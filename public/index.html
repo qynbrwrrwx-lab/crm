@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>CRM PRO</title>
+
+<!-- STYLE -->
+<link rel="stylesheet" href="style.css">
+
+<!-- LEAFLET (CARTE) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+/* sécurité affichage carte */
+#map {
+  height: 400px;
+  width: 100%;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>🚀 CRM PRO</header>
+
+<div class="container">
+
+  <!-- AUTH -->
+  <div id="auth" class="card">
+    <h2>Connexion</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Mot de passe">
+    <button onclick="login()">Se connecter</button>
+    <button onclick="register()">Créer un compte</button>
+  </div>
+
+  <!-- APP -->
+  <div id="app" style="display:none;">
+
+    <div class="grid">
+
+      <!-- AJOUT CLIENT -->
+      <div class="card">
+        <input id="name" placeholder="Nom">
+        <input id="phone" placeholder="Téléphone">
+        <input id="address" placeholder="Adresse">
+        <button onclick="addClient()">Ajouter</button>
+      </div>
+
+      <!-- STATS -->
+      <div class="card">
+        <h2>📊 Dashboard</h2>
+        <p>Total clients : <span id="total">0</span></p>
+      </div>
+
+    </div>
+
+    <!-- CARTE -->
+    <div class="card">
+      <h2>🗺️ Carte des clients</h2>
+      <div id="map"></div>
+    </div>
+
+    <!-- LISTE CLIENTS -->
+    <div class="card">
+      <h2>Clients</h2>
+      <div id="list"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- LEAFLET JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- APP -->
+<script src="app.js"></script>
+
+</body>
+</html>

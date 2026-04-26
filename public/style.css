@@ -1,0 +1,100 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #0f172a;
+  color: white;
+}
+
+/* HEADER */
+header {
+  background: #020617;
+  padding: 15px;
+  font-size: 20px;
+  font-weight: bold;
+  border-bottom: 1px solid #1e293b;
+}
+
+/* CONTAINER */
+.container {
+  padding: 20px;
+}
+
+/* CARD */
+.card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* INPUT */
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: none;
+  background: #020617;
+  color: white;
+}
+
+/* BUTTON */
+button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(45deg, #3b82f6, #6366f1);
+  color: white;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* CLIENT LIST */
+.client {
+  background: #020617;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.client-info {
+  text-align: left;
+}
+
+.delete {
+  background: #ef4444;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media(max-width: 700px){
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+#map {
+  margin-top: 10px;
+}
+
+#map {
+  height: 400px;
+  width: 100%;
+}
