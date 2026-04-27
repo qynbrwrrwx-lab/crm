@@ -98,3 +98,21 @@ button:hover {
   height: 400px;
   width: 100%;
 }
+
+.logout {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.logout:hover {
+  background: #e60000;
+}

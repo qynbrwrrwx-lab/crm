@@ -166,3 +166,21 @@ async function deleteClient(id) {
 
   loadClients();
 }
+
+function logout() {
+  // cacher app
+  document.getElementById("app").style.display = "none";
+
+  // afficher login
+  document.getElementById("auth").style.display = "block";
+
+  // reset champs
+  document.getElementById("email").value = "";
+  document.getElementById("password").value = "";
+
+  // optionnel : reset carte
+  if (map) {
+    map.remove();
+    map = null;
+  }
+}
