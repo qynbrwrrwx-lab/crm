@@ -1,3 +1,4 @@
+/* GLOBAL */
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
@@ -15,6 +16,21 @@ body {
   padding: 15px 20px;
   border-radius: 10px;
   margin-bottom: 20px;
+}
+
+/* LOGO */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.logo img {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
 }
 
 /* CONTAINER */
@@ -42,7 +58,7 @@ input {
   color: white;
 }
 
-/* BUTTON */
+/* BUTTON GLOBAL */
 button {
   padding: 12px;
   border: none;
@@ -57,6 +73,20 @@ button {
 
 button:hover {
   opacity: 0.9;
+}
+
+/* LOGOUT (override du bouton global) */
+.logout {
+  background: #ff4d4d;
+  width: auto; /* 🔥 empêche le bouton de prendre toute la largeur */
+  padding: 8px 15px;
+  border-radius: 6px;
+  margin-top: 0;
+}
+
+.logout:hover {
+  background: #e60000;
+  transform: scale(1.05);
 }
 
 /* CLIENT LIST */
@@ -93,28 +123,11 @@ button:hover {
     grid-template-columns: 1fr;
   }
 }
-#map {
-  margin-top: 10px;
-}
 
+/* MAP */
 #map {
   height: 400px;
   width: 100%;
-}
-
-/* LOGOUT */
-.logout {
-  background: #ff4d4d;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-.logout:hover {
-  background: #e60000;
-  transform: scale(1.05);
+  border-radius: 10px;
+  margin-top: 10px;
 }
