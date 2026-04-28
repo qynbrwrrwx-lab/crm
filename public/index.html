@@ -24,7 +24,7 @@
 
 <body>
 
-<!-- AUTH (plein écran avant connexion) -->
+<!-- AUTH -->
 <div id="auth" class="auth-container">
   <div class="card">
     <h2>Connexion</h2>
@@ -38,7 +38,8 @@
 <!-- APP -->
 <div id="app" style="display:none;">
 
-  <div class="layout">
+  <!-- ✅ CORRECTION ICI -->
+  <div class="app-layout">
 
     <!-- SIDEBAR -->
     <aside class="sidebar">
@@ -50,19 +51,20 @@
       <nav>
         <button onclick="showSection('dashboard')">📊 Dashboard</button>
         <button onclick="showSection('clients')">👥 Clients</button>
-        <button onclick="showSection('map')">🗺️ Carte</button>
+        <!-- ✅ CORRECTION ICI -->
+        <button onclick="showSection('mapSection')">🗺️ Carte</button>
       </nav>
 
       <button onclick="logout()" class="logout">🚪 Déconnexion</button>
     </aside>
 
-    <!-- CONTENU -->
+    <!-- MAIN -->
     <main class="main">
 
       <div class="container">
 
         <!-- DASHBOARD -->
-        <div id="dashboard" class="section">
+        <div id="dashboard" class="section active">
           <div class="card">
             <h2>📊 Dashboard</h2>
             <p>Total clients : <span id="total">0</span></p>
@@ -74,7 +76,6 @@
 
           <div class="grid">
 
-            <!-- AJOUT CLIENT -->
             <div class="card">
               <input id="name" placeholder="Nom">
               <input id="phone" placeholder="Téléphone">
@@ -82,7 +83,6 @@
               <button onclick="addClient()">Ajouter</button>
             </div>
 
-            <!-- LISTE -->
             <div class="card">
               <h2>Clients</h2>
               <div id="list"></div>

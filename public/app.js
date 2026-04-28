@@ -49,21 +49,21 @@ async function login() {
 
 // ================= SIDEBAR =================
 
-function showSection(section) {
+function showSection(sectionId) {
   document.querySelectorAll(".section").forEach(el => {
     el.classList.remove("active");
   });
 
-  if (section === "map") {
-    document.getElementById("mapSection").classList.add("active");
+  const section = document.getElementById(sectionId);
+  if (section) {
+    section.classList.add("active");
+  }
 
-    // 🔥 important : resize map quand visible
+  // 🔥 FIX important pour Leaflet
+  if (sectionId === "mapSection") {
     setTimeout(() => {
       if (map) map.invalidateSize();
-    }, 200);
-
-  } else {
-    document.getElementById(section).classList.add("active");
+    }, 300);
   }
 }
 
@@ -104,7 +104,9 @@ async function loadClients() {
   document.getElementById("total").innerText = clients.length;
 
   // supprimer anciens markers
-  markers.forEach(m => map.removeLayer(m));
+  if (map) {
+    markers.forEach(m => map.removeLayer(m));
+  }
   markers = [];
 
   clients.forEach(c => {
@@ -171,6 +173,11 @@ async function addClient() {
       },
       body: JSON.stringify({ name, phone, address, lat, lng })
     });
+
+    // reset champs (UX 🔥)
+    document.getElementById("name").value = "";
+    document.getElementById("phone").value = "";
+    document.getElementById("address").value = "";
 
     loadClients();
 
