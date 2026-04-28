@@ -7,7 +7,7 @@
 <!-- STYLE -->
 <link rel="stylesheet" href="style.css">
 
-<!-- LEAFLET (CARTE) -->
+<!-- LEAFLET -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
@@ -24,65 +24,91 @@
 
 <body>
 
-<!-- HEADER UNIQUE -->
-<header class="header">
-  <div class="logo">
-    <img src="/logo.png" alt="logo">
-    <span>My Prospect</span>
-  </div>
-
-  <button onclick="logout()" class="logout">🚪 Déconnexion</button>
-</header>
-
-<div class="container">
-
-  <!-- AUTH -->
-  <div id="auth" class="card">
+<!-- AUTH (plein écran avant connexion) -->
+<div id="auth" class="auth-container">
+  <div class="card">
     <h2>Connexion</h2>
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Mot de passe">
     <button onclick="login()">Se connecter</button>
     <button onclick="register()">Créer un compte</button>
   </div>
+</div>
 
-  <!-- APP -->
-  <div id="app" style="display:none;">
+<!-- APP -->
+<div id="app" style="display:none;">
 
-    <div class="grid">
+  <div class="layout">
 
-      <!-- AJOUT CLIENT -->
-      <div class="card">
-        <input id="name" placeholder="Nom">
-        <input id="phone" placeholder="Téléphone">
-        <input id="address" placeholder="Adresse">
-        <button onclick="addClient()">Ajouter</button>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="/logo.png" alt="logo">
+        <span>My Prospect</span>
       </div>
 
-      <!-- STATS -->
-      <div class="card">
-        <h2>📊 Dashboard</h2>
-        <p>Total clients : <span id="total">0</span></p>
+      <nav>
+        <button onclick="showSection('dashboard')">📊 Dashboard</button>
+        <button onclick="showSection('clients')">👥 Clients</button>
+        <button onclick="showSection('map')">🗺️ Carte</button>
+      </nav>
+
+      <button onclick="logout()" class="logout">🚪 Déconnexion</button>
+    </aside>
+
+    <!-- CONTENU -->
+    <main class="main">
+
+      <div class="container">
+
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="section">
+          <div class="card">
+            <h2>📊 Dashboard</h2>
+            <p>Total clients : <span id="total">0</span></p>
+          </div>
+        </div>
+
+        <!-- CLIENTS -->
+        <div id="clients" class="section">
+
+          <div class="grid">
+
+            <!-- AJOUT CLIENT -->
+            <div class="card">
+              <input id="name" placeholder="Nom">
+              <input id="phone" placeholder="Téléphone">
+              <input id="address" placeholder="Adresse">
+              <button onclick="addClient()">Ajouter</button>
+            </div>
+
+            <!-- LISTE -->
+            <div class="card">
+              <h2>Clients</h2>
+              <div id="list"></div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- MAP -->
+        <div id="mapSection" class="section">
+          <div class="card">
+            <h2>🗺️ Carte des clients</h2>
+            <div id="map"></div>
+          </div>
+        </div>
+
       </div>
 
-    </div>
-
-    <!-- CARTE -->
-    <div class="card">
-      <h2>🗺️ Carte des clients</h2>
-      <div id="map"></div>
-    </div>
-
-    <!-- LISTE CLIENTS -->
-    <div class="card">
-      <h2>Clients</h2>
-      <div id="list"></div>
-    </div>
+    </main>
 
   </div>
 
 </div>
 
-<!-- APP -->
+<!-- SCRIPT -->
 <script src="app.js"></script>
 
 </body>

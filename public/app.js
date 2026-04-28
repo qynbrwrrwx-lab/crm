@@ -33,18 +33,43 @@ async function login() {
     document.getElementById("auth").style.display = "none";
     document.getElementById("app").style.display = "block";
 
+    // section par défaut
+    showSection("dashboard");
+
+    // init map + data
     setTimeout(() => {
-  initMap();
-}, 200);
-        loadClients();
+      initMap();
+      loadClients();
+    }, 200);
+
   } else {
     alert(data.error);
   }
 }
 
+// ================= SIDEBAR =================
+
+function showSection(section) {
+  document.querySelectorAll(".section").forEach(el => {
+    el.classList.remove("active");
+  });
+
+  if (section === "map") {
+    document.getElementById("mapSection").classList.add("active");
+
+    // 🔥 important : resize map quand visible
+    setTimeout(() => {
+      if (map) map.invalidateSize();
+    }, 200);
+
+  } else {
+    document.getElementById(section).classList.add("active");
+  }
+}
+
 // ================= MAP =================
 
-// 🔥 FIX ICONES LEAFLET
+// FIX icônes Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -58,11 +83,10 @@ function initMap() {
 
   map = L.map("map").setView([48.8566, 2.3522], 5);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap"
   }).addTo(map);
 
-  // 🔥 FIX écran gris
   setTimeout(() => {
     map.invalidateSize();
   }, 500);
@@ -79,11 +103,12 @@ async function loadClients() {
 
   document.getElementById("total").innerText = clients.length;
 
-  // nettoyer anciens markers
+  // supprimer anciens markers
   markers.forEach(m => map.removeLayer(m));
   markers = [];
 
   clients.forEach(c => {
+
     // LISTE
     const div = document.createElement("div");
     div.className = "client";
@@ -100,7 +125,7 @@ async function loadClients() {
     list.appendChild(div);
 
     // MAP
-    if (c.lat && c.lng) {
+    if (c.lat && c.lng && map) {
       const marker = L.marker([c.lat, c.lng])
         .addTo(map)
         .bindPopup(
@@ -125,7 +150,6 @@ async function addClient() {
   }
 
   try {
-    // 🔥 géocodage adresse → coordonnées
     const geoRes = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
     );
@@ -140,7 +164,6 @@ async function addClient() {
     const lat = parseFloat(geoData[0].lat);
     const lng = parseFloat(geoData[0].lon);
 
-    // 🔥 enregistrement en base MongoDB
     await fetch("/clients", {
       method: "POST",
       headers: {
@@ -167,18 +190,15 @@ async function deleteClient(id) {
   loadClients();
 }
 
+// ================= LOGOUT =================
+
 function logout() {
-  // cacher app
   document.getElementById("app").style.display = "none";
+  document.getElementById("auth").style.display = "flex";
 
-  // afficher login
-  document.getElementById("auth").style.display = "block";
-
-  // reset champs
   document.getElementById("email").value = "";
   document.getElementById("password").value = "";
 
-  // optionnel : reset carte
   if (map) {
     map.remove();
     map = null;

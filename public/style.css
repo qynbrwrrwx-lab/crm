@@ -6,6 +6,41 @@ body {
   color: white;
 }
 
+/* LAYOUT APP (sidebar + contenu) */
+.app-layout {
+  display: flex;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background: #020617;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.sidebar h2 {
+  margin-bottom: 30px;
+}
+
+.sidebar button {
+  width: 100%;
+  margin-bottom: 10px;
+  background: none;
+  border: 1px solid #1e293b;
+}
+
+.sidebar button:hover {
+  background: #1e293b;
+}
+
+/* MAIN CONTENT */
+.main {
+  flex: 1;
+  padding: 20px;
+}
+
 /* HEADER */
 .header {
   display: flex;
@@ -22,14 +57,14 @@ body {
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 18px;
+  gap: 12px;
+  font-size: 20px;
   font-weight: bold;
 }
 
 .logo img {
-  width: 35px;
-  height: 35px;
+  width: 50px;
+  height: 50px;
   object-fit: contain;
 }
 
@@ -69,16 +104,17 @@ button {
   width: 100%;
   margin-top: 10px;
   font-weight: bold;
+  transition: 0.2s;
 }
 
 button:hover {
   opacity: 0.9;
 }
 
-/* LOGOUT (override du bouton global) */
+/* LOGOUT */
 .logout {
   background: #ff4d4d;
-  width: auto; /* 🔥 empêche le bouton de prendre toute la largeur */
+  width: auto;
   padding: 8px 15px;
   border-radius: 6px;
   margin-top: 0;
@@ -122,6 +158,10 @@ button:hover {
   .grid {
     grid-template-columns: 1fr;
   }
+
+  .sidebar {
+    display: none;
+  }
 }
 
 /* MAP */
@@ -130,4 +170,13 @@ button:hover {
   width: 100%;
   border-radius: 10px;
   margin-top: 10px;
+}
+
+/* SECTIONS (sidebar navigation) */
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
 }
