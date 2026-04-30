@@ -6,80 +6,114 @@ body {
   color: white;
 }
 
-/* LAYOUT APP (sidebar + contenu) */
+/* LAYOUT */
 .app-layout {
   display: flex;
 }
 
 /* SIDEBAR */
 .sidebar {
-  width: 220px;
+  width: 240px;
   height: 100vh;
-  background: #020617;
-  padding: 20px;
+  background: linear-gradient(180deg, #020617, #020617);
+  padding: 25px 20px;
   box-sizing: border-box;
+  border-right: 1px solid #1e293b;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.sidebar h2 {
-  margin-bottom: 30px;
+/* LOGO (PRO VERSION) */
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.logo-big {
+  width: 130px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(59,130,246,0.4));
+  transition: 0.3s;
+}
+
+.logo-big:hover {
+  transform: scale(1.05);
+}
+
+/* NAVIGATION */
+.sidebar nav {
+  flex: 1;
 }
 
 .sidebar button {
   width: 100%;
-  margin-bottom: 10px;
-  background: none;
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 10px;
   border: 1px solid #1e293b;
+  background: transparent;
+  color: #cbd5f5;
+  text-align: left;
+  font-weight: 500;
+  transition: 0.2s;
 }
 
+/* HOVER PRO */
 .sidebar button:hover {
   background: #1e293b;
+  color: white;
+  transform: translateX(5px);
 }
 
-/* MAIN CONTENT */
+/* ACTIVE BUTTON (optionnel futur) */
+.sidebar button.active {
+  background: linear-gradient(45deg, #3b82f6, #6366f1);
+  border: none;
+  color: white;
+}
+
+/* LOGOUT */
+.logout {
+  background: #ff4d4d;
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+.logout:hover {
+  background: #e60000;
+  transform: scale(1.05);
+}
+
+/* MAIN */
 .main {
   flex: 1;
-  padding: 20px;
-}
-
-/* HEADER */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #1e1e2f;
-  color: white;
-  padding: 15px 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-}
-
-/* LOGO */
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.logo img {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
+  padding: 25px;
 }
 
 /* CONTAINER */
 .container {
-  padding: 20px;
+  padding: 10px;
 }
 
 /* CARD */
 .card {
   background: #1e293b;
   padding: 20px;
-  border-radius: 12px;
+  border-radius: 14px;
   margin-bottom: 20px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  transition: 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
 }
 
 /* INPUT */
@@ -91,6 +125,11 @@ input {
   border: none;
   background: #020617;
   color: white;
+  outline: none;
+}
+
+input:focus {
+  border: 1px solid #3b82f6;
 }
 
 /* BUTTON GLOBAL */
@@ -111,21 +150,7 @@ button:hover {
   opacity: 0.9;
 }
 
-/* LOGOUT */
-.logout {
-  background: #ff4d4d;
-  width: auto;
-  padding: 8px 15px;
-  border-radius: 6px;
-  margin-top: 0;
-}
-
-.logout:hover {
-  background: #e60000;
-  transform: scale(1.05);
-}
-
-/* CLIENT LIST */
+/* CLIENT */
 .client {
   background: #020617;
   padding: 15px;
@@ -140,6 +165,7 @@ button:hover {
   text-align: left;
 }
 
+/* DELETE BUTTON */
 .delete {
   background: #ef4444;
   padding: 8px;
@@ -172,11 +198,24 @@ button:hover {
   margin-top: 10px;
 }
 
-/* SECTIONS (sidebar navigation) */
+/* SECTIONS */
 .section {
   display: none;
+  animation: fadeIn 0.3s ease;
 }
 
 .section.active {
   display: block;
+}
+
+/* ANIMATION */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
