@@ -24,24 +24,33 @@ body {
   justify-content: space-between;
 }
 
-/* LOGO (PRO VERSION) */
+/* LOGO (VERSION PRO FINAL) */
 .logo {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
+  padding: 15px;
+
+  background: rgba(30, 41, 59, 0.4); /* 👈 fond léger */
+  border-radius: 12px;
 }
 
+/* IMAGE LOGO */
 .logo-big {
-  width: 130px;
+  width: 80px;
+  max-width: 100%;
   height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 12px rgba(59,130,246,0.4));
-  transition: 0.3s;
+
+  filter: drop-shadow(0 0 10px rgba(59,130,246,0.4));
+  transition: transform 0.3s ease, filter 0.3s ease;
 }
 
+/* HOVER */
 .logo-big:hover {
-  transform: scale(1.05);
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 18px rgba(59,130,246,0.6));
 }
 
 /* NAVIGATION */
