@@ -1,11 +1,14 @@
 let map;
 let markers = [];
+let chart;
 
 // ================= AUTH =================
 
 async function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
+
+  showLoader();
 
   const res = await fetch("/register", {
     method: "POST",
@@ -14,10 +17,18 @@ async function register() {
   });
 
   const data = await res.json();
-  alert(data.success ? "Compte créé ✅" : data.error);
+  hideLoader();
+
+  if (data.success) {
+    showToast("Compte créé ✅");
+  } else {
+    alert(data.error);
+  }
 }
 
 async function login() {
+  showLoader();
+
   const res = await fetch("/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -28,20 +39,20 @@ async function login() {
   });
 
   const data = await res.json();
+  hideLoader();
 
   if (data.success) {
     document.getElementById("auth").style.display = "none";
     document.getElementById("app").style.display = "block";
 
-    // section par défaut
     showSection("dashboard");
 
-    // init map + data
     setTimeout(() => {
       initMap();
       loadClients();
     }, 200);
 
+    showToast("Connexion réussie 🚀");
   } else {
     alert(data.error);
   }
@@ -49,27 +60,27 @@ async function login() {
 
 // ================= SIDEBAR =================
 
-function showSection(sectionId) {
+function showSection(sectionId, event) {
   document.querySelectorAll(".section").forEach(el => {
     el.classList.remove("active");
   });
 
-  const section = document.getElementById(sectionId);
-  if (section) {
-    section.classList.add("active");
-  }
+  document.querySelectorAll(".sidebar button").forEach(btn => {
+    btn.classList.remove("active");
+  });
 
-  // 🔥 FIX important pour Leaflet
-  if (sectionId === "mapSection") {
-    setTimeout(() => {
-      if (map) map.invalidateSize();
-    }, 300);
+  const section = document.getElementById(sectionId);
+  if (section) section.classList.add("active");
+
+  if (event) event.currentTarget.classList.add("active");
+
+  if (sectionId === "mapSection" && map) {
+    setTimeout(() => map.invalidateSize(), 200);
   }
 }
 
 // ================= MAP =================
 
-// FIX icônes Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -87,9 +98,31 @@ function initMap() {
     attribution: "© OpenStreetMap"
   }).addTo(map);
 
-  setTimeout(() => {
-    map.invalidateSize();
-  }, 500);
+  setTimeout(() => map.invalidateSize(), 500);
+}
+
+// ================= CHART =================
+
+function updateChart(clients) {
+  const ctx = document.getElementById("chart");
+
+  if (!ctx) return;
+
+  const labels = clients.map(c => c.name);
+  const data = clients.map(() => 1);
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Clients",
+        data: data
+      }]
+    }
+  });
 }
 
 // ================= CLIENTS =================
@@ -103,7 +136,6 @@ async function loadClients() {
 
   document.getElementById("total").innerText = clients.length;
 
-  // supprimer anciens markers
   if (map) {
     markers.forEach(m => map.removeLayer(m));
   }
@@ -111,7 +143,6 @@ async function loadClients() {
 
   clients.forEach(c => {
 
-    // LISTE
     const div = document.createElement("div");
     div.className = "client";
 
@@ -126,7 +157,6 @@ async function loadClients() {
 
     list.appendChild(div);
 
-    // MAP
     if (c.lat && c.lng && map) {
       const marker = L.marker([c.lat, c.lng])
         .addTo(map)
@@ -137,6 +167,8 @@ async function loadClients() {
       markers.push(marker);
     }
   });
+
+  updateChart(clients);
 }
 
 // ================= ADD CLIENT =================
@@ -151,6 +183,8 @@ async function addClient() {
     return;
   }
 
+  showLoader();
+
   try {
     const geoRes = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
@@ -159,6 +193,7 @@ async function addClient() {
     const geoData = await geoRes.json();
 
     if (!geoData.length) {
+      hideLoader();
       alert("Adresse introuvable ❌");
       return;
     }
@@ -168,33 +203,58 @@ async function addClient() {
 
     await fetch("/clients", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, phone, address, lat, lng })
     });
 
-    // reset champs (UX 🔥)
     document.getElementById("name").value = "";
     document.getElementById("phone").value = "";
     document.getElementById("address").value = "";
 
-    loadClients();
+    await loadClients();
+
+    showToast("Client ajouté ✅");
 
   } catch (err) {
     console.error(err);
-    alert("Erreur géolocalisation ❌");
+    alert("Erreur ❌");
   }
+
+  hideLoader();
 }
 
 // ================= DELETE =================
 
 async function deleteClient(id) {
-  await fetch("/clients/" + id, {
-    method: "DELETE"
-  });
-
+  await fetch("/clients/" + id, { method: "DELETE" });
   loadClients();
+  showToast("Client supprimé 🗑️");
+}
+
+// ================= TOAST =================
+
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+
+  toast.innerText = msg;
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2500);
+}
+
+// ================= LOADER =================
+
+function showLoader() {
+  const loader = document.getElementById("loader");
+  if (loader) loader.style.display = "flex";
+}
+
+function hideLoader() {
+  const loader = document.getElementById("loader");
+  if (loader) loader.style.display = "none";
 }
 
 // ================= LOGOUT =================
@@ -210,4 +270,6 @@ function logout() {
     map.remove();
     map = null;
   }
+
+  showToast("Déconnecté 👋");
 }

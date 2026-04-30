@@ -2,12 +2,17 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Prospect</title>
 
+<!-- STYLE -->
 <link rel="stylesheet" href="style.css">
 
+<!-- LEAFLET -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- CHART -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 #map {
@@ -21,6 +26,14 @@
 </head>
 
 <body>
+
+<!-- LOADER -->
+<div id="loader" class="loader" style="display:none;">
+  <div class="spinner"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
 
 <!-- AUTH -->
 <div id="auth" class="auth-container">
@@ -41,18 +54,21 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
 
-      <!-- ✅ LOGO FIX -->
+      <!-- LOGO -->
       <div class="logo">
-        <img src="./logo.png" class="logo-big" alt="My Prospect logo">
+        <img src="./logo.png" class="logo-big" alt="logo">
       </div>
 
+      <!-- NAVIGATION -->
       <nav>
-        <button onclick="showSection('dashboard')">📊 Dashboard</button>
-        <button onclick="showSection('clients')">👥 Clients</button>
-        <button onclick="showSection('mapSection')">🗺️ Carte</button>
+        <button onclick="showSection('dashboard', event)" class="active">📊 Dashboard</button>
+        <button onclick="showSection('clients', event)">👥 Clients</button>
+        <button onclick="showSection('mapSection', event)">🗺️ Carte</button>
       </nav>
 
+      <!-- LOGOUT -->
       <button onclick="logout()" class="logout">🚪 Déconnexion</button>
+
     </aside>
 
     <!-- MAIN -->
@@ -60,31 +76,38 @@
 
       <div class="container">
 
+        <!-- DASHBOARD -->
         <div id="dashboard" class="section active">
           <div class="card">
             <h2>📊 Dashboard</h2>
             <p>Total clients : <span id="total">0</span></p>
+            <canvas id="chart"></canvas>
           </div>
         </div>
 
+        <!-- CLIENTS -->
         <div id="clients" class="section">
           <div class="grid">
 
+            <!-- ADD CLIENT -->
             <div class="card">
+              <h2>Ajouter un client</h2>
               <input id="name" placeholder="Nom">
               <input id="phone" placeholder="Téléphone">
               <input id="address" placeholder="Adresse">
               <button onclick="addClient()">Ajouter</button>
             </div>
 
+            <!-- LIST -->
             <div class="card">
-              <h2>Clients</h2>
+              <h2>Liste clients</h2>
               <div id="list"></div>
             </div>
 
           </div>
         </div>
 
+        <!-- MAP -->
         <div id="mapSection" class="section">
           <div class="card">
             <h2>🗺️ Carte des clients</h2>
@@ -100,6 +123,10 @@
 
 </div>
 
+<!-- LEAFLET JS (placé en bas pour performance) -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- APP JS -->
 <script src="app.js"></script>
 
 </body>

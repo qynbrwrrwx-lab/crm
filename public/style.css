@@ -75,7 +75,6 @@ body {
   transition: 0.25s;
 }
 
-/* HOVER */
 .sidebar button:hover {
   background: rgba(59,130,246,0.15);
   border-color: rgba(59,130,246,0.4);
@@ -83,7 +82,6 @@ body {
   transform: translateX(5px);
 }
 
-/* ACTIVE */
 .sidebar button.active {
   background: linear-gradient(90deg, #3b82f6, #6366f1);
   border: none;
@@ -235,5 +233,56 @@ button:hover {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ================= LEVEL 2 ================= */
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #3b82f6;
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: white;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: 0.3s;
+  z-index: 1000;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* LOADER */
+.loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(2, 6, 23, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.spinner {
+  width: 45px;
+  height: 45px;
+  border: 4px solid #1e293b;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
