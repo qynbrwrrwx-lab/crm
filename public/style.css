@@ -2,7 +2,7 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background: #0f172a;
+  background: radial-gradient(circle at top left, #1e293b, #020617);
   color: white;
 }
 
@@ -15,83 +15,80 @@ body {
 .sidebar {
   width: 240px;
   height: 100vh;
-  background: linear-gradient(180deg, #020617, #020617);
+  background: linear-gradient(180deg, #020617, #0f172a);
   padding: 25px 20px;
   box-sizing: border-box;
-  border-right: 1px solid #1e293b;
+  border-right: 1px solid rgba(255,255,255,0.05);
+
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-/* LOGO CONTAINER */
+/* LOGO */
 .logo {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 30px;
-  padding: 20px 10px;
+  margin-bottom: 35px;
+  padding: 20px;
 
-  background: rgba(30, 41, 59, 0.4);
-  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+
+  box-shadow: 0 0 20px rgba(59,130,246,0.15);
 }
 
-/* IMAGE LOGO */
 .logo-big {
-  width: 100px;          /* 👈 plus grand */
+  width: 100px;
   max-width: 100%;
   height: auto;
   object-fit: contain;
 
-  display: block;        /* 👈 force centrage propre */
-  margin: 0 auto;
-
-  filter: drop-shadow(0 0 12px rgba(59,130,246,0.5));
+  filter: drop-shadow(0 0 15px rgba(59,130,246,0.5));
   transition: transform 0.3s ease, filter 0.3s ease;
 }
 
-/* HOVER */
 .logo-big:hover {
   transform: scale(1.08);
-  filter: drop-shadow(0 0 20px rgba(59,130,246,0.7));
-}
-
-/* HOVER */
-.logo-big:hover {
-  transform: scale(1.08);
-  filter: drop-shadow(0 0 18px rgba(59,130,246,0.6));
+  filter: drop-shadow(0 0 22px rgba(59,130,246,0.7));
 }
 
 /* NAVIGATION */
 .sidebar nav {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .sidebar button {
   width: 100%;
-  margin-bottom: 12px;
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid #1e293b;
+  border: 1px solid rgba(255,255,255,0.08);
   background: transparent;
   color: #cbd5f5;
   text-align: left;
   font-weight: 500;
-  transition: 0.2s;
+  transition: 0.25s;
 }
 
-/* HOVER PRO */
+/* HOVER */
 .sidebar button:hover {
-  background: #1e293b;
+  background: rgba(59,130,246,0.15);
+  border-color: rgba(59,130,246,0.4);
   color: white;
   transform: translateX(5px);
 }
 
-/* ACTIVE BUTTON (optionnel futur) */
+/* ACTIVE */
 .sidebar button.active {
-  background: linear-gradient(45deg, #3b82f6, #6366f1);
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
   border: none;
   color: white;
+  box-shadow: 0 0 12px rgba(59,130,246,0.5);
 }
 
 /* LOGOUT */
@@ -102,6 +99,7 @@ body {
   border-radius: 8px;
   font-weight: bold;
   margin-top: 20px;
+  transition: 0.2s;
 }
 
 .logout:hover {
@@ -131,7 +129,7 @@ body {
 }
 
 .card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
 }
 
 /* INPUT */
@@ -144,10 +142,12 @@ input {
   background: #020617;
   color: white;
   outline: none;
+  transition: 0.2s;
 }
 
 input:focus {
   border: 1px solid #3b82f6;
+  box-shadow: 0 0 5px rgba(59,130,246,0.5);
 }
 
 /* BUTTON GLOBAL */
@@ -183,7 +183,7 @@ button:hover {
   text-align: left;
 }
 
-/* DELETE BUTTON */
+/* DELETE */
 .delete {
   background: #ef4444;
   padding: 8px;
