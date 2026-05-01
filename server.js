@@ -15,18 +15,28 @@ mongoose.connect(process.env.MONGO_URI)
 
 // ================= MODELS =================
 
+// USER
 const User = mongoose.model("User", {
   email: String,
   password: String
 });
 
-const Client = mongoose.model("Client", {
+// CLIENT
+const ClientSchema = new mongoose.Schema({
   name: String,
   phone: String,
   address: String,
   lat: Number,
-  lng: Number
-});
+  lng: Number,
+
+  favorite: {
+    type: Boolean,
+    default: false
+  }
+
+}, { timestamps: true });
+
+const Client = mongoose.model("Client", ClientSchema);
 
 // ================= AUTH =================
 
@@ -59,22 +69,56 @@ app.post("/login", async (req, res) => {
 
 // ================= CLIENTS =================
 
-// GET
+// 🔎 GET AVEC FILTRES (SEARCH + FAVORITES)
 app.get("/clients", async (req, res) => {
-  const clients = await Client.find();
+  const { search, favorite } = req.query;
+
+  let filter = {};
+
+  // 🔎 recherche texte
+  if (search) {
+    filter.$or = [
+      { name: { $regex: search, $options: "i" } },
+      { phone: { $regex: search, $options: "i" } }
+    ];
+  }
+
+  // ⭐ filtre favoris
+  if (favorite === "true") {
+    filter.favorite = true;
+  }
+
+  const clients = await Client.find(filter).sort({ createdAt: -1 });
+
   res.json(clients);
 });
 
-// ADD
+// ADD CLIENT
 app.post("/clients", async (req, res) => {
-  const client = await Client.create(req.body);
+  const client = await Client.create({
+    ...req.body,
+    favorite: false
+  });
+
   res.json(client);
 });
 
-// DELETE
+// DELETE CLIENT
 app.delete("/clients/:id", async (req, res) => {
   await Client.findByIdAndDelete(req.params.id);
   res.json({ success: true });
+});
+
+// ⭐ TOGGLE FAVORITE
+app.put("/clients/favorite/:id", async (req, res) => {
+  const client = await Client.findById(req.params.id);
+
+  if (!client) return res.json({ error: "Client introuvable" });
+
+  client.favorite = !client.favorite;
+  await client.save();
+
+  res.json(client);
 });
 
 // ================= SERVER =================
@@ -82,5 +126,5 @@ app.delete("/clients/:id", async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("🚀 CRM CLOUD lancé sur port", PORT);
+  console.log("🚀 CRM CLOUD LEVEL 3+ lancé sur port", PORT);
 });

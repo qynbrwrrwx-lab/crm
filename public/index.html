@@ -54,19 +54,16 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
 
-      <!-- LOGO -->
       <div class="logo">
         <img src="./logo.png" class="logo-big" alt="logo">
       </div>
 
-      <!-- NAVIGATION -->
       <nav>
         <button onclick="showSection('dashboard', event)" class="active">📊 Dashboard</button>
         <button onclick="showSection('clients', event)">👥 Clients</button>
         <button onclick="showSection('mapSection', event)">🗺️ Carte</button>
       </nav>
 
-      <!-- LOGOUT -->
       <button onclick="logout()" class="logout">🚪 Déconnexion</button>
 
     </aside>
@@ -87,6 +84,12 @@
 
         <!-- CLIENTS -->
         <div id="clients" class="section">
+
+          <!-- 🔎 SEARCH BAR -->
+          <div class="card">
+            <input id="search" placeholder="🔎 Rechercher un client..." oninput="filterClients()">
+          </div>
+
           <div class="grid">
 
             <!-- ADD CLIENT -->
@@ -105,6 +108,7 @@
             </div>
 
           </div>
+
         </div>
 
         <!-- MAP -->
@@ -123,10 +127,10 @@
 
 </div>
 
-<!-- LEAFLET JS (placé en bas pour performance) -->
+<!-- LEAFLET -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-<!-- APP JS -->
+<!-- APP -->
 <script src="app.js"></script>
 
 </body>
