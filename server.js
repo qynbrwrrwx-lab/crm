@@ -2,34 +2,61 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
+require("dotenv").config();
 
 const app = express();
 
 app.use(express.json());
 app.use(express.static("public"));
 
-// 🔐 SECRET JWT (mets une vraie clé en prod)
-const SECRET = "supersecretkey123";
+// ================= CONFIG =================
+
+// 🔐 SECRET OBLIGATOIRE
+const SECRET = process.env.JWT_SECRET;
+
+if (!SECRET) {
+  throw new Error("JWT_SECRET manquant !");
+}
+
+// ================= RATE LIMIT =================
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 min
+  max: 100
+});
+
+app.use(limiter);
 
 // ================= MONGODB =================
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connecté"))
-  .catch(err => console.error(err));
+  .catch(err => console.error("❌ MongoDB error:", err));
 
 // ================= MODELS =================
 
 // USER
 const UserSchema = new mongoose.Schema({
-  email: String,
-  password: String
+  email: {
+    type: String,
+    unique: true,
+    required: true
+  },
+  password: {
+    type: String,
+    required: true
+  }
 });
 
 const User = mongoose.model("User", UserSchema);
 
-// CLIENT (lié à user)
+// CLIENT (multi-user sécurisé)
 const ClientSchema = new mongoose.Schema({
-  userId: String, // 🔥 IMPORTANT
+  userId: {
+    type: mongoose.Schema.Types.ObjectId, // 🔥 amélioré
+    required: true
+  },
 
   name: String,
   phone: String,
@@ -49,16 +76,20 @@ const Client = mongoose.model("Client", ClientSchema);
 // ================= MIDDLEWARE AUTH =================
 
 function auth(req, res, next) {
-  const token = req.headers.authorization;
+  const authHeader = req.headers.authorization;
 
-  if (!token) return res.status(401).json({ error: "Non autorisé" });
+  if (!authHeader) {
+    return res.status(401).json({ error: "Token manquant" });
+  }
+
+  const token = authHeader.split(" ")[1]; // 🔥 Bearer
 
   try {
     const decoded = jwt.verify(token, SECRET);
     req.userId = decoded.id;
     next();
   } catch {
-    res.status(401).json({ error: "Token invalide" });
+    return res.status(401).json({ error: "Token invalide" });
   }
 }
 
@@ -66,95 +97,163 @@ function auth(req, res, next) {
 
 // REGISTER
 app.post("/register", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    let { email, password } = req.body;
 
-  const existing = await User.findOne({ email });
-  if (existing) return res.json({ error: "Utilisateur existe déjà" });
+    if (!email || !password) {
+      return res.status(400).json({ error: "Champs requis" });
+    }
 
-  const hash = await bcrypt.hash(password, 10);
+    email = email.toLowerCase();
 
-  await User.create({ email, password: hash });
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Mot de passe trop court" });
+    }
 
-  res.json({ success: true });
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ error: "Utilisateur existe déjà" });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+
+    await User.create({ email, password: hash });
+
+    res.json({ success: true });
+
+  } catch {
+    res.status(500).json({ error: "Erreur serveur" });
+  }
 });
 
-// LOGIN (avec token)
+// LOGIN
 app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) return res.json({ error: "Utilisateur introuvable" });
+    if (!email || !password) {
+      return res.status(400).json({ error: "Champs requis" });
+    }
 
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) return res.json({ error: "Mot de passe incorrect" });
+    const user = await User.findOne({ email: email.toLowerCase() });
 
-  const token = jwt.sign({ id: user._id }, SECRET);
+    if (!user) {
+      return res.status(400).json({ error: "Utilisateur introuvable" });
+    }
 
-  res.json({ success: true, token });
+    const valid = await bcrypt.compare(password, user.password);
+
+    if (!valid) {
+      return res.status(400).json({ error: "Mot de passe incorrect" });
+    }
+
+    const token = jwt.sign(
+      { id: user._id },
+      SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({ success: true, token });
+
+  } catch {
+    res.status(500).json({ error: "Erreur serveur" });
+  }
 });
 
 // ================= CLIENTS =================
 
-// 🔎 GET CLIENTS (USER + FILTERS)
+// GET CLIENTS
 app.get("/clients", auth, async (req, res) => {
-  const { search, favorite } = req.query;
+  try {
+    const { search, favorite } = req.query;
 
-  let filter = {
-    userId: req.userId // 🔥 important
-  };
+    let filter = {
+      userId: req.userId
+    };
 
-  // 🔎 recherche
-  if (search) {
-    filter.$or = [
-      { name: { $regex: search, $options: "i" } },
-      { phone: { $regex: search, $options: "i" } }
-    ];
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { phone: { $regex: search, $options: "i" } }
+      ];
+    }
+
+    if (favorite === "true") {
+      filter.favorite = true;
+    }
+
+    const clients = await Client
+      .find(filter)
+      .sort({ createdAt: -1 });
+
+    res.json(clients);
+
+  } catch {
+    res.status(500).json({ error: "Erreur serveur" });
   }
-
-  // ⭐ favoris
-  if (favorite === "true") {
-    filter.favorite = true;
-  }
-
-  const clients = await Client.find(filter).sort({ createdAt: -1 });
-
-  res.json(clients);
 });
 
-// ADD CLIENT (lié à user)
+// ADD CLIENT
 app.post("/clients", auth, async (req, res) => {
-  const client = await Client.create({
-    ...req.body,
-    userId: req.userId,
-    favorite: false
-  });
+  try {
+    const { name, phone, address, lat, lng } = req.body;
 
-  res.json(client);
+    if (!name || !phone) {
+      return res.status(400).json({ error: "Champs requis" });
+    }
+
+    const client = await Client.create({
+      name,
+      phone,
+      address,
+      lat,
+      lng,
+      userId: req.userId,
+      favorite: false
+    });
+
+    res.json(client);
+
+  } catch {
+    res.status(500).json({ error: "Erreur création client" });
+  }
 });
 
-// DELETE sécurisé
+// DELETE CLIENT
 app.delete("/clients/:id", auth, async (req, res) => {
-  await Client.findOneAndDelete({
-    _id: req.params.id,
-    userId: req.userId
-  });
+  try {
+    await Client.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.userId
+    });
 
-  res.json({ success: true });
+    res.json({ success: true });
+
+  } catch {
+    res.status(500).json({ error: "Erreur suppression" });
+  }
 });
 
-// ⭐ TOGGLE FAVORITE sécurisé
+// TOGGLE FAVORITE
 app.put("/clients/favorite/:id", auth, async (req, res) => {
-  const client = await Client.findOne({
-    _id: req.params.id,
-    userId: req.userId
-  });
+  try {
+    const client = await Client.findOne({
+      _id: req.params.id,
+      userId: req.userId
+    });
 
-  if (!client) return res.json({ error: "Client introuvable" });
+    if (!client) {
+      return res.status(404).json({ error: "Client introuvable" });
+    }
 
-  client.favorite = !client.favorite;
-  await client.save();
+    client.favorite = !client.favorite;
+    await client.save();
 
-  res.json(client);
+    res.json(client);
+
+  } catch {
+    res.status(500).json({ error: "Erreur favoris" });
+  }
 });
 
 // ================= SERVER =================
@@ -162,5 +261,5 @@ app.put("/clients/favorite/:id", auth, async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("🚀 CRM CLOUD LEVEL 4 sécurisé lancé sur port", PORT);
+  console.log("🚀 CRM CLOUD LEVEL 4++ lancé sur port", PORT);
 });

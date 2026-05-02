@@ -2,6 +2,39 @@ let map;
 let markers = [];
 let chart;
 
+// ================= TOKEN =================
+
+function getToken() {
+  return localStorage.getItem("token");
+}
+
+function setToken(token) {
+  localStorage.setItem("token", token);
+}
+
+function removeToken() {
+  localStorage.removeItem("token");
+}
+
+function getAuthHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "Authorization": getToken()
+  };
+}
+
+// ================= AUTO LOGIN =================
+
+window.onload = () => {
+  if (getToken()) {
+    document.getElementById("auth").style.display = "none";
+    document.getElementById("app").style.display = "block";
+
+    initMap();
+    loadClients();
+  }
+};
+
 // ================= AUTH =================
 
 async function register() {
@@ -10,64 +43,72 @@ async function register() {
 
   showLoader();
 
-  const res = await fetch("/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
+  try {
+    const res = await fetch("/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-  const data = await res.json();
-  hideLoader();
+    const data = await res.json();
 
-  if (data.success) {
-    showToast("Compte créé ✅");
-  } else {
-    alert(data.error);
+    if (data.success) {
+      showToast("Compte créé ✅");
+    } else {
+      alert(data.error);
+    }
+
+  } catch {
+    alert("Erreur serveur ❌");
   }
+
+  hideLoader();
 }
 
 async function login() {
   showLoader();
 
-  const res = await fetch("/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email: document.getElementById("email").value,
-      password: document.getElementById("password").value
-    })
-  });
+  try {
+    const res = await fetch("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value
+      })
+    });
 
-  const data = await res.json();
-  hideLoader();
+    const data = await res.json();
 
-  if (data.success) {
-    // 🔐 STOCKER TOKEN
-    localStorage.setItem("token", data.token);
+    if (data.success) {
+      setToken(data.token);
 
-    document.getElementById("auth").style.display = "none";
-    document.getElementById("app").style.display = "block";
+      document.getElementById("auth").style.display = "none";
+      document.getElementById("app").style.display = "block";
 
-    showSection("dashboard");
-
-    setTimeout(() => {
       initMap();
       loadClients();
-    }, 200);
 
-    showToast("Connexion réussie 🚀");
-  } else {
-    alert(data.error);
+      showToast("Connexion réussie 🚀");
+    } else {
+      alert(data.error);
+    }
+
+  } catch {
+    alert("Erreur serveur ❌");
   }
+
+  hideLoader();
 }
 
-// ================= HELPER AUTH =================
+// ================= HANDLE 401 =================
 
-function getAuthHeaders() {
-  return {
-    "Content-Type": "application/json",
-    "Authorization": localStorage.getItem("token")
-  };
+function handleAuthError(res) {
+  if (res.status === 401) {
+    logout();
+    return true;
+  }
+  return false;
 }
 
 // ================= SIDEBAR =================
@@ -109,8 +150,6 @@ function initMap() {
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap"
   }).addTo(map);
-
-  setTimeout(() => map.invalidateSize(), 500);
 }
 
 // ================= CHART =================
@@ -144,7 +183,7 @@ function updateChart(clients) {
   });
 }
 
-// ================= CLIENT RENDER =================
+// ================= RENDER =================
 
 function renderClients(clients) {
   const list = document.getElementById("list");
@@ -152,6 +191,7 @@ function renderClients(clients) {
 
   clients.forEach(c => {
     const div = document.createElement("div");
+
     div.className = "client";
 
     div.innerHTML = `
@@ -174,37 +214,38 @@ function renderClients(clients) {
 
 async function loadClients(query = "") {
   let url = "/clients";
-
   if (query) url += `?${query}`;
 
-  const res = await fetch(url, {
-    headers: getAuthHeaders()
-  });
-
-  if (res.status === 401) {
-    logout();
-    return;
-  }
-
-  const clients = await res.json();
-
-  document.getElementById("total").innerText = clients.length;
-
-  renderClients(clients);
-  updateChart(clients);
-
-  if (map) {
-    markers.forEach(m => map.removeLayer(m));
-    markers = [];
-
-    clients.forEach(c => {
-      if (c.lat && c.lng) {
-        const marker = L.marker([c.lat, c.lng])
-          .addTo(map)
-          .bindPopup(`<b>${c.name}</b>`);
-        markers.push(marker);
-      }
+  try {
+    const res = await fetch(url, {
+      headers: getAuthHeaders()
     });
+
+    if (handleAuthError(res)) return;
+
+    const clients = await res.json();
+
+    document.getElementById("total").innerText = clients.length;
+
+    renderClients(clients);
+    updateChart(clients);
+
+    if (map) {
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+
+      clients.forEach(c => {
+        if (c.lat && c.lng) {
+          const marker = L.marker([c.lat, c.lng])
+            .addTo(map)
+            .bindPopup(`<b>${c.name}</b>`);
+          markers.push(marker);
+        }
+      });
+    }
+
+  } catch {
+    alert("Erreur chargement ❌");
   }
 }
 
@@ -234,7 +275,7 @@ async function toggleFavorite(id) {
   loadClients();
 }
 
-// ================= ADD CLIENT =================
+// ================= ADD =================
 
 async function addClient() {
   const name = document.getElementById("name").value;
@@ -256,8 +297,8 @@ async function addClient() {
     const geoData = await geoRes.json();
 
     if (!geoData.length) {
-      hideLoader();
       alert("Adresse introuvable ❌");
+      hideLoader();
       return;
     }
 
@@ -274,12 +315,10 @@ async function addClient() {
     document.getElementById("phone").value = "";
     document.getElementById("address").value = "";
 
-    await loadClients();
-
+    loadClients();
     showToast("Client ajouté ✅");
 
-  } catch (err) {
-    console.error(err);
+  } catch {
     alert("Erreur ❌");
   }
 
@@ -298,7 +337,7 @@ async function deleteClient(id) {
   showToast("Client supprimé 🗑️");
 }
 
-// ================= TOAST =================
+// ================= UI =================
 
 function showToast(msg) {
   const toast = document.getElementById("toast");
@@ -311,8 +350,6 @@ function showToast(msg) {
     toast.classList.remove("show");
   }, 2500);
 }
-
-// ================= LOADER =================
 
 function showLoader() {
   const loader = document.getElementById("loader");
@@ -327,7 +364,7 @@ function hideLoader() {
 // ================= LOGOUT =================
 
 function logout() {
-  localStorage.removeItem("token"); // 🔐 important
+  removeToken();
 
   document.getElementById("app").style.display = "none";
   document.getElementById("auth").style.display = "flex";
