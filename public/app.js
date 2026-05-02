@@ -42,6 +42,9 @@ async function login() {
   hideLoader();
 
   if (data.success) {
+    // 🔐 STOCKER TOKEN
+    localStorage.setItem("token", data.token);
+
     document.getElementById("auth").style.display = "none";
     document.getElementById("app").style.display = "block";
 
@@ -56,6 +59,15 @@ async function login() {
   } else {
     alert(data.error);
   }
+}
+
+// ================= HELPER AUTH =================
+
+function getAuthHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "Authorization": localStorage.getItem("token")
+  };
 }
 
 // ================= SIDEBAR =================
@@ -117,18 +129,15 @@ function updateChart(clients) {
     counts[date] = (counts[date] || 0) + 1;
   });
 
-  const labels = Object.keys(counts);
-  const data = Object.values(counts);
-
   if (chart) chart.destroy();
 
   chart = new Chart(ctx, {
     type: "line",
     data: {
-      labels,
+      labels: Object.keys(counts),
       datasets: [{
         label: "Nouveaux clients",
-        data,
+        data: Object.values(counts),
         fill: true
       }]
     }
@@ -166,11 +175,17 @@ function renderClients(clients) {
 async function loadClients(query = "") {
   let url = "/clients";
 
-  if (query) {
-    url += `?${query}`;
+  if (query) url += `?${query}`;
+
+  const res = await fetch(url, {
+    headers: getAuthHeaders()
+  });
+
+  if (res.status === 401) {
+    logout();
+    return;
   }
 
-  const res = await fetch(url);
   const clients = await res.json();
 
   document.getElementById("total").innerText = clients.length;
@@ -187,26 +202,22 @@ async function loadClients(query = "") {
         const marker = L.marker([c.lat, c.lng])
           .addTo(map)
           .bindPopup(`<b>${c.name}</b>`);
-
         markers.push(marker);
       }
     });
   }
 }
 
-// ================= SEARCH (API) =================
+// ================= SEARCH =================
 
 function filterClients() {
   const query = document.getElementById("search").value;
 
-  if (!query) {
-    loadClients();
-  } else {
-    loadClients(`search=${encodeURIComponent(query)}`);
-  }
+  if (!query) loadClients();
+  else loadClients(`search=${encodeURIComponent(query)}`);
 }
 
-// ================= FAVORITES FILTER =================
+// ================= FAVORITES =================
 
 function showFavorites() {
   loadClients("favorite=true");
@@ -216,7 +227,8 @@ function showFavorites() {
 
 async function toggleFavorite(id) {
   await fetch(`/clients/favorite/${id}`, {
-    method: "PUT"
+    method: "PUT",
+    headers: getAuthHeaders()
   });
 
   loadClients();
@@ -254,7 +266,7 @@ async function addClient() {
 
     await fetch("/clients", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ name, phone, address, lat, lng })
     });
 
@@ -277,7 +289,11 @@ async function addClient() {
 // ================= DELETE =================
 
 async function deleteClient(id) {
-  await fetch("/clients/" + id, { method: "DELETE" });
+  await fetch("/clients/" + id, {
+    method: "DELETE",
+    headers: getAuthHeaders()
+  });
+
   loadClients();
   showToast("Client supprimé 🗑️");
 }
@@ -311,6 +327,8 @@ function hideLoader() {
 // ================= LOGOUT =================
 
 function logout() {
+  localStorage.removeItem("token"); // 🔐 important
+
   document.getElementById("app").style.display = "none";
   document.getElementById("auth").style.display = "flex";
 

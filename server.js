@@ -1,11 +1,15 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 
 app.use(express.json());
 app.use(express.static("public"));
+
+// 🔐 SECRET JWT (mets une vraie clé en prod)
+const SECRET = "supersecretkey123";
 
 // ================= MONGODB =================
 
@@ -16,13 +20,17 @@ mongoose.connect(process.env.MONGO_URI)
 // ================= MODELS =================
 
 // USER
-const User = mongoose.model("User", {
+const UserSchema = new mongoose.Schema({
   email: String,
   password: String
 });
 
-// CLIENT
+const User = mongoose.model("User", UserSchema);
+
+// CLIENT (lié à user)
 const ClientSchema = new mongoose.Schema({
+  userId: String, // 🔥 IMPORTANT
+
   name: String,
   phone: String,
   address: String,
@@ -37,6 +45,22 @@ const ClientSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const Client = mongoose.model("Client", ClientSchema);
+
+// ================= MIDDLEWARE AUTH =================
+
+function auth(req, res, next) {
+  const token = req.headers.authorization;
+
+  if (!token) return res.status(401).json({ error: "Non autorisé" });
+
+  try {
+    const decoded = jwt.verify(token, SECRET);
+    req.userId = decoded.id;
+    next();
+  } catch {
+    res.status(401).json({ error: "Token invalide" });
+  }
+}
 
 // ================= AUTH =================
 
@@ -54,7 +78,7 @@ app.post("/register", async (req, res) => {
   res.json({ success: true });
 });
 
-// LOGIN
+// LOGIN (avec token)
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -64,18 +88,22 @@ app.post("/login", async (req, res) => {
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) return res.json({ error: "Mot de passe incorrect" });
 
-  res.json({ success: true });
+  const token = jwt.sign({ id: user._id }, SECRET);
+
+  res.json({ success: true, token });
 });
 
 // ================= CLIENTS =================
 
-// 🔎 GET AVEC FILTRES (SEARCH + FAVORITES)
-app.get("/clients", async (req, res) => {
+// 🔎 GET CLIENTS (USER + FILTERS)
+app.get("/clients", auth, async (req, res) => {
   const { search, favorite } = req.query;
 
-  let filter = {};
+  let filter = {
+    userId: req.userId // 🔥 important
+  };
 
-  // 🔎 recherche texte
+  // 🔎 recherche
   if (search) {
     filter.$or = [
       { name: { $regex: search, $options: "i" } },
@@ -83,7 +111,7 @@ app.get("/clients", async (req, res) => {
     ];
   }
 
-  // ⭐ filtre favoris
+  // ⭐ favoris
   if (favorite === "true") {
     filter.favorite = true;
   }
@@ -93,25 +121,33 @@ app.get("/clients", async (req, res) => {
   res.json(clients);
 });
 
-// ADD CLIENT
-app.post("/clients", async (req, res) => {
+// ADD CLIENT (lié à user)
+app.post("/clients", auth, async (req, res) => {
   const client = await Client.create({
     ...req.body,
+    userId: req.userId,
     favorite: false
   });
 
   res.json(client);
 });
 
-// DELETE CLIENT
-app.delete("/clients/:id", async (req, res) => {
-  await Client.findByIdAndDelete(req.params.id);
+// DELETE sécurisé
+app.delete("/clients/:id", auth, async (req, res) => {
+  await Client.findOneAndDelete({
+    _id: req.params.id,
+    userId: req.userId
+  });
+
   res.json({ success: true });
 });
 
-// ⭐ TOGGLE FAVORITE
-app.put("/clients/favorite/:id", async (req, res) => {
-  const client = await Client.findById(req.params.id);
+// ⭐ TOGGLE FAVORITE sécurisé
+app.put("/clients/favorite/:id", auth, async (req, res) => {
+  const client = await Client.findOne({
+    _id: req.params.id,
+    userId: req.userId
+  });
 
   if (!client) return res.json({ error: "Client introuvable" });
 
@@ -126,5 +162,5 @@ app.put("/clients/favorite/:id", async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("🚀 CRM CLOUD LEVEL 3+ lancé sur port", PORT);
+  console.log("🚀 CRM CLOUD LEVEL 4 sécurisé lancé sur port", PORT);
 });
