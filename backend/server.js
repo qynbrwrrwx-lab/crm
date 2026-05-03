@@ -26,8 +26,13 @@ const app = express();
 app.set("trust proxy", 1); // 🔥 important sur Render
 
 app.use(express.json());
-app.use(helmet());
+const helmet = require("helmet");
 
+app.use(
+  helmet({
+    contentSecurityPolicy: false
+  })
+);
 const path = require("path");
 app.use(express.static(path.join(__dirname, "../frontend")));
 
