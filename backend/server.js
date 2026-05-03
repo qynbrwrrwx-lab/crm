@@ -26,7 +26,6 @@ const app = express();
 app.set("trust proxy", 1); // 🔥 important sur Render
 
 app.use(express.json());
-const helmet = require("helmet");
 
 app.use(
   helmet({
