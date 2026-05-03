@@ -1,18 +1,34 @@
+// ================= ENV =================
+
+// 🔥 Charger .env uniquement en local
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
+
+if (!process.env.MONGO_URI) {
+  console.error("❌ MONGO_URI manquant");
+  process.exit(1);
+}
+
+// ================= IMPORTS =================
+
 const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
-require("dotenv").config();
+const helmet = require("helmet");
 
 const app = express();
 
-app.use(express.json());
-app.use(express.static("public"));
-
 // ================= CONFIG =================
 
-// 🔐 SECRET OBLIGATOIRE
+app.set("trust proxy", 1); // 🔥 important sur Render
+
+app.use(express.json());
+app.use(express.static("public"));
+app.use(helmet()); // 🔐 sécurité headers
+
 const SECRET = process.env.JWT_SECRET;
 
 if (!SECRET) {
@@ -21,12 +37,22 @@ if (!SECRET) {
 
 // ================= RATE LIMIT =================
 
+// Global limiter
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 min
+  windowMs: 15 * 60 * 1000,
   max: 100
 });
 
 app.use(limiter);
+
+// 🔥 Protection brute force login
+const loginLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  message: { error: "Trop de tentatives, réessayez plus tard" }
+});
+
+app.use("/login", loginLimiter);
 
 // ================= MONGODB =================
 
@@ -54,21 +80,18 @@ const User = mongoose.model("User", UserSchema);
 // CLIENT (multi-user sécurisé)
 const ClientSchema = new mongoose.Schema({
   userId: {
-    type: mongoose.Schema.Types.ObjectId, // 🔥 amélioré
+    type: mongoose.Schema.Types.ObjectId,
     required: true
   },
-
   name: String,
   phone: String,
   address: String,
   lat: Number,
   lng: Number,
-
   favorite: {
     type: Boolean,
     default: false
   }
-
 }, { timestamps: true });
 
 const Client = mongoose.model("Client", ClientSchema);
@@ -82,7 +105,7 @@ function auth(req, res, next) {
     return res.status(401).json({ error: "Token manquant" });
   }
 
-  const token = authHeader.split(" ")[1]; // 🔥 Bearer
+  const token = authHeader.split(" ")[1];
 
   try {
     const decoded = jwt.verify(token, SECRET);
@@ -106,11 +129,17 @@ app.post("/register", async (req, res) => {
 
     email = email.toLowerCase();
 
+    // 🔥 validation email simple
+    if (!email.includes("@")) {
+      return res.status(400).json({ error: "Email invalide" });
+    }
+
     if (password.length < 6) {
       return res.status(400).json({ error: "Mot de passe trop court" });
     }
 
     const existing = await User.findOne({ email });
+
     if (existing) {
       return res.status(400).json({ error: "Utilisateur existe déjà" });
     }
@@ -184,6 +213,7 @@ app.get("/clients", auth, async (req, res) => {
 
     const clients = await Client
       .find(filter)
+      .select("-__v") // 🔥 protection données
       .sort({ createdAt: -1 });
 
     res.json(clients);
@@ -261,5 +291,5 @@ app.put("/clients/favorite/:id", auth, async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("🚀 CRM CLOUD LEVEL 4++ lancé sur port", PORT);
+  console.log("🚀 CRM CLOUD LEVEL 4 PRO lancé sur port", PORT);
 });

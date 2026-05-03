@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Prospect</title>
 
-<!-- STYLE -->
 <link rel="stylesheet" href="style.css">
 
 <!-- LEAFLET -->
@@ -22,7 +21,6 @@
   margin-top: 10px;
 }
 </style>
-
 </head>
 
 <body>
@@ -58,10 +56,14 @@
         <img src="./logo.png" class="logo-big" alt="logo">
       </div>
 
+      <!-- 🔥 NAVIGATION SAAS -->
       <nav>
         <button onclick="showSection('dashboard', event)" class="active">📊 Dashboard</button>
         <button onclick="showSection('clients', event)">👥 Clients</button>
+        <button onclick="showSection('favorites', event)">⭐ Favoris</button>
+        <button onclick="showSection('analytics', event)">📈 Analytics</button>
         <button onclick="showSection('mapSection', event)">🗺️ Carte</button>
+        <button onclick="showSection('settings', event)">⚙️ Paramètres</button>
       </nav>
 
       <button onclick="logout()" class="logout">🚪 Déconnexion</button>
@@ -73,7 +75,7 @@
 
       <div class="container">
 
-        <!-- DASHBOARD -->
+        <!-- ================= DASHBOARD ================= -->
         <div id="dashboard" class="section active">
           <div class="card">
             <h2>📊 Dashboard</h2>
@@ -82,17 +84,17 @@
           </div>
         </div>
 
-        <!-- CLIENTS -->
+        <!-- ================= CLIENTS ================= -->
         <div id="clients" class="section">
 
-          <!-- 🔎 SEARCH BAR -->
+          <!-- SEARCH -->
           <div class="card">
             <input id="search" placeholder="🔎 Rechercher un client..." oninput="filterClients()">
           </div>
 
           <div class="grid">
 
-            <!-- ADD CLIENT -->
+            <!-- ADD -->
             <div class="card">
               <h2>Ajouter un client</h2>
               <input id="name" placeholder="Nom">
@@ -111,11 +113,50 @@
 
         </div>
 
-        <!-- MAP -->
+        <!-- ================= FAVORITES ================= -->
+        <div id="favorites" class="section">
+          <div class="card">
+            <h2>⭐ Clients favoris</h2>
+            <div id="favoritesList"></div>
+          </div>
+        </div>
+
+        <!-- ================= ANALYTICS ================= -->
+        <div id="analytics" class="section">
+          <div class="card">
+            <h2>📈 Analyse des clients</h2>
+            <canvas id="analyticsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- ================= MAP ================= -->
         <div id="mapSection" class="section">
           <div class="card">
             <h2>🗺️ Carte des clients</h2>
             <div id="map"></div>
+          </div>
+        </div>
+
+        <!-- ================= SETTINGS ================= -->
+        <div id="settings" class="section">
+          <div class="card">
+            <h2>⚙️ Paramètres</h2>
+
+            <p><strong>Compte utilisateur</strong></p>
+
+            <div class="card" style="margin-top:10px;">
+              <p>Email : <span id="userEmail">...</span></p>
+              <p>Total clients : <span id="userStats">0</span></p>
+            </div>
+
+            <button onclick="logout()">🚪 Se déconnecter</button>
+
+            <hr style="margin:20px 0; border-color:#1e293b;">
+
+            <button style="background:#ef4444;">
+              🗑️ Supprimer mon compte (à venir)
+            </button>
+
           </div>
         </div>
 

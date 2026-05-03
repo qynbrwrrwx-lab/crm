@@ -1,6 +1,7 @@
 let map;
 let markers = [];
 let chart;
+let analyticsChart;
 
 // ================= TOKEN =================
 
@@ -16,11 +17,27 @@ function removeToken() {
   localStorage.removeItem("token");
 }
 
-function getAuthHeaders() {
-  return {
-    "Content-Type": "application/json",
-    "Authorization": getToken()
+// ================= API WRAPPER =================
+
+async function apiFetch(url, options = {}) {
+  const token = getToken();
+
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: "Bearer " + token })
+    },
+    ...options
   };
+
+  const res = await fetch(url, config);
+
+  if (res.status === 401) {
+    logout();
+    throw new Error("Session expirée");
+  }
+
+  return await res.json();
 }
 
 // ================= AUTO LOGIN =================
@@ -44,19 +61,13 @@ async function register() {
   showLoader();
 
   try {
-    const res = await fetch("/register", {
+    const data = await apiFetch("/register", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
     });
 
-    const data = await res.json();
-
-    if (data.success) {
-      showToast("Compte créé ✅");
-    } else {
-      alert(data.error);
-    }
+    if (data.success) showToast("Compte créé ✅");
+    else alert(data.error);
 
   } catch {
     alert("Erreur serveur ❌");
@@ -69,16 +80,13 @@ async function login() {
   showLoader();
 
   try {
-    const res = await fetch("/login", {
+    const data = await apiFetch("/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: document.getElementById("email").value,
         password: document.getElementById("password").value
       })
     });
-
-    const data = await res.json();
 
     if (data.success) {
       setToken(data.token);
@@ -101,35 +109,22 @@ async function login() {
   hideLoader();
 }
 
-// ================= HANDLE 401 =================
-
-function handleAuthError(res) {
-  if (res.status === 401) {
-    logout();
-    return true;
-  }
-  return false;
-}
-
 // ================= SIDEBAR =================
 
 function showSection(sectionId, event) {
-  document.querySelectorAll(".section").forEach(el => {
-    el.classList.remove("active");
-  });
+  document.querySelectorAll(".section").forEach(el => el.classList.remove("active"));
+  document.querySelectorAll(".sidebar button").forEach(btn => btn.classList.remove("active"));
 
-  document.querySelectorAll(".sidebar button").forEach(btn => {
-    btn.classList.remove("active");
-  });
-
-  const section = document.getElementById(sectionId);
-  if (section) section.classList.add("active");
-
-  if (event) event.currentTarget.classList.add("active");
+  document.getElementById(sectionId)?.classList.add("active");
+  event?.currentTarget.classList.add("active");
 
   if (sectionId === "mapSection" && map) {
     setTimeout(() => map.invalidateSize(), 200);
   }
+
+  if (sectionId === "favorites") loadFavorites();
+  if (sectionId === "analytics") loadAnalytics();
+  if (sectionId === "settings") loadUserInfo();
 }
 
 // ================= MAP =================
@@ -183,6 +178,57 @@ function updateChart(clients) {
   });
 }
 
+// ================= ANALYTICS =================
+
+async function loadAnalytics() {
+  const clients = await apiFetch("/clients");
+
+  const ctx = document.getElementById("analyticsChart");
+
+  const favorites = clients.filter(c => c.favorite).length;
+
+  if (analyticsChart) analyticsChart.destroy();
+
+  analyticsChart = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Favoris", "Autres"],
+      datasets: [{
+        data: [favorites, clients.length - favorites]
+      }]
+    }
+  });
+}
+
+// ================= FAVORITES =================
+
+async function loadFavorites() {
+  const clients = await apiFetch("/clients?favorite=true");
+
+  const container = document.getElementById("favoritesList");
+  container.innerHTML = "";
+
+  clients.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "client";
+
+    div.innerHTML = `
+      <strong>${c.name}</strong><br>
+      ${c.phone}
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// ================= USER INFO =================
+
+async function loadUserInfo() {
+  const clients = await apiFetch("/clients");
+
+  document.getElementById("userStats").innerText = clients.length;
+}
+
 // ================= RENDER =================
 
 function renderClients(clients) {
@@ -217,13 +263,7 @@ async function loadClients(query = "") {
   if (query) url += `?${query}`;
 
   try {
-    const res = await fetch(url, {
-      headers: getAuthHeaders()
-    });
-
-    if (handleAuthError(res)) return;
-
-    const clients = await res.json();
+    const clients = await apiFetch(url);
 
     document.getElementById("total").innerText = clients.length;
 
@@ -249,43 +289,30 @@ async function loadClients(query = "") {
   }
 }
 
-// ================= SEARCH =================
+// ================= ACTIONS =================
 
 function filterClients() {
   const query = document.getElementById("search").value;
-
-  if (!query) loadClients();
-  else loadClients(`search=${encodeURIComponent(query)}`);
+  loadClients(query ? `search=${encodeURIComponent(query)}` : "");
 }
-
-// ================= FAVORITES =================
-
-function showFavorites() {
-  loadClients("favorite=true");
-}
-
-// ================= FAVORITE =================
 
 async function toggleFavorite(id) {
-  await fetch(`/clients/favorite/${id}`, {
-    method: "PUT",
-    headers: getAuthHeaders()
-  });
-
+  await apiFetch(`/clients/favorite/${id}`, { method: "PUT" });
   loadClients();
 }
 
-// ================= ADD =================
+async function deleteClient(id) {
+  await apiFetch(`/clients/${id}`, { method: "DELETE" });
+  loadClients();
+  showToast("Client supprimé 🗑️");
+}
 
 async function addClient() {
   const name = document.getElementById("name").value;
   const phone = document.getElementById("phone").value;
   const address = document.getElementById("address").value;
 
-  if (!address) {
-    alert("Adresse obligatoire ❗");
-    return;
-  }
+  if (!address) return alert("Adresse obligatoire ❗");
 
   showLoader();
 
@@ -293,7 +320,6 @@ async function addClient() {
     const geoRes = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
     );
-
     const geoData = await geoRes.json();
 
     if (!geoData.length) {
@@ -305,9 +331,8 @@ async function addClient() {
     const lat = parseFloat(geoData[0].lat);
     const lng = parseFloat(geoData[0].lon);
 
-    await fetch("/clients", {
+    await apiFetch("/clients", {
       method: "POST",
-      headers: getAuthHeaders(),
       body: JSON.stringify({ name, phone, address, lat, lng })
     });
 
@@ -325,40 +350,22 @@ async function addClient() {
   hideLoader();
 }
 
-// ================= DELETE =================
-
-async function deleteClient(id) {
-  await fetch("/clients/" + id, {
-    method: "DELETE",
-    headers: getAuthHeaders()
-  });
-
-  loadClients();
-  showToast("Client supprimé 🗑️");
-}
-
 // ================= UI =================
 
 function showToast(msg) {
   const toast = document.getElementById("toast");
-  if (!toast) return;
-
   toast.innerText = msg;
   toast.classList.add("show");
 
-  setTimeout(() => {
-    toast.classList.remove("show");
-  }, 2500);
+  setTimeout(() => toast.classList.remove("show"), 2500);
 }
 
 function showLoader() {
-  const loader = document.getElementById("loader");
-  if (loader) loader.style.display = "flex";
+  document.getElementById("loader").style.display = "flex";
 }
 
 function hideLoader() {
-  const loader = document.getElementById("loader");
-  if (loader) loader.style.display = "none";
+  document.getElementById("loader").style.display = "none";
 }
 
 // ================= LOGOUT =================
@@ -368,9 +375,6 @@ function logout() {
 
   document.getElementById("app").style.display = "none";
   document.getElementById("auth").style.display = "flex";
-
-  document.getElementById("email").value = "";
-  document.getElementById("password").value = "";
 
   if (map) {
     map.remove();
