@@ -43,10 +43,9 @@ if (!JWT_SECRET || !MONGO_URI || !EMAIL_HOST || !EMAIL_USER || !EMAIL_PASS || !B
 
 // ================= SMTP =================
 const transporter = nodemailer.createTransport({
-  host: EMAIL_HOST,
-  port: Number(EMAIL_PORT),
-  secure: false,
-  requireTLS: true,
+  host: process.env.EMAIL_HOST,
+  port: Number(process.env.EMAIL_PORT),
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
