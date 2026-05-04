@@ -1,16 +1,9 @@
 // ================= ENV =================
-
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 
-if (!process.env.MONGO_URI) {
-  console.error("❌ MONGO_URI manquant");
-  process.exit(1);
-}
-
 // ================= IMPORTS =================
-
 const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
@@ -18,12 +11,12 @@ const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const path = require("path");
+const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 
 const app = express();
 
 // ================= CONFIG =================
-
 app.set("trust proxy", 1);
 app.use(express.json());
 
@@ -33,61 +26,73 @@ app.use(
   })
 );
 
-// ================= EMAIL CONFIG (AMEN) =================
+// ================= ENV VAR =================
+const {
+  JWT_SECRET,
+  MONGO_URI,
+  EMAIL_HOST,
+  EMAIL_PORT,
+  EMAIL_USER,
+  EMAIL_PASS,
+  BASE_URL
+} = process.env;
 
+if (!JWT_SECRET || !MONGO_URI || !EMAIL_HOST || !EMAIL_USER || !EMAIL_PASS || !BASE_URL) {
+  throw new Error("❌ Variables ENV manquantes !");
+}
+
+// ================= SMTP =================
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST, // smtp.amen.fr
-  port: process.env.EMAIL_PORT, // 587
+  host: EMAIL_HOST,
+  port: Number(EMAIL_PORT),
   secure: false,
+  requireTLS: true,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    user: EMAIL_USER,
+    pass: EMAIL_PASS
   }
 });
 
-// 🔥 TEST SMTP (tu peux garder pour debug)
+// Test SMTP
 transporter.verify((err) => {
-  if (err) console.log("❌ SMTP ERROR:", err);
+  if (err) console.error("❌ SMTP ERROR:", err);
   else console.log("✅ SMTP prêt");
 });
 
-// ================= SECRET =================
-
-const SECRET = process.env.JWT_SECRET;
-
-if (!SECRET) {
-  throw new Error("JWT_SECRET manquant !");
-}
-
 // ================= RATE LIMIT =================
-
 const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 5,
   message: { error: "Trop de tentatives, réessayez plus tard" }
 });
 
+const registerLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 10,
+  message: { error: "Trop de comptes créés, réessayez plus tard" }
+});
+
 app.use("/login", loginLimiter);
+app.use("/register", registerLimiter);
 
 // ================= MONGODB =================
-
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(MONGO_URI)
   .then(() => console.log("✅ MongoDB connecté"))
   .catch(err => console.error("❌ MongoDB error:", err));
 
 // ================= MODELS =================
-
 const UserSchema = new mongoose.Schema({
-  email: { type: String, unique: true, required: true },
-  password: { type: String, required: true },
+  email: { type: String, unique: true },
+  password: String,
   isVerified: { type: Boolean, default: false },
-  verifyToken: String
+  verifyToken: String,
+  verifyExpires: Date
 });
 
 const User = mongoose.model("User", UserSchema);
 
 const ClientSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  userId: mongoose.Schema.Types.ObjectId,
   name: String,
   phone: String,
   address: String,
@@ -98,8 +103,7 @@ const ClientSchema = new mongoose.Schema({
 
 const Client = mongoose.model("Client", ClientSchema);
 
-// ================= AUTH MIDDLEWARE =================
-
+// ================= AUTH =================
 function auth(req, res, next) {
   const authHeader = req.headers.authorization;
 
@@ -110,7 +114,7 @@ function auth(req, res, next) {
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.userId = decoded.id;
     next();
   } catch {
@@ -118,9 +122,7 @@ function auth(req, res, next) {
   }
 }
 
-// ================= AUTH =================
-
-// REGISTER + EMAIL CONFIRMATION
+// ================= REGISTER =================
 app.post("/register", async (req, res) => {
   try {
     let { email, password } = req.body;
@@ -141,32 +143,35 @@ app.post("/register", async (req, res) => {
 
     const existing = await User.findOne({ email });
 
-    if (existing) {
+    if (existing && !existing.isVerified) {
+      await User.deleteOne({ email });
+    }
+
+    if (existing && existing.isVerified) {
       return res.status(400).json({ error: "Email déjà utilisé" });
     }
 
     const hash = await bcrypt.hash(password, 10);
-
-    const verifyToken = jwt.sign({ email }, SECRET, { expiresIn: "1d" });
+    const token = crypto.randomBytes(32).toString("hex");
 
     await User.create({
       email,
       password: hash,
-      verifyToken,
+      verifyToken: token,
+      verifyExpires: Date.now() + 3600000, // 1h
       isVerified: false
     });
 
-    // 🔗 lien validation
-    const link = `https://my-prospect.com/verify?token=${verifyToken}`;
+    const verifyLink = `${BASE_URL}/verify/${token}`;
 
     await transporter.sendMail({
-      from: `"My Prospect" <${process.env.EMAIL_USER}>`,
+      from: `"My Prospect" <${EMAIL_USER}>`,
       to: email,
       subject: "Confirme ton compte",
       html: `
         <h2>Bienvenue 👋</h2>
-        <p>Clique ici pour activer ton compte :</p>
-        <a href="${link}">${link}</a>
+        <p>Confirme ton compte :</p>
+        <a href="${verifyLink}">Valider mon compte</a>
       `
     });
 
@@ -178,30 +183,27 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// VERIFY EMAIL
-app.get("/verify", async (req, res) => {
-  try {
-    const { token } = req.query;
+// ================= VERIFY =================
+app.get("/verify/:token", async (req, res) => {
+  const user = await User.findOne({
+    verifyToken: req.params.token,
+    verifyExpires: { $gt: Date.now() }
+  });
 
-    const decoded = jwt.verify(token, SECRET);
-
-    const user = await User.findOne({ email: decoded.email });
-
-    if (!user) return res.send("Utilisateur introuvable");
-
-    user.isVerified = true;
-    user.verifyToken = null;
-
-    await user.save();
-
-    res.send("✅ Compte activé ! Tu peux te connecter.");
-
-  } catch {
-    res.send("❌ Lien invalide ou expiré");
+  if (!user) {
+    return res.send("Lien invalide ou expiré ❌");
   }
+
+  user.isVerified = true;
+  user.verifyToken = null;
+  user.verifyExpires = null;
+
+  await user.save();
+
+  res.send("Compte validé ✅");
 });
 
-// LOGIN
+// ================= LOGIN =================
 app.post("/login", async (req, res) => {
   try {
     let { email, password } = req.body;
@@ -218,9 +220,8 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Utilisateur introuvable" });
     }
 
-    // 🔥 BLOQUE SI PAS VALIDÉ
     if (!user.isVerified) {
-      return res.status(403).json({ error: "Email non vérifié" });
+      return res.status(403).json({ error: "Compte non validé" });
     }
 
     const valid = await bcrypt.compare(password, user.password);
@@ -231,7 +232,7 @@ app.post("/login", async (req, res) => {
 
     const token = jwt.sign(
       { id: user._id },
-      SECRET,
+      JWT_SECRET,
       { expiresIn: "7d" }
     );
 
@@ -244,31 +245,21 @@ app.post("/login", async (req, res) => {
 });
 
 // ================= CLIENTS =================
-
 app.get("/clients", auth, async (req, res) => {
-  try {
-    const clients = await Client.find({ userId: req.userId })
-      .sort({ createdAt: -1 });
+  const clients = await Client.find({ userId: req.userId })
+    .select("-__v")
+    .sort({ createdAt: -1 });
 
-    res.json(clients);
-
-  } catch {
-    res.status(500).json({ error: "Erreur serveur" });
-  }
+  res.json(clients);
 });
 
 app.post("/clients", auth, async (req, res) => {
-  try {
-    const client = await Client.create({
-      ...req.body,
-      userId: req.userId
-    });
+  const client = await Client.create({
+    ...req.body,
+    userId: req.userId
+  });
 
-    res.json(client);
-
-  } catch {
-    res.status(500).json({ error: "Erreur création client" });
-  }
+  res.json(client);
 });
 
 app.delete("/clients/:id", auth, async (req, res) => {
@@ -287,7 +278,7 @@ app.put("/clients/favorite/:id", auth, async (req, res) => {
   });
 
   if (!client) {
-    return res.status(404).json({ error: "Client introuvable" });
+    return res.status(404).json({ error: "Introuvable" });
   }
 
   client.favorite = !client.favorite;
@@ -296,8 +287,7 @@ app.put("/clients/favorite/:id", auth, async (req, res) => {
   res.json(client);
 });
 
-// ================= FRONTEND =================
-
+// ================= FRONT =================
 app.use(express.static(path.join(__dirname, "../frontend")));
 
 app.get("*", (req, res) => {
@@ -305,9 +295,8 @@ app.get("*", (req, res) => {
 });
 
 // ================= SERVER =================
-
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("🚀 CRM lancé sur port", PORT);
+  console.log("🚀 CRM PRO lancé sur port", PORT);
 });
