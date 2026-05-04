@@ -18,13 +18,13 @@ const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const path = require("path");
+const nodemailer = require("nodemailer");
 
 const app = express();
 
 // ================= CONFIG =================
 
 app.set("trust proxy", 1);
-
 app.use(express.json());
 
 app.use(
@@ -33,7 +33,26 @@ app.use(
   })
 );
 
-// 🔐 SECRET
+// ================= EMAIL CONFIG (AMEN) =================
+
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST, // smtp.amen.fr
+  port: process.env.EMAIL_PORT, // 587
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+// 🔥 TEST SMTP (tu peux garder pour debug)
+transporter.verify((err) => {
+  if (err) console.log("❌ SMTP ERROR:", err);
+  else console.log("✅ SMTP prêt");
+});
+
+// ================= SECRET =================
+
 const SECRET = process.env.JWT_SECRET;
 
 if (!SECRET) {
@@ -41,9 +60,6 @@ if (!SECRET) {
 }
 
 // ================= RATE LIMIT =================
-
-// ❌ Désactivé global pour éviter blocage
-// app.use(limiter);
 
 const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
@@ -63,16 +79,15 @@ mongoose.connect(process.env.MONGO_URI)
 
 const UserSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
-  password: { type: String, required: true }
+  password: { type: String, required: true },
+  isVerified: { type: Boolean, default: false },
+  verifyToken: String
 });
 
 const User = mongoose.model("User", UserSchema);
 
 const ClientSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
-  },
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true },
   name: String,
   phone: String,
   address: String,
@@ -105,7 +120,7 @@ function auth(req, res, next) {
 
 // ================= AUTH =================
 
-// REGISTER
+// REGISTER + EMAIL CONFIRMATION
 app.post("/register", async (req, res) => {
   try {
     let { email, password } = req.body;
@@ -125,15 +140,37 @@ app.post("/register", async (req, res) => {
     }
 
     const existing = await User.findOne({ email });
+
     if (existing) {
-      return res.status(400).json({ error: "Utilisateur existe déjà" });
+      return res.status(400).json({ error: "Email déjà utilisé" });
     }
 
     const hash = await bcrypt.hash(password, 10);
 
-    await User.create({ email, password: hash });
+    const verifyToken = jwt.sign({ email }, SECRET, { expiresIn: "1d" });
 
-    res.json({ success: true });
+    await User.create({
+      email,
+      password: hash,
+      verifyToken,
+      isVerified: false
+    });
+
+    // 🔗 lien validation
+    const link = `https://my-prospect.com/verify?token=${verifyToken}`;
+
+    await transporter.sendMail({
+      from: `"My Prospect" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Confirme ton compte",
+      html: `
+        <h2>Bienvenue 👋</h2>
+        <p>Clique ici pour activer ton compte :</p>
+        <a href="${link}">${link}</a>
+      `
+    });
+
+    res.json({ success: true, message: "Email envoyé 📩" });
 
   } catch (err) {
     console.error("REGISTER ERROR:", err);
@@ -141,12 +178,33 @@ app.post("/register", async (req, res) => {
   }
 });
 
+// VERIFY EMAIL
+app.get("/verify", async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    const decoded = jwt.verify(token, SECRET);
+
+    const user = await User.findOne({ email: decoded.email });
+
+    if (!user) return res.send("Utilisateur introuvable");
+
+    user.isVerified = true;
+    user.verifyToken = null;
+
+    await user.save();
+
+    res.send("✅ Compte activé ! Tu peux te connecter.");
+
+  } catch {
+    res.send("❌ Lien invalide ou expiré");
+  }
+});
+
 // LOGIN
 app.post("/login", async (req, res) => {
   try {
     let { email, password } = req.body;
-
-    console.log("LOGIN BODY:", req.body);
 
     if (!email || !password) {
       return res.status(400).json({ error: "Champs requis" });
@@ -158,6 +216,11 @@ app.post("/login", async (req, res) => {
 
     if (!user) {
       return res.status(400).json({ error: "Utilisateur introuvable" });
+    }
+
+    // 🔥 BLOQUE SI PAS VALIDÉ
+    if (!user.isVerified) {
+      return res.status(403).json({ error: "Email non vérifié" });
     }
 
     const valid = await bcrypt.compare(password, user.password);
@@ -182,103 +245,58 @@ app.post("/login", async (req, res) => {
 
 // ================= CLIENTS =================
 
-// GET
 app.get("/clients", auth, async (req, res) => {
   try {
-    const { search, favorite } = req.query;
-
-    let filter = { userId: req.userId };
-
-    if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { phone: { $regex: search, $options: "i" } }
-      ];
-    }
-
-    if (favorite === "true") {
-      filter.favorite = true;
-    }
-
-    const clients = await Client.find(filter)
-      .select("-__v")
+    const clients = await Client.find({ userId: req.userId })
       .sort({ createdAt: -1 });
 
     res.json(clients);
 
-  } catch (err) {
-    console.error(err);
+  } catch {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
-// ADD
 app.post("/clients", auth, async (req, res) => {
   try {
-    const { name, phone, address, lat, lng } = req.body;
-
-    if (!name || !phone) {
-      return res.status(400).json({ error: "Champs requis" });
-    }
-
     const client = await Client.create({
-      name,
-      phone,
-      address,
-      lat,
-      lng,
-      userId: req.userId,
-      favorite: false
+      ...req.body,
+      userId: req.userId
     });
 
     res.json(client);
 
-  } catch (err) {
-    console.error(err);
+  } catch {
     res.status(500).json({ error: "Erreur création client" });
   }
 });
 
-// DELETE
 app.delete("/clients/:id", auth, async (req, res) => {
-  try {
-    await Client.findOneAndDelete({
-      _id: req.params.id,
-      userId: req.userId
-    });
+  await Client.findOneAndDelete({
+    _id: req.params.id,
+    userId: req.userId
+  });
 
-    res.json({ success: true });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erreur suppression" });
-  }
+  res.json({ success: true });
 });
 
-// FAVORITE
 app.put("/clients/favorite/:id", auth, async (req, res) => {
-  try {
-    const client = await Client.findOne({
-      _id: req.params.id,
-      userId: req.userId
-    });
+  const client = await Client.findOne({
+    _id: req.params.id,
+    userId: req.userId
+  });
 
-    if (!client) {
-      return res.status(404).json({ error: "Client introuvable" });
-    }
-
-    client.favorite = !client.favorite;
-    await client.save();
-
-    res.json(client);
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erreur favoris" });
+  if (!client) {
+    return res.status(404).json({ error: "Client introuvable" });
   }
+
+  client.favorite = !client.favorite;
+  await client.save();
+
+  res.json(client);
 });
 
-// ================= FRONTEND (IMPORTANT À LA FIN) =================
+// ================= FRONTEND =================
 
 app.use(express.static(path.join(__dirname, "../frontend")));
 
@@ -291,5 +309,5 @@ app.get("*", (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("🚀 CRM CLOUD LEVEL 4 PRO lancé sur port", PORT);
+  console.log("🚀 CRM lancé sur port", PORT);
 });
