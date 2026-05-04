@@ -1,6 +1,5 @@
 // ================= ENV =================
 
-// 🔥 Charger .env uniquement en local
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
@@ -18,12 +17,13 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
+const path = require("path");
 
 const app = express();
 
 // ================= CONFIG =================
 
-app.set("trust proxy", 1); // 🔥 important sur Render
+app.set("trust proxy", 1);
 
 app.use(express.json());
 
@@ -32,13 +32,8 @@ app.use(
     contentSecurityPolicy: false
   })
 );
-const path = require("path");
-app.use(express.static(path.join(__dirname, "../frontend")));
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/index.html"));
-});
-
+// 🔐 SECRET
 const SECRET = process.env.JWT_SECRET;
 
 if (!SECRET) {
@@ -47,15 +42,9 @@ if (!SECRET) {
 
 // ================= RATE LIMIT =================
 
-// Global limiter
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100
-});
+// ❌ Désactivé global pour éviter blocage
+// app.use(limiter);
 
-app.use(limiter);
-
-// 🔥 Protection brute force login
 const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 5,
@@ -72,22 +61,13 @@ mongoose.connect(process.env.MONGO_URI)
 
 // ================= MODELS =================
 
-// USER
 const UserSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    unique: true,
-    required: true
-  },
-  password: {
-    type: String,
-    required: true
-  }
+  email: { type: String, unique: true, required: true },
+  password: { type: String, required: true }
 });
 
 const User = mongoose.model("User", UserSchema);
 
-// CLIENT (multi-user sécurisé)
 const ClientSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -98,15 +78,12 @@ const ClientSchema = new mongoose.Schema({
   address: String,
   lat: Number,
   lng: Number,
-  favorite: {
-    type: Boolean,
-    default: false
-  }
+  favorite: { type: Boolean, default: false }
 }, { timestamps: true });
 
 const Client = mongoose.model("Client", ClientSchema);
 
-// ================= MIDDLEWARE AUTH =================
+// ================= AUTH MIDDLEWARE =================
 
 function auth(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -139,7 +116,6 @@ app.post("/register", async (req, res) => {
 
     email = email.toLowerCase();
 
-    // 🔥 validation email simple
     if (!email.includes("@")) {
       return res.status(400).json({ error: "Email invalide" });
     }
@@ -149,7 +125,6 @@ app.post("/register", async (req, res) => {
     }
 
     const existing = await User.findOne({ email });
-
     if (existing) {
       return res.status(400).json({ error: "Utilisateur existe déjà" });
     }
@@ -160,7 +135,8 @@ app.post("/register", async (req, res) => {
 
     res.json({ success: true });
 
-  } catch {
+  } catch (err) {
+    console.error("REGISTER ERROR:", err);
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
@@ -168,13 +144,17 @@ app.post("/register", async (req, res) => {
 // LOGIN
 app.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+
+    console.log("LOGIN BODY:", req.body);
 
     if (!email || !password) {
       return res.status(400).json({ error: "Champs requis" });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    email = email.toLowerCase();
+
+    const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(400).json({ error: "Utilisateur introuvable" });
@@ -194,21 +174,20 @@ app.post("/login", async (req, res) => {
 
     res.json({ success: true, token });
 
-  } catch {
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
 // ================= CLIENTS =================
 
-// GET CLIENTS
+// GET
 app.get("/clients", auth, async (req, res) => {
   try {
     const { search, favorite } = req.query;
 
-    let filter = {
-      userId: req.userId
-    };
+    let filter = { userId: req.userId };
 
     if (search) {
       filter.$or = [
@@ -221,19 +200,19 @@ app.get("/clients", auth, async (req, res) => {
       filter.favorite = true;
     }
 
-    const clients = await Client
-      .find(filter)
-      .select("-__v") // 🔥 protection données
+    const clients = await Client.find(filter)
+      .select("-__v")
       .sort({ createdAt: -1 });
 
     res.json(clients);
 
-  } catch {
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
-// ADD CLIENT
+// ADD
 app.post("/clients", auth, async (req, res) => {
   try {
     const { name, phone, address, lat, lng } = req.body;
@@ -254,12 +233,13 @@ app.post("/clients", auth, async (req, res) => {
 
     res.json(client);
 
-  } catch {
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Erreur création client" });
   }
 });
 
-// DELETE CLIENT
+// DELETE
 app.delete("/clients/:id", auth, async (req, res) => {
   try {
     await Client.findOneAndDelete({
@@ -269,12 +249,13 @@ app.delete("/clients/:id", auth, async (req, res) => {
 
     res.json({ success: true });
 
-  } catch {
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Erreur suppression" });
   }
 });
 
-// TOGGLE FAVORITE
+// FAVORITE
 app.put("/clients/favorite/:id", auth, async (req, res) => {
   try {
     const client = await Client.findOne({
@@ -291,9 +272,18 @@ app.put("/clients/favorite/:id", auth, async (req, res) => {
 
     res.json(client);
 
-  } catch {
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Erreur favoris" });
   }
+});
+
+// ================= FRONTEND (IMPORTANT À LA FIN) =================
+
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
 // ================= SERVER =================

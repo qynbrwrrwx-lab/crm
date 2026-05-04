@@ -30,14 +30,25 @@ async function apiFetch(url, options = {}) {
     ...options
   };
 
-  const res = await fetch(url, config);
+  try {
+    const res = await fetch(url, config);
 
-  if (res.status === 401) {
-    logout();
-    throw new Error("Session expirée");
+    if (res.status === 401) {
+      logout();
+      throw new Error("Session expirée");
+    }
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Erreur API");
+    }
+
+    return await res.json();
+
+  } catch (err) {
+    console.error("API ERROR:", err);
+    throw err;
   }
-
-  return await res.json();
 }
 
 // ================= AUTO LOGIN =================
@@ -66,11 +77,10 @@ async function register() {
       body: JSON.stringify({ email, password })
     });
 
-    if (data.success) showToast("Compte créé ✅");
-    else alert(data.error);
+    showToast("Compte créé ✅");
 
-  } catch {
-    alert("Erreur serveur ❌");
+  } catch (err) {
+    alert(err.message);
   }
 
   hideLoader();
@@ -79,31 +89,29 @@ async function register() {
 async function login() {
   showLoader();
 
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  console.log("LOGIN:", email);
+
   try {
     const data = await apiFetch("/login", {
       method: "POST",
-      body: JSON.stringify({
-        email: document.getElementById("email").value,
-        password: document.getElementById("password").value
-      })
+      body: JSON.stringify({ email, password })
     });
 
-    if (data.success) {
-      setToken(data.token);
+    setToken(data.token);
 
-      document.getElementById("auth").style.display = "none";
-      document.getElementById("app").style.display = "block";
+    document.getElementById("auth").style.display = "none";
+    document.getElementById("app").style.display = "block";
 
-      initMap();
-      loadClients();
+    initMap();
+    loadClients();
 
-      showToast("Connexion réussie 🚀");
-    } else {
-      alert(data.error);
-    }
+    showToast("Connexion réussie 🚀");
 
-  } catch {
-    alert("Erreur serveur ❌");
+  } catch (err) {
+    alert(err.message);
   }
 
   hideLoader();
@@ -147,7 +155,7 @@ function initMap() {
   }).addTo(map);
 }
 
-// ================= CHART =================
+// ================= DASHBOARD CHART =================
 
 function updateChart(clients) {
   const ctx = document.getElementById("chart");
@@ -181,52 +189,64 @@ function updateChart(clients) {
 // ================= ANALYTICS =================
 
 async function loadAnalytics() {
-  const clients = await apiFetch("/clients");
+  try {
+    const clients = await apiFetch("/clients");
 
-  const ctx = document.getElementById("analyticsChart");
+    const ctx = document.getElementById("analyticsChart");
+    const favorites = clients.filter(c => c.favorite).length;
 
-  const favorites = clients.filter(c => c.favorite).length;
+    if (analyticsChart) analyticsChart.destroy();
 
-  if (analyticsChart) analyticsChart.destroy();
+    analyticsChart = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: ["Favoris", "Autres"],
+        datasets: [{
+          data: [favorites, clients.length - favorites]
+        }]
+      }
+    });
 
-  analyticsChart = new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: ["Favoris", "Autres"],
-      datasets: [{
-        data: [favorites, clients.length - favorites]
-      }]
-    }
-  });
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 // ================= FAVORITES =================
 
 async function loadFavorites() {
-  const clients = await apiFetch("/clients?favorite=true");
+  try {
+    const clients = await apiFetch("/clients?favorite=true");
 
-  const container = document.getElementById("favoritesList");
-  container.innerHTML = "";
+    const container = document.getElementById("favoritesList");
+    container.innerHTML = "";
 
-  clients.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "client";
+    clients.forEach(c => {
+      const div = document.createElement("div");
+      div.className = "client";
 
-    div.innerHTML = `
-      <strong>${c.name}</strong><br>
-      ${c.phone}
-    `;
+      div.innerHTML = `
+        <strong>${c.name}</strong><br>
+        ${c.phone}
+      `;
 
-    container.appendChild(div);
-  });
+      container.appendChild(div);
+    });
+
+  } catch (err) {
+    console.error(err);
+  }
 }
 
-// ================= USER INFO =================
+// ================= SETTINGS =================
 
 async function loadUserInfo() {
-  const clients = await apiFetch("/clients");
-
-  document.getElementById("userStats").innerText = clients.length;
+  try {
+    const clients = await apiFetch("/clients");
+    document.getElementById("userStats").innerText = clients.length;
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 // ================= RENDER =================
@@ -237,7 +257,6 @@ function renderClients(clients) {
 
   clients.forEach(c => {
     const div = document.createElement("div");
-
     div.className = "client";
 
     div.innerHTML = `
@@ -284,8 +303,8 @@ async function loadClients(query = "") {
       });
     }
 
-  } catch {
-    alert("Erreur chargement ❌");
+  } catch (err) {
+    alert(err.message);
   }
 }
 
@@ -324,7 +343,6 @@ async function addClient() {
 
     if (!geoData.length) {
       alert("Adresse introuvable ❌");
-      hideLoader();
       return;
     }
 
@@ -343,8 +361,8 @@ async function addClient() {
     loadClients();
     showToast("Client ajouté ✅");
 
-  } catch {
-    alert("Erreur ❌");
+  } catch (err) {
+    alert(err.message);
   }
 
   hideLoader();
