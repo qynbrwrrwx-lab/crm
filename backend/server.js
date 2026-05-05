@@ -147,36 +147,36 @@ app.post("/register", async (req, res) => {
         from: EMAIL_FROM,
         subject: "Confirme ton compte",
         html: `
-  <div style="font-family:Arial, sans-serif; text-align:center; padding:30px;">
-    <h2>Bienvenue 👋</h2>
-    <p>Confirme ton compte pour commencer :</p>
+          <div style="font-family:Arial, sans-serif; text-align:center; padding:30px;">
+            <h2>Bienvenue 👋</h2>
+            <p>Confirme ton compte pour commencer :</p>
 
-    <a href="${verifyLink}" 
-       style="
-         display:inline-block;
-         padding:12px 25px;
-         background:#4CAF50;
-         color:white;
-         text-decoration:none;
-         border-radius:8px;
-         font-weight:bold;
-       ">
-      Activer mon compte
-    </a>
+            <a href="${verifyLink}" 
+              style="
+                display:inline-block;
+                padding:12px 25px;
+                background:#4CAF50;
+                color:white;
+                text-decoration:none;
+                border-radius:8px;
+                font-weight:bold;
+              ">
+              Activer mon compte
+            </a>
 
-    <p style="margin-top:20px; font-size:12px; color:#888;">
-      Si le bouton ne fonctionne pas :
-    </p>
+            <p style="margin-top:20px; font-size:12px; color:#888;">
+              Si le bouton ne fonctionne pas :
+            </p>
 
-    <p style="font-size:12px;">
-      <a href="${verifyLink}">
-        ${verifyLink}
-      </a>
-    </p>
-  </div>
-`
+            <p style="font-size:12px;">
+              <a href="${verifyLink}">
+                ${verifyLink}
+              </a>
+            </p>
+          </div>
         `
       });
+
     } catch (emailErr) {
       console.error("❌ EMAIL ERROR:", emailErr.response?.body || emailErr);
       return res.status(500).json({ error: "Erreur envoi email" });
@@ -208,10 +208,11 @@ app.get("/verify/:token", async (req, res) => {
 
     await user.save();
 
-    res.redirect(`${BASE_URL}/success.html`);
+    return res.redirect(`${BASE_URL}/success.html`);
 
-  } catch {
-    res.redirect(`${BASE_URL}/error.html`);
+  } catch (err) {
+    console.error("VERIFY ERROR:", err);
+    return res.redirect(`${BASE_URL}/error.html`);
   }
 });
 
