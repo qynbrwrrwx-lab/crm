@@ -45,15 +45,8 @@ sgMail.setApiKey(SENDGRID_API_KEY);
 console.log("✅ SendGrid prêt");
 
 // ================= RATE LIMIT =================
-app.use("/login", rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 5
-}));
-
-app.use("/register", rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 10
-}));
+app.use("/login", rateLimit({ windowMs: 10 * 60 * 1000, max: 5 }));
+app.use("/register", rateLimit({ windowMs: 10 * 60 * 1000, max: 10 }));
 
 // ================= MONGODB =================
 mongoose.connect(MONGO_URI)
@@ -68,8 +61,13 @@ const User = mongoose.model("User", new mongoose.Schema({
   email: { type: String, unique: true },
   password: String,
   isVerified: { type: Boolean, default: false },
+
   verifyToken: String,
-  verifyExpires: Date
+  verifyExpires: Date,
+
+  // 🔐 RESET PASSWORD
+  resetToken: String,
+  resetExpires: Date
 }));
 
 const Client = mongoose.model("Client", new mongoose.Schema({
@@ -85,7 +83,6 @@ const Client = mongoose.model("Client", new mongoose.Schema({
 // ================= AUTH =================
 function auth(req, res, next) {
   const authHeader = req.headers.authorization;
-
   if (!authHeader) return res.status(401).json({ error: "Token manquant" });
 
   try {
@@ -103,19 +100,7 @@ app.post("/register", async (req, res) => {
   try {
     let { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: "Champs requis" });
-    }
-
     email = email.toLowerCase().trim();
-
-    if (!email.includes("@")) {
-      return res.status(400).json({ error: "Email invalide" });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ error: "Mot de passe trop court" });
-    }
 
     const existing = await User.findOne({ email });
 
@@ -140,80 +125,139 @@ app.post("/register", async (req, res) => {
 
     const verifyLink = `${BASE_URL}/verify/${token}`;
 
-    // 🔥 EMAIL SENDGRID
-    try {
-      await sgMail.send({
-        to: email,
-        from: EMAIL_FROM,
-        subject: "Confirme ton compte",
-        html: `
-          <div style="font-family:Arial, sans-serif; text-align:center; padding:30px;">
-            <h2>Bienvenue 👋</h2>
-            <p>Confirme ton compte pour commencer :</p>
-
-            <a href="${verifyLink}" 
-              style="
-                display:inline-block;
-                padding:12px 25px;
-                background:#4CAF50;
-                color:white;
-                text-decoration:none;
-                border-radius:8px;
-                font-weight:bold;
-              ">
-              Activer mon compte
-            </a>
-
-            <p style="margin-top:20px; font-size:12px; color:#888;">
-              Si le bouton ne fonctionne pas :
-            </p>
-
-            <p style="font-size:12px;">
-              <a href="${verifyLink}">
-                ${verifyLink}
-              </a>
-            </p>
-          </div>
-        `
-      });
-
-    } catch (emailErr) {
-      console.error("❌ EMAIL ERROR:", emailErr.response?.body || emailErr);
-      return res.status(500).json({ error: "Erreur envoi email" });
-    }
+    await sgMail.send({
+      to: email,
+      from: EMAIL_FROM,
+      subject: "🚀 Active ton compte",
+      html: `<a href="${verifyLink}">Activer mon compte</a>`
+    });
 
     res.json({ success: true });
 
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+// ================= RESEND EMAIL =================
+app.post("/resend-verification", async (req, res) => {
+  try {
+    let { email } = req.body;
+
+    email = email.toLowerCase().trim();
+
+    const user = await User.findOne({ email });
+
+    if (!user || user.isVerified) {
+      return res.json({ success: true });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    user.verifyToken = token;
+    user.verifyExpires = Date.now() + 3600000;
+    await user.save();
+
+    const verifyLink = `${BASE_URL}/verify/${token}`;
+
+    await sgMail.send({
+      to: email,
+      from: EMAIL_FROM,
+      subject: "📩 Nouveau lien de validation",
+      html: `<a href="${verifyLink}">Valider mon compte</a>`
+    });
+
+    res.json({ success: true });
+
+  } catch (err) {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
 // ================= VERIFY =================
 app.get("/verify/:token", async (req, res) => {
+  const user = await User.findOne({
+    verifyToken: req.params.token,
+    verifyExpires: { $gt: Date.now() }
+  });
+
+  if (!user) {
+    return res.redirect(`${BASE_URL}/error.html`);
+  }
+
+  user.isVerified = true;
+  user.verifyToken = null;
+  user.verifyExpires = null;
+
+  await user.save();
+
+  res.redirect(`${BASE_URL}/success.html`);
+});
+
+// ================= REQUEST RESET =================
+app.post("/request-reset", async (req, res) => {
+  try {
+    let { email } = req.body;
+
+    email = email.toLowerCase().trim();
+
+    const user = await User.findOne({ email });
+
+    if (!user) return res.json({ success: true });
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    user.resetToken = token;
+    user.resetExpires = Date.now() + 3600000;
+    await user.save();
+
+    const link = `${BASE_URL}/reset-password/${token}`;
+
+    await sgMail.send({
+      to: email,
+      from: EMAIL_FROM,
+      subject: "🔐 Reset password",
+      html: `<a href="${link}">Reset ton mot de passe</a>`
+    });
+
+    res.json({ success: true });
+
+  } catch {
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+// ================= RESET PASSWORD =================
+app.post("/reset-password/:token", async (req, res) => {
   try {
     const user = await User.findOne({
-      verifyToken: req.params.token,
-      verifyExpires: { $gt: Date.now() }
+      resetToken: req.params.token,
+      resetExpires: { $gt: Date.now() }
     });
 
     if (!user) {
-      return res.redirect(`${BASE_URL}/error.html`);
+      return res.status(400).json({ error: "Lien invalide" });
     }
 
-    user.isVerified = true;
-    user.verifyToken = null;
-    user.verifyExpires = null;
+    const hash = await bcrypt.hash(req.body.password, 10);
+
+    user.password = hash;
+    user.resetToken = null;
+    user.resetExpires = null;
 
     await user.save();
 
-    return res.redirect(`${BASE_URL}/success.html`);
+    res.json({ success: true });
 
-  } catch (err) {
-    console.error("VERIFY ERROR:", err);
-    return res.redirect(`${BASE_URL}/error.html`);
+  } catch {
+    res.status(500).json({ error: "Erreur serveur" });
   }
+});
+
+// 🔥 PAGE RESET
+app.get("/reset-password/:token", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/reset.html"));
 });
 
 // ================= LOGIN =================
@@ -221,20 +265,12 @@ app.post("/login", async (req, res) => {
   try {
     let { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: "Champs requis" });
-    }
-
     email = email.toLowerCase().trim();
 
     const user = await User.findOne({ email });
 
-    if (!user) {
-      return res.status(400).json({ error: "Utilisateur introuvable" });
-    }
-
-    if (!user.isVerified) {
-      return res.status(403).json({ error: "Compte non validé" });
+    if (!user || !user.isVerified) {
+      return res.status(400).json({ error: "Compte invalide" });
     }
 
     const valid = await bcrypt.compare(password, user.password);
@@ -243,71 +279,27 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Mot de passe incorrect" });
     }
 
-    const token = jwt.sign(
-      { id: user._id },
-      JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
 
     res.json({ success: true, token });
 
-  } catch (err) {
-    console.error("LOGIN ERROR:", err);
+  } catch {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
 // ================= CLIENTS =================
 app.get("/clients", auth, async (req, res) => {
-  const clients = await Client.find({ userId: req.userId })
-    .select("-__v")
-    .sort({ createdAt: -1 });
-
+  const clients = await Client.find({ userId: req.userId });
   res.json(clients);
-});
-
-app.post("/clients", auth, async (req, res) => {
-  const client = await Client.create({
-    ...req.body,
-    userId: req.userId
-  });
-
-  res.json(client);
-});
-
-app.delete("/clients/:id", auth, async (req, res) => {
-  await Client.findOneAndDelete({
-    _id: req.params.id,
-    userId: req.userId
-  });
-
-  res.json({ success: true });
-});
-
-app.put("/clients/favorite/:id", auth, async (req, res) => {
-  const client = await Client.findOne({
-    _id: req.params.id,
-    userId: req.userId
-  });
-
-  if (!client) return res.status(404).json({ error: "Introuvable" });
-
-  client.favorite = !client.favorite;
-  await client.save();
-
-  res.json(client);
 });
 
 // ================= FRONT =================
 app.use(express.static(path.join(__dirname, "../frontend")));
-
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
 // ================= SERVER =================
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("🚀 CRM PRO lancé sur port", PORT);
-});
+app.listen(PORT, () => console.log("🚀 Serveur lancé"));
