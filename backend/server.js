@@ -180,7 +180,7 @@ app.get("/verify/:token", async (req, res) => {
   });
 
   if (!user) {
-    return res.send("Lien invalide ou expiré ❌");
+    return res.redirect(`${BASE_URL}/error.html`);
   }
 
   user.isVerified = true;
@@ -189,7 +189,8 @@ app.get("/verify/:token", async (req, res) => {
 
   await user.save();
 
-  res.send("Compte validé ✅");
+  // ✅ REDIRECTION FRONT
+  res.redirect(`${BASE_URL}/success.html`);
 });
 
 // ================= LOGIN =================
