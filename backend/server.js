@@ -43,8 +43,8 @@ if (!JWT_SECRET || !MONGO_URI || !EMAIL_HOST || !EMAIL_USER || !EMAIL_PASS || !B
 
 // ================= SMTP =================
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT),
+  host: "smtp.amen.fr",
+  port: 465,
   secure: true,
   auth: {
     user: process.env.EMAIL_USER,
