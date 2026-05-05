@@ -12,7 +12,7 @@ const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const path = require("path");
 const crypto = require("crypto");
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
 
 const app = express();
 
@@ -30,33 +30,18 @@ app.use(
 const {
   JWT_SECRET,
   MONGO_URI,
-  EMAIL_HOST,
-  EMAIL_PORT,
-  EMAIL_USER,
-  EMAIL_PASS,
+  SENDGRID_API_KEY,
+  EMAIL_FROM,
   BASE_URL
 } = process.env;
 
-if (!JWT_SECRET || !MONGO_URI || !EMAIL_HOST || !EMAIL_USER || !EMAIL_PASS || !BASE_URL) {
+if (!JWT_SECRET || !MONGO_URI || !SENDGRID_API_KEY || !EMAIL_FROM || !BASE_URL) {
   throw new Error("❌ Variables ENV manquantes !");
 }
 
-// ================= SMTP =================
-const transporter = nodemailer.createTransport({
-  host: "smtp.amen.fr",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-
-// Test SMTP
-transporter.verify((err) => {
-  if (err) console.error("❌ SMTP ERROR:", err);
-  else console.log("✅ SMTP prêt");
-});
+// ================= SENDGRID =================
+sgMail.setApiKey(SENDGRID_API_KEY);
+console.log("✅ SendGrid prêt");
 
 // ================= RATE LIMIT =================
 const loginLimiter = rateLimit({
@@ -157,20 +142,25 @@ app.post("/register", async (req, res) => {
       email,
       password: hash,
       verifyToken: token,
-      verifyExpires: Date.now() + 3600000, // 1h
+      verifyExpires: Date.now() + 3600000,
       isVerified: false
     });
 
     const verifyLink = `${BASE_URL}/verify/${token}`;
 
-    await transporter.sendMail({
-      from: `"My Prospect" <${EMAIL_USER}>`,
+    // 🔥 SENDGRID EMAIL
+    await sgMail.send({
       to: email,
+      from: EMAIL_FROM,
       subject: "Confirme ton compte",
       html: `
-        <h2>Bienvenue 👋</h2>
-        <p>Confirme ton compte :</p>
-        <a href="${verifyLink}">Valider mon compte</a>
+        <div style="font-family:sans-serif">
+          <h2>Bienvenue 👋</h2>
+          <p>Confirme ton compte :</p>
+          <a href="${verifyLink}" style="padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">
+            Activer mon compte
+          </a>
+        </div>
       `
     });
 
