@@ -65,7 +65,6 @@ const User = mongoose.model("User", new mongoose.Schema({
   verifyToken: String,
   verifyExpires: Date,
 
-  // 🔐 RESET PASSWORD
   resetToken: String,
   resetExpires: Date
 }));
@@ -129,13 +128,32 @@ app.post("/register", async (req, res) => {
       to: email,
       from: EMAIL_FROM,
       subject: "🚀 Active ton compte",
-      html: `<a href="${verifyLink}">Activer mon compte</a>`
+      html: `
+        <div style="font-family:Arial; text-align:center; padding:30px;">
+          <h2>Bienvenue 👋</h2>
+          <p>Active ton compte :</p>
+
+          <table align="center">
+            <tr>
+              <td style="background:#28a745; padding:12px 20px; border-radius:6px;">
+                <a href="${verifyLink}" style="color:white; text-decoration:none;">
+                  Activer mon compte
+                </a>
+              </td>
+            </tr>
+          </table>
+
+          <p style="margin-top:20px;font-size:12px;">
+            <a href="${verifyLink}">${verifyLink}</a>
+          </p>
+        </div>
+      `
     });
 
     res.json({ success: true });
 
   } catch (err) {
-    console.error(err);
+    console.error("REGISTER ERROR:", err);
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
@@ -144,7 +162,6 @@ app.post("/register", async (req, res) => {
 app.post("/resend-verification", async (req, res) => {
   try {
     let { email } = req.body;
-
     email = email.toLowerCase().trim();
 
     const user = await User.findOne({ email });
@@ -159,47 +176,26 @@ app.post("/resend-verification", async (req, res) => {
     user.verifyExpires = Date.now() + 3600000;
     await user.save();
 
-    const verifyLink = `${BASE_URL}/verify/${token}`;
+    const link = `${BASE_URL}/verify/${token}`;
 
     await sgMail.send({
       to: email,
       from: EMAIL_FROM,
-      subject: "📩 Nouveau lien de validation",
-      html: `<a href="${verifyLink}">Valider mon compte</a>`
+      subject: "📩 Nouveau lien",
+      html: `<a href="${link}">Valider mon compte</a>`
     });
 
     res.json({ success: true });
 
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
-// ================= VERIFY =================
-app.get("/verify/:token", async (req, res) => {
-  const user = await User.findOne({
-    verifyToken: req.params.token,
-    verifyExpires: { $gt: Date.now() }
-  });
-
-  if (!user) {
-    return res.redirect(`${BASE_URL}/error.html`);
-  }
-
-  user.isVerified = true;
-  user.verifyToken = null;
-  user.verifyExpires = null;
-
-  await user.save();
-
-  res.redirect(`${BASE_URL}/success.html`);
-});
-
-// ================= REQUEST RESET =================
+// ================= REQUEST RESET PASSWORD =================
 app.post("/request-reset", async (req, res) => {
   try {
     let { email } = req.body;
-
     email = email.toLowerCase().trim();
 
     const user = await User.findOne({ email });
@@ -217,7 +213,7 @@ app.post("/request-reset", async (req, res) => {
     await sgMail.send({
       to: email,
       from: EMAIL_FROM,
-      subject: "🔐 Reset password",
+      subject: "🔐 Réinitialiser ton mot de passe",
       html: `<a href="${link}">Reset ton mot de passe</a>`
     });
 
@@ -255,9 +251,29 @@ app.post("/reset-password/:token", async (req, res) => {
   }
 });
 
-// 🔥 PAGE RESET
+// ================= PAGE RESET =================
 app.get("/reset-password/:token", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/reset.html"));
+});
+
+// ================= VERIFY =================
+app.get("/verify/:token", async (req, res) => {
+  const user = await User.findOne({
+    verifyToken: req.params.token,
+    verifyExpires: { $gt: Date.now() }
+  });
+
+  if (!user) {
+    return res.redirect(`${BASE_URL}/error.html`);
+  }
+
+  user.isVerified = true;
+  user.verifyToken = null;
+  user.verifyExpires = null;
+
+  await user.save();
+
+  res.redirect(`${BASE_URL}/success.html`);
 });
 
 // ================= LOGIN =================
@@ -286,12 +302,6 @@ app.post("/login", async (req, res) => {
   } catch {
     res.status(500).json({ error: "Erreur serveur" });
   }
-});
-
-// ================= CLIENTS =================
-app.get("/clients", auth, async (req, res) => {
-  const clients = await Client.find({ userId: req.userId });
-  res.json(clients);
 });
 
 // ================= FRONT =================
