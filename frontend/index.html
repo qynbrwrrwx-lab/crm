@@ -10,72 +10,81 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-/* ===== MAP ===== */
-#map {
-  height: 400px;
-  width: 100%;
-  border-radius: 10px;
-  margin-top: 10px;
-}
 
-/* ===== AUTH MODERNE ===== */
+/* ===== AUTH FUTURISTE ===== */
 .auth-container {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
+  background: radial-gradient(circle at top, #020617, #020617);
 }
 
-.card {
-  background: white;
+.auth-card {
+  width: 360px;
   padding: 35px;
-  border-radius: 14px;
-  width: 340px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  border-radius: 16px;
+
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(59,130,246,0.2);
+  box-shadow: 0 0 30px rgba(59,130,246,0.2);
+
   text-align: center;
 }
 
-.card h2 {
-  margin-bottom: 10px;
+/* glow titre */
+.auth-card h2 {
+  margin-bottom: 5px;
+  color: #3b82f6;
 }
 
-.card input {
+.auth-card p {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* inputs */
+.auth-card input {
   width: 100%;
   padding: 12px;
-  margin-top: 10px;
+  margin-top: 12px;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  outline: none;
+  border: 1px solid transparent;
+  background: #020617;
+  color: white;
 }
 
-.card input:focus {
-  border-color: #3b82f6;
+.auth-card input:focus {
+  border: 1px solid #3b82f6;
+  box-shadow: 0 0 10px rgba(59,130,246,0.5);
 }
 
-/* boutons principaux */
+/* boutons */
 .primary-btn {
   margin-top: 15px;
   width: 100%;
   padding: 12px;
-  border: none;
   border-radius: 8px;
-  background: #3b82f6;
+  border: none;
+  background: linear-gradient(45deg, #3b82f6, #6366f1);
   color: white;
   cursor: pointer;
 }
 
 .primary-btn:hover {
-  background: #2563eb;
+  box-shadow: 0 0 20px rgba(59,130,246,0.6);
 }
 
 .secondary-btn {
   margin-top: 10px;
   width: 100%;
   padding: 10px;
-  border: none;
   border-radius: 8px;
-  background: #f1f5f9;
+  border: none;
+  background: #020617;
+  color: #cbd5f5;
   cursor: pointer;
 }
 
@@ -84,20 +93,21 @@
   margin-top: 15px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .auth-links button {
   background: none;
   border: none;
   color: #3b82f6;
-  cursor: pointer;
   font-size: 13px;
+  cursor: pointer;
 }
 
 .auth-links button:hover {
   text-decoration: underline;
 }
+
 </style>
 </head>
 
@@ -111,10 +121,10 @@
 
 <!-- ================= AUTH ================= -->
 <div id="auth" class="auth-container">
-  <div class="card">
+  <div class="auth-card">
 
-    <h2>My Prospect</h2>
-    <p style="font-size:14px;color:#64748b;">Connecte-toi à ton CRM</p>
+    <h2>🚀 My Prospect</h2>
+    <p>Ton CRM nouvelle génération</p>
 
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Mot de passe">
@@ -157,14 +167,34 @@
     <main class="main">
       <div class="container">
 
+        <!-- DASHBOARD FUTURISTE -->
         <div id="dashboard" class="section active">
+
+          <div class="kpi-grid">
+            <div class="kpi">
+              <h3>Total clients</h3>
+              <span id="total">0</span>
+            </div>
+
+            <div class="kpi">
+              <h3>Favoris</h3>
+              <span id="favCount">0</span>
+            </div>
+
+            <div class="kpi">
+              <h3>Nouveaux</h3>
+              <span id="newCount">0</span>
+            </div>
+          </div>
+
           <div class="card">
-            <h2>📊 Dashboard</h2>
-            <p>Total clients : <span id="total">0</span></p>
+            <h2>📊 Évolution</h2>
             <canvas id="chart"></canvas>
           </div>
+
         </div>
 
+        <!-- CLIENTS -->
         <div id="clients" class="section">
           <div class="card">
             <input id="search" placeholder="🔎 Rechercher..." oninput="filterClients()">
@@ -186,6 +216,7 @@
           </div>
         </div>
 
+        <!-- AUTRES SECTIONS IDENTIQUES -->
         <div id="favorites" class="section">
           <div class="card">
             <h2>⭐ Favoris</h2>
@@ -223,7 +254,6 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="app.js"></script>
 
-<!-- ================= AUTH JS ================= -->
 <script>
 
 // 📩 RESEND EMAIL
@@ -231,7 +261,7 @@ async function resendEmail() {
   const email = document.getElementById("email").value;
   if (!email) return showToast("Entre ton email 📧");
 
-  const res = await fetch("/resend-verification", {
+  await fetch("/resend-verification", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({ email })

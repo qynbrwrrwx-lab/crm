@@ -1,10 +1,10 @@
+// ================= GLOBAL =================
 let map;
 let markers = [];
 let chart;
 let analyticsChart;
 
 // ================= TOKEN =================
-
 function getToken() {
   return localStorage.getItem("token");
 }
@@ -17,8 +17,7 @@ function removeToken() {
   localStorage.removeItem("token");
 }
 
-// ================= API WRAPPER =================
-
+// ================= API =================
 async function apiFetch(url, options = {}) {
   const token = getToken();
 
@@ -30,41 +29,37 @@ async function apiFetch(url, options = {}) {
     ...options
   };
 
-  try {
-    const res = await fetch(url, config);
+  const res = await fetch(url, config);
 
-    if (res.status === 401) {
-      logout();
-      throw new Error("Session expirée");
-    }
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || "Erreur API");
-    }
-
-    return await res.json();
-
-  } catch (err) {
-    console.error("API ERROR:", err);
-    throw err;
+  if (res.status === 401) {
+    logout();
+    throw new Error("Session expirée");
   }
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Erreur API");
+  }
+
+  return res.json();
 }
 
-// ================= AUTO LOGIN =================
-
+// ================= INIT =================
 window.onload = () => {
   if (getToken()) {
-    document.getElementById("auth").style.display = "none";
-    document.getElementById("app").style.display = "block";
-
-    initMap();
-    loadClients();
+    showApp();
   }
 };
 
-// ================= AUTH =================
+function showApp() {
+  document.getElementById("auth").style.display = "none";
+  document.getElementById("app").style.display = "block";
 
+  initMap();
+  loadClients();
+}
+
+// ================= AUTH =================
 async function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -72,15 +67,14 @@ async function register() {
   showLoader();
 
   try {
-    const data = await apiFetch("/register", {
+    await apiFetch("/register", {
       method: "POST",
       body: JSON.stringify({ email, password })
     });
 
-    showToast("Compte créé ✅");
-
+    showToast("📩 Vérifie ton email !");
   } catch (err) {
-    alert(err.message);
+    showToast(err.message);
   }
 
   hideLoader();
@@ -92,8 +86,6 @@ async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  console.log("LOGIN:", email);
-
   try {
     const data = await apiFetch("/login", {
       method: "POST",
@@ -101,24 +93,17 @@ async function login() {
     });
 
     setToken(data.token);
+    showApp();
 
-    document.getElementById("auth").style.display = "none";
-    document.getElementById("app").style.display = "block";
-
-    initMap();
-    loadClients();
-
-    showToast("Connexion réussie 🚀");
-
+    showToast("Bienvenue 🚀");
   } catch (err) {
-    alert(err.message);
+    showToast(err.message);
   }
 
   hideLoader();
 }
 
 // ================= SIDEBAR =================
-
 function showSection(sectionId, event) {
   document.querySelectorAll(".section").forEach(el => el.classList.remove("active"));
   document.querySelectorAll(".sidebar button").forEach(btn => btn.classList.remove("active"));
@@ -136,13 +121,12 @@ function showSection(sectionId, event) {
 }
 
 // ================= MAP =================
-
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png"
+  iconRetinaUrl: "https://unpkg.com/leaflet/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet/dist/images/marker-shadow.png"
 });
 
 function initMap() {
@@ -150,13 +134,10 @@ function initMap() {
 
   map = L.map("map").setView([48.8566, 2.3522], 5);
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap"
-  }).addTo(map);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
 }
 
-// ================= DASHBOARD CHART =================
-
+// ================= DASHBOARD =================
 function updateChart(clients) {
   const ctx = document.getElementById("chart");
   if (!ctx) return;
@@ -186,130 +167,109 @@ function updateChart(clients) {
   });
 }
 
+// ================= KPI =================
+function updateKPI(clients) {
+  document.getElementById("total").innerText = clients.length;
+
+  const fav = clients.filter(c => c.favorite).length;
+  document.getElementById("favCount").innerText = fav;
+
+  const recent = clients.slice(0, 5).length;
+  document.getElementById("newCount").innerText = recent;
+}
+
 // ================= ANALYTICS =================
-
 async function loadAnalytics() {
-  try {
-    const clients = await apiFetch("/clients");
+  const clients = await apiFetch("/clients");
 
-    const ctx = document.getElementById("analyticsChart");
-    const favorites = clients.filter(c => c.favorite).length;
+  const ctx = document.getElementById("analyticsChart");
+  const favorites = clients.filter(c => c.favorite).length;
 
-    if (analyticsChart) analyticsChart.destroy();
+  if (analyticsChart) analyticsChart.destroy();
 
-    analyticsChart = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: ["Favoris", "Autres"],
-        datasets: [{
-          data: [favorites, clients.length - favorites]
-        }]
-      }
-    });
-
-  } catch (err) {
-    console.error(err);
-  }
+  analyticsChart = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Favoris", "Autres"],
+      datasets: [{
+        data: [favorites, clients.length - favorites]
+      }]
+    }
+  });
 }
 
 // ================= FAVORITES =================
-
 async function loadFavorites() {
-  try {
-    const clients = await apiFetch("/clients?favorite=true");
+  const clients = await apiFetch("/clients?favorite=true");
 
-    const container = document.getElementById("favoritesList");
-    container.innerHTML = "";
+  const container = document.getElementById("favoritesList");
+  container.innerHTML = "";
 
-    clients.forEach(c => {
-      const div = document.createElement("div");
-      div.className = "client";
-
-      div.innerHTML = `
+  clients.forEach(c => {
+    container.innerHTML += `
+      <div class="client">
         <strong>${c.name}</strong><br>
         ${c.phone}
-      `;
-
-      container.appendChild(div);
-    });
-
-  } catch (err) {
-    console.error(err);
-  }
+      </div>
+    `;
+  });
 }
 
 // ================= SETTINGS =================
-
 async function loadUserInfo() {
-  try {
-    const clients = await apiFetch("/clients");
-    document.getElementById("userStats").innerText = clients.length;
-  } catch (err) {
-    console.error(err);
-  }
+  const clients = await apiFetch("/clients");
+  document.getElementById("userStats").innerText = clients.length;
 }
 
 // ================= RENDER =================
-
 function renderClients(clients) {
   const list = document.getElementById("list");
   list.innerHTML = "";
 
   clients.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "client";
-
-    div.innerHTML = `
-      <div class="client-info">
-        <strong>${c.name}</strong> ${c.favorite ? "⭐" : ""}<br>
-        ${c.phone}<br>
-        ${c.address || ""}
-      </div>
-      <div>
-        <button onclick="toggleFavorite('${c._id}')">⭐</button>
-        <button class="delete" onclick="deleteClient('${c._id}')">❌</button>
+    list.innerHTML += `
+      <div class="client">
+        <div>
+          <strong>${c.name}</strong> ${c.favorite ? "⭐" : ""}<br>
+          ${c.phone}<br>
+          ${c.address || ""}
+        </div>
+        <div>
+          <button onclick="toggleFavorite('${c._id}')">⭐</button>
+          <button class="delete" onclick="deleteClient('${c._id}')">❌</button>
+        </div>
       </div>
     `;
-
-    list.appendChild(div);
   });
 }
 
 // ================= LOAD CLIENTS =================
-
 async function loadClients(query = "") {
   let url = "/clients";
   if (query) url += `?${query}`;
 
-  try {
-    const clients = await apiFetch(url);
+  const clients = await apiFetch(url);
 
-    document.getElementById("total").innerText = clients.length;
+  updateKPI(clients);
+  renderClients(clients);
+  updateChart(clients);
 
-    renderClients(clients);
-    updateChart(clients);
+  if (map) {
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
 
-    if (map) {
-      markers.forEach(m => map.removeLayer(m));
-      markers = [];
-
-      clients.forEach(c => {
-        if (c.lat && c.lng) {
-          const marker = L.marker([c.lat, c.lng])
-            .addTo(map)
-            .bindPopup(`<b>${c.name}</b>`);
-          markers.push(marker);
-        }
-      });
-    }
-
-  } catch (err) {
-    alert(err.message);
+    clients.forEach(c => {
+      if (c.lat && c.lng) {
+        const marker = L.marker([c.lat, c.lng])
+          .addTo(map)
+          .bindPopup(`<b>${c.name}</b>`);
+        markers.push(marker);
+      }
+    });
   }
 }
 
 // ================= ACTIONS =================
-
 function filterClients() {
   const query = document.getElementById("search").value;
   loadClients(query ? `search=${encodeURIComponent(query)}` : "");
@@ -331,50 +291,45 @@ async function addClient() {
   const phone = document.getElementById("phone").value;
   const address = document.getElementById("address").value;
 
-  if (!address) return alert("Adresse obligatoire ❗");
+  if (!address) return showToast("Adresse obligatoire ❗");
 
   showLoader();
 
-  try {
-    const geoRes = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
-    );
-    const geoData = await geoRes.json();
+  const geoRes = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
+  );
+  const geoData = await geoRes.json();
 
-    if (!geoData.length) {
-      alert("Adresse introuvable ❌");
-      return;
-    }
-
-    const lat = parseFloat(geoData[0].lat);
-    const lng = parseFloat(geoData[0].lon);
-
-    await apiFetch("/clients", {
-      method: "POST",
-      body: JSON.stringify({ name, phone, address, lat, lng })
-    });
-
-    document.getElementById("name").value = "";
-    document.getElementById("phone").value = "";
-    document.getElementById("address").value = "";
-
-    loadClients();
-    showToast("Client ajouté ✅");
-
-  } catch (err) {
-    alert(err.message);
+  if (!geoData.length) {
+    hideLoader();
+    return showToast("Adresse introuvable ❌");
   }
 
+  await apiFetch("/clients", {
+    method: "POST",
+    body: JSON.stringify({
+      name,
+      phone,
+      address,
+      lat: parseFloat(geoData[0].lat),
+      lng: parseFloat(geoData[0].lon)
+    })
+  });
+
+  document.getElementById("name").value = "";
+  document.getElementById("phone").value = "";
+  document.getElementById("address").value = "";
+
+  loadClients();
   hideLoader();
+  showToast("Client ajouté ✅");
 }
 
 // ================= UI =================
-
 function showToast(msg) {
   const toast = document.getElementById("toast");
   toast.innerText = msg;
   toast.classList.add("show");
-
   setTimeout(() => toast.classList.remove("show"), 2500);
 }
 
@@ -387,7 +342,6 @@ function hideLoader() {
 }
 
 // ================= LOGOUT =================
-
 function logout() {
   removeToken();
 
