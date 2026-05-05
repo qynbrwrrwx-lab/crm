@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Compte activé</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      padding: 45px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+      max-width: 400px;
+    }
+
+    .logo {
+      font-size: 18px;
+      opacity: 0.8;
+      margin-bottom: 10px;
+    }
+
+    .check {
+      font-size: 65px;
+      animation: pop 0.5s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    h1 {
+      margin: 20px 0 10px;
+      font-size: 26px;
+    }
+
+    p {
+      opacity: 0.85;
+      font-size: 15px;
+    }
+
+    .btn {
+      margin-top: 25px;
+      display: inline-block;
+      padding: 14px 28px;
+      background: white;
+      color: #2563eb;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .loader {
+      margin-top: 15px;
+      font-size: 13px;
+      opacity: 0.7;
+    }
+
+    .small {
+      margin-top: 20px;
+      font-size: 11px;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+
+    <div class="logo">🚀 My Prospect</div>
+
+    <div class="check">✅</div>
+
+    <h1>Compte activé</h1>
+
+    <p>
+      Ton compte est maintenant prêt.<br>
+      Tu peux commencer à gérer tes prospects.
+    </p>
+
+    <a href="/" class="btn">Accéder au CRM</a>
+
+    <div class="loader">Redirection automatique...</div>
+
+    <div class="small">Connexion en cours...</div>
+
+  </div>
+
+  <script>
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 3500);
+  </script>
+
+</body>
+</html>

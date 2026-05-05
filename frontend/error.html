@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Erreur de validation</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      padding: 45px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+      max-width: 400px;
+    }
+
+    .logo {
+      font-size: 18px;
+      opacity: 0.8;
+      margin-bottom: 10px;
+    }
+
+    .icon {
+      font-size: 60px;
+      animation: shake 0.4s ease;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+
+    h1 {
+      margin: 20px 0 10px;
+      font-size: 26px;
+    }
+
+    p {
+      opacity: 0.85;
+      font-size: 15px;
+    }
+
+    .btn {
+      margin-top: 25px;
+      display: inline-block;
+      padding: 14px 28px;
+      background: white;
+      color: #dc2626;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .small {
+      margin-top: 20px;
+      font-size: 12px;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+
+    <div class="logo">🚀 My Prospect</div>
+
+    <div class="icon">❌</div>
+
+    <h1>Lien invalide</h1>
+
+    <p>
+      Ce lien est expiré ou incorrect.<br>
+      Tu peux refaire une inscription ou demander un nouvel email.
+    </p>
+
+    <a href="/" class="btn">Retour à l'application</a>
+
+    <div class="small">Besoin d’aide ? Contact support</div>
+
+  </div>
+
+</body>
+</html>

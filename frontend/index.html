@@ -6,11 +6,7 @@
 <title>My Prospect</title>
 
 <link rel="stylesheet" href="style.css">
-
-<!-- LEAFLET -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-
-<!-- CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -20,43 +16,70 @@
   border-radius: 10px;
   margin-top: 10px;
 }
+
+.auth-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.link-btn:hover {
+  text-decoration: underline;
+}
 </style>
 </head>
 
 <body>
 
-<!-- LOADER -->
 <div id="loader" class="loader" style="display:none;">
   <div class="spinner"></div>
 </div>
 
-<!-- TOAST -->
 <div id="toast" class="toast"></div>
 
-<!-- AUTH -->
+<!-- ================= AUTH ================= -->
 <div id="auth" class="auth-container">
   <div class="card">
     <h2>Connexion</h2>
+
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Mot de passe">
-    <button onclick="login()">Se connecter</button>
-    <button onclick="register()">Créer un compte</button>
+
+    <div class="auth-actions">
+      <button onclick="login()">Se connecter</button>
+      <button onclick="register()">Créer un compte</button>
+
+      <!-- 🔥 RESEND -->
+      <button onclick="resendEmail()" class="link-btn">
+        📩 Renvoyer l'email de validation
+      </button>
+
+      <!-- 🔐 RESET -->
+      <button onclick="requestReset()" class="link-btn">
+        🔐 Mot de passe oublié
+      </button>
+    </div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ================= APP ================= -->
 <div id="app" style="display:none;">
-
   <div class="app-layout">
 
-    <!-- SIDEBAR -->
     <aside class="sidebar">
-
       <div class="logo">
         <img src="./logo.png" class="logo-big" alt="logo">
       </div>
 
-      <!-- 🔥 NAVIGATION SAAS -->
       <nav>
         <button onclick="showSection('dashboard', event)" class="active">📊 Dashboard</button>
         <button onclick="showSection('clients', event)">👥 Clients</button>
@@ -67,15 +90,11 @@
       </nav>
 
       <button onclick="logout()" class="logout">🚪 Déconnexion</button>
-
     </aside>
 
-    <!-- MAIN -->
     <main class="main">
-
       <div class="container">
 
-        <!-- ================= DASHBOARD ================= -->
         <div id="dashboard" class="section active">
           <div class="card">
             <h2>📊 Dashboard</h2>
@@ -84,17 +103,12 @@
           </div>
         </div>
 
-        <!-- ================= CLIENTS ================= -->
         <div id="clients" class="section">
-
-          <!-- SEARCH -->
           <div class="card">
-            <input id="search" placeholder="🔎 Rechercher un client..." oninput="filterClients()">
+            <input id="search" placeholder="🔎 Rechercher..." oninput="filterClients()">
           </div>
 
           <div class="grid">
-
-            <!-- ADD -->
             <div class="card">
               <h2>Ajouter un client</h2>
               <input id="name" placeholder="Nom">
@@ -103,76 +117,100 @@
               <button onclick="addClient()">Ajouter</button>
             </div>
 
-            <!-- LIST -->
             <div class="card">
               <h2>Liste clients</h2>
               <div id="list"></div>
             </div>
-
           </div>
-
         </div>
 
-        <!-- ================= FAVORITES ================= -->
         <div id="favorites" class="section">
           <div class="card">
-            <h2>⭐ Clients favoris</h2>
+            <h2>⭐ Favoris</h2>
             <div id="favoritesList"></div>
           </div>
         </div>
 
-        <!-- ================= ANALYTICS ================= -->
         <div id="analytics" class="section">
           <div class="card">
-            <h2>📈 Analyse des clients</h2>
+            <h2>📈 Analytics</h2>
             <canvas id="analyticsChart"></canvas>
           </div>
         </div>
 
-        <!-- ================= MAP ================= -->
         <div id="mapSection" class="section">
           <div class="card">
-            <h2>🗺️ Carte des clients</h2>
+            <h2>🗺️ Carte</h2>
             <div id="map"></div>
           </div>
         </div>
 
-        <!-- ================= SETTINGS ================= -->
         <div id="settings" class="section">
           <div class="card">
             <h2>⚙️ Paramètres</h2>
-
-            <p><strong>Compte utilisateur</strong></p>
-
-            <div class="card" style="margin-top:10px;">
-              <p>Email : <span id="userEmail">...</span></p>
-              <p>Total clients : <span id="userStats">0</span></p>
-            </div>
-
-            <button onclick="logout()">🚪 Se déconnecter</button>
-
-            <hr style="margin:20px 0; border-color:#1e293b;">
-
-            <button style="background:#ef4444;">
-              🗑️ Supprimer mon compte (à venir)
-            </button>
-
+            <p>Total clients : <span id="userStats">0</span></p>
+            <button onclick="logout()">🚪 Déconnexion</button>
           </div>
         </div>
 
       </div>
-
     </main>
-
   </div>
-
 </div>
 
-<!-- LEAFLET -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-<!-- APP -->
 <script src="app.js"></script>
+
+<!-- ================= AUTH JS ================= -->
+<script>
+
+// 📩 RESEND EMAIL
+async function resendEmail() {
+  const email = document.getElementById("email").value;
+
+  if (!email) return showToast("Entre ton email 📧");
+
+  try {
+    const res = await fetch("/resend-verification", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ email })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      showToast("Email renvoyé 📩");
+    } else {
+      showToast(data.error || "Erreur");
+    }
+
+  } catch {
+    showToast("Erreur serveur ❌");
+  }
+}
+
+// 🔐 RESET PASSWORD
+async function requestReset() {
+  const email = document.getElementById("email").value;
+
+  if (!email) return showToast("Entre ton email 📧");
+
+  try {
+    await fetch("/request-reset", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ email })
+    });
+
+    showToast("Email de réinitialisation envoyé 🔐");
+
+  } catch {
+    showToast("Erreur serveur ❌");
+  }
+}
+
+</script>
 
 </body>
 </html>
