@@ -36,7 +36,8 @@ const {
 } = process.env;
 
 if (!JWT_SECRET || !MONGO_URI || !SENDGRID_API_KEY || !EMAIL_FROM || !BASE_URL) {
-  throw new Error("❌ Variables ENV manquantes !");
+  console.error("❌ Variables ENV manquantes !");
+  process.exit(1);
 }
 
 // ================= SENDGRID =================
@@ -44,38 +45,34 @@ sgMail.setApiKey(SENDGRID_API_KEY);
 console.log("✅ SendGrid prêt");
 
 // ================= RATE LIMIT =================
-const loginLimiter = rateLimit({
+app.use("/login", rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 5,
-  message: { error: "Trop de tentatives, réessayez plus tard" }
-});
+  max: 5
+}));
 
-const registerLimiter = rateLimit({
+app.use("/register", rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 10,
-  message: { error: "Trop de comptes créés, réessayez plus tard" }
-});
-
-app.use("/login", loginLimiter);
-app.use("/register", registerLimiter);
+  max: 10
+}));
 
 // ================= MONGODB =================
 mongoose.connect(MONGO_URI)
   .then(() => console.log("✅ MongoDB connecté"))
-  .catch(err => console.error("❌ MongoDB error:", err));
+  .catch(err => {
+    console.error("❌ MongoDB error:", err);
+    process.exit(1);
+  });
 
 // ================= MODELS =================
-const UserSchema = new mongoose.Schema({
+const User = mongoose.model("User", new mongoose.Schema({
   email: { type: String, unique: true },
   password: String,
   isVerified: { type: Boolean, default: false },
   verifyToken: String,
   verifyExpires: Date
-});
+}));
 
-const User = mongoose.model("User", UserSchema);
-
-const ClientSchema = new mongoose.Schema({
+const Client = mongoose.model("Client", new mongoose.Schema({
   userId: mongoose.Schema.Types.ObjectId,
   name: String,
   phone: String,
@@ -83,21 +80,16 @@ const ClientSchema = new mongoose.Schema({
   lat: Number,
   lng: Number,
   favorite: { type: Boolean, default: false }
-}, { timestamps: true });
-
-const Client = mongoose.model("Client", ClientSchema);
+}, { timestamps: true }));
 
 // ================= AUTH =================
 function auth(req, res, next) {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
-    return res.status(401).json({ error: "Token manquant" });
-  }
-
-  const token = authHeader.split(" ")[1];
+  if (!authHeader) return res.status(401).json({ error: "Token manquant" });
 
   try {
+    const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, JWT_SECRET);
     req.userId = decoded.id;
     next();
@@ -115,7 +107,7 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Champs requis" });
     }
 
-    email = email.toLowerCase();
+    email = email.toLowerCase().trim();
 
     if (!email.includes("@")) {
       return res.status(400).json({ error: "Email invalide" });
@@ -127,12 +119,12 @@ app.post("/register", async (req, res) => {
 
     const existing = await User.findOne({ email });
 
-    if (existing && !existing.isVerified) {
-      await User.deleteOne({ email });
-    }
-
     if (existing && existing.isVerified) {
       return res.status(400).json({ error: "Email déjà utilisé" });
+    }
+
+    if (existing && !existing.isVerified) {
+      await User.deleteOne({ email });
     }
 
     const hash = await bcrypt.hash(password, 10);
@@ -148,23 +140,49 @@ app.post("/register", async (req, res) => {
 
     const verifyLink = `${BASE_URL}/verify/${token}`;
 
-    // 🔥 SENDGRID EMAIL
-    await sgMail.send({
-      to: email,
-      from: EMAIL_FROM,
-      subject: "Confirme ton compte",
-      html: `
-        <div style="font-family:sans-serif">
-          <h2>Bienvenue 👋</h2>
-          <p>Confirme ton compte :</p>
-          <a href="${verifyLink}" style="padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">
-            Activer mon compte
-          </a>
-        </div>
-      `
-    });
+    // 🔥 EMAIL SENDGRID
+    try {
+      await sgMail.send({
+        to: email,
+        from: EMAIL_FROM,
+        subject: "Confirme ton compte",
+        html: `
+  <div style="font-family:Arial, sans-serif; text-align:center; padding:30px;">
+    <h2>Bienvenue 👋</h2>
+    <p>Confirme ton compte pour commencer :</p>
 
-    res.json({ success: true, message: "Email envoyé 📩" });
+    <a href="${verifyLink}" 
+       style="
+         display:inline-block;
+         padding:12px 25px;
+         background:#4CAF50;
+         color:white;
+         text-decoration:none;
+         border-radius:8px;
+         font-weight:bold;
+       ">
+      Activer mon compte
+    </a>
+
+    <p style="margin-top:20px; font-size:12px; color:#888;">
+      Si le bouton ne fonctionne pas :
+    </p>
+
+    <p style="font-size:12px;">
+      <a href="${verifyLink}">
+        ${verifyLink}
+      </a>
+    </p>
+  </div>
+`
+        `
+      });
+    } catch (emailErr) {
+      console.error("❌ EMAIL ERROR:", emailErr.response?.body || emailErr);
+      return res.status(500).json({ error: "Erreur envoi email" });
+    }
+
+    res.json({ success: true });
 
   } catch (err) {
     console.error("REGISTER ERROR:", err);
@@ -174,23 +192,27 @@ app.post("/register", async (req, res) => {
 
 // ================= VERIFY =================
 app.get("/verify/:token", async (req, res) => {
-  const user = await User.findOne({
-    verifyToken: req.params.token,
-    verifyExpires: { $gt: Date.now() }
-  });
+  try {
+    const user = await User.findOne({
+      verifyToken: req.params.token,
+      verifyExpires: { $gt: Date.now() }
+    });
 
-  if (!user) {
-    return res.redirect(`${BASE_URL}/error.html`);
+    if (!user) {
+      return res.redirect(`${BASE_URL}/error.html`);
+    }
+
+    user.isVerified = true;
+    user.verifyToken = null;
+    user.verifyExpires = null;
+
+    await user.save();
+
+    res.redirect(`${BASE_URL}/success.html`);
+
+  } catch {
+    res.redirect(`${BASE_URL}/error.html`);
   }
-
-  user.isVerified = true;
-  user.verifyToken = null;
-  user.verifyExpires = null;
-
-  await user.save();
-
-  // ✅ REDIRECTION FRONT
-  res.redirect(`${BASE_URL}/success.html`);
 });
 
 // ================= LOGIN =================
@@ -202,7 +224,7 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Champs requis" });
     }
 
-    email = email.toLowerCase();
+    email = email.toLowerCase().trim();
 
     const user = await User.findOne({ email });
 
@@ -267,9 +289,7 @@ app.put("/clients/favorite/:id", auth, async (req, res) => {
     userId: req.userId
   });
 
-  if (!client) {
-    return res.status(404).json({ error: "Introuvable" });
-  }
+  if (!client) return res.status(404).json({ error: "Introuvable" });
 
   client.favorite = !client.favorite;
   await client.save();
