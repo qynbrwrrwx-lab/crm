@@ -1,17 +1,18 @@
-/* GLOBAL */
+/* ================= GLOBAL ================= */
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
   background: radial-gradient(circle at top left, #1e293b, #020617);
   color: white;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* LAYOUT */
+/* ================= LAYOUT ================= */
 .app-layout {
   display: flex;
 }
 
-/* SIDEBAR */
+/* ================= SIDEBAR ================= */
 .sidebar {
   width: 240px;
   height: 100vh;
@@ -25,7 +26,7 @@ body {
   justify-content: space-between;
 }
 
-/* LOGO */
+/* ================= LOGO ================= */
 .logo {
   display: flex;
   justify-content: center;
@@ -35,27 +36,22 @@ body {
 
   background: rgba(30, 41, 59, 0.5);
   border-radius: 16px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
 
-  box-shadow: 0 0 20px rgba(59,130,246,0.15);
+  box-shadow: 0 0 25px rgba(59,130,246,0.2);
 }
 
 .logo-big {
   width: 100px;
-  max-width: 100%;
-  height: auto;
-  object-fit: contain;
-
-  filter: drop-shadow(0 0 15px rgba(59,130,246,0.5));
-  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 0 20px rgba(59,130,246,0.6));
+  transition: 0.3s;
 }
 
 .logo-big:hover {
-  transform: scale(1.08);
-  filter: drop-shadow(0 0 22px rgba(59,130,246,0.7));
+  transform: scale(1.1);
 }
 
-/* NAVIGATION */
+/* ================= NAV ================= */
 .sidebar nav {
   flex: 1;
   display: flex;
@@ -89,69 +85,62 @@ body {
   box-shadow: 0 0 12px rgba(59,130,246,0.5);
 }
 
-/* LOGOUT */
+/* ================= LOGOUT ================= */
 .logout {
-  background: #ff4d4d;
-  width: 100%;
+  background: #ef4444;
   padding: 10px;
   border-radius: 8px;
   font-weight: bold;
-  margin-top: 20px;
   transition: 0.2s;
 }
 
 .logout:hover {
-  background: #e60000;
+  background: #dc2626;
   transform: scale(1.05);
 }
 
-/* MAIN */
+/* ================= MAIN ================= */
 .main {
   flex: 1;
   padding: 25px;
 }
 
-/* CONTAINER */
-.container {
-  padding: 10px;
-}
-
-/* CARD */
+/* ================= CARD ================= */
 .card {
-  background: #1e293b;
+  background: rgba(30, 41, 59, 0.9);
   padding: 20px;
   border-radius: 14px;
   margin-bottom: 20px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-  transition: 0.2s;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+  transition: 0.25s;
 }
 
 .card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
 }
 
-/* INPUT */
+/* ================= INPUT ================= */
 input {
   width: 100%;
   padding: 12px;
   margin: 8px 0;
   border-radius: 8px;
-  border: none;
+  border: 1px solid transparent;
   background: #020617;
   color: white;
   outline: none;
-  transition: 0.2s;
+  transition: 0.25s;
 }
 
 input:focus {
   border: 1px solid #3b82f6;
-  box-shadow: 0 0 5px rgba(59,130,246,0.5);
+  box-shadow: 0 0 8px rgba(59,130,246,0.5);
 }
 
-/* BUTTON GLOBAL */
+/* ================= BUTTON ================= */
 button {
   padding: 12px;
-  border: none;
   border-radius: 8px;
   background: linear-gradient(45deg, #3b82f6, #6366f1);
   color: white;
@@ -159,14 +148,27 @@ button {
   width: 100%;
   margin-top: 10px;
   font-weight: bold;
-  transition: 0.2s;
+  transition: 0.25s;
+  border: none;
 }
 
 button:hover {
-  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(59,130,246,0.4);
 }
 
-/* CLIENT */
+/* ================= AUTH LINKS ================= */
+.auth-links button {
+  background: none;
+  color: #3b82f6;
+  font-size: 13px;
+}
+
+.auth-links button:hover {
+  text-decoration: underline;
+}
+
+/* ================= CLIENT ================= */
 .client {
   background: #020617;
   padding: 15px;
@@ -175,21 +177,21 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: 0.2s;
 }
 
-.client-info {
-  text-align: left;
+.client:hover {
+  background: #020617cc;
 }
 
-/* DELETE */
+/* ================= DELETE ================= */
 .delete {
   background: #ef4444;
   padding: 8px;
   border-radius: 6px;
-  cursor: pointer;
 }
 
-/* GRID */
+/* ================= GRID ================= */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -206,15 +208,7 @@ button:hover {
   }
 }
 
-/* MAP */
-#map {
-  height: 400px;
-  width: 100%;
-  border-radius: 10px;
-  margin-top: 10px;
-}
-
-/* SECTIONS */
+/* ================= SECTIONS ================= */
 .section {
   display: none;
   animation: fadeIn 0.3s ease;
@@ -224,21 +218,13 @@ button:hover {
   display: block;
 }
 
-/* ANIMATION */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ================= MAP ================= */
+#map {
+  height: 400px;
+  border-radius: 10px;
 }
 
-/* ================= LEVEL 2 ================= */
-
-/* TOAST */
+/* ================= TOAST ================= */
 .toast {
   position: fixed;
   bottom: 20px;
@@ -246,11 +232,9 @@ button:hover {
   background: #3b82f6;
   padding: 12px 20px;
   border-radius: 8px;
-  color: white;
   opacity: 0;
   transform: translateY(20px);
   transition: 0.3s;
-  z-index: 1000;
 }
 
 .toast.show {
@@ -258,7 +242,7 @@ button:hover {
   transform: translateY(0);
 }
 
-/* LOADER */
+/* ================= LOADER ================= */
 .loader {
   position: fixed;
   top: 0;
@@ -269,7 +253,6 @@ button:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
 }
 
 .spinner {
@@ -284,5 +267,17 @@ button:hover {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* ================= ANIMATION ================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -10,6 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+/* ===== MAP ===== */
 #map {
   height: 400px;
   width: 100%;
@@ -17,22 +18,84 @@
   margin-top: 10px;
 }
 
-.auth-actions {
+/* ===== AUTH MODERNE ===== */
+.auth-container {
+  height: 100vh;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 10px;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
 }
 
-.link-btn {
+.card {
+  background: white;
+  padding: 35px;
+  border-radius: 14px;
+  width: 340px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+.card h2 {
+  margin-bottom: 10px;
+}
+
+.card input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  outline: none;
+}
+
+.card input:focus {
+  border-color: #3b82f6;
+}
+
+/* boutons principaux */
+.primary-btn {
+  margin-top: 15px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #3b82f6;
+  color: white;
+  cursor: pointer;
+}
+
+.primary-btn:hover {
+  background: #2563eb;
+}
+
+.secondary-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #f1f5f9;
+  cursor: pointer;
+}
+
+/* liens */
+.auth-links {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.auth-links button {
   background: none;
   border: none;
   color: #3b82f6;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
 }
 
-.link-btn:hover {
+.auth-links button:hover {
   text-decoration: underline;
 }
 </style>
@@ -49,25 +112,24 @@
 <!-- ================= AUTH ================= -->
 <div id="auth" class="auth-container">
   <div class="card">
-    <h2>Connexion</h2>
+
+    <h2>My Prospect</h2>
+    <p style="font-size:14px;color:#64748b;">Connecte-toi à ton CRM</p>
 
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Mot de passe">
 
-    <div class="auth-actions">
-      <button onclick="login()">Se connecter</button>
-      <button onclick="register()">Créer un compte</button>
+    <button class="primary-btn" onclick="login()">Se connecter</button>
 
-      <!-- 🔥 RESEND -->
-      <button onclick="resendEmail()" class="link-btn">
-        📩 Renvoyer l'email de validation
-      </button>
+    <button class="secondary-btn" onclick="register()">
+      Créer un compte
+    </button>
 
-      <!-- 🔐 RESET -->
-      <button onclick="requestReset()" class="link-btn">
-        🔐 Mot de passe oublié
-      </button>
+    <div class="auth-links">
+      <button onclick="resendEmail()">📩 Renvoyer email</button>
+      <button onclick="requestReset()">🔐 Mot de passe oublié</button>
     </div>
+
   </div>
 </div>
 
@@ -167,47 +229,29 @@
 // 📩 RESEND EMAIL
 async function resendEmail() {
   const email = document.getElementById("email").value;
-
   if (!email) return showToast("Entre ton email 📧");
 
-  try {
-    const res = await fetch("/resend-verification", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ email })
-    });
+  const res = await fetch("/resend-verification", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ email })
+  });
 
-    const data = await res.json();
-
-    if (data.success) {
-      showToast("Email renvoyé 📩");
-    } else {
-      showToast(data.error || "Erreur");
-    }
-
-  } catch {
-    showToast("Erreur serveur ❌");
-  }
+  showToast("Email renvoyé 📩");
 }
 
 // 🔐 RESET PASSWORD
 async function requestReset() {
   const email = document.getElementById("email").value;
-
   if (!email) return showToast("Entre ton email 📧");
 
-  try {
-    await fetch("/request-reset", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ email })
-    });
+  await fetch("/request-reset", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ email })
+  });
 
-    showToast("Email de réinitialisation envoyé 🔐");
-
-  } catch {
-    showToast("Erreur serveur ❌");
-  }
+  showToast("Email de reset envoyé 🔐");
 }
 
 </script>
