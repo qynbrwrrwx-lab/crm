@@ -1,107 +1,151 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
 <title>My Prospect</title>
 
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link rel="stylesheet" href="style.css" />
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
-/* ===== AUTH FUTURISTE ===== */
+/* ================= AUTH ================= */
+
 .auth-container {
   height: 100vh;
+
   display: flex;
   justify-content: center;
   align-items: center;
-  background: radial-gradient(circle at top, #020617, #020617);
+
+  background:
+    radial-gradient(circle at top, #0f172a, #020617);
 }
 
 .auth-card {
   width: 360px;
-  padding: 35px;
-  border-radius: 16px;
 
-  background: rgba(15, 23, 42, 0.8);
+  padding: 35px;
+
+  border-radius: 18px;
+
+  background: rgba(15,23,42,0.82);
+
   backdrop-filter: blur(12px);
 
-  border: 1px solid rgba(59,130,246,0.2);
-  box-shadow: 0 0 30px rgba(59,130,246,0.2);
+  border: 1px solid rgba(59,130,246,0.18);
+
+  box-shadow:
+    0 0 30px rgba(59,130,246,0.18);
 
   text-align: center;
 }
 
-/* glow titre */
 .auth-card h2 {
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+
   color: #3b82f6;
 }
 
 .auth-card p {
-  font-size: 14px;
   color: #94a3b8;
+  font-size: 14px;
 }
 
-/* inputs */
 .auth-card input {
   width: 100%;
+
   padding: 12px;
+
   margin-top: 12px;
-  border-radius: 8px;
+
+  border-radius: 10px;
+
   border: 1px solid transparent;
+
   background: #020617;
+
   color: white;
 }
 
 .auth-card input:focus {
   border: 1px solid #3b82f6;
-  box-shadow: 0 0 10px rgba(59,130,246,0.5);
+
+  box-shadow:
+    0 0 10px rgba(59,130,246,0.5);
 }
 
-/* boutons */
 .primary-btn {
-  margin-top: 15px;
   width: 100%;
+
+  margin-top: 16px;
+
   padding: 12px;
-  border-radius: 8px;
+
+  border-radius: 10px;
+
   border: none;
-  background: linear-gradient(45deg, #3b82f6, #6366f1);
+
+  background:
+    linear-gradient(45deg,#3b82f6,#6366f1);
+
   color: white;
+
   cursor: pointer;
+
+  font-weight: bold;
 }
 
 .primary-btn:hover {
-  box-shadow: 0 0 20px rgba(59,130,246,0.6);
+  box-shadow:
+    0 0 20px rgba(59,130,246,0.5);
 }
 
 .secondary-btn {
-  margin-top: 10px;
   width: 100%;
-  padding: 10px;
-  border-radius: 8px;
+
+  margin-top: 10px;
+
+  padding: 11px;
+
+  border-radius: 10px;
+
   border: none;
+
   background: #020617;
+
   color: #cbd5f5;
+
   cursor: pointer;
 }
 
-/* liens */
 .auth-links {
-  margin-top: 15px;
+  margin-top: 16px;
+
   display: flex;
   flex-direction: column;
-  gap: 6px;
+
+  gap: 8px;
 }
 
 .auth-links button {
   background: none;
+
   border: none;
+
   color: #3b82f6;
-  font-size: 13px;
+
   cursor: pointer;
+
+  font-size: 13px;
 }
 
 .auth-links button:hover {
@@ -109,68 +153,168 @@
 }
 
 </style>
+
 </head>
 
 <body>
 
-<div id="loader" class="loader" style="display:none;">
+<!-- ================= LOADER ================= -->
+
+<div id="loader"
+class="loader"
+style="display:none;">
+
   <div class="spinner"></div>
+
 </div>
 
-<div id="toast" class="toast"></div>
+<!-- ================= TOAST ================= -->
+
+<div id="toast"
+class="toast"></div>
 
 <!-- ================= AUTH ================= -->
-<div id="auth" class="auth-container">
+
+<div id="auth"
+class="auth-container">
+
   <div class="auth-card">
 
     <h2>🚀 My Prospect</h2>
-    <p>Ton CRM nouvelle génération</p>
 
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Mot de passe">
+    <p>CRM nouvelle génération</p>
 
-    <button class="primary-btn" onclick="login()">Se connecter</button>
+    <input
+      id="email"
+      placeholder="Email"
+    />
 
-    <button class="secondary-btn" onclick="register()">
+    <input
+      id="password"
+      type="password"
+      placeholder="Mot de passe"
+    />
+
+    <button
+      class="primary-btn"
+      onclick="login()"
+    >
+      Se connecter
+    </button>
+
+    <button
+      class="secondary-btn"
+      onclick="register()"
+    >
       Créer un compte
     </button>
 
     <div class="auth-links">
-      <button onclick="resendEmail()">📩 Renvoyer email</button>
-      <button onclick="requestReset()">🔐 Mot de passe oublié</button>
+
+      <button onclick="resendEmail()">
+        📩 Renvoyer email
+      </button>
+
+      <button onclick="requestReset()">
+        🔐 Mot de passe oublié
+      </button>
+
     </div>
 
   </div>
+
 </div>
 
 <!-- ================= APP ================= -->
-<div id="app" style="display:none;">
+
+<div id="app"
+style="display:none;">
+
   <div class="app-layout">
 
+    <!-- ================= SIDEBAR ================= -->
+
     <aside class="sidebar">
+
       <div class="logo">
-        <img src="./logo.png" class="logo-big" alt="logo">
+        <img
+          src="./logo.png"
+          class="logo-big"
+          alt="logo"
+        />
       </div>
 
       <nav>
-        <button onclick="showSection('dashboard', event)" class="active">📊 Dashboard</button>
-        <button onclick="showSection('clients', event)">👥 Clients</button>
-        <button onclick="showSection('favorites', event)">⭐ Favoris</button>
-        <button onclick="showSection('analytics', event)">📈 Analytics</button>
-        <button onclick="showSection('mapSection', event)">🗺️ Carte</button>
-        <button onclick="showSection('settings', event)">⚙️ Paramètres</button>
+
+        <button
+          onclick="showSection('dashboard', event)"
+          class="active"
+        >
+          📊 Dashboard
+        </button>
+
+        <button
+          onclick="showSection('clients', event)"
+        >
+          👥 Clients
+        </button>
+
+        <button
+          onclick="showSection('pipeline', event)"
+        >
+          🚀 Pipeline
+        </button>
+
+        <button
+          onclick="showSection('favorites', event)"
+        >
+          ⭐ Favoris
+        </button>
+
+        <button
+          onclick="showSection('analytics', event)"
+        >
+          📈 Analytics
+        </button>
+
+        <button
+          onclick="showSection('mapSection', event)"
+        >
+          🗺️ Carte
+        </button>
+
+        <button
+          onclick="showSection('settings', event)"
+        >
+          ⚙️ Paramètres
+        </button>
+
       </nav>
 
-      <button onclick="logout()" class="logout">🚪 Déconnexion</button>
+      <button
+        onclick="logout()"
+        class="logout"
+      >
+        🚪 Déconnexion
+      </button>
+
     </aside>
 
+    <!-- ================= MAIN ================= -->
+
     <main class="main">
+
       <div class="container">
 
-        <!-- DASHBOARD FUTURISTE -->
-        <div id="dashboard" class="section active">
+        <!-- ================= DASHBOARD ================= -->
+
+        <div
+          id="dashboard"
+          class="section active"
+        >
 
           <div class="kpi-grid">
+
             <div class="kpi">
               <h3>Total clients</h3>
               <span id="total">0</span>
@@ -185,99 +329,276 @@
               <h3>Nouveaux</h3>
               <span id="newCount">0</span>
             </div>
+
           </div>
 
           <div class="card">
+
             <h2>📊 Évolution</h2>
+
             <canvas id="chart"></canvas>
+
           </div>
 
         </div>
 
-        <!-- CLIENTS -->
-        <div id="clients" class="section">
+        <!-- ================= CLIENTS ================= -->
+
+        <div
+          id="clients"
+          class="section"
+        >
+
           <div class="card">
-            <input id="search" placeholder="🔎 Rechercher..." oninput="filterClients()">
+
+            <input
+              id="search"
+              placeholder="🔎 Rechercher..."
+              oninput="filterClients()"
+            />
+
           </div>
 
           <div class="grid">
+
             <div class="card">
+
               <h2>Ajouter un client</h2>
-              <input id="name" placeholder="Nom">
-              <input id="phone" placeholder="Téléphone">
-              <input id="address" placeholder="Adresse">
-              <button onclick="addClient()">Ajouter</button>
+
+              <input
+                id="name"
+                placeholder="Nom"
+              />
+
+              <input
+                id="phone"
+                placeholder="Téléphone"
+              />
+
+              <input
+                id="address"
+                placeholder="Adresse"
+              />
+
+              <button onclick="addClient()">
+                Ajouter
+              </button>
+
             </div>
 
             <div class="card">
+
               <h2>Liste clients</h2>
+
               <div id="list"></div>
+
             </div>
+
           </div>
+
         </div>
 
-        <!-- AUTRES SECTIONS IDENTIQUES -->
-        <div id="favorites" class="section">
+        <!-- ================= PIPELINE ================= -->
+
+        <div
+          id="pipeline"
+          class="section"
+        >
+
+          <div class="pipeline-board">
+
+            <div class="pipeline-column">
+
+              <h3>🔥 Leads</h3>
+
+              <div
+                id="leadColumn"
+                class="dropzone"
+              ></div>
+
+            </div>
+
+            <div class="pipeline-column">
+
+              <h3>📞 Contactés</h3>
+
+              <div
+                id="contactedColumn"
+                class="dropzone"
+              ></div>
+
+            </div>
+
+            <div class="pipeline-column">
+
+              <h3>📄 Devis</h3>
+
+              <div
+                id="proposalColumn"
+                class="dropzone"
+              ></div>
+
+            </div>
+
+            <div class="pipeline-column">
+
+              <h3>🤝 Négociation</h3>
+
+              <div
+                id="negotiationColumn"
+                class="dropzone"
+              ></div>
+
+            </div>
+
+            <div class="pipeline-column">
+
+              <h3>🏆 Gagnés</h3>
+
+              <div
+                id="wonColumn"
+                class="dropzone"
+              ></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ================= FAVORITES ================= -->
+
+        <div
+          id="favorites"
+          class="section"
+        >
+
           <div class="card">
+
             <h2>⭐ Favoris</h2>
+
             <div id="favoritesList"></div>
+
           </div>
+
         </div>
 
-        <div id="analytics" class="section">
+        <!-- ================= ANALYTICS ================= -->
+
+        <div
+          id="analytics"
+          class="section"
+        >
+
           <div class="card">
+
             <h2>📈 Analytics</h2>
+
             <canvas id="analyticsChart"></canvas>
+
           </div>
+
         </div>
 
-        <div id="mapSection" class="section">
+        <!-- ================= MAP ================= -->
+
+        <div
+          id="mapSection"
+          class="section"
+        >
+
           <div class="card">
+
             <h2>🗺️ Carte</h2>
+
             <div id="map"></div>
+
           </div>
+
         </div>
 
-        <div id="settings" class="section">
+        <!-- ================= SETTINGS ================= -->
+
+        <div
+          id="settings"
+          class="section"
+        >
+
           <div class="card">
+
             <h2>⚙️ Paramètres</h2>
-            <p>Total clients : <span id="userStats">0</span></p>
-            <button onclick="logout()">🚪 Déconnexion</button>
+
+            <p>
+              Total clients :
+              <span id="userStats">0</span>
+            </p>
+
+            <button onclick="logout()">
+              🚪 Déconnexion
+            </button>
+
           </div>
+
         </div>
 
       </div>
+
     </main>
+
   </div>
+
 </div>
 
+<!-- ================= SCRIPTS ================= -->
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <script src="app.js"></script>
 
 <script>
 
-// 📩 RESEND EMAIL
+// ================= RESEND EMAIL =================
+
 async function resendEmail() {
-  const email = document.getElementById("email").value;
-  if (!email) return showToast("Entre ton email 📧");
+
+  const email =
+    document.getElementById("email").value;
+
+  if (!email) {
+    return showToast("Entre ton email 📧");
+  }
 
   await fetch("/resend-verification", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+
+    headers: {
+      "Content-Type": "application/json"
+    },
+
     body: JSON.stringify({ email })
   });
 
   showToast("Email renvoyé 📩");
 }
 
-// 🔐 RESET PASSWORD
+// ================= RESET PASSWORD =================
+
 async function requestReset() {
-  const email = document.getElementById("email").value;
-  if (!email) return showToast("Entre ton email 📧");
+
+  const email =
+    document.getElementById("email").value;
+
+  if (!email) {
+    return showToast("Entre ton email 📧");
+  }
 
   await fetch("/request-reset", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+
+    headers: {
+      "Content-Type": "application/json"
+    },
+
     body: JSON.stringify({ email })
   });
 
