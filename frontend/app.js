@@ -1,5 +1,6 @@
 // ================= GLOBAL =================
 
+const API_URL = "https://www.my-prospect.com";
 let map;
 let markers = [];
 
@@ -19,6 +20,8 @@ function setToken(token) {
 function removeToken() {
   localStorage.removeItem("token");
 }
+
+// ================= API =================
 
 // ================= API =================
 
@@ -42,17 +45,20 @@ async function apiFetch(url, options = {}) {
 
   try {
 
-    const res = await fetch(url, config);
+    const res = await fetch(
+      API_URL + url,
+      config
+    );
 
-    // SESSION EXPIRE
     if (res.status === 401) {
 
       logout();
 
-      throw new Error("Session expirée");
+      throw new Error(
+        "Session expirée"
+      );
     }
 
-    // API ERROR
     if (!res.ok) {
 
       let err = {};
