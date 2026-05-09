@@ -7,9 +7,10 @@ const transporter =
 
     host: process.env.EMAIL_HOST,
 
-    port: process.env.EMAIL_PORT,
+    port: Number(process.env.EMAIL_PORT),
 
-    secure: false,
+    secure:
+      Number(process.env.EMAIL_PORT) === 465,
 
     auth: {
 
@@ -19,7 +20,26 @@ const transporter =
     }
   });
 
-// ================= SEND INVOICE EMAIL =================
+// ================= VERIFY SMTP =================
+
+transporter.verify((err) => {
+
+  if (err) {
+
+    console.error(
+      "❌ SMTP ERROR :",
+      err.message
+    );
+
+  } else {
+
+    console.log(
+      "✅ SMTP connecté"
+    );
+  }
+});
+
+// ================= SEND EMAIL =================
 
 async function sendInvoiceEmail({
   to,
@@ -29,8 +49,144 @@ async function sendInvoiceEmail({
 
   try {
 
+    if (!to) {
+
+      console.log(
+        "⚠️ Aucun email client"
+      );
+
+      return;
+    }
+
     const isQuote =
       invoice.type === "quote";
+
+    const subject =
+      isQuote
+        ? `Votre devis ${invoice.invoiceNumber}`
+        : `Votre facture ${invoice.invoiceNumber}`;
+
+    const html = `
+
+      <div style="
+        font-family:Arial;
+        padding:30px;
+        background:#f8fafc;
+      ">
+
+        <div style="
+          max-width:600px;
+          margin:auto;
+          background:white;
+          padding:30px;
+          border-radius:12px;
+          border:1px solid #e2e8f0;
+        ">
+
+          <h1 style="
+            color:#2563eb;
+            margin-bottom:20px;
+          ">
+
+            ${
+              isQuote
+                ? "📄 Nouveau devis"
+                : "🧾 Nouvelle facture"
+            }
+
+          </h1>
+
+          <p style="
+            font-size:15px;
+            color:#334155;
+          ">
+
+            Bonjour,
+
+          </p>
+
+          <p style="
+            font-size:15px;
+            color:#334155;
+            line-height:1.7;
+          ">
+
+            Veuillez trouver ci-joint votre
+            ${
+              isQuote
+                ? "devis"
+                : "facture"
+            }.
+
+          </p>
+
+          <div style="
+            margin-top:25px;
+            padding:20px;
+            background:#eff6ff;
+            border-radius:10px;
+          ">
+
+            <p>
+              <strong>
+                Numéro :
+              </strong>
+
+              ${invoice.invoiceNumber}
+            </p>
+
+            <p>
+              <strong>
+                Total TTC :
+              </strong>
+
+              ${invoice.totalTTC.toFixed(2)} €
+            </p>
+
+            <p>
+              <strong>
+                Statut :
+              </strong>
+
+              ${
+                invoice.paymentStatus === "paid"
+                  ? "✅ Payé"
+                  : "⌛ En attente"
+              }
+            </p>
+
+          </div>
+
+          <p style="
+            margin-top:30px;
+            color:#64748b;
+            font-size:14px;
+          ">
+
+            Merci pour votre confiance 🙌
+
+          </p>
+
+          <hr style="
+            margin-top:30px;
+            border:none;
+            border-top:1px solid #e2e8f0;
+          ">
+
+          <p style="
+            font-size:12px;
+            color:#94a3b8;
+            margin-top:20px;
+          ">
+
+            My Prospect CRM
+
+          </p>
+
+        </div>
+
+      </div>
+    `;
 
     await transporter.sendMail({
 
@@ -38,61 +194,9 @@ async function sendInvoiceEmail({
 
       to,
 
-      subject:
-        isQuote
-          ? `Votre devis ${invoice.invoiceNumber}`
-          : `Votre facture ${invoice.invoiceNumber}`,
+      subject,
 
-      html: `
-
-        <div style="
-          font-family:Arial;
-          padding:30px;
-        ">
-
-          <h2>
-            ${
-              isQuote
-                ? "📄 Nouveau devis"
-                : "🧾 Nouvelle facture"
-            }
-          </h2>
-
-          <p>
-            Bonjour,
-          </p>
-
-          <p>
-            Veuillez trouver ci-joint votre
-            ${
-              isQuote
-                ? "devis"
-                : "facture"
-            }.
-          </p>
-
-          <p>
-            Numéro :
-            <strong>
-              ${invoice.invoiceNumber}
-            </strong>
-          </p>
-
-          <p>
-            Total TTC :
-            <strong>
-              ${invoice.totalTTC.toFixed(2)} €
-            </strong>
-          </p>
-
-          <br>
-
-          <p>
-            Merci pour votre confiance 🙌
-          </p>
-
-        </div>
-      `,
+      html,
 
       attachments: [
 
@@ -100,19 +204,22 @@ async function sendInvoiceEmail({
           filename:
             `${invoice.invoiceNumber}.pdf`,
 
-          content: pdfBuffer
+          content: pdfBuffer,
+
+          contentType:
+            "application/pdf"
         }
       ]
     });
 
     console.log(
-      "✅ Email envoyé avec succès"
+      `✅ Email envoyé à ${to}`
     );
 
   } catch (err) {
 
     console.error(
-      "❌ Erreur email:",
+      "❌ EMAIL ERROR :",
       err
     );
   }
