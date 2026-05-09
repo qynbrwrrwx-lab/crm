@@ -31,7 +31,7 @@ href="https://unpkg.com/leaflet/dist/leaflet.css" />
 }
 
 .auth-card {
-  width: 360px;
+  width: 380px;
 
   padding: 35px;
 
@@ -74,6 +74,8 @@ href="https://unpkg.com/leaflet/dist/leaflet.css" />
   background: #020617;
 
   color: white;
+
+  box-sizing: border-box;
 }
 
 .auth-card input:focus {
@@ -152,6 +154,43 @@ href="https://unpkg.com/leaflet/dist/leaflet.css" />
   text-decoration: underline;
 }
 
+/* ================= CONTACT FORM ================= */
+
+.contact-grid {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 12px;
+}
+
+.contact-grid-full {
+  grid-column: 1 / -1;
+}
+
+select,
+textarea {
+  width: 100%;
+
+  padding: 12px;
+
+  border-radius: 10px;
+
+  border: 1px solid transparent;
+
+  background: #020617;
+
+  color: white;
+
+  box-sizing: border-box;
+}
+
+textarea {
+  min-height: 100px;
+
+  resize: vertical;
+}
+
 </style>
 
 </head>
@@ -182,7 +221,7 @@ class="auth-container">
 
     <h2>🚀 My Prospect</h2>
 
-    <p>CRM nouvelle génération</p>
+    <p>ERP / CRM nouvelle génération</p>
 
     <input
       id="email"
@@ -250,19 +289,13 @@ style="display:none;">
           onclick="showSection('dashboard', event)"
           class="active"
         >
-          📊 Dashboard
+          📊 Tableau de bord
         </button>
 
         <button
-          onclick="showSection('clients', event)"
+          onclick="showSection('contacts', event)"
         >
-          👥 Clients
-        </button>
-
-        <button
-          onclick="showSection('pipeline', event)"
-        >
-          🚀 Pipeline
+          👥 Contacts
         </button>
 
         <button
@@ -316,7 +349,7 @@ style="display:none;">
           <div class="kpi-grid">
 
             <div class="kpi">
-              <h3>Total clients</h3>
+              <h3>Total contacts</h3>
               <span id="total">0</span>
             </div>
 
@@ -342,10 +375,10 @@ style="display:none;">
 
         </div>
 
-        <!-- ================= CLIENTS ================= -->
+        <!-- ================= CONTACTS ================= -->
 
         <div
-          id="clients"
+          id="contacts"
           class="section"
         >
 
@@ -353,112 +386,101 @@ style="display:none;">
 
             <input
               id="search"
-              placeholder="🔎 Rechercher..."
-              oninput="filterClients()"
+              placeholder="🔎 Rechercher un contact..."
+              oninput="filterContacts()"
             />
 
           </div>
 
           <div class="grid">
 
+            <!-- ================= ADD CONTACT ================= -->
+
             <div class="card">
 
-              <h2>Ajouter un client</h2>
+              <h2>👥 Ajouter un contact</h2>
 
-              <input
-                id="name"
-                placeholder="Nom"
-              />
+              <div class="contact-grid">
 
-              <input
-                id="phone"
-                placeholder="Téléphone"
-              />
+                <select id="type">
 
-              <input
-                id="address"
-                placeholder="Adresse"
-              />
+                  <option value="particulier">
+                    Particulier
+                  </option>
 
-              <button onclick="addClient()">
-                Ajouter
+                  <option value="pro">
+                    Professionnel
+                  </option>
+
+                  <option value="association">
+                    Association
+                  </option>
+
+                </select>
+
+                <input
+                  id="companyName"
+                  placeholder="Raison sociale"
+                />
+
+                <input
+                  id="firstname"
+                  placeholder="Prénom"
+                />
+
+                <input
+                  id="lastname"
+                  placeholder="Nom"
+                />
+
+                <input
+                  id="siret"
+                  placeholder="SIRET"
+                />
+
+                <input
+                  id="emailContact"
+                  placeholder="Email"
+                />
+
+                <input
+                  id="phone"
+                  placeholder="Téléphone"
+                />
+
+                <input
+                  id="billingAddress"
+                  placeholder="Adresse facturation"
+                  class="contact-grid-full"
+                />
+
+                <input
+                  id="shippingAddress"
+                  placeholder="Adresse livraison"
+                  class="contact-grid-full"
+                />
+
+                <textarea
+                  id="notes"
+                  placeholder="Notes"
+                  class="contact-grid-full"
+                ></textarea>
+
+              </div>
+
+              <button onclick="addContact()">
+                Ajouter contact
               </button>
 
             </div>
 
+            <!-- ================= LIST CONTACTS ================= -->
+
             <div class="card">
 
-              <h2>Liste clients</h2>
+              <h2>📋 Liste contacts</h2>
 
               <div id="list"></div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- ================= PIPELINE ================= -->
-
-        <div
-          id="pipeline"
-          class="section"
-        >
-
-          <div class="pipeline-board">
-
-            <div class="pipeline-column">
-
-              <h3>🔥 Leads</h3>
-
-              <div
-                id="leadColumn"
-                class="dropzone"
-              ></div>
-
-            </div>
-
-            <div class="pipeline-column">
-
-              <h3>📞 Contactés</h3>
-
-              <div
-                id="contactedColumn"
-                class="dropzone"
-              ></div>
-
-            </div>
-
-            <div class="pipeline-column">
-
-              <h3>📄 Devis</h3>
-
-              <div
-                id="proposalColumn"
-                class="dropzone"
-              ></div>
-
-            </div>
-
-            <div class="pipeline-column">
-
-              <h3>🤝 Négociation</h3>
-
-              <div
-                id="negotiationColumn"
-                class="dropzone"
-              ></div>
-
-            </div>
-
-            <div class="pipeline-column">
-
-              <h3>🏆 Gagnés</h3>
-
-              <div
-                id="wonColumn"
-                class="dropzone"
-              ></div>
 
             </div>
 
@@ -529,7 +551,7 @@ style="display:none;">
             <h2>⚙️ Paramètres</h2>
 
             <p>
-              Total clients :
+              Total contacts :
               <span id="userStats">0</span>
             </p>
 

@@ -104,29 +104,37 @@ const User = mongoose.model(
   })
 );
 
-// CLIENTS
-const Client = mongoose.model(
-  "Client",
+// ================= CONTACTS =================
+const Contact = mongoose.model(
+  "Contact",
   new mongoose.Schema(
     {
       userId: mongoose.Schema.Types.ObjectId,
 
-      name: String,
-      phone: String,
-      address: String,
+      // particulier / pro / association
+      type: {
+        type: String,
+        enum: ["particulier", "pro", "association"],
+        default: "particulier"
+      },
 
-      lat: Number,
-      lng: Number,
+      firstname: String,
+      lastname: String,
+
+      companyName: String,
+      siret: String,
+
+      email: String,
+      phone: String,
+
+      billingAddress: String,
+      shippingAddress: String,
+
+      notes: String,
 
       favorite: {
         type: Boolean,
         default: false
-      },
-
-      // 🚀 PIPELINE CRM
-      status: {
-        type: String,
-        default: "lead"
       }
     },
     { timestamps: true }
@@ -505,35 +513,35 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// ================= CLIENTS =================
+// ================= CONTACTS =================
 
-// GET CLIENTS
-app.get("/clients", auth, async (req, res) => {
+// GET CONTACTS
+app.get("/contacts", auth, async (req, res) => {
 
-  const clients = await Client.find({
+  const contacts = await Contact.find({
     userId: req.userId
   }).sort({
     createdAt: -1
   });
 
-  res.json(clients);
+  res.json(contacts);
 });
 
-// ADD CLIENT
-app.post("/clients", auth, async (req, res) => {
+// ADD CONTACT
+app.post("/contacts", auth, async (req, res) => {
 
-  const client = await Client.create({
+  const contact = await Contact.create({
     ...req.body,
     userId: req.userId
   });
 
-  res.json(client);
+  res.json(contact);
 });
 
-// DELETE CLIENT
-app.delete("/clients/:id", auth, async (req, res) => {
+// DELETE CONTACT
+app.delete("/contacts/:id", auth, async (req, res) => {
 
-  await Client.findOneAndDelete({
+  await Contact.findOneAndDelete({
     _id: req.params.id,
     userId: req.userId
   });
@@ -543,46 +551,25 @@ app.delete("/clients/:id", auth, async (req, res) => {
   });
 });
 
-// FAVORITE CLIENT
-app.put("/clients/favorite/:id", auth, async (req, res) => {
+// FAVORITE CONTACT
+app.put("/contacts/favorite/:id", auth, async (req, res) => {
 
-  const client = await Client.findOne({
+  const contact = await Contact.findOne({
     _id: req.params.id,
     userId: req.userId
   });
 
-  if (!client) {
+  if (!contact) {
     return res.status(404).json({
       error: "Introuvable"
     });
   }
 
-  client.favorite = !client.favorite;
+  contact.favorite = !contact.favorite;
 
-  await client.save();
+  await contact.save();
 
-  res.json(client);
-});
-
-// ================= PIPELINE STATUS =================
-app.put("/clients/status/:id", auth, async (req, res) => {
-
-  const client = await Client.findOne({
-    _id: req.params.id,
-    userId: req.userId
-  });
-
-  if (!client) {
-    return res.status(404).json({
-      error: "Client introuvable"
-    });
-  }
-
-  client.status = req.body.status;
-
-  await client.save();
-
-  res.json(client);
+  res.json(contact);
 });
 
 // ================= FRONT =================

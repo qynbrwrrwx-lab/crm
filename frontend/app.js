@@ -6,8 +6,6 @@ let markers = [];
 let chart;
 let analyticsChart;
 
-let draggedClient = null;
-
 // ================= TOKEN =================
 
 function getToken() {
@@ -31,6 +29,7 @@ async function apiFetch(url, options = {}) {
   const config = {
     headers: {
       "Content-Type": "application/json",
+
       ...(token && {
         Authorization: "Bearer " + token
       })
@@ -74,13 +73,15 @@ window.onload = () => {
 
 function showApp() {
 
-  document.getElementById("auth").style.display = "none";
+  document.getElementById("auth")
+    .style.display = "none";
 
-  document.getElementById("app").style.display = "block";
+  document.getElementById("app")
+    .style.display = "block";
 
   initMap();
 
-  loadClients();
+  loadContacts();
 }
 
 // ================= AUTH =================
@@ -98,6 +99,7 @@ async function register() {
   try {
 
     await apiFetch("/register", {
+
       method: "POST",
 
       body: JSON.stringify({
@@ -129,6 +131,7 @@ async function login() {
   try {
 
     const data = await apiFetch("/login", {
+
       method: "POST",
 
       body: JSON.stringify({
@@ -196,11 +199,6 @@ function showSection(sectionId, event) {
   if (sectionId === "settings") {
     loadUserInfo();
   }
-
-  // 🚀 PIPELINE
-  if (sectionId === "pipeline") {
-    loadPipeline();
-  }
 }
 
 // ================= MAP =================
@@ -233,7 +231,7 @@ function initMap() {
 
 // ================= DASHBOARD =================
 
-function updateChart(clients) {
+function updateChart(contacts) {
 
   const ctx =
     document.getElementById("chart");
@@ -242,10 +240,10 @@ function updateChart(clients) {
 
   const counts = {};
 
-  clients.forEach(client => {
+  contacts.forEach(contact => {
 
-    const date = client.createdAt
-      ? new Date(client.createdAt)
+    const date = contact.createdAt
+      ? new Date(contact.createdAt)
           .toLocaleDateString()
       : "Unknown";
 
@@ -266,7 +264,7 @@ function updateChart(clients) {
       labels: Object.keys(counts),
 
       datasets: [{
-        label: "Nouveaux clients",
+        label: "Nouveaux contacts",
 
         data: Object.values(counts),
 
@@ -278,19 +276,19 @@ function updateChart(clients) {
 
 // ================= KPI =================
 
-function updateKPI(clients) {
+function updateKPI(contacts) {
 
   document.getElementById("total")
-    .innerText = clients.length;
+    .innerText = contacts.length;
 
   const favorites =
-    clients.filter(c => c.favorite).length;
+    contacts.filter(c => c.favorite).length;
 
   document.getElementById("favCount")
     .innerText = favorites;
 
   const recent =
-    clients.slice(0, 5).length;
+    contacts.slice(0, 5).length;
 
   document.getElementById("newCount")
     .innerText = recent;
@@ -300,14 +298,14 @@ function updateKPI(clients) {
 
 async function loadAnalytics() {
 
-  const clients =
-    await apiFetch("/clients");
+  const contacts =
+    await apiFetch("/contacts");
 
   const ctx =
     document.getElementById("analyticsChart");
 
   const favorites =
-    clients.filter(c => c.favorite).length;
+    contacts.filter(c => c.favorite).length;
 
   if (analyticsChart) {
     analyticsChart.destroy();
@@ -327,7 +325,7 @@ async function loadAnalytics() {
       datasets: [{
         data: [
           favorites,
-          clients.length - favorites
+          contacts.length - favorites
         ]
       }]
     }
@@ -338,25 +336,37 @@ async function loadAnalytics() {
 
 async function loadFavorites() {
 
-  const clients =
-    await apiFetch("/clients");
+  const contacts =
+    await apiFetch("/contacts");
 
   const favorites =
-    clients.filter(c => c.favorite);
+    contacts.filter(c => c.favorite);
 
   const container =
     document.getElementById("favoritesList");
 
   container.innerHTML = "";
 
-  favorites.forEach(client => {
+  favorites.forEach(contact => {
 
     container.innerHTML += `
       <div class="client">
 
         <div>
-          <strong>${client.name}</strong><br>
-          ${client.phone}
+
+          <strong>
+            ${contact.firstname || ""}
+            ${contact.lastname || ""}
+          </strong>
+
+          <br>
+
+          ${contact.phone || ""}
+
+          <br>
+
+          ${contact.companyName || ""}
+
         </div>
 
       </div>
@@ -368,56 +378,68 @@ async function loadFavorites() {
 
 async function loadUserInfo() {
 
-  const clients =
-    await apiFetch("/clients");
+  const contacts =
+    await apiFetch("/contacts");
 
   document.getElementById("userStats")
-    .innerText = clients.length;
+    .innerText = contacts.length;
 }
 
-// ================= RENDER CLIENTS =================
+// ================= RENDER CONTACTS =================
 
-function renderClients(clients) {
+function renderContacts(contacts) {
 
   const list =
     document.getElementById("list");
 
   list.innerHTML = "";
 
-  clients.forEach(client => {
+  contacts.forEach(contact => {
 
     list.innerHTML += `
+
       <div class="client">
 
         <div class="client-info">
 
           <strong>
-            ${client.name}
+
+            ${contact.firstname || ""}
+            ${contact.lastname || ""}
+
           </strong>
 
-          ${client.favorite ? "⭐" : ""}
+          ${contact.favorite ? "⭐" : ""}
 
           <br>
 
-          ${client.phone}
+          ${contact.companyName || ""}
 
           <br>
 
-          ${client.address || ""}
+          ${contact.email || ""}
+
+          <br>
+
+          ${contact.phone || ""}
+
+          <br>
+
+          ${contact.billingAddress || ""}
 
         </div>
 
         <div>
 
           <button
-            onclick="toggleFavorite('${client._id}')"
+            onclick="toggleFavorite('${contact._id}')"
           >
             ⭐
           </button>
 
           <button
             class="delete"
-            onclick="deleteClient('${client._id}')"
+            onclick="deleteContact('${contact._id}')"
           >
             ❌
           </button>
@@ -429,24 +451,24 @@ function renderClients(clients) {
   });
 }
 
-// ================= LOAD CLIENTS =================
+// ================= LOAD CONTACTS =================
 
-async function loadClients(query = "") {
+async function loadContacts(query = "") {
 
-  let url = "/clients";
+  let url = "/contacts";
 
   if (query) {
     url += `?${query}`;
   }
 
-  const clients =
+  const contacts =
     await apiFetch(url);
 
-  updateKPI(clients);
+  updateKPI(contacts);
 
-  renderClients(clients);
+  renderContacts(contacts);
 
-  updateChart(clients);
+  updateChart(contacts);
 
   // MAP MARKERS
   if (map) {
@@ -457,18 +479,26 @@ async function loadClients(query = "") {
 
     markers = [];
 
-    clients.forEach(client => {
+    contacts.forEach(contact => {
 
-      if (client.lat && client.lng) {
+      if (
+        contact.lat &&
+        contact.lng
+      ) {
 
         const marker =
           L.marker([
-            client.lat,
-            client.lng
+            contact.lat,
+            contact.lng
           ])
           .addTo(map)
           .bindPopup(`
-            <b>${client.name}</b>
+
+            <b>
+              ${contact.firstname || ""}
+              ${contact.lastname || ""}
+            </b>
+
           `);
 
         markers.push(marker);
@@ -477,105 +507,14 @@ async function loadClients(query = "") {
   }
 }
 
-// ================= PIPELINE =================
-
-async function loadPipeline() {
-
-  const clients =
-    await apiFetch("/clients");
-
-  const columns = {
-
-    lead:
-      document.getElementById("leadColumn"),
-
-    contacted:
-      document.getElementById("contactedColumn"),
-
-    proposal:
-      document.getElementById("proposalColumn"),
-
-    negotiation:
-      document.getElementById("negotiationColumn"),
-
-    won:
-      document.getElementById("wonColumn")
-  };
-
-  // RESET
-  Object.values(columns)
-    .forEach(column => {
-      column.innerHTML = "";
-    });
-
-  // CARDS
-  clients.forEach(client => {
-
-    const card =
-      document.createElement("div");
-
-    card.className = "pipeline-card";
-
-    card.draggable = true;
-
-    card.innerHTML = `
-      <strong>${client.name}</strong>
-      <br>
-      ${client.phone}
-    `;
-
-    // DRAG
-    card.addEventListener("dragstart", () => {
-      draggedClient = client;
-    });
-
-    const status =
-      client.status || "lead";
-
-    columns[status]?.appendChild(card);
-  });
-
-  // DROP ZONES
-  document
-    .querySelectorAll(".dropzone")
-    .forEach(zone => {
-
-      zone.ondragover = e => {
-        e.preventDefault();
-      };
-
-      zone.ondrop = async () => {
-
-        const status =
-          zone.id
-            .replace("Column", "");
-
-        await apiFetch(
-          `/clients/status/${draggedClient._id}`,
-          {
-            method: "PUT",
-
-            body: JSON.stringify({
-              status
-            })
-          }
-        );
-
-        loadPipeline();
-
-        showToast("Pipeline mis à jour 🚀");
-      };
-    });
-}
-
 // ================= ACTIONS =================
 
-function filterClients() {
+function filterContacts() {
 
   const query =
     document.getElementById("search").value;
 
-  loadClients(
+  loadContacts(
     query
       ? `search=${encodeURIComponent(query)}`
       : ""
@@ -585,41 +524,65 @@ function filterClients() {
 async function toggleFavorite(id) {
 
   await apiFetch(
-    `/clients/favorite/${id}`,
+    `/contacts/favorite/${id}`,
     {
       method: "PUT"
     }
   );
 
-  loadClients();
+  loadContacts();
 }
 
-async function deleteClient(id) {
+async function deleteContact(id) {
 
   await apiFetch(
-    `/clients/${id}`,
+    `/contacts/${id}`,
     {
       method: "DELETE"
     }
   );
 
-  loadClients();
+  loadContacts();
 
-  showToast("Client supprimé 🗑️");
+  showToast("Contact supprimé 🗑️");
 }
 
-async function addClient() {
+// ================= ADD CONTACT =================
 
-  const name =
-    document.getElementById("name").value;
+async function addContact() {
+
+  const type =
+    document.getElementById("type").value;
+
+  const firstname =
+    document.getElementById("firstname").value;
+
+  const lastname =
+    document.getElementById("lastname").value;
+
+  const companyName =
+    document.getElementById("companyName").value;
+
+  const siret =
+    document.getElementById("siret").value;
+
+  const email =
+    document.getElementById("emailContact").value;
 
   const phone =
     document.getElementById("phone").value;
 
-  const address =
-    document.getElementById("address").value;
+  const billingAddress =
+    document.getElementById("billingAddress").value;
 
-  if (!address) {
+  const shippingAddress =
+    document.getElementById("shippingAddress").value;
+
+  const notes =
+    document.getElementById("notes").value;
+
+  if (!billingAddress) {
+
     return showToast(
       "Adresse obligatoire ❗"
     );
@@ -629,49 +592,76 @@ async function addClient() {
 
   // GEOLOC
   const geoRes = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(billingAddress)}`
   );
 
   const geoData =
     await geoRes.json();
 
-  if (!geoData.length) {
+  let lat = null;
+  let lng = null;
 
-    hideLoader();
+  if (geoData.length) {
 
-    return showToast(
-      "Adresse introuvable ❌"
-    );
+    lat = parseFloat(geoData[0].lat);
+
+    lng = parseFloat(geoData[0].lon);
   }
 
-  await apiFetch("/clients", {
+  await apiFetch("/contacts", {
 
     method: "POST",
 
     body: JSON.stringify({
 
-      name,
+      type,
+
+      firstname,
+      lastname,
+
+      companyName,
+
+      siret,
+
+      email,
+
       phone,
-      address,
 
-      lat: parseFloat(geoData[0].lat),
+      billingAddress,
 
-      lng: parseFloat(geoData[0].lon)
+      shippingAddress,
+
+      notes,
+
+      lat,
+      lng
     })
   });
 
   // RESET INPUTS
-  document.getElementById("name").value = "";
+  document.getElementById("firstname").value = "";
+
+  document.getElementById("lastname").value = "";
+
+  document.getElementById("companyName").value = "";
+
+  document.getElementById("siret").value = "";
+
+  document.getElementById("emailContact").value = "";
 
   document.getElementById("phone").value = "";
 
-  document.getElementById("address").value = "";
+  document.getElementById("billingAddress").value = "";
 
-  loadClients();
+  document.getElementById("shippingAddress").value = "";
+
+  document.getElementById("notes").value = "";
+
+  loadContacts();
 
   hideLoader();
 
-  showToast("Client ajouté ✅");
+  showToast("Contact ajouté ✅");
 }
 
 // ================= UI =================
@@ -686,7 +676,9 @@ function showToast(message) {
   toast.classList.add("show");
 
   setTimeout(() => {
+
     toast.classList.remove("show");
+
   }, 2500);
 }
 
