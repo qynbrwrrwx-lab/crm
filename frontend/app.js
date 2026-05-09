@@ -889,55 +889,6 @@ async function createInvoice() {
 
   showLoader();
 
-  try {
-
-    await apiFetch("/invoices", {
-
-      method: "POST",
-
-      body: JSON.stringify({
-
-        type,
-
-        contactId,
-
-        paymentMethod,
-
-        products: [
-          {
-            productId,
-            quantity
-          }
-        ]
-      })
-    });
-
-    await loadInvoices();
-
-    await loadProducts();
-
-    await loadInvoiceData();
-
-    showToast("Document créé ✅");
-
-  } catch (err) {
-
-    console.error(err);
-
-    showToast(
-      err.message || "Erreur API"
-    );
-
-  } finally {
-
-    hideLoader();
-  }
-}
-
-  showLoader();
-
-  try {
-
     await apiFetch("/invoices", {
 
       method: "POST",
