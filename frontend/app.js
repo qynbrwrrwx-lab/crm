@@ -882,12 +882,16 @@ async function createInvoice() {
 
   if (!contactId || !productId) {
 
-    return showToast(
+    showToast(
       "Contact et produit obligatoires ❗"
     );
+
+    return;
   }
 
   showLoader();
+
+  try {
 
     await apiFetch("/invoices", {
 
@@ -896,34 +900,38 @@ async function createInvoice() {
       body: JSON.stringify({
 
         type,
-
         contactId,
-
         paymentMethod,
 
         products: [
           {
             productId,
-            quantity
+            quantity: Number(quantity)
           }
         ]
       })
     });
 
-    loadInvoices();
+    await loadInvoices();
 
-    loadProducts();
+    await loadProducts();
 
-    loadInvoiceData();
+    await loadInvoiceData();
 
     showToast("Document créé ✅");
 
   } catch (err) {
 
-    showToast(err.message);
-  }
+    console.error(err);
 
-  hideLoader();
+    showToast(
+      err.message || "Erreur API"
+    );
+
+  } finally {
+
+    hideLoader();
+  }
 }
 
 // MARK PAID
