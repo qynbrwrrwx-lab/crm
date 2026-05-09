@@ -40,28 +40,55 @@ async function apiFetch(url, options = {}) {
     ...options
   };
 
-  const res = await fetch(url, config);
+  try {
 
-  // SESSION EXPIRE
-  if (res.status === 401) {
+    const res = await fetch(url, config);
 
-    logout();
+    // SESSION EXPIRE
+    if (res.status === 401) {
 
-    throw new Error("Session expirée");
-  }
+      logout();
 
-  // API ERROR
-  if (!res.ok) {
+      throw new Error("Session expirée");
+    }
 
-    const err =
-      await res.json().catch(() => ({}));
+    // API ERROR
+    if (!res.ok) {
 
-    throw new Error(
-      err.error || "Erreur API"
+      let err = {};
+
+      try {
+
+        err = await res.json();
+
+      } catch {
+
+        err = {
+          error: "Erreur serveur"
+        };
+      }
+
+      console.error(
+        "❌ API ERROR :",
+        err
+      );
+
+      throw new Error(
+        err.error || "Erreur API"
+      );
+    }
+
+    return await res.json();
+
+  } catch (err) {
+
+    console.error(
+      "❌ FETCH ERROR :",
+      err
     );
-  }
 
-  return res.json();
+    throw err;
+  }
 }
 
 // ================= INIT =================
@@ -83,13 +110,13 @@ function showApp() {
 
   initMap();
 
-  loadContacts();
+  loadContacts().catch(console.error);
 
-  loadProducts();
+  loadProducts().catch(console.error);
 
-  loadInvoices();
+  loadInvoices().catch(console.error);
 
-  loadInvoiceData();
+  loadInvoiceData().catch(console.error);
 }
 
 // ================= AUTH =================
@@ -691,7 +718,7 @@ async function deleteProduct(id) {
 
 // ================= INVOICES =================
 
-// LOAD DATA SELECTS
+// LOAD SELECT DATA
 async function loadInvoiceData() {
 
   const contacts =
@@ -708,11 +735,9 @@ async function loadInvoiceData() {
 
   if (!contactSelect || !productSelect) return;
 
+  // CONTACTS
   contactSelect.innerHTML =
     `<option value="">Sélectionner un contact</option>`;
-
-  productSelect.innerHTML =
-    `<option value="">Sélectionner un produit</option>`;
 
   contacts.forEach(contact => {
 
@@ -725,11 +750,16 @@ async function loadInvoiceData() {
     `;
   });
 
+  // PRODUCTS
+  productSelect.innerHTML =
+    `<option value="">Sélectionner un produit</option>`;
+
   products.forEach(product => {
 
     productSelect.innerHTML += `
       <option value="${product._id}">
         ${product.name}
+        (${product.stock} stock)
       </option>
     `;
   });
@@ -738,10 +768,19 @@ async function loadInvoiceData() {
 // LOAD INVOICES
 async function loadInvoices() {
 
-  const invoices =
-    await apiFetch("/invoices");
+  try {
 
-  renderInvoices(invoices);
+    const invoices =
+      await apiFetch("/invoices");
+
+    renderInvoices(invoices);
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast(err.message);
+  }
 }
 
 // RENDER INVOICES
@@ -763,23 +802,20 @@ function renderInvoices(invoices) {
         <div class="client-info">
 
           <strong>
-            ${invoice.number}
+            ${invoice.invoiceNumber}
           </strong>
 
           <br>
 
-          ${invoice.contactName || ""}
-
-          <br>
-
-          ${invoice.type === "quote"
+          ${
+            invoice.type === "quote"
             ? "📄 Devis"
             : "🧾 Facture"
           }
 
           <br>
 
-          TTC :
+          Total TTC :
           ${Number(invoice.totalTTC).toFixed(2)} €
 
           <br>
@@ -790,17 +826,27 @@ function renderInvoices(invoices) {
           <br>
 
           Statut :
-          ${invoice.status}
+          ${
+            invoice.paymentStatus === "paid"
+            ? "✅ Payé"
+            : "⌛ En attente"
+          }
 
         </div>
 
         <div>
 
-          <button
-            onclick="markInvoicePaid('${invoice._id}')"
-          >
-            ✅
-          </button>
+          ${
+            invoice.paymentStatus !== "paid"
+            ? `
+              <button
+                onclick="markInvoicePaid('${invoice._id}')"
+              >
+                💰
+              </button>
+            `
+            : ""
+          }
 
           <button
             class="delete"
@@ -820,19 +866,30 @@ function renderInvoices(invoices) {
 async function createInvoice() {
 
   const contactId =
-    document.getElementById("invoiceContact").value;
+    document.getElementById(
+      "invoiceContact"
+    ).value;
 
   const productId =
-    document.getElementById("invoiceProduct").value;
+    document.getElementById(
+      "invoiceProduct"
+    ).value;
 
-  const quantity =
-    document.getElementById("invoiceQuantity").value;
+  const quantity = Number(
+    document.getElementById(
+      "invoiceQuantity"
+    ).value
+  );
 
   const type =
-    document.getElementById("invoiceType").value;
+    document.getElementById(
+      "invoiceType"
+    ).value;
 
   const paymentMethod =
-    document.getElementById("paymentMethod").value;
+    document.getElementById(
+      "paymentMethod"
+    ).value;
 
   if (!contactId || !productId) {
 
@@ -840,6 +897,75 @@ async function createInvoice() {
       "Contact et produit obligatoires ❗"
     );
   }
+
+  if (quantity <= 0) {
+
+    return showToast(
+      "Quantité invalide ❗"
+    );
+  }
+
+  showLoader();
+
+  try {
+
+    console.log(
+      "📤 Création facture..."
+    );
+
+    const result =
+      await apiFetch("/invoices", {
+
+        method: "POST",
+
+        body: JSON.stringify({
+
+          type,
+
+          contactId,
+
+          paymentMethod,
+
+          products: [
+            {
+              productId,
+              quantity
+            }
+          ]
+        })
+      });
+
+    console.log(
+      "✅ FACTURE :",
+      result
+    );
+
+    await loadInvoices();
+
+    await loadProducts();
+
+    await loadInvoiceData();
+
+    showToast(
+      "Document créé ✅"
+    );
+
+  } catch (err) {
+
+    console.error(
+      "❌ CREATE INVOICE ERROR :",
+      err
+    );
+
+    showToast(
+      err.message || "Erreur API"
+    );
+
+  } finally {
+
+    hideLoader();
+  }
+}
 
   showLoader();
 
@@ -851,15 +977,26 @@ async function createInvoice() {
 
       body: JSON.stringify({
 
-        contactId,
-        productId,
-        quantity,
         type,
-        paymentMethod
+
+        contactId,
+
+        paymentMethod,
+
+        products: [
+          {
+            productId,
+            quantity
+          }
+        ]
       })
     });
 
     loadInvoices();
+
+    loadProducts();
+
+    loadInvoiceData();
 
     showToast("Document créé ✅");
 
@@ -871,34 +1008,56 @@ async function createInvoice() {
   hideLoader();
 }
 
-// PAID
+// MARK PAID
 async function markInvoicePaid(id) {
 
-  await apiFetch(
-    `/invoices/pay/${id}`,
-    {
-      method: "PUT"
-    }
-  );
+  try {
 
-  loadInvoices();
+    await apiFetch(
+      `/invoices/pay/${id}`,
+      {
+        method: "PUT"
+      }
+    );
 
-  showToast("Facture payée ✅");
+    await loadInvoices();
+
+    showToast(
+      "Facture payée ✅"
+    );
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast(err.message);
+  }
 }
 
-// DELETE
+// DELETE INVOICE
 async function deleteInvoice(id) {
 
-  await apiFetch(
-    `/invoices/${id}`,
-    {
-      method: "DELETE"
-    }
-  );
+  try {
 
-  loadInvoices();
+    await apiFetch(
+      `/invoices/${id}`,
+      {
+        method: "DELETE"
+      }
+    );
 
-  showToast("Document supprimé 🗑️");
+    await loadInvoices();
+
+    showToast(
+      "Document supprimé 🗑️"
+    );
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast(err.message);
+  }
 }
 
 // ================= ACTIONS =================

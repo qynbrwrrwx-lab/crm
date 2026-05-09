@@ -10,7 +10,7 @@
   content="width=device-width, initial-scale=1.0"
 />
 
-<title>My Prospect</title>
+<title>My Prospect ERP</title>
 
 <link rel="stylesheet" href="style.css" />
 
@@ -22,6 +22,21 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
+/* ================= GLOBAL ================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: #020617;
+  color: white;
+}
 
 /* ================= AUTH ================= */
 
@@ -81,15 +96,18 @@
   background: #020617;
 
   color: white;
-
-  box-sizing: border-box;
 }
 
 .auth-card input:focus {
   border: 1px solid #3b82f6;
 
-  box-shadow:
-    0 0 10px rgba(59,130,246,0.5);
+  outline: none;
+}
+
+/* ================= BUTTONS ================= */
+
+button {
+  cursor: pointer;
 }
 
 .primary-btn {
@@ -110,8 +128,6 @@
 
   color: white;
 
-  cursor: pointer;
-
   font-weight: bold;
 }
 
@@ -129,8 +145,6 @@
   background: #020617;
 
   color: #cbd5f5;
-
-  cursor: pointer;
 }
 
 .auth-links {
@@ -149,12 +163,129 @@
 
   color: #3b82f6;
 
-  cursor: pointer;
-
   font-size: 13px;
 }
 
-/* ================= FORMS ================= */
+/* ================= APP ================= */
+
+.app-layout {
+  display: flex;
+
+  min-height: 100vh;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+  width: 260px;
+
+  background: #0f172a;
+
+  padding: 20px;
+
+  border-right:
+    1px solid rgba(255,255,255,0.05);
+
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.logo-big {
+  width: 120px;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.sidebar nav button {
+  background: #111827;
+
+  border: none;
+
+  color: white;
+
+  padding: 14px;
+
+  border-radius: 12px;
+
+  text-align: left;
+
+  transition: 0.2s;
+}
+
+.sidebar nav button:hover,
+.sidebar nav button.active {
+  background: #2563eb;
+}
+
+.logout {
+  margin-top: auto;
+
+  background: #dc2626;
+
+  border: none;
+
+  color: white;
+
+  padding: 14px;
+
+  border-radius: 12px;
+}
+
+/* ================= MAIN ================= */
+
+.main {
+  flex: 1;
+
+  padding: 25px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+
+  gap: 25px;
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+/* ================= CARDS ================= */
+
+.card {
+  background: #0f172a;
+
+  padding: 20px;
+
+  border-radius: 18px;
+
+  border:
+    1px solid rgba(255,255,255,0.05);
+}
+
+/* ================= GRID ================= */
+
+.grid {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 20px;
+}
 
 .contact-grid,
 .product-grid,
@@ -172,6 +303,9 @@
   grid-column: 1 / -1;
 }
 
+/* ================= INPUTS ================= */
+
+input,
 select,
 textarea {
   width: 100%;
@@ -185,13 +319,180 @@ textarea {
   background: #020617;
 
   color: white;
-
-  box-sizing: border-box;
 }
 
 textarea {
   min-height: 100px;
   resize: vertical;
+}
+
+/* ================= KPI ================= */
+
+.kpi-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+
+  gap: 20px;
+
+  margin-bottom: 20px;
+}
+
+.kpi {
+  background: #0f172a;
+
+  padding: 20px;
+
+  border-radius: 18px;
+
+  text-align: center;
+}
+
+.kpi h3 {
+  color: #94a3b8;
+
+  margin-bottom: 10px;
+}
+
+.kpi span {
+  font-size: 32px;
+
+  font-weight: bold;
+
+  color: #3b82f6;
+}
+
+/* ================= LIST ================= */
+
+.client {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  background: #111827;
+
+  padding: 14px;
+
+  border-radius: 12px;
+
+  margin-top: 10px;
+}
+
+.client-info {
+  line-height: 1.6;
+}
+
+.client button {
+  margin-left: 6px;
+
+  border: none;
+
+  padding: 8px 10px;
+
+  border-radius: 8px;
+
+  background: #1e293b;
+
+  color: white;
+}
+
+.delete {
+  background: #dc2626 !important;
+}
+
+/* ================= MAP ================= */
+
+#map {
+  height: 500px;
+
+  border-radius: 18px;
+
+  margin-top: 15px;
+}
+
+/* ================= TOAST ================= */
+
+.toast {
+  position: fixed;
+
+  bottom: 20px;
+  right: 20px;
+
+  background: #2563eb;
+
+  color: white;
+
+  padding: 14px 20px;
+
+  border-radius: 12px;
+
+  opacity: 0;
+
+  transition: 0.3s;
+
+  z-index: 999;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+/* ================= LOADER ================= */
+
+.loader {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0,0,0,0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+
+  border:
+    5px solid rgba(255,255,255,0.1);
+
+  border-top:
+    5px solid #3b82f6;
+
+  border-radius: 50%;
+
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width: 900px) {
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
 }
 
 </style>
@@ -207,9 +508,7 @@ textarea {
   class="loader"
   style="display:none;"
 >
-
   <div class="spinner"></div>
-
 </div>
 
 <!-- ================= TOAST ================= -->
@@ -320,7 +619,7 @@ textarea {
         <button
           onclick="showSection('invoices', event)"
         >
-          📄 Factures
+          🧾 Factures
         </button>
 
         <button
@@ -364,7 +663,7 @@ textarea {
 
       <div class="container">
 
-        <!-- ================= DASHBOARD ================= -->
+        <!-- DASHBOARD -->
 
         <div
           id="dashboard"
@@ -400,7 +699,7 @@ textarea {
 
         </div>
 
-        <!-- ================= CONTACTS ================= -->
+        <!-- CONTACTS -->
 
         <div
           id="contacts"
@@ -411,7 +710,7 @@ textarea {
 
             <input
               id="search"
-              placeholder="🔎 Rechercher un contact..."
+              placeholder="🔎 Rechercher..."
               oninput="filterContacts()"
             />
 
@@ -419,11 +718,9 @@ textarea {
 
           <div class="grid">
 
-            <!-- ADD CONTACT -->
-
             <div class="card">
 
-              <h2>👥 Ajouter un contact</h2>
+              <h2>👥 Ajouter contact</h2>
 
               <div class="contact-grid">
 
@@ -445,7 +742,7 @@ textarea {
 
                 <input
                   id="companyName"
-                  placeholder="Raison sociale"
+                  placeholder="Entreprise"
                 />
 
                 <input
@@ -493,13 +790,14 @@ textarea {
 
               </div>
 
-              <button onclick="addContact()">
+              <button
+                class="primary-btn"
+                onclick="addContact()"
+              >
                 Ajouter contact
               </button>
 
             </div>
-
-            <!-- LIST CONTACTS -->
 
             <div class="card">
 
@@ -513,7 +811,7 @@ textarea {
 
         </div>
 
-        <!-- ================= PRODUCTS ================= -->
+        <!-- PRODUCTS -->
 
         <div
           id="products"
@@ -522,11 +820,9 @@ textarea {
 
           <div class="grid">
 
-            <!-- ADD PRODUCT -->
-
             <div class="card">
 
-              <h2>📦 Ajouter un produit</h2>
+              <h2>📦 Ajouter produit</h2>
 
               <div class="product-grid">
 
@@ -549,8 +845,8 @@ textarea {
                 <input
                   id="productTVA"
                   type="number"
-                  placeholder="TVA (%)"
                   value="20"
+                  placeholder="TVA"
                 />
 
                 <input
@@ -567,13 +863,14 @@ textarea {
 
               </div>
 
-              <button onclick="addProduct()">
+              <button
+                class="primary-btn"
+                onclick="addProduct()"
+              >
                 Ajouter produit
               </button>
 
             </div>
-
-            <!-- LIST PRODUCTS -->
 
             <div class="card">
 
@@ -587,7 +884,7 @@ textarea {
 
         </div>
 
-        <!-- ================= INVOICES ================= -->
+        <!-- FACTURES -->
 
         <div
           id="invoices"
@@ -596,28 +893,22 @@ textarea {
 
           <div class="grid">
 
-            <!-- CREATE INVOICE -->
-
             <div class="card">
 
-              <h2>📄 Nouvelle facture</h2>
+              <h2>🧾 Nouvelle facture</h2>
 
               <div class="invoice-grid">
 
                 <select id="invoiceContact">
-
                   <option value="">
                     Sélectionner un contact
                   </option>
-
                 </select>
 
                 <select id="invoiceProduct">
-
                   <option value="">
                     Sélectionner un produit
                   </option>
-
                 </select>
 
                 <input
@@ -665,17 +956,18 @@ textarea {
 
               </div>
 
-              <button onclick="createInvoice()">
+              <button
+                class="primary-btn"
+                onclick="createInvoice()"
+              >
                 Créer document
               </button>
 
             </div>
 
-            <!-- LIST INVOICES -->
-
             <div class="card">
 
-              <h2>🧾 Factures & devis</h2>
+              <h2>📄 Factures & devis</h2>
 
               <div id="invoiceList"></div>
 
@@ -685,7 +977,7 @@ textarea {
 
         </div>
 
-        <!-- ================= FAVORITES ================= -->
+        <!-- FAVORITES -->
 
         <div
           id="favorites"
@@ -702,7 +994,7 @@ textarea {
 
         </div>
 
-        <!-- ================= ANALYTICS ================= -->
+        <!-- ANALYTICS -->
 
         <div
           id="analytics"
@@ -719,7 +1011,7 @@ textarea {
 
         </div>
 
-        <!-- ================= MAP ================= -->
+        <!-- MAP -->
 
         <div
           id="mapSection"
@@ -736,7 +1028,7 @@ textarea {
 
         </div>
 
-        <!-- ================= SETTINGS ================= -->
+        <!-- SETTINGS -->
 
         <div
           id="settings"
@@ -752,8 +1044,11 @@ textarea {
               <span id="userStats">0</span>
             </p>
 
-            <button onclick="logout()">
-              🚪 Déconnexion
+            <button
+              class="primary-btn"
+              onclick="logout()"
+            >
+              Déconnexion
             </button>
 
           </div>
@@ -823,7 +1118,7 @@ async function requestReset() {
     body: JSON.stringify({ email })
   });
 
-  showToast("Email de reset envoyé 🔐");
+  showToast("Email reset envoyé 🔐");
 }
 
 </script>
