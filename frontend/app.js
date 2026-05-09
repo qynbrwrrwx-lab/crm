@@ -27,7 +27,9 @@ async function apiFetch(url, options = {}) {
   const token = getToken();
 
   const config = {
+
     headers: {
+
       "Content-Type": "application/json",
 
       ...(token && {
@@ -82,6 +84,8 @@ function showApp() {
   initMap();
 
   loadContacts();
+
+  loadProducts();
 }
 
 // ================= AUTH =================
@@ -130,15 +134,16 @@ async function login() {
 
   try {
 
-    const data = await apiFetch("/login", {
+    const data =
+      await apiFetch("/login", {
 
-      method: "POST",
+        method: "POST",
 
-      body: JSON.stringify({
-        email,
-        password
-      })
-    });
+        body: JSON.stringify({
+          email,
+          password
+        })
+      });
 
     setToken(data.token);
 
@@ -198,6 +203,11 @@ function showSection(sectionId, event) {
   // SETTINGS
   if (sectionId === "settings") {
     loadUserInfo();
+  }
+
+  // PRODUCTS
+  if (sectionId === "products") {
+    loadProducts();
   }
 }
 
@@ -507,6 +517,169 @@ async function loadContacts(query = "") {
   }
 }
 
+// ================= PRODUCTS =================
+
+// LOAD PRODUCTS
+async function loadProducts() {
+
+  const products =
+    await apiFetch("/products");
+
+  renderProducts(products);
+}
+
+// RENDER PRODUCTS
+function renderProducts(products) {
+
+  const list =
+    document.getElementById("productsList");
+
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  products.forEach(product => {
+
+    list.innerHTML += `
+
+      <div class="client">
+
+        <div class="client-info">
+
+          <strong>
+            ${product.name}
+          </strong>
+
+          <br>
+
+          Réf :
+          ${product.reference || "-"}
+
+          <br>
+
+          HT :
+          ${Number(product.priceHT).toFixed(2)} €
+
+          <br>
+
+          TVA :
+          ${product.tva} %
+
+          <br>
+
+          TTC :
+          ${Number(product.priceTTC).toFixed(2)} €
+
+          <br>
+
+          Stock :
+          ${product.stock}
+
+        </div>
+
+        <div>
+
+          <button
+            class="delete"
+            onclick="deleteProduct('${product._id}')"
+          >
+            ❌
+          </button>
+
+        </div>
+
+      </div>
+    `;
+  });
+}
+
+// ADD PRODUCT
+async function addProduct() {
+
+  const name =
+    document.getElementById("productName").value;
+
+  const reference =
+    document.getElementById("productReference").value;
+
+  const description =
+    document.getElementById("productDescription").value;
+
+  const priceHT =
+    document.getElementById("productPriceHT").value;
+
+  const tva =
+    document.getElementById("productTVA").value;
+
+  const stock =
+    document.getElementById("productStock").value;
+
+  if (!name || !priceHT) {
+
+    return showToast(
+      "Nom et prix obligatoires ❗"
+    );
+  }
+
+  showLoader();
+
+  try {
+
+    await apiFetch("/products", {
+
+      method: "POST",
+
+      body: JSON.stringify({
+
+        name,
+        reference,
+        description,
+        priceHT,
+        tva,
+        stock
+      })
+    });
+
+    // RESET INPUTS
+    document.getElementById("productName").value = "";
+
+    document.getElementById("productReference").value = "";
+
+    document.getElementById("productDescription").value = "";
+
+    document.getElementById("productPriceHT").value = "";
+
+    document.getElementById("productTVA").value = "20";
+
+    document.getElementById("productStock").value = "";
+
+    loadProducts();
+
+    showToast("Produit ajouté ✅");
+
+  } catch (err) {
+
+    showToast(err.message);
+  }
+
+  hideLoader();
+}
+
+// DELETE PRODUCT
+async function deleteProduct(id) {
+
+  await apiFetch(
+    `/products/${id}`,
+    {
+      method: "DELETE"
+    }
+  );
+
+  loadProducts();
+
+  showToast("Produit supprimé 🗑️");
+}
+
 // ================= ACTIONS =================
 
 function filterContacts() {
@@ -603,9 +776,11 @@ async function addContact() {
 
   if (geoData.length) {
 
-    lat = parseFloat(geoData[0].lat);
+    lat =
+      parseFloat(geoData[0].lat);
 
-    lng = parseFloat(geoData[0].lon);
+    lng =
+      parseFloat(geoData[0].lon);
   }
 
   await apiFetch("/contacts", {
