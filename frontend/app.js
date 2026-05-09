@@ -866,30 +866,19 @@ function renderInvoices(invoices) {
 async function createInvoice() {
 
   const contactId =
-    document.getElementById(
-      "invoiceContact"
-    ).value;
+    document.getElementById("invoiceContact").value;
 
   const productId =
-    document.getElementById(
-      "invoiceProduct"
-    ).value;
+    document.getElementById("invoiceProduct").value;
 
-  const quantity = Number(
-    document.getElementById(
-      "invoiceQuantity"
-    ).value
-  );
+  const quantity =
+    document.getElementById("invoiceQuantity").value;
 
   const type =
-    document.getElementById(
-      "invoiceType"
-    ).value;
+    document.getElementById("invoiceType").value;
 
   const paymentMethod =
-    document.getElementById(
-      "paymentMethod"
-    ).value;
+    document.getElementById("paymentMethod").value;
 
   if (!contactId || !productId) {
 
@@ -898,47 +887,30 @@ async function createInvoice() {
     );
   }
 
-  if (quantity <= 0) {
-
-    return showToast(
-      "Quantité invalide ❗"
-    );
-  }
-
   showLoader();
 
   try {
 
-    console.log(
-      "📤 Création facture..."
-    );
+    await apiFetch("/invoices", {
 
-    const result =
-      await apiFetch("/invoices", {
+      method: "POST",
 
-        method: "POST",
+      body: JSON.stringify({
 
-        body: JSON.stringify({
+        type,
 
-          type,
+        contactId,
 
-          contactId,
+        paymentMethod,
 
-          paymentMethod,
-
-          products: [
-            {
-              productId,
-              quantity
-            }
-          ]
-        })
-      });
-
-    console.log(
-      "✅ FACTURE :",
-      result
-    );
+        products: [
+          {
+            productId,
+            quantity
+          }
+        ]
+      })
+    });
 
     await loadInvoices();
 
@@ -946,16 +918,11 @@ async function createInvoice() {
 
     await loadInvoiceData();
 
-    showToast(
-      "Document créé ✅"
-    );
+    showToast("Document créé ✅");
 
   } catch (err) {
 
-    console.error(
-      "❌ CREATE INVOICE ERROR :",
-      err
-    );
+    console.error(err);
 
     showToast(
       err.message || "Erreur API"
