@@ -2,17 +2,22 @@
 <html lang="fr">
 
 <head>
+
 <meta charset="UTF-8" />
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+/>
 
 <title>My Prospect</title>
 
 <link rel="stylesheet" href="style.css" />
 
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet/dist/leaflet.css"
+/>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -152,7 +157,8 @@ href="https://unpkg.com/leaflet/dist/leaflet.css" />
 /* ================= FORMS ================= */
 
 .contact-grid,
-.product-grid {
+.product-grid,
+.invoice-grid {
   display: grid;
 
   grid-template-columns: 1fr 1fr;
@@ -161,7 +167,8 @@ href="https://unpkg.com/leaflet/dist/leaflet.css" />
 }
 
 .contact-grid-full,
-.product-grid-full {
+.product-grid-full,
+.invoice-grid-full {
   grid-column: 1 / -1;
 }
 
@@ -195,9 +202,11 @@ textarea {
 
 <!-- ================= LOADER ================= -->
 
-<div id="loader"
-class="loader"
-style="display:none;">
+<div
+  id="loader"
+  class="loader"
+  style="display:none;"
+>
 
   <div class="spinner"></div>
 
@@ -205,13 +214,17 @@ style="display:none;">
 
 <!-- ================= TOAST ================= -->
 
-<div id="toast"
-class="toast"></div>
+<div
+  id="toast"
+  class="toast"
+></div>
 
 <!-- ================= AUTH ================= -->
 
-<div id="auth"
-class="auth-container">
+<div
+  id="auth"
+  class="auth-container"
+>
 
   <div class="auth-card">
 
@@ -262,8 +275,10 @@ class="auth-container">
 
 <!-- ================= APP ================= -->
 
-<div id="app"
-style="display:none;">
+<div
+  id="app"
+  style="display:none;"
+>
 
   <div class="app-layout">
 
@@ -300,6 +315,12 @@ style="display:none;">
           onclick="showSection('products', event)"
         >
           📦 Produits
+        </button>
+
+        <button
+          onclick="showSection('invoices', event)"
+        >
+          📄 Factures
         </button>
 
         <button
@@ -559,6 +580,104 @@ style="display:none;">
               <h2>📋 Liste produits</h2>
 
               <div id="productsList"></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ================= INVOICES ================= -->
+
+        <div
+          id="invoices"
+          class="section"
+        >
+
+          <div class="grid">
+
+            <!-- CREATE INVOICE -->
+
+            <div class="card">
+
+              <h2>📄 Nouvelle facture</h2>
+
+              <div class="invoice-grid">
+
+                <select id="invoiceContact">
+
+                  <option value="">
+                    Sélectionner un contact
+                  </option>
+
+                </select>
+
+                <select id="invoiceProduct">
+
+                  <option value="">
+                    Sélectionner un produit
+                  </option>
+
+                </select>
+
+                <input
+                  id="invoiceQuantity"
+                  type="number"
+                  min="1"
+                  value="1"
+                  placeholder="Quantité"
+                />
+
+                <select id="invoiceType">
+
+                  <option value="invoice">
+                    Facture
+                  </option>
+
+                  <option value="quote">
+                    Devis
+                  </option>
+
+                </select>
+
+                <select
+                  id="paymentMethod"
+                  class="invoice-grid-full"
+                >
+
+                  <option value="transfer">
+                    Virement
+                  </option>
+
+                  <option value="cb">
+                    Carte bancaire
+                  </option>
+
+                  <option value="cash">
+                    Espèces
+                  </option>
+
+                  <option value="check">
+                    Chèque
+                  </option>
+
+                </select>
+
+              </div>
+
+              <button onclick="createInvoice()">
+                Créer document
+              </button>
+
+            </div>
+
+            <!-- LIST INVOICES -->
+
+            <div class="card">
+
+              <h2>🧾 Factures & devis</h2>
+
+              <div id="invoiceList"></div>
 
             </div>
 

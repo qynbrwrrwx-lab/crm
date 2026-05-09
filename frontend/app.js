@@ -86,6 +86,10 @@ function showApp() {
   loadContacts();
 
   loadProducts();
+
+  loadInvoices();
+
+  loadInvoiceData();
 }
 
 // ================= AUTH =================
@@ -208,6 +212,14 @@ function showSection(sectionId, event) {
   // PRODUCTS
   if (sectionId === "products") {
     loadProducts();
+  }
+
+  // INVOICES
+  if (sectionId === "invoices") {
+
+    loadInvoices();
+
+    loadInvoiceData();
   }
 }
 
@@ -395,7 +407,7 @@ async function loadUserInfo() {
     .innerText = contacts.length;
 }
 
-// ================= RENDER CONTACTS =================
+// ================= CONTACTS =================
 
 function renderContacts(contacts) {
 
@@ -461,8 +473,6 @@ function renderContacts(contacts) {
   });
 }
 
-// ================= LOAD CONTACTS =================
-
 async function loadContacts(query = "") {
 
   let url = "/contacts";
@@ -480,7 +490,7 @@ async function loadContacts(query = "") {
 
   updateChart(contacts);
 
-  // MAP MARKERS
+  // MAP
   if (map) {
 
     markers.forEach(marker => {
@@ -519,7 +529,6 @@ async function loadContacts(query = "") {
 
 // ================= PRODUCTS =================
 
-// LOAD PRODUCTS
 async function loadProducts() {
 
   const products =
@@ -528,7 +537,6 @@ async function loadProducts() {
   renderProducts(products);
 }
 
-// RENDER PRODUCTS
 function renderProducts(products) {
 
   const list =
@@ -593,7 +601,6 @@ function renderProducts(products) {
   });
 }
 
-// ADD PRODUCT
 async function addProduct() {
 
   const name =
@@ -640,7 +647,6 @@ async function addProduct() {
       })
     });
 
-    // RESET INPUTS
     document.getElementById("productName").value = "";
 
     document.getElementById("productReference").value = "";
@@ -655,6 +661,8 @@ async function addProduct() {
 
     loadProducts();
 
+    loadInvoiceData();
+
     showToast("Produit ajouté ✅");
 
   } catch (err) {
@@ -665,7 +673,6 @@ async function addProduct() {
   hideLoader();
 }
 
-// DELETE PRODUCT
 async function deleteProduct(id) {
 
   await apiFetch(
@@ -677,7 +684,221 @@ async function deleteProduct(id) {
 
   loadProducts();
 
+  loadInvoiceData();
+
   showToast("Produit supprimé 🗑️");
+}
+
+// ================= INVOICES =================
+
+// LOAD DATA SELECTS
+async function loadInvoiceData() {
+
+  const contacts =
+    await apiFetch("/contacts");
+
+  const products =
+    await apiFetch("/products");
+
+  const contactSelect =
+    document.getElementById("invoiceContact");
+
+  const productSelect =
+    document.getElementById("invoiceProduct");
+
+  if (!contactSelect || !productSelect) return;
+
+  contactSelect.innerHTML =
+    `<option value="">Sélectionner un contact</option>`;
+
+  productSelect.innerHTML =
+    `<option value="">Sélectionner un produit</option>`;
+
+  contacts.forEach(contact => {
+
+    contactSelect.innerHTML += `
+      <option value="${contact._id}">
+        ${contact.firstname || ""}
+        ${contact.lastname || ""}
+        ${contact.companyName || ""}
+      </option>
+    `;
+  });
+
+  products.forEach(product => {
+
+    productSelect.innerHTML += `
+      <option value="${product._id}">
+        ${product.name}
+      </option>
+    `;
+  });
+}
+
+// LOAD INVOICES
+async function loadInvoices() {
+
+  const invoices =
+    await apiFetch("/invoices");
+
+  renderInvoices(invoices);
+}
+
+// RENDER INVOICES
+function renderInvoices(invoices) {
+
+  const list =
+    document.getElementById("invoiceList");
+
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  invoices.forEach(invoice => {
+
+    list.innerHTML += `
+
+      <div class="client">
+
+        <div class="client-info">
+
+          <strong>
+            ${invoice.number}
+          </strong>
+
+          <br>
+
+          ${invoice.contactName || ""}
+
+          <br>
+
+          ${invoice.type === "quote"
+            ? "📄 Devis"
+            : "🧾 Facture"
+          }
+
+          <br>
+
+          TTC :
+          ${Number(invoice.totalTTC).toFixed(2)} €
+
+          <br>
+
+          Paiement :
+          ${invoice.paymentMethod}
+
+          <br>
+
+          Statut :
+          ${invoice.status}
+
+        </div>
+
+        <div>
+
+          <button
+            onclick="markInvoicePaid('${invoice._id}')"
+          >
+            ✅
+          </button>
+
+          <button
+            class="delete"
+            onclick="deleteInvoice('${invoice._id}')"
+          >
+            ❌
+          </button>
+
+        </div>
+
+      </div>
+    `;
+  });
+}
+
+// CREATE INVOICE
+async function createInvoice() {
+
+  const contactId =
+    document.getElementById("invoiceContact").value;
+
+  const productId =
+    document.getElementById("invoiceProduct").value;
+
+  const quantity =
+    document.getElementById("invoiceQuantity").value;
+
+  const type =
+    document.getElementById("invoiceType").value;
+
+  const paymentMethod =
+    document.getElementById("paymentMethod").value;
+
+  if (!contactId || !productId) {
+
+    return showToast(
+      "Contact et produit obligatoires ❗"
+    );
+  }
+
+  showLoader();
+
+  try {
+
+    await apiFetch("/invoices", {
+
+      method: "POST",
+
+      body: JSON.stringify({
+
+        contactId,
+        productId,
+        quantity,
+        type,
+        paymentMethod
+      })
+    });
+
+    loadInvoices();
+
+    showToast("Document créé ✅");
+
+  } catch (err) {
+
+    showToast(err.message);
+  }
+
+  hideLoader();
+}
+
+// PAID
+async function markInvoicePaid(id) {
+
+  await apiFetch(
+    `/invoices/pay/${id}`,
+    {
+      method: "PUT"
+    }
+  );
+
+  loadInvoices();
+
+  showToast("Facture payée ✅");
+}
+
+// DELETE
+async function deleteInvoice(id) {
+
+  await apiFetch(
+    `/invoices/${id}`,
+    {
+      method: "DELETE"
+    }
+  );
+
+  loadInvoices();
+
+  showToast("Document supprimé 🗑️");
 }
 
 // ================= ACTIONS =================
@@ -716,6 +937,8 @@ async function deleteContact(id) {
   );
 
   loadContacts();
+
+  loadInvoiceData();
 
   showToast("Contact supprimé 🗑️");
 }
@@ -763,7 +986,6 @@ async function addContact() {
 
   showLoader();
 
-  // GEOLOC
   const geoRes = await fetch(
     `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(billingAddress)}`
   );
@@ -813,7 +1035,6 @@ async function addContact() {
     })
   });
 
-  // RESET INPUTS
   document.getElementById("firstname").value = "";
 
   document.getElementById("lastname").value = "";
@@ -833,6 +1054,8 @@ async function addContact() {
   document.getElementById("notes").value = "";
 
   loadContacts();
+
+  loadInvoiceData();
 
   hideLoader();
 

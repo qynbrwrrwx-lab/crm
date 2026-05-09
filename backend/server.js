@@ -83,9 +83,7 @@ mongoose
 // USERS
 const User = mongoose.model(
   "User",
-
   new mongoose.Schema({
-
     email: {
       type: String,
       unique: true
@@ -103,96 +101,163 @@ const User = mongoose.model(
 
     resetToken: String,
     resetExpires: Date
-
   })
 );
 
 // ================= CONTACTS =================
 const Contact = mongoose.model(
   "Contact",
+  new mongoose.Schema(
+    {
+      userId: mongoose.Schema.Types.ObjectId,
 
-  new mongoose.Schema({
+      type: {
+        type: String,
+        enum: ["particulier", "pro", "association"],
+        default: "particulier"
+      },
 
-    userId: mongoose.Schema.Types.ObjectId,
+      firstname: String,
+      lastname: String,
 
-    type: {
-      type: String,
-      enum: ["particulier", "pro", "association"],
-      default: "particulier"
+      companyName: String,
+      siret: String,
+
+      email: String,
+      phone: String,
+
+      billingAddress: String,
+      shippingAddress: String,
+
+      notes: String,
+
+      lat: Number,
+      lng: Number,
+
+      favorite: {
+        type: Boolean,
+        default: false
+      }
     },
-
-    firstname: String,
-    lastname: String,
-
-    companyName: String,
-    siret: String,
-
-    email: String,
-    phone: String,
-
-    billingAddress: String,
-    shippingAddress: String,
-
-    notes: String,
-
-    favorite: {
-      type: Boolean,
-      default: false
+    {
+      timestamps: true
     }
-
-  }, {
-    timestamps: true
-  })
+  )
 );
 
 // ================= PRODUCTS =================
 const Product = mongoose.model(
   "Product",
+  new mongoose.Schema(
+    {
+      userId: mongoose.Schema.Types.ObjectId,
 
-  new mongoose.Schema({
+      name: String,
 
-    userId: mongoose.Schema.Types.ObjectId,
+      reference: String,
 
-    name: String,
+      description: String,
 
-    reference: String,
+      category: String,
 
-    description: String,
+      priceHT: Number,
 
-    priceHT: Number,
+      tva: {
+        type: Number,
+        default: 20
+      },
 
-    tva: {
-      type: Number,
-      default: 20
+      priceTTC: Number,
+
+      stock: {
+        type: Number,
+        default: 0
+      },
+
+      barcode: String,
+
+      supplier: String,
+
+      active: {
+        type: Boolean,
+        default: true
+      }
     },
-
-    priceTTC: Number,
-
-    stock: {
-      type: Number,
-      default: 0
+    {
+      timestamps: true
     }
+  )
+);
 
-  }, {
-    timestamps: true
-  })
+// ================= INVOICES =================
+const Invoice = mongoose.model(
+  "Invoice",
+  new mongoose.Schema(
+    {
+      userId: mongoose.Schema.Types.ObjectId,
+
+      type: {
+        type: String,
+        enum: ["quote", "invoice"],
+        default: "quote"
+      },
+
+      contactId: mongoose.Schema.Types.ObjectId,
+
+      invoiceNumber: String,
+
+      products: [
+        {
+          productId: mongoose.Schema.Types.ObjectId,
+
+          name: String,
+
+          quantity: Number,
+
+          priceHT: Number,
+
+          tva: Number,
+
+          totalHT: Number,
+
+          totalTTC: Number
+        }
+      ],
+
+      totalHT: Number,
+
+      totalTTC: Number,
+
+      paymentStatus: {
+        type: String,
+        enum: ["pending", "paid"],
+        default: "pending"
+      },
+
+      paymentMethod: {
+        type: String,
+        enum: ["cb", "cash", "transfer", "check"],
+        default: "transfer"
+      }
+    },
+    {
+      timestamps: true
+    }
+  )
 );
 
 // ================= AUTH =================
 function auth(req, res, next) {
-
   const authHeader =
     req.headers.authorization;
 
   if (!authHeader) {
-
     return res.status(401).json({
       error: "Token manquant"
     });
   }
 
   try {
-
     const token =
       authHeader.split(" ")[1];
 
@@ -204,7 +269,6 @@ function auth(req, res, next) {
     next();
 
   } catch {
-
     return res.status(401).json({
       error: "Token invalide"
     });
@@ -213,9 +277,7 @@ function auth(req, res, next) {
 
 // ================= REGISTER =================
 app.post("/register", async (req, res) => {
-
   try {
-
     let { email, password } =
       req.body;
 
@@ -226,14 +288,12 @@ app.post("/register", async (req, res) => {
       await User.findOne({ email });
 
     if (existing && existing.isVerified) {
-
       return res.status(400).json({
         error: "Email déjà utilisé"
       });
     }
 
     if (existing && !existing.isVerified) {
-
       await User.deleteOne({ email });
     }
 
@@ -245,7 +305,6 @@ app.post("/register", async (req, res) => {
       .toString("hex");
 
     await User.create({
-
       email,
 
       password: hash,
@@ -262,7 +321,6 @@ app.post("/register", async (req, res) => {
       `${BASE_URL}/verify/${token}`;
 
     await sgMail.send({
-
       to: email,
 
       from: EMAIL_FROM,
@@ -270,33 +328,25 @@ app.post("/register", async (req, res) => {
       subject: "🚀 Active ton compte",
 
       html: `
-        <div style="font-family:Arial; text-align:center; padding:30px;">
-
+        <div style="font-family:Arial;text-align:center;padding:30px;">
           <h2>Bienvenue 👋</h2>
 
           <p>Active ton compte :</p>
 
-          <table align="center">
-            <tr>
-              <td style="
-                background:#3b82f6;
-                padding:14px 24px;
-                border-radius:8px;
-              ">
-                <a
-                  href="${verifyLink}"
-                  style="
-                    color:white;
-                    text-decoration:none;
-                    font-weight:bold;
-                  "
-                >
-                  Activer mon compte
-                </a>
-              </td>
-            </tr>
-          </table>
-
+          <a
+            href="${verifyLink}"
+            style="
+              background:#3b82f6;
+              color:white;
+              padding:14px 24px;
+              border-radius:8px;
+              text-decoration:none;
+              font-weight:bold;
+              display:inline-block;
+            "
+          >
+            Activer mon compte
+          </a>
         </div>
       `
     });
@@ -313,221 +363,6 @@ app.post("/register", async (req, res) => {
       error: "Erreur serveur"
     });
   }
-});
-
-// ================= RESEND VERIFICATION =================
-app.post("/resend-verification", async (req, res) => {
-
-  try {
-
-    let { email } = req.body;
-
-    email =
-      email.toLowerCase().trim();
-
-    const user =
-      await User.findOne({ email });
-
-    if (!user || user.isVerified) {
-
-      return res.json({
-        success: true
-      });
-    }
-
-    const token =
-      crypto.randomBytes(32)
-      .toString("hex");
-
-    user.verifyToken = token;
-
-    user.verifyExpires =
-      Date.now() + 3600000;
-
-    await user.save();
-
-    const verifyLink =
-      `${BASE_URL}/verify/${token}`;
-
-    await sgMail.send({
-
-      to: email,
-
-      from: EMAIL_FROM,
-
-      subject: "📩 Nouveau lien",
-
-      html: `
-        <a href="${verifyLink}">
-          Valider mon compte
-        </a>
-      `
-    });
-
-    res.json({
-      success: true
-    });
-
-  } catch (err) {
-
-    console.error(err);
-
-    res.status(500).json({
-      error: "Erreur serveur"
-    });
-  }
-});
-
-// ================= REQUEST RESET PASSWORD =================
-app.post("/request-reset", async (req, res) => {
-
-  try {
-
-    let { email } = req.body;
-
-    email =
-      email.toLowerCase().trim();
-
-    const user =
-      await User.findOne({ email });
-
-    if (!user) {
-
-      return res.json({
-        success: true
-      });
-    }
-
-    const token =
-      crypto.randomBytes(32)
-      .toString("hex");
-
-    user.resetToken = token;
-
-    user.resetExpires =
-      Date.now() + 3600000;
-
-    await user.save();
-
-    const resetLink =
-      `${BASE_URL}/reset-password/${token}`;
-
-    await sgMail.send({
-
-      to: email,
-
-      from: EMAIL_FROM,
-
-      subject: "🔐 Réinitialiser ton mot de passe",
-
-      html: `
-        <a href="${resetLink}">
-          Réinitialiser mon mot de passe
-        </a>
-      `
-    });
-
-    res.json({
-      success: true
-    });
-
-  } catch (err) {
-
-    console.error(err);
-
-    res.status(500).json({
-      error: "Erreur serveur"
-    });
-  }
-});
-
-// ================= RESET PASSWORD =================
-app.post("/reset-password/:token", async (req, res) => {
-
-  try {
-
-    const user =
-      await User.findOne({
-
-        resetToken: req.params.token,
-
-        resetExpires: {
-          $gt: Date.now()
-        }
-      });
-
-    if (!user) {
-
-      return res.status(400).json({
-        error: "Lien invalide"
-      });
-    }
-
-    const hash =
-      await bcrypt.hash(
-        req.body.password,
-        10
-      );
-
-    user.password = hash;
-
-    user.resetToken = null;
-    user.resetExpires = null;
-
-    await user.save();
-
-    res.json({
-      success: true
-    });
-
-  } catch (err) {
-
-    console.error(err);
-
-    res.status(500).json({
-      error: "Erreur serveur"
-    });
-  }
-});
-
-// ================= PAGE RESET =================
-app.get("/reset-password/:token", (req, res) => {
-
-  res.sendFile(
-    path.join(__dirname, "../frontend/reset.html")
-  );
-});
-
-// ================= VERIFY =================
-app.get("/verify/:token", async (req, res) => {
-
-  const user =
-    await User.findOne({
-
-      verifyToken: req.params.token,
-
-      verifyExpires: {
-        $gt: Date.now()
-      }
-    });
-
-  if (!user) {
-
-    return res.redirect(
-      `${BASE_URL}/error.html`
-    );
-  }
-
-  user.isVerified = true;
-
-  user.verifyToken = null;
-  user.verifyExpires = null;
-
-  await user.save();
-
-  res.redirect(
-    `${BASE_URL}/success.html`
-  );
 });
 
 // ================= LOGIN =================
@@ -564,16 +399,15 @@ app.post("/login", async (req, res) => {
       });
     }
 
-    const token =
-      jwt.sign(
-        {
-          id: user._id
-        },
-        JWT_SECRET,
-        {
-          expiresIn: "7d"
-        }
-      );
+    const token = jwt.sign(
+      {
+        id: user._id
+      },
+      JWT_SECRET,
+      {
+        expiresIn: "7d"
+      }
+    );
 
     res.json({
       success: true,
@@ -648,7 +482,7 @@ app.put("/contacts/favorite/:id", auth, async (req, res) => {
   if (!contact) {
 
     return res.status(404).json({
-      error: "Introuvable"
+      error: "Contact introuvable"
     });
   }
 
@@ -682,12 +516,15 @@ app.post("/products", auth, async (req, res) => {
     name,
     reference,
     description,
+    category,
     priceHT,
     tva,
-    stock
+    stock,
+    barcode,
+    supplier
   } = req.body;
 
-  const priceTTC =
+  const calculatedTTC =
     Number(priceHT) *
     (1 + Number(tva) / 100);
 
@@ -702,14 +539,50 @@ app.post("/products", auth, async (req, res) => {
 
       description,
 
+      category,
+
       priceHT,
 
       tva,
 
-      priceTTC,
+      priceTTC:
+        Number(calculatedTTC.toFixed(2)),
 
-      stock
+      stock,
+
+      barcode,
+
+      supplier
     });
+
+  res.json(product);
+});
+
+// UPDATE PRODUCT
+app.put("/products/:id", auth, async (req, res) => {
+
+  const product =
+    await Product.findOne({
+
+      _id: req.params.id,
+
+      userId: req.userId
+    });
+
+  if (!product) {
+
+    return res.status(404).json({
+      error: "Produit introuvable"
+    });
+  }
+
+  Object.assign(product, req.body);
+
+  product.priceTTC =
+    Number(product.priceHT) *
+    (1 + Number(product.tva) / 100);
+
+  await product.save();
 
   res.json(product);
 });
@@ -718,6 +591,154 @@ app.post("/products", auth, async (req, res) => {
 app.delete("/products/:id", auth, async (req, res) => {
 
   await Product.findOneAndDelete({
+
+    _id: req.params.id,
+
+    userId: req.userId
+  });
+
+  res.json({
+    success: true
+  });
+});
+
+// ================= INVOICES =================
+
+// GET INVOICES
+app.get("/invoices", auth, async (req, res) => {
+
+  const invoices =
+    await Invoice.find({
+      userId: req.userId
+    }).sort({
+      createdAt: -1
+    });
+
+  res.json(invoices);
+});
+
+// ADD INVOICE
+app.post("/invoices", auth, async (req, res) => {
+
+  const {
+    type,
+    contactId,
+    products,
+    paymentMethod
+  } = req.body;
+
+  let totalHT = 0;
+  let totalTTC = 0;
+
+  const formattedProducts = [];
+
+  for (const item of products) {
+
+    const product =
+      await Product.findOne({
+
+        _id: item.productId,
+
+        userId: req.userId
+      });
+
+    if (!product) {
+      continue;
+    }
+
+    if (product.stock < item.quantity) {
+
+      return res.status(400).json({
+        error: `Stock insuffisant pour ${product.name}`
+      });
+    }
+
+    const lineHT =
+      product.priceHT * item.quantity;
+
+    const lineTTC =
+      product.priceTTC * item.quantity;
+
+    totalHT += lineHT;
+    totalTTC += lineTTC;
+
+    formattedProducts.push({
+
+      productId: product._id,
+
+      name: product.name,
+
+      quantity: item.quantity,
+
+      priceHT: product.priceHT,
+
+      tva: product.tva,
+
+      totalHT: lineHT,
+
+      totalTTC: lineTTC
+    });
+
+    // DECREMENT STOCK
+    product.stock -= item.quantity;
+
+    await product.save();
+  }
+
+  const invoice =
+    await Invoice.create({
+
+      userId: req.userId,
+
+      type,
+
+      contactId,
+
+      paymentMethod,
+
+      invoiceNumber:
+        "FAC-" + Date.now(),
+
+      products: formattedProducts,
+
+      totalHT,
+
+      totalTTC
+    });
+
+  res.json(invoice);
+});
+
+// UPDATE PAYMENT STATUS
+app.put("/invoices/pay/:id", auth, async (req, res) => {
+
+  const invoice =
+    await Invoice.findOne({
+
+      _id: req.params.id,
+
+      userId: req.userId
+    });
+
+  if (!invoice) {
+
+    return res.status(404).json({
+      error: "Facture introuvable"
+    });
+  }
+
+  invoice.paymentStatus =
+    req.body.paymentStatus;
+
+  await invoice.save();
+
+  res.json(invoice);
+});
+
+// DELETE INVOICE
+app.delete("/invoices/:id", auth, async (req, res) => {
+
+  await Invoice.findOneAndDelete({
 
     _id: req.params.id,
 
