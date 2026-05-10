@@ -1,6 +1,6 @@
 // ================= GLOBAL =================
 
-const API_URL = "https://crm-2-15ox.onrender.com/";
+const API_URL = "https://crm-2-15ox.onrender.com";
 let map;
 let markers = [];
 
