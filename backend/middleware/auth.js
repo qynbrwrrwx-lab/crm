@@ -23,11 +23,14 @@ module.exports = (req, res, next) => {
         process.env.JWT_SECRET
       );
 
-    req.userId = decoded.id;
+    req.userId =
+      decoded.userId;
 
     next();
 
-  } catch {
+  } catch (err) {
+
+    console.error(err);
 
     return res.status(401).json({
       error: "Token invalide"
