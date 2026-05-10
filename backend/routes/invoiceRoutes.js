@@ -1,23 +1,12 @@
 const express = require("express");
 
-const PDFDocument = require("pdfkit");
-
-const Invoice =
-  require("../models/invoice");
-
-const Product =
-  require("../models/product");
-
-const Contact =
-  require("../models/contact");
-
-const auth =
-  require("../middleware/auth");
-
-const sendInvoiceEmail =
-  require("../services/emailService");
-
 const router = express.Router();
+
+const Invoice = require("../models/invoice");
+const Contact = require("../models/contact");
+const Product = require("../models/product");
+
+const auth = require("../middleware/auth");
 
 // ================= GET INVOICES =================
 
@@ -26,14 +15,8 @@ router.get("/", auth, async (req, res) => {
   try {
 
     const invoices =
-      await Invoice.find({
-
-        userId: req.userId
-
-      }).sort({
-
-        createdAt: -1
-      });
+      await Invoice.find()
+      .sort({ createdAt: -1 });
 
     res.json(invoices);
 
@@ -42,9 +25,7 @@ router.get("/", auth, async (req, res) => {
     console.error(err);
 
     res.status(500).json({
-
-      error:
-        "Erreur récupération factures"
+      error: "Erreur récupération factures"
     });
   }
 });
@@ -58,367 +39,85 @@ router.post("/", auth, async (req, res) => {
     const {
       type,
       contactId,
-      products,
-      paymentMethod
+      paymentMethod,
+      products
     } = req.body;
 
-    // ================= CONTACT =================
-
+    // CONTACT
     const contact =
-  await Contact.findById(contactId);
-
-        _id: contactId,
-
-        userId: req.userId
-      });
+      await Contact.findById(contactId);
 
     if (!contact) {
 
       return res.status(404).json({
-
         error: "Contact introuvable"
       });
     }
 
-    // ================= TOTALS =================
-
     let totalHT = 0;
-
     let totalTTC = 0;
 
-    const formattedProducts = [];
+    const populatedProducts = [];
 
-    // ================= PRODUCTS =================
-
+    // PRODUCTS
     for (const item of products) {
 
       const product =
-  await Product.findById(
-    item.productId
-  );
-  
-      if (!product) continue;
+        await Product.findById(
+          item.productId
+        );
 
-      const quantity =
-        Number(item.quantity);
+      if (!product) {
 
-      // ================= STOCK =================
-
-      if (
-        type === "invoice" &&
-        product.stock < quantity
-      ) {
-
-        return res.status(400).json({
-
-          error:
-            `Stock insuffisant pour ${product.name}`
+        return res.status(404).json({
+          error: "Produit introuvable"
         });
       }
 
       const lineHT =
-        product.priceHT * quantity;
+        Number(product.priceHT) *
+        Number(item.quantity);
 
       const lineTTC =
-        product.priceTTC * quantity;
+        Number(product.priceTTC) *
+        Number(item.quantity);
 
       totalHT += lineHT;
-
       totalTTC += lineTTC;
 
-      formattedProducts.push({
-
+      populatedProducts.push({
         productId: product._id,
-
-        name: product.name,
-
-        quantity,
-
-        priceHT: product.priceHT,
-
-        tva: product.tva,
-
-        totalHT:
-          Number(lineHT.toFixed(2)),
-
-        totalTTC:
-          Number(lineTTC.toFixed(2))
+        quantity: item.quantity
       });
 
-      // ================= UPDATE STOCK =================
+      // UPDATE STOCK
+      product.stock -= item.quantity;
 
-      if (type === "invoice") {
-
-        product.stock -= quantity;
-
-        await product.save();
-      }
+      await product.save();
     }
 
-    // ================= CREATE DOCUMENT =================
+    const invoiceNumber =
+      "FAC-" + Date.now();
 
     const invoice =
       await Invoice.create({
 
-        userId: req.userId,
+        invoiceNumber,
 
         type,
 
         contactId,
 
-        contactName:
-          `${contact.firstname || ""}
-          ${contact.lastname || ""}
-          ${contact.companyName || ""}`,
+        products: populatedProducts,
 
-        invoiceNumber:
-          type === "quote"
-            ? "DEV-" + Date.now()
-            : "FAC-" + Date.now(),
+        totalHT,
 
-        products: formattedProducts,
+        totalTTC,
 
-        totalHT:
-          Number(totalHT.toFixed(2)),
+        paymentMethod,
 
-        totalTTC:
-          Number(totalTTC.toFixed(2)),
-
-        paymentMethod
+        paymentStatus: "pending"
       });
-
-    // ================= PDF =================
-
-    const doc =
-      new PDFDocument({
-
-        margin: 50
-      });
-
-    const buffers = [];
-
-    doc.on(
-      "data",
-      buffers.push.bind(buffers)
-    );
-
-    // ================= PDF CONTENT =================
-
-    doc
-      .fontSize(24)
-      .fillColor("#2563eb")
-      .text(
-
-        type === "quote"
-          ? "DEVIS"
-          : "FACTURE",
-
-        {
-          align: "center"
-        }
-      );
-
-    doc.moveDown();
-
-    doc
-      .fontSize(12)
-      .fillColor("black")
-      .text("My Prospect");
-
-    doc.text("contact@myprospect.fr");
-
-    doc.moveDown();
-
-    doc.text(
-      `Numéro : ${invoice.invoiceNumber}`
-    );
-
-    doc.text(
-      `Date : ${new Date()
-        .toLocaleDateString()}`
-    );
-
-    doc.moveDown();
-
-    // ================= CLIENT =================
-
-    doc
-      .fontSize(16)
-      .fillColor("#2563eb")
-      .text("CLIENT");
-
-    doc.moveDown(0.5);
-
-    doc
-      .fontSize(12)
-      .fillColor("black")
-      .text(invoice.contactName);
-
-    doc.text(contact.email || "");
-
-    doc.text(contact.phone || "");
-
-    doc.text(
-      contact.billingAddress || ""
-    );
-
-    doc.moveDown();
-
-    // ================= PRODUCTS =================
-
-    doc
-      .fontSize(16)
-      .fillColor("#2563eb")
-      .text("PRODUITS");
-
-    doc.moveDown();
-
-    formattedProducts.forEach(product => {
-
-      doc
-        .fontSize(12)
-        .fillColor("black")
-        .text(
-
-          `${product.name} x${product.quantity}`,
-
-          {
-            continued: true
-          }
-        )
-
-        .text(
-          `${product.totalTTC.toFixed(2)} €`,
-          {
-            align: "right"
-          }
-        );
-
-      doc.moveDown(0.5);
-    });
-
-    doc.moveDown();
-
-    // ================= TOTAL =================
-
-    doc
-      .fontSize(20)
-      .fillColor("#16a34a")
-      .text(
-
-        `TOTAL TTC : ${invoice.totalTTC.toFixed(2)} €`,
-
-        {
-          align: "right"
-        }
-      );
-
-    doc.moveDown(2);
-
-    doc
-      .fontSize(10)
-      .fillColor("gray")
-      .text(
-
-        "Merci pour votre confiance 🙌",
-
-        {
-          align: "center"
-        }
-      );
-
-    // ================= END PDF =================
-
-    doc.end();
-
-    // ================= EMAIL =================
-
-    doc.on("end", async () => {
-
-      try {
-
-        const pdfBuffer =
-          Buffer.concat(buffers);
-
-        if (contact.email) {
-
-          await sendInvoiceEmail({
-
-            to: contact.email,
-
-            invoice,
-
-            pdfBuffer
-          });
-
-          console.log(
-            "✅ Email envoyé"
-          );
-        }
-
-      } catch (emailError) {
-
-        console.error(
-          "❌ Erreur email :",
-          emailError
-        );
-      }
-    });
-
-    // IMPORTANT :
-    // Réponse immédiate
-    // même si email plante
-
-    res.json({
-
-      success: true,
-
-      invoice
-    });
-
-  } catch (err) {
-
-    console.error(
-      "❌ ERREUR FACTURE :",
-      err
-    );
-
-    res.status(500).json({
-
-      error:
-        err.message ||
-        "Erreur création facture"
-    });
-  }
-});
-
-// ================= MARK AS PAID =================
-
-router.put("/pay/:id", auth, async (req, res) => {
-
-  try {
-
-    const invoice =
-      await Invoice.findOne({
-
-        _id: req.params.id,
-
-        userId: req.userId
-      });
-
-    if (!invoice) {
-
-      return res.status(404).json({
-
-        error:
-          "Facture introuvable"
-      });
-    }
-
-    invoice.paymentStatus =
-      "paid";
-
-    await invoice.save();
 
     res.json(invoice);
 
@@ -427,41 +126,76 @@ router.put("/pay/:id", auth, async (req, res) => {
     console.error(err);
 
     res.status(500).json({
-
-      error:
-        "Erreur paiement"
+      error: "Erreur création facture"
     });
   }
 });
 
-// ================= DELETE =================
+// ================= MARK PAID =================
 
-router.delete("/:id", auth, async (req, res) => {
+router.put(
+  "/pay/:id",
+  auth,
+  async (req, res) => {
 
-  try {
+    try {
 
-    await Invoice.findOneAndDelete({
+      const invoice =
+        await Invoice.findById(
+          req.params.id
+        );
 
-      _id: req.params.id,
+      if (!invoice) {
 
-      userId: req.userId
-    });
+        return res.status(404).json({
+          error: "Facture introuvable"
+        });
+      }
 
-    res.json({
+      invoice.paymentStatus =
+        "paid";
 
-      success: true
-    });
+      await invoice.save();
 
-  } catch (err) {
+      res.json(invoice);
 
-    console.error(err);
+    } catch (err) {
 
-    res.status(500).json({
+      console.error(err);
 
-      error:
-        "Erreur suppression"
-    });
+      res.status(500).json({
+        error: "Erreur paiement"
+      });
+    }
   }
-});
+);
+
+// ================= DELETE INVOICE =================
+
+router.delete(
+  "/:id",
+  auth,
+  async (req, res) => {
+
+    try {
+
+      await Invoice.findByIdAndDelete(
+        req.params.id
+      );
+
+      res.json({
+        success: true
+      });
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: "Erreur suppression facture"
+      });
+    }
+  }
+);
 
 module.exports = router;
