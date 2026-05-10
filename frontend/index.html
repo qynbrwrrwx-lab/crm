@@ -617,9 +617,9 @@ textarea {
         </button>
 
         <button
-          onclick="showSection('invoices', event)"
+          onclick="showSection('ordersSection', event)">
         >
-          🧾 Factures
+          🧾 Commandes
         </button>
 
         <button
@@ -884,98 +884,177 @@ textarea {
 
         </div>
 
-        <!-- FACTURES -->
+        <!-- COMMANDES / DEVIS / FACTURES -->
 
-        <div
-          id="invoices"
-          class="section"
-        >
+<div
+  id="ordersSection"
+  class="section"
+>
 
-          <div class="grid">
+  <!-- TABS -->
 
-            <div class="card">
+  <div class="orders-tabs">
 
-              <h2>🧾 Nouvelle facture</h2>
+    <button
+      onclick="showOrderTab('createOrder')"
+    >
+      ➕ Nouvelle commande / devis
+    </button>
 
-              <div class="invoice-grid">
+    <button
+      onclick="showOrderTab('quotesTab')"
+    >
+      📄 Devis
+    </button>
 
-                <select id="invoiceContact">
-                  <option value="">
-                    Sélectionner un contact
-                  </option>
-                </select>
+    <button
+      onclick="showOrderTab('invoicesTab')"
+    >
+      🧾 Factures
+    </button>
 
-                <select id="invoiceProduct">
-                  <option value="">
-                    Sélectionner un produit
-                  </option>
-                </select>
+  </div>
 
-                <input
-                  id="invoiceQuantity"
-                  type="number"
-                  min="1"
-                  value="1"
-                  placeholder="Quantité"
-                />
+  <!-- CREATE ORDER -->
 
-                <select id="invoiceType">
+  <div
+    id="createOrder"
+    class="order-tab active"
+  >
 
-                  <option value="invoice">
-                    Facture
-                  </option>
+    <div class="grid">
 
-                  <option value="quote">
-                    Devis
-                  </option>
+      <div class="card">
 
-                </select>
+        <h2>
+          ➕ Nouveau devis / facture
+        </h2>
 
-                <select
-                  id="paymentMethod"
-                  class="invoice-grid-full"
-                >
+        <div class="invoice-grid">
 
-                  <option value="transfer">
-                    Virement
-                  </option>
+          <!-- CONTACT -->
 
-                  <option value="cb">
-                    Carte bancaire
-                  </option>
+          <select id="invoiceContact">
 
-                  <option value="cash">
-                    Espèces
-                  </option>
+            <option value="">
+              Sélectionner un contact
+            </option>
 
-                  <option value="check">
-                    Chèque
-                  </option>
+          </select>
 
-                </select>
+          <!-- PRODUCT -->
 
-              </div>
+          <select id="invoiceProduct">
 
-              <button
-                class="primary-btn"
-                onclick="createInvoice()"
-              >
-                Créer document
-              </button>
+            <option value="">
+              Sélectionner un produit
+            </option>
 
-            </div>
+          </select>
 
-            <div class="card">
+          <!-- QUANTITY -->
 
-              <h2>📄 Factures & devis</h2>
+          <input
+            id="invoiceQuantity"
+            type="number"
+            min="1"
+            value="1"
+            placeholder="Quantité"
+          />
 
-              <div id="invoiceList"></div>
+          <!-- TYPE -->
 
-            </div>
+          <select id="invoiceType">
 
-          </div>
+            <option value="invoice">
+              Facture
+            </option>
+
+            <option value="quote">
+              Devis
+            </option>
+
+          </select>
+
+          <!-- PAYMENT -->
+
+          <select
+            id="paymentMethod"
+            class="invoice-grid-full"
+          >
+
+            <option value="transfer">
+              Virement
+            </option>
+
+            <option value="cb">
+              Carte bancaire
+            </option>
+
+            <option value="cash">
+              Espèces
+            </option>
+
+            <option value="check">
+              Chèque
+            </option>
+
+          </select>
 
         </div>
+
+        <button
+          class="primary-btn"
+          onclick="createInvoice()"
+        >
+          Créer document
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- QUOTES -->
+
+  <div
+    id="quotesTab"
+    class="order-tab"
+  >
+
+    <div class="card">
+
+      <h2>
+        📄 Liste des devis
+      </h2>
+
+      <div id="quotesContainer"></div>
+
+    </div>
+
+  </div>
+
+  <!-- INVOICES -->
+
+  <div
+    id="invoicesTab"
+    class="order-tab"
+  >
+
+    <div class="card">
+
+      <h2>
+        🧾 Liste des factures
+      </h2>
+
+      <div id="invoiceList"></div>
+
+    </div>
+
+  </div>
+
+</div>
 
         <!-- FAVORITES -->
 

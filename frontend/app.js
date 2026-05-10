@@ -218,6 +218,20 @@ function showSection(sectionId, event) {
   event?.currentTarget
     .classList.add("active");
 
+    function showOrderTab(tabId) {
+
+  document
+    .querySelectorAll(".order-tab")
+    .forEach(tab => {
+
+      tab.classList.remove("active");
+    });
+
+  document
+    .getElementById(tabId)
+    ?.classList.add("active");
+}
+
   // MAP
   if (sectionId === "mapSection" && map) {
 
@@ -791,16 +805,20 @@ async function loadInvoices() {
 // RENDER INVOICES
 function renderInvoices(invoices) {
 
-  const list =
+  const invoiceList =
     document.getElementById("invoiceList");
 
-  if (!list) return;
+  const quotesList =
+    document.getElementById("quotesContainer");
 
-  list.innerHTML = "";
+  if (!invoiceList || !quotesList) return;
+
+  invoiceList.innerHTML = "";
+  quotesList.innerHTML = "";
 
   invoices.forEach(invoice => {
 
-    list.innerHTML += `
+    const html = `
 
       <div class="client">
 
@@ -864,6 +882,15 @@ function renderInvoices(invoices) {
 
       </div>
     `;
+
+    if (invoice.type === "quote") {
+
+      quotesList.innerHTML += html;
+
+    } else {
+
+      invoiceList.innerHTML += html;
+    }
   });
 }
 
