@@ -1,11 +1,10 @@
 const express = require("express");
 
+const router = express.Router();
+
 const Contact = require("../models/contact");
 
-const auth =
-  require("../middleware/auth");
-
-const router = express.Router();
+const auth = require("../middleware/auth");
 
 // ================= GET CONTACTS =================
 
@@ -14,11 +13,8 @@ router.get("/", auth, async (req, res) => {
   try {
 
     const contacts =
-      await Contact.find({
-        userId: req.userId
-      }).sort({
-        createdAt: -1
-      });
+      await Contact.find()
+      .sort({ createdAt: -1 });
 
     res.json(contacts);
 
@@ -32,19 +28,14 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-// ================= ADD CONTACT =================
+// ================= CREATE CONTACT =================
 
 router.post("/", auth, async (req, res) => {
 
   try {
 
     const contact =
-      await Contact.create({
-
-        ...req.body,
-
-        userId: req.userId
-      });
+      await Contact.create(req.body);
 
     res.json(contact);
 
@@ -58,55 +49,15 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
-// ================= UPDATE CONTACT =================
-
-router.put("/:id", auth, async (req, res) => {
-
-  try {
-
-    const contact =
-      await Contact.findOne({
-
-        _id: req.params.id,
-
-        userId: req.userId
-      });
-
-    if (!contact) {
-
-      return res.status(404).json({
-        error: "Contact introuvable"
-      });
-    }
-
-    Object.assign(contact, req.body);
-
-    await contact.save();
-
-    res.json(contact);
-
-  } catch (err) {
-
-    console.error(err);
-
-    res.status(500).json({
-      error: "Erreur modification contact"
-    });
-  }
-});
-
 // ================= DELETE CONTACT =================
 
 router.delete("/:id", auth, async (req, res) => {
 
   try {
 
-    await Contact.findOneAndDelete({
-
-      _id: req.params.id,
-
-      userId: req.userId
-    });
+    await Contact.findByIdAndDelete(
+      req.params.id
+    );
 
     res.json({
       success: true
@@ -122,42 +73,43 @@ router.delete("/:id", auth, async (req, res) => {
   }
 });
 
-// ================= FAVORITE CONTACT =================
+// ================= FAVORITE =================
 
-router.put("/favorite/:id", auth, async (req, res) => {
+router.put(
+  "/favorite/:id",
+  auth,
+  async (req, res) => {
 
-  try {
+    try {
 
-    const contact =
-      await Contact.findOne({
+      const contact =
+        await Contact.findById(
+          req.params.id
+        );
 
-        _id: req.params.id,
+      if (!contact) {
 
-        userId: req.userId
-      });
+        return res.status(404).json({
+          error: "Contact introuvable"
+        });
+      }
 
-    if (!contact) {
+      contact.favorite =
+        !contact.favorite;
 
-      return res.status(404).json({
-        error: "Contact introuvable"
+      await contact.save();
+
+      res.json(contact);
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: "Erreur favoris"
       });
     }
-
-    contact.favorite =
-      !contact.favorite;
-
-    await contact.save();
-
-    res.json(contact);
-
-  } catch (err) {
-
-    console.error(err);
-
-    res.status(500).json({
-      error: "Erreur favoris"
-    });
   }
-});
+);
 
 module.exports = router;
