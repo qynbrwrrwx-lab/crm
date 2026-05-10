@@ -1178,6 +1178,23 @@ await apiFetch("/api/contacts", {
   showToast("Contact ajouté ✅");
 }
 
+// ================= ORDER TABS =================
+
+function showOrderTab(tabId) {
+
+  document
+    .querySelectorAll(".order-tab")
+    .forEach(tab => {
+
+      tab.classList.remove("active");
+
+    });
+
+  document
+    .getElementById(tabId)
+    ?.classList.add("active");
+}
+
 // ================= UI =================
 
 function showToast(message) {
