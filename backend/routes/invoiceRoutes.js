@@ -65,7 +65,7 @@ router.post("/", auth, async (req, res) => {
     // ================= CONTACT =================
 
     const contact =
-      await Contact.findOne({
+  await Contact.findById(contactId);
 
         _id: contactId,
 
@@ -93,13 +93,10 @@ router.post("/", auth, async (req, res) => {
     for (const item of products) {
 
       const product =
-        await Product.findOne({
-
-          _id: item.productId,
-
-          userId: req.userId
-        });
-
+  await Product.findById(
+    item.productId
+  );
+  
       if (!product) continue;
 
       const quantity =
