@@ -6,6 +6,8 @@ if (process.env.NODE_ENV !== "production") {
 
 // ================= IMPORTS =================
 
+const cors = require("cors");
+
 const express = require("express");
 
 const mongoose = require("mongoose");
@@ -34,6 +36,14 @@ const invoiceRoutes =
 // ================= APP =================
 
 const app = express();
+
+app.use(cors({
+  origin: [
+    "https://www.my-prospect.com",
+    "https://crm-2-15ox.onrender.com"
+  ],
+  credentials: true
+}));
 
 // ================= CONFIG =================
 
