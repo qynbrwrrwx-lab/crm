@@ -21,7 +21,6 @@ function removeToken() {
   localStorage.removeItem("token");
 }
 
-// ================= API =================
 
 // ================= API =================
 
@@ -139,7 +138,7 @@ async function register() {
 
   try {
 
-    await apiFetch("/register", {
+    await apiFetch("/api/auth/register", {
 
       method: "POST",
 
@@ -172,7 +171,7 @@ async function login() {
   try {
 
     const data =
-      await apiFetch("/login", {
+      await apiFetch("/api/auth/login", {
 
         method: "POST",
 
@@ -353,8 +352,8 @@ function updateKPI(contacts) {
 
 async function loadAnalytics() {
 
-  const contacts =
-    await apiFetch("/contacts");
+ const contacts =
+  await apiFetch("/api/contacts");
 
   const ctx =
     document.getElementById("analyticsChart");
@@ -391,8 +390,8 @@ async function loadAnalytics() {
 
 async function loadFavorites() {
 
-  const contacts =
-    await apiFetch("/contacts");
+const contacts =
+  await apiFetch("/api/contacts");
 
   const favorites =
     contacts.filter(c => c.favorite);
@@ -434,7 +433,7 @@ async function loadFavorites() {
 async function loadUserInfo() {
 
   const contacts =
-    await apiFetch("/contacts");
+  await apiFetch("/api/contacts");
 
   document.getElementById("userStats")
     .innerText = contacts.length;
@@ -508,7 +507,7 @@ function renderContacts(contacts) {
 
 async function loadContacts(query = "") {
 
-  let url = "/contacts";
+  let url = "/api/contacts";
 
   if (query) {
     url += `?${query}`;
@@ -565,7 +564,7 @@ async function loadContacts(query = "") {
 async function loadProducts() {
 
   const products =
-    await apiFetch("/products");
+  await apiFetch("/api/products");
 
   renderProducts(products);
 }
@@ -665,7 +664,7 @@ async function addProduct() {
 
   try {
 
-    await apiFetch("/products", {
+await apiFetch("/api/products", {
 
       method: "POST",
 
@@ -708,8 +707,8 @@ async function addProduct() {
 
 async function deleteProduct(id) {
 
-  await apiFetch(
-    `/products/${id}`,
+ await apiFetch(
+  `/api/products/${id}`,
     {
       method: "DELETE"
     }
@@ -728,10 +727,10 @@ async function deleteProduct(id) {
 async function loadInvoiceData() {
 
   const contacts =
-    await apiFetch("/contacts");
+  await apiFetch("/api/contacts");
 
-  const products =
-    await apiFetch("/products");
+const products =
+  await apiFetch("/api/products");
 
   const contactSelect =
     document.getElementById("invoiceContact");
@@ -777,7 +776,7 @@ async function loadInvoices() {
   try {
 
     const invoices =
-      await apiFetch("/invoices");
+  await apiFetch("/api/invoices");
 
     renderInvoices(invoices);
 
@@ -899,7 +898,7 @@ async function createInvoice() {
 
   try {
 
-    await apiFetch("/invoices", {
+    await apiFetch("/api/invoices", {
 
       method: "POST",
 
@@ -945,8 +944,8 @@ async function markInvoicePaid(id) {
 
   try {
 
-    await apiFetch(
-      `/invoices/pay/${id}`,
+   await apiFetch(
+  `/api/invoices/pay/${id}`,
       {
         method: "PUT"
       }
@@ -972,7 +971,7 @@ async function deleteInvoice(id) {
   try {
 
     await apiFetch(
-      `/invoices/${id}`,
+  `/api/invoices/${id}`,
       {
         method: "DELETE"
       }
@@ -1009,7 +1008,7 @@ function filterContacts() {
 async function toggleFavorite(id) {
 
   await apiFetch(
-    `/contacts/favorite/${id}`,
+  `/api/contacts/favorite/${id}`,
     {
       method: "PUT"
     }
@@ -1020,8 +1019,8 @@ async function toggleFavorite(id) {
 
 async function deleteContact(id) {
 
-  await apiFetch(
-    `/contacts/${id}`,
+ await apiFetch(
+  `/api/contacts/${id}`,
     {
       method: "DELETE"
     }
@@ -1096,8 +1095,7 @@ async function addContact() {
       parseFloat(geoData[0].lon);
   }
 
-  await apiFetch("/contacts", {
-
+await apiFetch("/api/contacts", {
     method: "POST",
 
     body: JSON.stringify({
