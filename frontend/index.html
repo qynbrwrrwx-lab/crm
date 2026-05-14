@@ -520,51 +520,103 @@ textarea {
 
 <!-- ================= AUTH ================= -->
 
-<div
-  id="auth"
-  class="auth-container"
->
+# Refonte Premium — Login / Register My-Prospect
 
-  <div class="auth-card">
+## 1. Remplace complètement le bloc HTML de connexion
 
-    <h2>🚀 My Prospect</h2>
+Dans ton `index.html`, cherche :
 
-    <p>ERP / CRM nouvelle génération</p>
+```html
+<div id="auth">
+```
 
-    <input
-      id="email"
-      placeholder="Email"
-    />
+Supprime tout le bloc AUTH actuel.
 
-    <input
-      id="password"
-      type="password"
-      placeholder="Mot de passe"
-    />
+Puis remplace-le par ceci :
 
-    <button
-      class="primary-btn"
-      onclick="login()"
-    >
-      Se connecter
-    </button>
+```html
+<!-- ================= AUTH ================= -->
 
-    <button
-      class="secondary-btn"
-      onclick="register()"
-    >
-      Créer un compte
-    </button>
+<div id="auth" class="auth-page">
 
-    <div class="auth-links">
+  <div class="auth-left">
 
-      <button onclick="resendEmail()">
-        📩 Renvoyer email
-      </button>
+    <div class="auth-overlay"></div>
 
-      <button onclick="requestReset()">
-        🔐 Mot de passe oublié
-      </button>
+    <div class="brand-box">
+
+      <img
+        src="logo.png"
+        alt="My-Prospect"
+        class="auth-logo"
+      />
+
+      <h1>
+        My-Prospect
+      </h1>
+
+      <p>
+        CRM nouvelle génération pour gérer
+        vos prospects, clients, devis,
+        commandes et factures.
+      </p>
+
+      <div class="brand-tags">
+
+        <span>CRM</span>
+        <span>FACTURATION</span>
+        <span>PIPELINE</span>
+        <span>ERP</span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="auth-right">
+
+    <div class="auth-card">
+
+      <div class="auth-header">
+
+        <h2>Connexion</h2>
+
+        <p>
+          Accédez à votre espace My-Prospect
+        </p>
+
+      </div>
+
+      <div class="auth-form">
+
+        <input
+          id="email"
+          type="email"
+          placeholder="Adresse email"
+        />
+
+        <input
+          id="password"
+          type="password"
+          placeholder="Mot de passe"
+        />
+
+        <button
+          class="auth-btn"
+          onclick="login()"
+        >
+          Se connecter
+        </button>
+
+        <button
+          class="auth-btn secondary"
+          onclick="register()"
+        >
+          Créer un compte
+        </button>
+
+      </div>
 
     </div>
 
