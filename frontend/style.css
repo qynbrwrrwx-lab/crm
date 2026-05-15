@@ -581,6 +581,31 @@ button:hover {
 
   overflow: hidden;
 }
+.auth-page::before {
+
+  content: "";
+
+  position: absolute;
+
+  width: 700px;
+  height: 700px;
+
+  background:
+    radial-gradient(circle,
+    rgba(59,130,246,0.18),
+    transparent 70%);
+
+  filter: blur(80px);
+
+  top: 50%;
+
+  left: 50%;
+
+  transform:
+    translate(-50%, -50%);
+
+  z-index: 0;
+}
 
 /* ================= LEFT SIDE ================= */
 
@@ -627,14 +652,14 @@ button:hover {
 
 .auth-logo {
 
-  width: 180px;
+  width: 300px;
 
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 
-  border-radius: 24px;
+  filter:
+    drop-shadow(0 0 40px rgba(59,130,246,0.35));
 
-  box-shadow:
-    0 0 45px rgba(37,99,235,0.25);
+  transition: 0.3s ease;
 }
 
 .auth-slogan {
@@ -678,22 +703,22 @@ button:hover {
 
   width: 100%;
 
-  max-width: 420px;
+  max-width: 500px;
+
+  padding: 50px;
+
+  border-radius: 32px;
 
   background:
-    rgba(15,23,42,0.82);
+    rgba(15,23,42,0.78);
 
   border:
-    1px solid rgba(255,255,255,0.06);
+    1px solid rgba(59,130,246,0.18);
 
-  border-radius: 30px;
-
-  padding: 45px;
-
-  backdrop-filter: blur(22px);
+  backdrop-filter: blur(25px);
 
   box-shadow:
-    0 0 60px rgba(37,99,235,0.16);
+    0 0 80px rgba(37,99,235,0.2);
 }
 
 .auth-card h2 {
@@ -872,28 +897,75 @@ button:hover {
 
 .hero-title {
 
-  font-size: 72px;
+  font-size: 78px;
 
   font-weight: 800;
 
   line-height: 0.95;
 
-  margin-bottom: 24px;
+  letter-spacing: -4px;
 
-  letter-spacing: -3px;
+  margin-bottom: 28px;
 
   color: white;
 }
 
+.hero-title span {
+
+  color: #3b82f6;
+}
+
 .hero-text {
 
-  max-width: 560px;
+  font-size: 22px;
 
   line-height: 1.8;
 
-  font-size: 20px;
-
   color: #cbd5e1;
 
-  font-weight: 300;
+  max-width: 620px;
+
+  margin-bottom: 35px;
+}
+
+.hero-badges {
+
+  display: flex;
+
+  gap: 16px;
+
+  flex-wrap: wrap;
+
+  margin-bottom: 35px;
+}
+
+.hero-badge {
+
+  padding: 14px 20px;
+
+  border-radius: 18px;
+
+  background:
+    rgba(15,23,42,0.75);
+
+  border:
+    1px solid rgba(59,130,246,0.2);
+
+  backdrop-filter: blur(12px);
+
+  color: white;
+
+  font-size: 15px;
+
+  font-weight: 500;
+
+  box-shadow:
+    0 0 20px rgba(59,130,246,0.08);
+}
+
+.hero-security {
+
+  color: #94a3b8;
+
+  font-size: 15px;
 }
