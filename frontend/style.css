@@ -4,9 +4,8 @@ body {
   margin: 0;
 
   font-family:
-    'Inter',
-    'Segoe UI',
-    sans-serif;
+  'Outfit',
+  sans-serif;
 
   background:
     radial-gradient(circle at top left,
@@ -622,14 +621,14 @@ button:hover {
 
 .auth-logo {
 
-  width: 520px;
+  width: 340px;
 
-  max-width: 90%;
+  max-width: 85%;
 
-  margin-bottom: 35px;
+  margin-bottom: 10px;
 
   filter:
-    drop-shadow(0 0 40px rgba(59,130,246,0.35));
+    drop-shadow(0 0 35px rgba(59,130,246,0.35));
 }
 
 .auth-slogan {
@@ -861,4 +860,44 @@ button:hover {
   .auth-card {
     padding: 30px 20px;
   }
+}
+/* ================= HERO TEXT ================= */
+
+.hero-title {
+
+  font-size: 64px;
+
+  font-weight: 800;
+
+  margin-top: 25px;
+
+  margin-bottom: 12px;
+
+  letter-spacing: -2px;
+
+  line-height: 1;
+
+  background:
+    linear-gradient(
+      90deg,
+      #ffffff,
+      #60a5fa
+    );
+
+  -webkit-background-clip: text;
+
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-text {
+
+  max-width: 720px;
+
+  line-height: 1.7;
+
+  font-size: 18px;
+
+  color: #cbd5e1;
+
+  font-weight: 400;
 }
