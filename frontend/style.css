@@ -640,9 +640,11 @@ button:hover {
 
   object-fit: contain;
 
+  mix-blend-mode: screen;
+
   filter:
   drop-shadow(
-    0 0 35px rgba(59,130,246,0.18)
+    0 0 45px rgba(59,130,246,0.25)
   );
 }
 
@@ -650,34 +652,32 @@ button:hover {
 
 .hero-title {
 
-  font-size: 84px;
+  font-size: 62px;
 
-  line-height: 0.92;
+  line-height: 1.02;
 
   font-weight: 800;
 
-  letter-spacing: -5px;
+  margin-bottom: 24px;
 
-  margin: 0 0 30px;
+  letter-spacing: -3px;
 
   color: white;
 
-  text-align: left;
+  max-width: 700px;
 }
 
 /* ================= TEXT ================= */
 
 .hero-text {
 
-  font-size: 22px;
+  font-size: 20px;
 
   line-height: 1.8;
 
   color: #cbd5e1;
 
-  max-width: 620px;
-
-  text-align: left;
+  max-width: 720px;
 }
 
 /* ================= RIGHT ================= */
