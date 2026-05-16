@@ -654,6 +654,8 @@ button:hover {
 
 .hero-title {
 
+  margin-top:-70px;
+
   font-size: 58px;
 
   line-height: 0.95;
@@ -684,6 +686,8 @@ button:hover {
   max-width: 680px;
 
   text-align: center;
+
+  margin-top: -6px;
 
   margin-bottom: 28px;
 
@@ -952,6 +956,8 @@ button:hover {
 /* ================= HERO FEATURES ================= */
 
 .hero-features {
+
+  margin-top: -8px;
 
   display: flex;
 
