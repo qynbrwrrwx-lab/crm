@@ -1,43 +1,14 @@
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
 
-// ================= TRANSPORTER =================
+// ================= SENDGRID CONFIG =================
 
-const transporter =
-  nodemailer.createTransport({
+sgMail.setApiKey(
+  process.env.SENDGRID_API_KEY
+);
 
-    host: process.env.EMAIL_HOST,
-
-    port: Number(process.env.EMAIL_PORT),
-
-    secure:
-      Number(process.env.EMAIL_PORT) === 465,
-
-    auth: {
-
-      user: process.env.EMAIL_USER,
-
-      pass: process.env.EMAIL_PASS
-    }
-  });
-
-// ================= VERIFY SMTP =================
-
-transporter.verify((err) => {
-
-  if (err) {
-
-    console.error(
-      "❌ SMTP ERROR :",
-      err.message
-    );
-
-  } else {
-
-    console.log(
-      "✅ SMTP connecté"
-    );
-  }
-});
+console.log(
+  "✅ SendGrid configuré"
+);
 
 // ================= SEND EMAIL =================
 
@@ -188,7 +159,7 @@ async function sendInvoiceEmail({
       </div>
     `;
 
-    await transporter.sendMail({
+    await sgMail.send({
 
       from: process.env.EMAIL_FROM,
 
@@ -225,5 +196,145 @@ async function sendInvoiceEmail({
   }
 }
 
-module.exports =
-  sendInvoiceEmail;
+// ================= RESET EMAIL =================
+
+async function sendResetEmail({
+  to,
+  resetLink
+}) {
+
+  try {
+
+    await sgMail.send({
+
+      from: process.env.EMAIL_FROM,
+
+      to,
+
+      subject:
+        "Réinitialisation du mot de passe",
+
+      html: `
+
+        <div style="
+          font-family:Arial;
+          padding:30px;
+        ">
+
+          <h2>
+            🔐 Réinitialisation du mot de passe
+          </h2>
+
+          <p>
+            Cliquez sur le bouton ci-dessous
+            pour réinitialiser votre mot de passe.
+          </p>
+
+          <a
+            href="${resetLink}"
+            style="
+              display:inline-block;
+              margin-top:20px;
+              padding:12px 20px;
+              background:#2563eb;
+              color:white;
+              text-decoration:none;
+              border-radius:8px;
+            "
+          >
+            Réinitialiser
+          </a>
+
+        </div>
+      `
+    });
+
+    console.log(
+      `✅ Reset envoyé à ${to}`
+    );
+
+  } catch (err) {
+
+    console.error(
+      "❌ RESET EMAIL ERROR :",
+      err
+    );
+  }
+}
+
+// ================= VERIFICATION EMAIL =================
+
+async function sendVerificationEmail({
+  to,
+  verificationLink
+}) {
+
+  try {
+
+    await sgMail.send({
+
+      from: process.env.EMAIL_FROM,
+
+      to,
+
+      subject:
+        "Validation de votre compte",
+
+      html: `
+
+        <div style="
+          font-family:Arial;
+          padding:30px;
+        ">
+
+          <h2>
+            ✅ Validation du compte
+          </h2>
+
+          <p>
+            Cliquez ci-dessous pour
+            confirmer votre adresse email.
+          </p>
+
+          <a
+            href="${verificationLink}"
+            style="
+              display:inline-block;
+              margin-top:20px;
+              padding:12px 20px;
+              background:#2563eb;
+              color:white;
+              text-decoration:none;
+              border-radius:8px;
+            "
+          >
+            Valider mon compte
+          </a>
+
+        </div>
+      `
+    });
+
+    console.log(
+      `✅ Verification envoyée à ${to}`
+    );
+
+  } catch (err) {
+
+    console.error(
+      "❌ VERIFICATION EMAIL ERROR :",
+      err
+    );
+  }
+}
+
+// ================= EXPORTS =================
+
+module.exports = {
+
+  sendInvoiceEmail,
+
+  sendResetEmail,
+
+  sendVerificationEmail
+};

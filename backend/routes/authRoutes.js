@@ -5,6 +5,11 @@ const crypto = require("crypto");
 
 const User = require("../models/user");
 
+const {
+  sendResetEmail,
+  sendVerificationEmail
+} = require("../services/emailService");
+
 const router = express.Router();
 
 // REGISTER
@@ -116,5 +121,97 @@ router.post("/login", async (req, res) => {
     });
   }
 });
+
+// ================= RESET PASSWORD =================
+
+router.post(
+  "/request-reset",
+  async (req, res) => {
+
+    try {
+
+      const { email } = req.body;
+
+      if (!email) {
+
+        return res.status(400).json({
+          success: false,
+          message: "Email requis"
+        });
+      }
+
+      const resetToken =
+  crypto.randomBytes(32).toString("hex");
+
+await sendResetEmail({
+
+  to: email,
+
+  resetLink:
+    `${process.env.BASE_URL}/reset-password/${resetToken}`
+});
+
+      return res.json({
+        success: true,
+        message:
+          "Email reset envoyé"
+      });
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        success: false
+      });
+    }
+  }
+);
+
+// ================= RESEND EMAIL =================
+
+router.post(
+  "/resend-verification",
+  async (req, res) => {
+
+    try {
+
+      const { email } = req.body;
+
+      if (!email) {
+
+        return res.status(400).json({
+          success: false,
+          message: "Email requis"
+        });
+      }
+
+      const verifyToken =
+  crypto.randomBytes(32).toString("hex");
+
+await sendVerificationEmail({
+
+  to: email,
+
+  verificationLink:
+    `${process.env.BASE_URL}/verify-email/${verifyToken}`
+});
+
+      return res.json({
+        success: true,
+        message:
+          "Email validation renvoyé"
+      });
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        success: false
+      });
+    }
+  }
+);
 
 module.exports = router;
