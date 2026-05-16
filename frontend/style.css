@@ -553,23 +553,66 @@ button:hover {
   display: block;
 }
 
-/* ================= PREMIUM AUTH ================= */
+/* ================= FINAL AUTH ================= */
 
 .auth-page {
+
+  position: relative;
+
+  min-height: 100vh;
+
+  overflow: hidden;
+
+  background:
+  radial-gradient(
+    circle at top,
+    #101935 0%,
+    #050816 45%,
+    #02030a 100%
+  );
+}
+
+/* ================= OVERLAY ================= */
+
+.auth-overlay {
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+  radial-gradient(
+    circle at center,
+    rgba(37,99,235,0.16),
+    transparent 60%
+  );
+
+  filter: blur(100px);
+
+  z-index: 0;
+}
+
+/* ================= CONTAINER ================= */
+
+.auth-container {
+
+  position: relative;
+
+  z-index: 2;
+
+  width: 100%;
 
   min-height: 100vh;
 
   display: grid;
 
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 1fr 480px;
 
-  background:
-    radial-gradient(circle at top left,
-    #0f172a 0%,
-    #020617 45%,
-    #000814 100%);
+  align-items: center;
 
-  overflow: hidden;
+  padding: 0 8vw;
+
+  box-sizing: border-box;
 }
 
 /* ================= LEFT SIDE ================= */
@@ -577,77 +620,49 @@ button:hover {
 .auth-left {
 
   display: flex;
-  align-items: center;
+
+  flex-direction: column;
+
   justify-content: center;
 
-  padding: 80px;
+  align-items: flex-start;
 
-  position: relative;
-}
-
-.auth-left::before {
-
-  content: "";
-
-  position: absolute;
-
-  width: 700px;
-  height: 700px;
-
-  background:
-    radial-gradient(circle,
-    rgba(59,130,246,0.18),
-    transparent 70%);
-
-  filter: blur(80px);
-
-  z-index: 0;
-}
-
-/* ================= HERO CONTENT ================= */
-
-.hero-content {
-
-  position: relative;
-
-  z-index: 2;
-
-  max-width: 620px;
-
-display: flex;
-flex-direction: column;
-justify-content: center;
+  max-width: 760px;
 }
 
 /* ================= LOGO ================= */
 
 .hero-logo {
 
-  width: 320px;
+  width: 360px;
 
-  margin-bottom: 50px;
+  margin-bottom: 55px;
+
+  object-fit: contain;
 
   filter:
-    drop-shadow(0 0 45px rgba(59,130,246,0.25));
+  drop-shadow(
+    0 0 35px rgba(59,130,246,0.18)
+  );
 }
 
 /* ================= TITLE ================= */
 
 .hero-title {
 
-  font-size: 72px;
+  font-size: 84px;
 
-  line-height: 0.95;
+  line-height: 0.92;
 
   font-weight: 800;
 
-  margin-bottom: 24px;
+  letter-spacing: -5px;
 
-  letter-spacing: -3px;
+  margin: 0 0 30px;
 
   color: white;
 
-  max-width: 700px;
+  text-align: left;
 }
 
 /* ================= TEXT ================= */
@@ -656,14 +671,16 @@ justify-content: center;
 
   font-size: 22px;
 
-  line-height: 1.7;
+  line-height: 1.8;
 
   color: #cbd5e1;
 
-  max-width: 580px;
+  max-width: 620px;
+
+  text-align: left;
 }
 
-/* ================= RIGHT SIDE ================= */
+/* ================= RIGHT ================= */
 
 .auth-right {
 
@@ -672,45 +689,40 @@ justify-content: center;
   justify-content: center;
 
   align-items: center;
-
-  padding: 60px;
 }
 
-/* ================= LOGIN CARD ================= */
+/* ================= CARD ================= */
 
 .auth-card {
 
   width: 100%;
-  max-width: 430px;
 
-  padding: 55px;
+  padding: 60px;
 
-  border-radius: 30px;
+  border-radius: 32px;
 
   background:
-    rgba(15,23,42,0.58);
+  rgba(8,15,35,0.58);
+
+  backdrop-filter: blur(18px);
 
   border:
-    1px solid rgba(255,255,255,0.06);
-
-  backdrop-filter: blur(20px);
+  1px solid rgba(255,255,255,0.05);
 
   box-shadow:
-    0 0 40px rgba(59,130,246,0.08);
+  0 0 50px rgba(0,0,0,0.35);
 }
 
-/* ================= LOGIN TITLE ================= */
+/* ================= CARD TITLE ================= */
 
 .auth-card h2 {
 
-  font-size: 42px;
-
-  margin-bottom: 10px;
+  font-size: 40px;
 
   text-align: center;
-}
 
-/* ================= LOGIN SUBTEXT ================= */
+  margin-bottom: 10px;
+}
 
 .auth-card p {
 
@@ -718,22 +730,36 @@ justify-content: center;
 
   color: #94a3b8;
 
-  margin-bottom: 30px;
+  margin-bottom: 35px;
 }
 
-/* ================= INPUTS ================= */
+/* ================= FORM ================= */
+
+.auth-form {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+/* ================= INPUT ================= */
 
 .auth-form input {
 
-  height: 58px;
+  height: 60px;
 
-  border-radius: 16px;
+  border-radius: 18px;
+
+  border: none;
+
+  padding: 0 20px;
 
   background:
-    rgba(2,6,23,0.85);
+  rgba(255,255,255,0.04);
 
-  border:
-    1px solid rgba(255,255,255,0.05);
+  color: white;
 
   font-size: 15px;
 }
@@ -742,40 +768,64 @@ justify-content: center;
 
 .auth-btn {
 
-  height: 58px;
+  height: 60px;
 
-  border-radius: 16px;
+  border-radius: 18px;
+
+  border: none;
+
+  cursor: pointer;
 
   font-size: 16px;
 
   font-weight: 700;
 
-  margin-top: 16px;
+  color: white;
 
   background:
-    linear-gradient(
-      90deg,
-      #06b6d4,
-      #2563eb
-    );
+  linear-gradient(
+    90deg,
+    #06b6d4,
+    #2563eb
+  );
+
+  transition: 0.3s ease;
+}
+
+.auth-btn:hover {
+
+  transform: translateY(-2px);
+}
+
+/* ================= SECONDARY ================= */
+
+.auth-btn.secondary {
+
+  background:
+  transparent;
+
+  border:
+  1px solid rgba(255,255,255,0.08);
 }
 
 /* ================= RESPONSIVE ================= */
 
 @media(max-width: 1100px) {
 
-  .auth-page {
+  .auth-container {
 
     grid-template-columns: 1fr;
+
+    padding: 60px 30px;
   }
 
   .auth-left {
 
-    display: none;
+    margin-bottom: 60px;
   }
 
-  .auth-right {
+  .hero-title {
 
-    min-height: 100vh;
+    font-size: 62px;
   }
 }

@@ -525,35 +525,35 @@ textarea {
 
 <!-- ================= AUTH ================= -->
 
-<div class="auth-left">
+<div id="auth" class="auth-page">
 
-  <div class="hero-content">
+  <div class="auth-overlay"></div>
 
-    <img
-      src="assets/logo.png"
-      class="hero-logo"
-      alt="My-Prospect"
-   />
+  <div class="auth-container">
 
-    <h1 class="hero-title">
-      Votre activité.<br>
-      Une seule plateforme.
-    </h1>
+    <div class="auth-left">
 
-    <p class="hero-text">
-      Centralisez clients, commandes, factures, stocks,
-      dans une application moderne pensée pour les entrepreneurs.
-    </p>
+      <img
+        src="assets/logo.png"
+        class="hero-logo"
+        alt="My Prospect"
+      >
 
-  </div>
+      <h1 class="hero-title">
+        Votre activité.<br>
+        Une seule plateforme.
+      </h1>
 
-</div>
+      <p class="hero-text">
+        Centralisez vos clients, devis, commandes et factures
+        dans une interface moderne pensée pour les entrepreneurs.
+      </p>
 
-  <div class="auth-right">
+    </div>
 
-    <div class="auth-card">
+    <div class="auth-right">
 
-      <div class="auth-header">
+      <div class="auth-card">
 
         <h2>Connexion</h2>
 
@@ -561,43 +561,27 @@ textarea {
           Accédez à votre espace My-Prospect
         </p>
 
-      </div>
+        <form class="auth-form">
 
-      <div class="auth-form">
+          <input
+            type="email"
+            placeholder="Adresse email"
+          >
 
-        <input
-          id="email"
-          type="email"
-          placeholder="Adresse email"
-        />
+          <input
+            type="password"
+            placeholder="Mot de passe"
+          >
 
-        <input
-          id="password"
-          type="password"
-          placeholder="Mot de passe"
-        />
-      
-        <div class="auth-links">
+          <button class="auth-btn">
+            Se connecter
+          </button>
 
-          <a href="#">
-            Mot de passe oublié ?
-          </a>
+          <button class="auth-btn secondary">
+            Créer un compte
+          </button>
 
-      </div>
-
-        <button
-          class="auth-btn"
-          onclick="login()"
-        >
-          Se connecter
-        </button>
-
-        <button
-          class="auth-btn secondary"
-          onclick="register()"
-        >
-          Créer un compte
-        </button>
+        </form>
 
       </div>
 
