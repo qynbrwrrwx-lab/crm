@@ -652,7 +652,7 @@ button:hover {
 
 .hero-title {
 
-  font-size: 64px;
+  font-size: 56px;
 
   line-height: 0.95;
 
@@ -664,7 +664,7 @@ button:hover {
 
   color: white;
 
-  max-width: 620px;
+  max-width: 540px;
 }
 
 /* ================= TEXT ================= */
@@ -697,9 +697,9 @@ button:hover {
 
   width: 100%;
 
-  padding: 60px;
+  padding: 42px;
 
-  border-radius: 32px;
+  border-radius: 26px;
 
   background:
   rgba(8,15,35,0.58);
@@ -717,7 +717,7 @@ button:hover {
 
 .auth-card h2 {
 
-  font-size: 40px;
+  font-size: 34px;
 
   text-align: center;
 
@@ -741,14 +741,14 @@ button:hover {
 
   flex-direction: column;
 
-  gap: 18px;
+  gap: 14px;
 }
 
 /* ================= INPUT ================= */
 
 .auth-form input {
 
-  height: 60px;
+  height: 54px;
 
   border-radius: 18px;
 
@@ -768,7 +768,7 @@ button:hover {
 
 .auth-btn {
 
-  height: 60px;
+  height: 54px;
 
   border-radius: 18px;
 
