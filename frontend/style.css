@@ -638,7 +638,7 @@ button:hover {
 
   width: 520px;
   
-  margin-bottom: 40px;
+  margin-bottom: 18px;
 
   object-fit: contain;
 
@@ -660,7 +660,7 @@ button:hover {
 
   font-weight: 800;
 
-  margin-bottom: 18px;
+  margin-bottom: 10px;
 
   letter-spacing: -3px;
 
@@ -685,7 +685,7 @@ button:hover {
 
   text-align: center;
 
-  margin-bottom: 45px;
+  margin-bottom: 28px;
 
 }
 
@@ -955,13 +955,13 @@ button:hover {
 
   display: flex;
 
-  flex-wrap: wrap;
+  flex-direction: column;
 
-  justify-content: center;
+  align-items: center;
 
   gap: 14px;
 
-  max-width: 700px;
+  width: 100%;
 }
 
 .hero-features span {
@@ -996,4 +996,15 @@ button:hover {
 
   box-shadow:
   0 0 25px rgba(59,130,246,0.15);
+}
+
+.hero-features-row {
+
+  display: flex;
+
+  justify-content: center;
+
+  gap: 14px;
+
+  flex-wrap: wrap;
 }
