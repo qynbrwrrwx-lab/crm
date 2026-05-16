@@ -652,9 +652,9 @@ button:hover {
 
 .hero-title {
 
-  font-size: 62px;
+  font-size: 64px;
 
-  line-height: 1.02;
+  line-height: 0.95;
 
   font-weight: 800;
 
@@ -664,7 +664,7 @@ button:hover {
 
   color: white;
 
-  max-width: 700px;
+  max-width: 620px;
 }
 
 /* ================= TEXT ================= */
@@ -806,6 +806,116 @@ button:hover {
 
   border:
   1px solid rgba(255,255,255,0.08);
+}
+
+/* ================= OPTIONS ================= */
+
+.auth-options {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-top: -4px;
+
+  margin-bottom: 10px;
+}
+
+.remember-me {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 14px;
+
+  color: #cbd5e1;
+}
+
+.remember-me input {
+
+  width: 16px;
+
+  height: 16px;
+
+  accent-color: #2563eb;
+}
+
+.forgot-link {
+
+  color: #3b82f6;
+
+  text-decoration: none;
+
+  font-size: 14px;
+
+  transition: 0.2s ease;
+}
+
+.forgot-link:hover {
+
+  opacity: 0.8;
+}
+
+/* ================= VALIDATION BOX ================= */
+
+.validation-box {
+
+  margin-top: 30px;
+
+  padding: 22px;
+
+  border-radius: 22px;
+
+  background:
+  rgba(255,255,255,0.02);
+
+  border:
+  1px solid rgba(59,130,246,0.10);
+}
+
+.validation-box p {
+
+  margin: 0 0 10px 0;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  color: white;
+}
+
+.validation-box span {
+
+  display: block;
+
+  color: #94a3b8;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+
+  margin-bottom: 16px;
+}
+
+.validation-box a {
+
+  color: #3b82f6;
+
+  text-decoration: none;
+
+  font-size: 14px;
+
+  font-weight: 600;
+}
+
+.validation-box a:hover {
+
+  opacity: 0.8;
 }
 
 /* ================= RESPONSIVE ================= */
