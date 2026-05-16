@@ -625,6 +625,8 @@ button:hover {
 
   justify-content: center;
 
+  transform: translateY(-30px);
+
   align-items: flex-start;
 
   max-width: 760px;
@@ -634,9 +636,11 @@ button:hover {
 
 .hero-logo {
 
-  width: 360px;
+  width: 430px;
 
-  margin-bottom: 55px;
+  margin-left: -10px;
+
+  margin-bottom: 70px;
 
   object-fit: contain;
 
