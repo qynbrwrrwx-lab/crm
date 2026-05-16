@@ -638,7 +638,7 @@ button:hover {
 
   width: 520px;
   
-  margin-bottom: 90px;
+  margin-bottom: 40px;
 
   object-fit: contain;
 
@@ -660,7 +660,7 @@ button:hover {
 
   font-weight: 800;
 
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 
   letter-spacing: -3px;
 
@@ -684,6 +684,8 @@ button:hover {
   max-width: 680px;
 
   text-align: center;
+
+  margin-bottom: 45px;
 
 }
 
@@ -945,4 +947,53 @@ button:hover {
 
     font-size: 62px;
   }
+}
+
+/* ================= HERO FEATURES ================= */
+
+.hero-features {
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  gap: 14px;
+
+  max-width: 700px;
+}
+
+.hero-features span {
+
+  padding: 12px 18px;
+
+  border-radius: 999px;
+
+  background:
+  rgba(255,255,255,0.04);
+
+  border:
+  1px solid rgba(255,255,255,0.06);
+
+  color: #dbeafe;
+
+  font-size: 14px;
+
+  font-weight: 500;
+
+  backdrop-filter: blur(10px);
+
+  transition: 0.3s ease;
+}
+
+.hero-features span:hover {
+
+  transform: translateY(-2px);
+
+  border-color:
+  rgba(59,130,246,0.35);
+
+  box-shadow:
+  0 0 25px rgba(59,130,246,0.15);
 }
