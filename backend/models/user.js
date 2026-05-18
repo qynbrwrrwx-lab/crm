@@ -13,6 +13,8 @@ const userSchema = new mongoose.Schema({
     required: true
   },
 
+  resetToken: String,
+  
   verifyToken: {
     type: String
   },
