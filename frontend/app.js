@@ -1,5 +1,67 @@
-// ================= GLOBAL =================
+const path = window.location.pathname;
 
+if (path.includes("/reset-password/")) {
+
+  document.body.innerHTML = `
+
+    <div style="
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:#0f172a;
+      color:white;
+      font-family:Arial;
+    ">
+
+      <div style="
+        width:400px;
+        padding:40px;
+        background:#1e293b;
+        border-radius:20px;
+      ">
+
+        <h1>
+          Nouveau mot de passe
+        </h1>
+
+        <input
+          id="newPassword"
+          type="password"
+          placeholder="Nouveau mot de passe"
+          style="
+            width:100%;
+            padding:15px;
+            margin-top:20px;
+            border-radius:10px;
+          "
+        >
+
+        <button
+          onclick="resetPassword()"
+          style="
+            width:100%;
+            padding:15px;
+            margin-top:20px;
+            border:none;
+            border-radius:10px;
+            background:#2563eb;
+            color:white;
+            cursor:pointer;
+          "
+        >
+
+          Modifier le mot de passe
+
+        </button>
+
+      </div>
+
+    </div>
+  `;
+}
+
+// ================= GLOBAL =================
 const API_URL = "https://crm-2-15ox.onrender.com";
 let map;
 let markers = [];
@@ -1245,4 +1307,53 @@ function logout() {
   }
 
   showToast("Déconnecté 👋");
+}
+
+async function resetPassword() {
+
+  const password =
+    document.getElementById("newPassword").value;
+
+  const token =
+    window.location.pathname.split("/").pop();
+
+  try {
+
+    const res = await fetch(
+
+      "https://crm-2-15ox.onrender.com/api/auth/reset-password",
+
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          token,
+          password
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+
+      alert(data.error || "Erreur");
+
+      return;
+    }
+
+    alert("Mot de passe modifié ✅");
+
+    window.location.href = "/";
+
+  } catch (err) {
+
+    console.error(err);
+
+    alert("Erreur serveur");
+  }
 }

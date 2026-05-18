@@ -143,6 +143,20 @@ router.post(
       const resetToken =
   crypto.randomBytes(32).toString("hex");
 
+const user =
+  await User.findOne({ email });
+
+if (!user) {
+
+  return res.status(400).json({
+    error: "Compte introuvable"
+  });
+}
+
+user.resetToken = resetToken;
+
+await user.save();
+
 await sendResetEmail({
 
   to: email,
@@ -209,6 +223,55 @@ await sendVerificationEmail({
 
       res.status(500).json({
         success: false
+      });
+    }
+  }
+);
+
+// ================= RESET PASSWORD =================
+
+router.post(
+  "/reset-password",
+  async (req, res) => {
+
+    try {
+
+      const {
+        token,
+        password
+      } = req.body;
+
+      const user =
+        await User.findOne({
+          resetToken: token
+        });
+
+      if (!user) {
+
+        return res.status(400).json({
+          error: "Token invalide"
+        });
+      }
+
+      const hash =
+        await bcrypt.hash(password, 10);
+
+      user.password = hash;
+
+      user.resetToken = undefined;
+
+      await user.save();
+
+      res.json({
+        success: true
+      });
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: "Erreur serveur"
       });
     }
   }
