@@ -117,6 +117,7 @@
           >
 
           <input
+            id="password"
             type="password"
             placeholder="Mot de passe"
           >
@@ -128,7 +129,7 @@
     Se souvenir de moi
   </label>
 
-    <a
+        <a
   href="#"
   class="forgot-link"
   onclick="requestReset()"
@@ -138,13 +139,21 @@
 
 </div>
 
-          <button class="auth-btn">
-            Se connecter
+          <button
+           type="button"
+            class="auth-btn"
+            onclick="login()"
+          >
+             Se connecter
           </button>
 
-          <button class="auth-btn secondary">
-            Créer un compte
-          </button>
+          <button
+  type="button"
+  class="auth-btn secondary"
+  onclick="register()"
+>
+  Créer un compte
+</button>
 
           <div class="validation-box">
 
@@ -751,7 +760,119 @@
 <script src="app.js"></script>
 
 <script>
+// ================= LOGIN =================
 
+async function login() {
+
+  const email =
+    document.getElementById("email").value;
+
+  const password =
+    document.getElementById("password").value;
+
+  if (!email || !password) {
+
+    return showToast(
+      "Remplis tous les champs"
+    );
+  }
+
+  try {
+
+    const res = await fetch("/api/auth/login", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        email,
+        password
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+
+      showToast("Connexion réussie ✅");
+
+      document.getElementById("auth").style.display = "none";
+
+      document.getElementById("app").style.display = "block";
+
+    } else {
+
+      showToast(
+        data.message || "Erreur connexion"
+      );
+    }
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast("Serveur indisponible");
+  }
+}
+
+// ================= REGISTER =================
+
+async function register() {
+
+  const email =
+    document.getElementById("email").value;
+
+  const password =
+    document.getElementById("password").value;
+
+  if (!email || !password) {
+
+    return showToast(
+      "Remplis tous les champs"
+    );
+  }
+
+  try {
+
+    const res = await fetch("/api/auth/register", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        email,
+        password
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+
+      showToast(
+        "Compte créé 📩 Vérifie tes emails"
+      );
+
+    } else {
+
+      showToast(
+        data.message || "Erreur inscription"
+      );
+    }
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast("Serveur indisponible");
+  }
+}
 // ================= RESEND EMAIL =================
 
 async function resendEmail() {
@@ -763,7 +884,9 @@ async function resendEmail() {
     return showToast("Entre ton email 📧");
   }
 
-  await fetch("/resend-verification", {
+  await fetch(
+  "https://crm-2-15ox.onrender.com/api/auth/resend-verification",
+{
 
     method: "POST",
 
@@ -788,7 +911,9 @@ async function requestReset() {
     return showToast("Entre ton email 📧");
   }
 
-  await fetch("/request-reset", {
+  await fetch(
+  "https://crm-2-15ox.onrender.com/api/auth/request-reset",
+{
 
     method: "POST",
 
