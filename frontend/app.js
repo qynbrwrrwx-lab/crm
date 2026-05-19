@@ -7,245 +7,142 @@ document.body.innerHTML = `
 <div style="
   min-height:100vh;
   display:flex;
+  justify-content:center;
+  align-items:center;
   background:
-    radial-gradient(circle at top left,#2563eb 0%,transparent 30%),
-    radial-gradient(circle at bottom right,#00d4ff 0%,transparent 25%),
+    radial-gradient(circle at top,#2563eb55,transparent 35%),
     linear-gradient(135deg,#07152f,#08142c,#0b1d44);
-  overflow:hidden;
   font-family:Poppins,Arial,sans-serif;
-  color:white;
+  padding:20px;
 ">
 
-  <!-- LEFT -->
-
   <div style="
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    padding:100px;
-    position:relative;
-    z-index:2;
-  ">
+    width:100%;
+    max-width:440px;
 
-    <img
-      src="/logo.png"
-      style="
-        width:180px;
-        margin-bottom:50px;
-      "
-    >
+    background:
+      rgba(255,255,255,0.06);
 
-    <h1 style="
-      font-size:88px;
-      line-height:0.95;
-      margin:0;
-      font-weight:900;
-      letter-spacing:-4px;
-      max-width:700px;
-    ">
+    border:
+      1px solid rgba(255,255,255,0.08);
 
-      Nouveau<br>
-      mot de passe.
+    backdrop-filter:blur(18px);
 
-    </h1>
+    border-radius:32px;
 
-    <p style="
-      margin-top:40px;
-      font-size:24px;
-      opacity:0.82;
-      max-width:650px;
-      line-height:1.7;
-      font-weight:300;
-    ">
+    padding:45px;
 
-      Sécurisez votre espace My Prospect ERP
-      avec un nouveau mot de passe sécurisé.
+    box-shadow:
+      0 20px 80px rgba(0,0,0,0.45);
 
-    </p>
-
-    <div style="
-      display:flex;
-      gap:18px;
-      margin-top:50px;
-      flex-wrap:wrap;
-    ">
-
-      <div style="
-        padding:14px 22px;
-        border-radius:40px;
-        background:rgba(255,255,255,0.08);
-        border:1px solid rgba(255,255,255,0.08);
-        backdrop-filter:blur(12px);
-      ">
-        ERP moderne
-      </div>
-
-      <div style="
-        padding:14px 22px;
-        border-radius:40px;
-        background:rgba(255,255,255,0.08);
-        border:1px solid rgba(255,255,255,0.08);
-        backdrop-filter:blur(12px);
-      ">
-        Sécurité avancée
-      </div>
-
-      <div style="
-        padding:14px 22px;
-        border-radius:40px;
-        background:rgba(255,255,255,0.08);
-        border:1px solid rgba(255,255,255,0.08);
-        backdrop-filter:blur(12px);
-      ">
-        Cloud sécurisé
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- RIGHT -->
-
-  <div style="
-    width:560px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:60px;
-    position:relative;
-    z-index:2;
+    color:white;
   ">
 
     <div style="
-      width:100%;
-      background:
-        rgba(255,255,255,0.07);
-
-      border:
-        1px solid rgba(255,255,255,0.08);
-
-      backdrop-filter:blur(20px);
-
-      border-radius:36px;
-
-      padding:50px;
-
-      box-shadow:
-        0 20px 80px rgba(0,0,0,0.45);
+      text-align:center;
+      margin-bottom:35px;
     ">
 
-      <div style="
-        width:70px;
-        height:70px;
-        border-radius:20px;
-        background:
-          linear-gradient(
-            135deg,
-            #00d4ff,
-            #2563eb
-          );
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size:30px;
-        margin-bottom:30px;
-      ">
+      <img
+        src="./logo.png"
+        style="
+          width:70px;
+          margin-bottom:20px;
+        "
+      >
 
-        🔒
-
-      </div>
-
-      <h2 style="
-        font-size:46px;
+      <h1 style="
+        font-size:38px;
         margin:0;
-        margin-bottom:14px;
         font-weight:800;
+        line-height:1.1;
       ">
 
-        Modifier le mot de passe
+        Nouveau mot<br>
+        de passe
 
-      </h2>
+      </h1>
 
       <p style="
+        margin-top:16px;
         opacity:0.7;
+        font-size:15px;
         line-height:1.6;
-        margin-bottom:35px;
-        font-size:17px;
       ">
 
-        Entrez un nouveau mot de passe sécurisé
-        pour protéger votre compte.
+        Sécurisez votre compte
+        avec un nouveau mot de passe.
 
       </p>
 
-      <input
-        id="newPassword"
-        type="password"
-        placeholder="Nouveau mot de passe"
-
-        style="
-          width:100%;
-          padding:22px;
-          border:none;
-          border-radius:20px;
-          margin-bottom:28px;
-          background:#091225;
-          color:white;
-          font-size:17px;
-          outline:none;
-          box-sizing:border-box;
-        "
-      >
-
-      <button
-        onclick="resetPassword()"
-
-        style="
-          width:100%;
-          padding:22px;
-          border:none;
-          border-radius:20px;
-
-          background:
-            linear-gradient(
-              90deg,
-              #00d4ff,
-              #2563eb
-            );
-
-          color:white;
-
-          font-size:19px;
-
-          font-weight:800;
-
-          cursor:pointer;
-
-          transition:0.25s;
-
-          box-shadow:
-            0 10px 30px rgba(37,99,235,0.45);
-        "
-
-        onmouseover="
-          this.style.transform='translateY(-2px)';
-        "
-
-        onmouseout="
-          this.style.transform='translateY(0px)';
-        "
-      >
-
-        Modifier le mot de passe
-
-      </button>
-
     </div>
+
+    <input
+      id="newPassword"
+      type="password"
+      placeholder="Nouveau mot de passe"
+
+      style="
+        width:100%;
+        padding:18px;
+        border:none;
+        border-radius:18px;
+        background:#091225;
+        color:white;
+        font-size:16px;
+        margin-bottom:22px;
+        outline:none;
+        box-sizing:border-box;
+      "
+    >
+
+    <button
+      onclick="resetPassword()"
+
+      style="
+        width:100%;
+        padding:18px;
+        border:none;
+        border-radius:18px;
+
+        background:
+          linear-gradient(
+            90deg,
+            #00d4ff,
+            #2563eb
+          );
+
+        color:white;
+
+        font-size:17px;
+
+        font-weight:700;
+
+        cursor:pointer;
+
+        transition:0.25s;
+
+        box-shadow:
+          0 10px 30px rgba(37,99,235,0.45);
+      "
+
+      onmouseover="
+        this.style.transform='translateY(-2px)';
+      "
+
+      onmouseout="
+        this.style.transform='translateY(0px)';
+      "
+    >
+
+      Modifier le mot de passe
+
+    </button>
 
   </div>
 
 </div>
+
 `;
 }
 
