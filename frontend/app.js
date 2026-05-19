@@ -45,11 +45,14 @@ document.body.innerHTML = `
 
       <img
         src="/logo.png"
-        alt="My Prospect"
+        
         style="
-          width:70px;
-          margin-bottom:20px;
+          width:120px;
+          margin-bottom:10px;
           object-fit:contain;
+          display:block;
+          margin-left:auto;
+          margin-right:auto;
         "
       >
 
