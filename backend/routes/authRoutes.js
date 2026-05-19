@@ -148,6 +148,20 @@ const user =
 
 if (!user) {
 
+  return res.status(404).json({
+    error: "Utilisateur introuvable"
+  });
+}
+
+user.resetToken = resetToken;
+
+await user.save();
+
+const user =
+  await User.findOne({ email });
+
+if (!user) {
+
   return res.status(400).json({
     error: "Compte introuvable"
   });
@@ -264,6 +278,53 @@ router.post(
 
       res.json({
         success: true
+      });
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: "Erreur serveur"
+      });
+    }
+  }
+);
+
+router.post(
+  "/reset-password/:token",
+  async (req, res) => {
+
+    try {
+
+      const { token } = req.params;
+
+      const { password } = req.body;
+
+      const user =
+        await User.findOne({
+          resetToken: token
+        });
+
+      if (!user) {
+
+        return res.status(400).json({
+          error: "Token invalide"
+        });
+      }
+
+      const hashedPassword =
+        await bcrypt.hash(password, 10);
+
+      user.password = hashedPassword;
+
+      user.resetToken = null;
+
+      await user.save();
+
+      res.json({
+        success: true,
+        message: "Mot de passe modifié"
       });
 
     } catch (err) {
