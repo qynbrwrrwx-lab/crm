@@ -47,7 +47,7 @@ document.body.innerHTML = `
         src="/logo.png"
         
         style="
-          width:260px;
+          width:340px;
           margin-bottom:10px;
           object-fit:contain;
           display:block;
