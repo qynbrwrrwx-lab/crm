@@ -1321,7 +1321,7 @@ async function resetPassword() {
 
     const res = await fetch(
 
-      "https://crm-2-15ox.onrender.com/api/auth/reset-password",
+      `https://crm-2-15ox.onrender.com/api/auth/reset-password/${token}`,
 
       {
         method: "POST",
@@ -1331,10 +1331,9 @@ async function resetPassword() {
         },
 
         body: JSON.stringify({
-          token,
-          password
-        })
-      }
+            password
+         })
+       }
     );
 
     const data = await res.json();
