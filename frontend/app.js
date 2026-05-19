@@ -44,10 +44,12 @@ document.body.innerHTML = `
     ">
 
       <img
-        src="/logo.png">
+        src="/logo.png"
+        alt="My Prospect"
         style="
           width:70px;
           margin-bottom:20px;
+          object-fit:contain;
         "
       >
 
