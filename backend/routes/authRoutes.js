@@ -122,7 +122,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ================= RESET PASSWORD =================
+// ================= RESET PASSWORD REQUEST =================
 
 router.post(
   "/request-reset",
@@ -135,149 +135,38 @@ router.post(
       if (!email) {
 
         return res.status(400).json({
-          success: false,
-          message: "Email requis"
+          error: "Email requis"
+        });
+      }
+
+      const user =
+        await User.findOne({ email });
+
+      if (!user) {
+
+        return res.status(404).json({
+          error: "Utilisateur introuvable"
         });
       }
 
       const resetToken =
-  crypto.randomBytes(32).toString("hex");
+        crypto.randomBytes(32).toString("hex");
 
-const user =
-  await User.findOne({ email });
-
-if (!user) {
-
-  return res.status(404).json({
-    error: "Utilisateur introuvable"
-  });
-}
-
-user.resetToken = resetToken;
-
-await user.save();
-
-const user =
-  await User.findOne({ email });
-
-if (!user) {
-
-  return res.status(400).json({
-    error: "Compte introuvable"
-  });
-}
-
-user.resetToken = resetToken;
-
-await user.save();
-
-await sendResetEmail({
-
-  to: email,
-
-  resetLink:
-    `${process.env.BASE_URL}/reset-password/${resetToken}`
-});
-
-      return res.json({
-        success: true,
-        message:
-          "Email reset envoyé"
-      });
-
-    } catch (err) {
-
-      console.error(err);
-
-      res.status(500).json({
-        success: false
-      });
-    }
-  }
-);
-
-// ================= RESEND EMAIL =================
-
-router.post(
-  "/resend-verification",
-  async (req, res) => {
-
-    try {
-
-      const { email } = req.body;
-
-      if (!email) {
-
-        return res.status(400).json({
-          success: false,
-          message: "Email requis"
-        });
-      }
-
-      const verifyToken =
-  crypto.randomBytes(32).toString("hex");
-
-await sendVerificationEmail({
-
-  to: email,
-
-  verificationLink:
-    `${process.env.BASE_URL}/verify-email/${verifyToken}`
-});
-
-      return res.json({
-        success: true,
-        message:
-          "Email validation renvoyé"
-      });
-
-    } catch (err) {
-
-      console.error(err);
-
-      res.status(500).json({
-        success: false
-      });
-    }
-  }
-);
-
-// ================= RESET PASSWORD =================
-
-router.post(
-  "/reset-password",
-  async (req, res) => {
-
-    try {
-
-      const {
-        token,
-        password
-      } = req.body;
-
-      const user =
-        await User.findOne({
-          resetToken: token
-        });
-
-      if (!user) {
-
-        return res.status(400).json({
-          error: "Token invalide"
-        });
-      }
-
-      const hash =
-        await bcrypt.hash(password, 10);
-
-      user.password = hash;
-
-      user.resetToken = undefined;
+      user.resetToken = resetToken;
 
       await user.save();
 
+      await sendResetEmail({
+
+        to: email,
+
+        resetLink:
+          `${process.env.BASE_URL}/reset-password/${resetToken}`
+      });
+
       res.json({
-        success: true
+        success: true,
+        message: "Email reset envoyé"
       });
 
     } catch (err) {
@@ -290,6 +179,8 @@ router.post(
     }
   }
 );
+
+// ================= CHANGE PASSWORD =================
 
 router.post(
   "/reset-password/:token",
@@ -325,6 +216,51 @@ router.post(
       res.json({
         success: true,
         message: "Mot de passe modifié"
+      });
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: "Erreur serveur"
+      });
+    }
+  }
+);
+
+// ================= RESEND EMAIL =================
+
+router.post(
+  "/resend-verification",
+  async (req, res) => {
+
+    try {
+
+      const { email } = req.body;
+
+      if (!email) {
+
+        return res.status(400).json({
+          error: "Email requis"
+        });
+      }
+
+      const verifyToken =
+        crypto.randomBytes(32).toString("hex");
+
+      await sendVerificationEmail({
+
+        to: email,
+
+        verificationLink:
+          `${process.env.BASE_URL}/verify-email/${verifyToken}`
+      });
+
+      res.json({
+        success: true,
+        message:
+          "Email validation renvoyé"
       });
 
     } catch (err) {
