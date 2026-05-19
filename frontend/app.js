@@ -2,63 +2,136 @@ const path = window.location.pathname;
 
 if (path.includes("/reset-password/")) {
 
-  document.body.innerHTML = `
+document.body.innerHTML = `
 
-    <div style="
-      height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      background:#0f172a;
-      color:white;
-      font-family:Arial;
+<div style="
+  min-height:100vh;
+  display:flex;
+  background:
+    linear-gradient(
+      135deg,
+      #07152f,
+      #0b1d44,
+      #102c6b
+    );
+  color:white;
+  font-family:Poppins,Arial;
+">
+
+  <!-- LEFT -->
+
+  <div style="
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:80px;
+  ">
+
+    <h1 style="
+      font-size:72px;
+      line-height:1;
+      margin-bottom:30px;
+      font-weight:800;
     ">
 
-      <div style="
-        width:400px;
-        padding:40px;
-        background:#1e293b;
-        border-radius:20px;
+      Nouveau mot<br>
+      de passe.
+
+    </h1>
+
+    <p style="
+      font-size:22px;
+      opacity:0.8;
+      max-width:600px;
+      line-height:1.6;
+    ">
+
+      Sécurisez votre compte My Prospect
+      avec un nouveau mot de passe.
+
+    </p>
+
+  </div>
+
+  <!-- RIGHT -->
+
+  <div style="
+    width:480px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px;
+  ">
+
+    <div style="
+      width:100%;
+      background:
+        rgba(255,255,255,0.06);
+      border:
+        1px solid rgba(255,255,255,0.08);
+      border-radius:30px;
+      padding:40px;
+      backdrop-filter:blur(12px);
+    ">
+
+      <h2 style="
+        font-size:38px;
+        margin-bottom:30px;
+        font-weight:700;
       ">
 
-        <h1>
-          Nouveau mot de passe
-        </h1>
+        Modifier le mot de passe
 
-        <input
-          id="newPassword"
-          type="password"
-          placeholder="Nouveau mot de passe"
-          style="
-            width:100%;
-            padding:15px;
-            margin-top:20px;
-            border-radius:10px;
-          "
-        >
+      </h2>
 
-        <button
-          onclick="resetPassword()"
-          style="
-            width:100%;
-            padding:15px;
-            margin-top:20px;
-            border:none;
-            border-radius:10px;
-            background:#2563eb;
-            color:white;
-            cursor:pointer;
-          "
-        >
+      <input
+        id="newPassword"
+        type="password"
+        placeholder="Nouveau mot de passe"
 
-          Modifier le mot de passe
+        style="
+          width:100%;
+          padding:18px;
+          border:none;
+          border-radius:18px;
+          margin-bottom:25px;
+          font-size:16px;
+          outline:none;
+        "
+      >
 
-        </button>
+      <button
+        onclick="resetPassword()"
 
-      </div>
+        style="
+          width:100%;
+          padding:18px;
+          border:none;
+          border-radius:18px;
+          background:
+            linear-gradient(
+              90deg,
+              #00d4ff,
+              #2563eb
+            );
+          color:white;
+          font-size:18px;
+          font-weight:700;
+          cursor:pointer;
+        "
+      >
+
+        Modifier le mot de passe
+
+      </button>
 
     </div>
-  `;
+
+  </div>
+
+</div>
+`;
 }
 
 // ================= GLOBAL =================
