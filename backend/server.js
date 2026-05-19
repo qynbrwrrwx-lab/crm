@@ -37,6 +37,11 @@ const invoiceRoutes =
 
 const app = express();
 
+app.use(
+  express.static(
+    path.join(__dirname, "../frontend/public")
+  )
+);
 app.use(cors({
   origin: [
     "https://www.my-prospect.com",
