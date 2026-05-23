@@ -2,157 +2,139 @@ const path = window.location.pathname;
 
 if (path.includes("/reset-password/")) {
 
-document.body.innerHTML = `
-
-<div style="
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:
-    radial-gradient(circle at top,#2563eb55,transparent 35%),
-    linear-gradient(135deg,#07152f,#08142c,#0b1d44);
-  font-family:Poppins,Arial,sans-serif;
-  padding:20px;
-">
+  document.body.innerHTML = `
 
   <div style="
-    width:100%;
-    max-width:440px;
-
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
     background:
-      rgba(255,255,255,0.06);
-
-    border:
-      1px solid rgba(255,255,255,0.08);
-
-    backdrop-filter:blur(18px);
-
-    border-radius:32px;
-
-    padding:45px;
-
-    box-shadow:
-      0 20px 80px rgba(0,0,0,0.45);
-
-    color:white;
+      radial-gradient(circle at bottom,#155dfc 0%,#0f172a 45%,#020617 100%);
+    font-family:Inter,sans-serif;
+    padding:20px;
   ">
 
     <div style="
+      width:100%;
+      max-width:420px;
+      background:rgba(15,23,42,0.78);
+      border:1px solid rgba(255,255,255,0.08);
+      backdrop-filter:blur(18px);
+      border-radius:28px;
+      padding:38px 34px;
+      box-shadow:0 0 50px rgba(37,99,235,0.25);
       text-align:center;
-      margin-bottom:35px;
-    ">
+   ">
 
       <img
         src="/logo.png"
-        
+        alt="My Prospect"
         style="
-          width:420px;
-          margin-bottom:10px;
+          width:180px;
+          margin-bottom:18px;
           object-fit:contain;
-          display:block;
-          margin-left:auto;
-          margin-right:auto;
-        "
+      "
       >
 
       <h1 style="
-        font-size:38px;
-        margin:0;
+        color:white;
+        font-size:42px;
+        line-height:1.05;
+        margin:0 0 12px 0;
         font-weight:800;
-        line-height:1.1;
-      ">
-
-        Nouveau mot<br>
-        de passe
-
+    ">
+        Nouveau mot<br>de passe
       </h1>
 
       <p style="
-        margin-top:16px;
-        opacity:0.7;
+        color:#cbd5e1;
         font-size:15px;
-        line-height:1.6;
+        line-height:1.5;
+        margin-bottom:28px;
+      ">
+        Sécurisez votre compte avec un nouveau mot de passe.
+      </p>
+
+      <div style="
+        position:relative;
+        margin-bottom:18px;
       ">
 
-        Sécurisez votre compte
-        avec un nouveau mot de passe.
+        <input
+          id="newPassword"
+          type="password"
+          placeholder="Nouveau mot de passe"
+          style="
+            width:100%;
+            padding:18px 55px 18px 18px;
+            border:none;
+            border-radius:16px;
+            background:#0f172a;
+            color:white;
+            font-size:16px;
+            outline:none;
+            box-sizing:border-box;
+          "
+        >
 
-      </p>
+        <button
+          onclick="togglePassword()"
+          style="
+            position:absolute;
+            right:15px;
+            top:50%;
+            transform:translateY(-50%);
+            background:none;
+            border:none;
+            color:#94a3b8;
+            cursor:pointer;
+            font-size:20px;
+          "
+        >
+          👁
+        </button>
+
+      </div>
+
+      <button
+        onclick="resetPassword()"
+        style="
+          width:100%;
+          padding:18px;
+          border:none;
+          border-radius:16px;
+          background:linear-gradient(90deg,#22d3ee,#2563eb);
+          color:white;
+          font-size:17px;
+          font-weight:700;
+          cursor:pointer;
+          transition:0.3s;
+          box-shadow:0 10px 30px rgba(37,99,235,0.35);
+        "
+      >
+        Modifier le mot de passe
+      </button>
 
     </div>
 
-    <input
-      id="newPassword"
-      type="password"
-      placeholder="Nouveau mot de passe"
-
-      style="
-        width:100%;
-        padding:18px;
-        border:none;
-        border-radius:18px;
-        background:#091225;
-        color:white;
-        font-size:16px;
-        margin-bottom:22px;
-        outline:none;
-        box-sizing:border-box;
-      "
-    >
-
-    <button
-      onclick="resetPassword()"
-
-      style="
-        width:100%;
-        padding:18px;
-        border:none;
-        border-radius:18px;
-
-        background:
-          linear-gradient(
-            90deg,
-            #00d4ff,
-            #2563eb
-          );
-
-        color:white;
-
-        font-size:17px;
-
-        font-weight:700;
-
-        cursor:pointer;
-
-        transition:0.25s;
-
-        box-shadow:
-          0 10px 30px rgba(37,99,235,0.45);
-      "
-
-      onmouseover="
-        this.style.transform='translateY(-2px)';
-      "
-
-      onmouseout="
-        this.style.transform='translateY(0px)';
-      "
-    >
-
-      Modifier le mot de passe
-
-    </button>
-
   </div>
+  `;
+}
 
-</div>
+function togglePassword() {
 
-`;
+  const input =
+    document.getElementById("newPassword");
+
+  input.type =
+    input.type === "password"
+      ? "text"
+      : "password";
 }
 
 // ================= GLOBAL =================
-const API_URL = "https://crm-2-15ox.onrender.com";
+const API_URL = "https://my-prospect.com";
 let map;
 let markers = [];
 
@@ -369,20 +351,7 @@ function showSection(sectionId, event) {
 
   event?.currentTarget
     .classList.add("active");
-
-    function showOrderTab(tabId) {
-
-  document
-    .querySelectorAll(".order-tab")
-    .forEach(tab => {
-
-      tab.classList.remove("active");
-    });
-
-  document
-    .getElementById(tabId)
-    ?.classList.add("active");
-}
+   } 
 
   // MAP
   if (sectionId === "mapSection" && map) {
@@ -390,7 +359,7 @@ function showSection(sectionId, event) {
     setTimeout(() => {
       map.invalidateSize();
     }, 200);
-  }
+  
 
   // FAVORITES
   if (sectionId === "favorites") {
@@ -1411,20 +1380,20 @@ async function resetPassword() {
 
     const res = await fetch(
 
-      `https://crm-2-15ox.onrender.com/api/auth/reset-password/${token}`,
+  `${API_URL}/api/auth/reset-password/${token}`,
 
-      {
-        method: "POST",
+  {
+    method: "POST",
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+    headers: {
+      "Content-Type": "application/json"
+    },
 
-        body: JSON.stringify({
-            password
-         })
-       }
-    );
+    body: JSON.stringify({
+      password
+    })
+  }
+);
 
     const data = await res.json();
 
