@@ -22,7 +22,7 @@ if (path.includes("/reset-password/")) {
       border:1px solid rgba(255,255,255,0.08);
       backdrop-filter:blur(18px);
       border-radius:28px;
-      padding:8px 34px 20px 34px;
+      padding:0px 34px 18px 34px;
       box-shadow:0 0 50px rgba(37,99,235,0.25);
       text-align:center;
    ">
@@ -32,7 +32,7 @@ if (path.includes("/reset-password/")) {
   alt="My Prospect"
   style="
     width:525px;
-    margin-bottom:-115px;
+    margin-bottom:-155px;
     object-fit:contain;
     display:block;
     margin-left:auto;
@@ -44,7 +44,7 @@ if (path.includes("/reset-password/")) {
         color:white;
         font-size:30px;
         line-height:0.95;
-        margin:0;
+        margin:0 0 4px 0;
         font-weight:800;
     ">
         Nouveau mot<br>de passe
