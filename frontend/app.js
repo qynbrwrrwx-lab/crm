@@ -39,10 +39,13 @@ if (path.includes("/reset-password/")) {
   alt="My Prospect"
   style="
     width:450px;
-    height:140px;
-    margin-top:-70px
-    margin-bottom:-55px;
+    height:auto;
+
+    margin-top:-45px
+    margin-bottom:-95px;
+
     object-fit:contain;
+    
     display:block;
     margin-left:auto;
     margin-right:auto;
