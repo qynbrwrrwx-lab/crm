@@ -16,23 +16,30 @@ if (path.includes("/reset-password/")) {
   ">
 
     <div style="
-      width:100%;
-      max-width:500px;
-      background:rgba(15,23,42,0.78);
-      border:1px solid rgba(255,255,255,0.08);
-      backdrop-filter:blur(18px);
-      border-radius:28px;
-      padding:0px 38px 22px 38px;
-      box-shadow:0 0 50px rgba(37,99,235,0.25);
-      text-align:center;
-   ">
+  width:100%;
+  max-width:420px;
+  background:rgba(15,23,42,0.78);
+  border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter:blur(18px);
+  border-radius:28px;
+
+  padding:28px 34px 26px 34px;
+
+  box-shadow:0 0 50px rgba(37,99,235,0.25);
+
+  text-align:center;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+">
 
       <img
   src="/logo.png"
   alt="My Prospect"
   style="
     width:450px;
-    margin-bottom:-8px;
+    margin-bottom:18px;
     object-fit:contain;
     display:block;
     margin-left:auto;
@@ -42,9 +49,9 @@ if (path.includes("/reset-password/")) {
 
       <h1 style="
         color:white;
-        font-size:26px;
-        line-height:1.05;
-        margin:0 0 6px 0;
+        font-size:24px;
+        line-height:1.1;
+        margin:0 0 12px 0;
         font-weight:800;
     ">
         Nouveau mot<br>de passe
