@@ -31,8 +31,8 @@ if (path.includes("/reset-password/")) {
   src="/logo.png"
   alt="My Prospect"
   style="
-    width:495px;
-    margin-bottom:-200px;
+    width:450px;
+    margin-bottom:-175px;
     object-fit:contain;
     display:block;
     margin-left:auto;
