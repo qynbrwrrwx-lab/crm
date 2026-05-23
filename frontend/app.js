@@ -31,8 +31,8 @@ if (path.includes("/reset-password/")) {
   src="/logo.png"
   alt="My Prospect"
   style="
-    width:525px;
-    margin-bottom:-155px;
+    width:495px;
+    margin-bottom:-200px;
     object-fit:contain;
     display:block;
     margin-left:auto;
@@ -44,7 +44,7 @@ if (path.includes("/reset-password/")) {
         color:white;
         font-size:30px;
         line-height:0.95;
-        margin:0 0 4px 0;
+        margin:0 0 10px 0;
         font-weight:800;
     ">
         Nouveau mot<br>de passe
