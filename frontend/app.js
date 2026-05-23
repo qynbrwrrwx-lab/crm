@@ -22,7 +22,7 @@ if (path.includes("/reset-password/")) {
       border:1px solid rgba(255,255,255,0.08);
       backdrop-filter:blur(18px);
       border-radius:28px;
-      padding:38px 34px;
+      padding:28px 34px;
       box-shadow:0 0 50px rgba(37,99,235,0.25);
       text-align:center;
    ">
@@ -38,12 +38,11 @@ if (path.includes("/reset-password/")) {
     margin-left:auto;
     margin-right:auto;
   "
->
-      >
+    >
 
       <h1 style="
         color:white;
-        font-size:42px;
+        font-size:36px;
         line-height:1.05;
         margin:0 0 12px 0;
         font-weight:800;
@@ -55,7 +54,7 @@ if (path.includes("/reset-password/")) {
         color:#cbd5e1;
         font-size:15px;
         line-height:1.5;
-        margin-bottom:28px;
+        margin-bottom:18px;
       ">
         Sécurisez votre compte avec un nouveau mot de passe.
       </p>
