@@ -23,7 +23,7 @@ if (path.includes("/reset-password/")) {
   backdrop-filter:blur(18px);
   border-radius:28px;
 
-  padding:18px 34px 18px 34px;
+  padding:0px 34px 22px 34px;
 
   box-shadow:0 0 50px rgba(37,99,235,0.25);
 
@@ -39,7 +39,9 @@ if (path.includes("/reset-password/")) {
   alt="My Prospect"
   style="
     width:450px;
-    margin-bottom:8px;
+    height:140px;
+    margin-top:-70px
+    margin-bottom:-55px;
     object-fit:contain;
     display:block;
     margin-left:auto;
