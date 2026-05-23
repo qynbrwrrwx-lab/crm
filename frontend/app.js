@@ -17,12 +17,12 @@ if (path.includes("/reset-password/")) {
 
     <div style="
       width:100%;
-      max-width:420px;
+      max-width:500px;
       background:rgba(15,23,42,0.78);
       border:1px solid rgba(255,255,255,0.08);
       backdrop-filter:blur(18px);
       border-radius:28px;
-      padding:28px 34px 30px 34px;
+      padding:20px 38px 28px 38px;
       box-shadow:0 0 50px rgba(37,99,235,0.25);
       text-align:center;
    ">
@@ -32,7 +32,7 @@ if (path.includes("/reset-password/")) {
   alt="My Prospect"
   style="
     width:450px;
-    margin-bottom:18px;
+    margin-bottom:2px;
     object-fit:contain;
     display:block;
     margin-left:auto;
@@ -42,9 +42,9 @@ if (path.includes("/reset-password/")) {
 
       <h1 style="
         color:white;
-        font-size:30px;
-        line-height:0.95;
-        margin:0 0 14px 0;
+        font-size:26px;
+        line-height:1.05;
+        margin:0 0 10px 0;
         font-weight:800;
     ">
         Nouveau mot<br>de passe
@@ -54,7 +54,7 @@ if (path.includes("/reset-password/")) {
         color:#cbd5e1;
         font-size:15px;
         line-height:1.5;
-        margin-bottom:22px;
+        margin-bottom:18px;
       ">
         Sécurisez votre compte avec un nouveau mot de passe.
       </p>
