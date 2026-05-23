@@ -28,13 +28,17 @@ if (path.includes("/reset-password/")) {
    ">
 
       <img
-        src="/logo.png"
-        alt="My Prospect"
-        style="
-          width:180px;
-          margin-bottom:18px;
-          object-fit:contain;
-      "
+  src="/logo.png"
+  alt="My Prospect"
+  style="
+    width:450px;
+    margin-bottom:8px;
+    object-fit:contain;
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+  "
+>
       >
 
       <h1 style="
@@ -79,21 +83,25 @@ if (path.includes("/reset-password/")) {
         >
 
         <button
-          onclick="togglePassword()"
-          style="
-            position:absolute;
-            right:15px;
-            top:50%;
-            transform:translateY(-50%);
-            background:none;
-            border:none;
-            color:#94a3b8;
-            cursor:pointer;
-            font-size:20px;
-          "
-        >
-          👁
-        </button>
+  onclick="togglePassword()"
+  style="
+    position:absolute;
+    right:18px;
+    top:50%;
+    transform:translateY(-50%);
+    background:transparent;
+    border:none;
+    color:#94a3b8;
+    cursor:pointer;
+    font-size:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+  "
+>
+  👁️
+</button>
 
       </div>
 
