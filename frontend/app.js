@@ -17,7 +17,7 @@ if (path.includes("/reset-password/")) {
 
     <div style="
       width:100%;
-      max-width:420px;
+      max-width:500px;
       background:rgba(15,23,42,0.78);
       border:1px solid rgba(255,255,255,0.08);
       backdrop-filter:blur(18px);
@@ -32,7 +32,7 @@ if (path.includes("/reset-password/")) {
   alt="My Prospect"
   style="
     width:450px;
-    margin-bottom:-175px;
+    margin-bottom:10px;
     object-fit:contain;
     display:block;
     margin-left:auto;
