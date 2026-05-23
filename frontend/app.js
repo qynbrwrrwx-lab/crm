@@ -22,7 +22,7 @@ if (path.includes("/reset-password/")) {
       border:1px solid rgba(255,255,255,0.08);
       backdrop-filter:blur(18px);
       border-radius:28px;
-      padding:18px 34px 20px 34px;
+      padding:8px 34px 20px 34px;
       box-shadow:0 0 50px rgba(37,99,235,0.25);
       text-align:center;
    ">
@@ -31,8 +31,8 @@ if (path.includes("/reset-password/")) {
   src="/logo.png"
   alt="My Prospect"
   style="
-    width:450px;
-    margin-bottom:-85px;
+    width:525px;
+    margin-bottom:-115px;
     object-fit:contain;
     display:block;
     margin-left:auto;
