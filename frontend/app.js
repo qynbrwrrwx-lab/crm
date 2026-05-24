@@ -28,7 +28,7 @@ if (path.includes("/reset-password/")) {
 
   border-radius:28px;
 
-  padding:140px 34px 28px 34px;
+  padding:95px 34px 30px 34px;
 
   box-shadow:0 0 50px rgba(37,99,235,0.25);
 
@@ -42,7 +42,7 @@ if (path.includes("/reset-password/")) {
     width:280px;
     position:absolute;
 
-    top:20px;
+    top:5px;
     left:50%;
 
     transform:translateX(-50%);
