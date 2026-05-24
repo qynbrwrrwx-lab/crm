@@ -49,21 +49,12 @@ if (path.includes("/reset-password/")) {
   "
 >
 
-      <h1 style="
-        color:white;
-        font-size:20px;
-        line-height:1.1;
-        margin:0 0 10px 0;
-        font-weight:800;
-    ">
-        Nouveau mot<br>de passe
-      </h1>
-
       <p style="
         color:#cbd5e1;
         font-size:14px;
         line-height:1.4;
-        margin-bottom:18px;
+        margin-top:10px;
+        margin-bottom:22px;
       ">
         Sécurisez votre compte avec un nouveau mot de passe.
       </p>
