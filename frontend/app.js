@@ -154,8 +154,10 @@ if (path.includes("/verify-email/")) {
       display:flex;
       justify-content:center;
       align-items:center;
-      background:
-        radial-gradient(circle at bottom,#155dfc 0%,#0f172a 45%,#020617 100%);
+    135deg,
+  #0f172a 0%,
+  #111827 45%,
+  #020617 100%
       font-family:Inter,sans-serif;
       padding:20px;
     ">
@@ -167,7 +169,7 @@ if (path.includes("/verify-email/")) {
         border:1px solid rgba(255,255,255,0.08);
         backdrop-filter:blur(18px);
         border-radius:28px;
-        padding:40px 34px;
+        padding:40px 34px 32px 34px;
         box-shadow:0 0 50px rgba(37,99,235,0.25);
         text-align:center;
       ">
@@ -175,9 +177,9 @@ if (path.includes("/verify-email/")) {
         <img
           src="/logo.png"
           style="
-            width:260px;
-            margin-top:-80px;
-            margin-bottom:-30px;
+            width:450px;
+            margin-top:-120px;
+            margin-bottom:-90px;
             object-fit:contain;
             display:block;
             margin-left:auto;
@@ -187,18 +189,20 @@ if (path.includes("/verify-email/")) {
 
         <h1 style="
           color:white;
-          font-size:28px;
+          font-size:20px;
+          line-height:1.1;
+          margin:0 0 12px 0;
           font-weight:800;
-          margin-bottom:15px;
+        
         ">
           ✅ Email validé
         </h1>
 
         <p style="
           color:#cbd5e1;
-          font-size:16px;
-          line-height:1.6;
-          margin-bottom:25px;
+          font-size:20px;
+          line-height:1.5;
+          margin-bottom:22px;
         ">
           Votre adresse email a bien été confirmée.
         </p>
@@ -206,13 +210,15 @@ if (path.includes("/verify-email/")) {
         <a
           href="/login"
           style="
-            display:inline-block;
-            padding:15px 28px;
-            border-radius:14px;
+            width:100%
+            padding:18px
+            border:none;
+            border-radius:16px;
             background:linear-gradient(90deg,#22d3ee,#2563eb);
             color:white;
-            text-decoration:none;
+            font-size:17px;
             font-weight:700;
+            cursor:pointer;
             box-shadow:0 10px 30px rgba(37,99,235,0.35);
           "
         >
