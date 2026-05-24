@@ -9,7 +9,12 @@ if (path.includes("/reset-password/")) {
     display:flex;
     justify-content:center;
     align-items:center;
-    background:linear-gradient(180deg,#0f172a 0%,#020617 100%);
+    background:linear-gradient(
+  135deg,
+  #0f172a 0%,
+  #111827 45%,
+  #020617 100%
+);
     font-family:Inter,sans-serif;
     padding:20px;
   ">
