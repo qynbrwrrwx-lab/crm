@@ -39,7 +39,7 @@ if (path.includes("/reset-password/")) {
   src="/logo.png"
   alt="My Prospect"
   style="
-    width:380px;
+    width:280px;
 
     position:absolute;
 
