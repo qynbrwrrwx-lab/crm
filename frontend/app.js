@@ -92,14 +92,26 @@ if (path.includes("/reset-password/")) {
     border:none;
     color:#94a3b8;
     cursor:pointer;
-    font-size:18px;
     display:flex;
     align-items:center;
     justify-content:center;
     padding:0;
   "
 >
-  👁️
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+    <circle cx="12" cy="12" r="3"></circle>
+  </svg>
 </button>
 
       </div>
