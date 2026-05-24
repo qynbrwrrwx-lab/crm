@@ -145,6 +145,87 @@ if (path.includes("/reset-password/")) {
   `;
 }
 
+if (path.includes("/verify-email/")) {
+
+  document.body.innerHTML = `
+
+    <div style="
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:
+        radial-gradient(circle at bottom,#155dfc 0%,#0f172a 45%,#020617 100%);
+      font-family:Inter,sans-serif;
+      padding:20px;
+    ">
+
+      <div style="
+        width:100%;
+        max-width:420px;
+        background:rgba(15,23,42,0.78);
+        border:1px solid rgba(255,255,255,0.08);
+        backdrop-filter:blur(18px);
+        border-radius:28px;
+        padding:40px 34px;
+        box-shadow:0 0 50px rgba(37,99,235,0.25);
+        text-align:center;
+      ">
+
+        <img
+          src="/logo.png"
+          style="
+            width:260px;
+            margin-top:-80px;
+            margin-bottom:-30px;
+            object-fit:contain;
+            display:block;
+            margin-left:auto;
+            margin-right:auto;
+          "
+        >
+
+        <h1 style="
+          color:white;
+          font-size:28px;
+          font-weight:800;
+          margin-bottom:15px;
+        ">
+          ✅ Email validé
+        </h1>
+
+        <p style="
+          color:#cbd5e1;
+          font-size:16px;
+          line-height:1.6;
+          margin-bottom:25px;
+        ">
+          Votre adresse email a bien été confirmée.
+        </p>
+
+        <a
+          href="/login"
+          style="
+            display:inline-block;
+            padding:15px 28px;
+            border-radius:14px;
+            background:linear-gradient(90deg,#22d3ee,#2563eb);
+            color:white;
+            text-decoration:none;
+            font-weight:700;
+            box-shadow:0 10px 30px rgba(37,99,235,0.35);
+          "
+        >
+          Accéder à l’application
+        </a>
+
+      </div>
+
+    </div>
+
+  `;
+}
+
 function togglePassword() {
 
   const input =
