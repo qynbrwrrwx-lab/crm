@@ -42,7 +42,7 @@ if (path.includes("/reset-password/")) {
     width:280px;
     position:absolute;
 
-    top:5px;
+    top:18px;
     left:50%;
 
     transform:translateX(-50%);
@@ -55,7 +55,7 @@ if (path.includes("/reset-password/")) {
         color:white;
         font-size:20px;
         line-height:1.1;
-        margin:0 0 10px 0;
+        margin:120 0 10px 0;
         font-weight:800;
     ">
         Nouveau mot<br>de passe
