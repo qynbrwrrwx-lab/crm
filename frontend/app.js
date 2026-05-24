@@ -40,10 +40,9 @@ if (path.includes("/reset-password/")) {
   alt="My Prospect"
   style="
     width:280px;
-
     position:absolute;
 
-    top:18px;
+    top:20px;
     left:50%;
 
     transform:translateX(-50%);
