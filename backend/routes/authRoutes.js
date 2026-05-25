@@ -46,7 +46,7 @@ router.post("/register", async (req, res) => {
 
         verifyToken,
 
-        isVerified: true
+        isVerified: false
       });
 
     res.json({
@@ -270,6 +270,57 @@ router.post(
       res.status(500).json({
         error: "Erreur serveur"
       });
+    }
+  }
+);
+
+// ================= VERIFY EMAIL =================
+
+router.get(
+  "/verify-email/:token",
+  async (req, res) => {
+
+    try {
+
+      const user =
+        await User.findOne({
+          verifyToken: req.params.token
+        });
+
+      // TOKEN INVALIDE
+      if (!user) {
+
+        return res.redirect(
+          `${process.env.BASE_URL}/verify-email-error`
+        );
+      }
+
+      // EMAIL DÉJÀ VALIDÉ
+      if (user.isVerified) {
+
+        return res.redirect(
+          `${process.env.BASE_URL}/verify-email-already`
+        );
+      }
+
+      // VALIDATION
+      user.isVerified = true;
+
+      user.verifyToken = null;
+
+      await user.save();
+
+      return res.redirect(
+        `${process.env.BASE_URL}/verify-email-success`
+      );
+
+    } catch (err) {
+
+      console.error(err);
+
+      return res.redirect(
+        `${process.env.BASE_URL}/verify-email-error`
+      );
     }
   }
 );
