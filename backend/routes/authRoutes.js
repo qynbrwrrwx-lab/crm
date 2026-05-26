@@ -49,9 +49,17 @@ router.post("/register", async (req, res) => {
         isVerified: false
       });
 
+    // ENVOI EMAIL VERIFICATION
+    await sendVerificationEmail({
+
+      to: email,
+
+      verificationLink:
+`${process.env.BASE_URL}/api/auth/verify-email/${verifyToken}`
+    });
+
     res.json({
-      success: true,
-      user
+      success: true
     });
 
   } catch (err) {
@@ -59,7 +67,7 @@ router.post("/register", async (req, res) => {
     console.error(err);
 
     res.status(500).json({
-      error: "Erreur serveur"
+      error: "Erreur inscription"
     });
   }
 });
