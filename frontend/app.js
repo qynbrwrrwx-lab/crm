@@ -925,7 +925,6 @@ function showSection(sectionId, event) {
 
   event?.currentTarget
     .classList.add("active");
-   } 
 
   // MAP
   if (sectionId === "mapSection" && map) {
@@ -933,7 +932,7 @@ function showSection(sectionId, event) {
     setTimeout(() => {
       map.invalidateSize();
     }, 200);
-  
+  }
 
   // FAVORITES
   if (sectionId === "favorites") {
