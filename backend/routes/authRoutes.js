@@ -284,15 +284,19 @@ router.post(
 
 // ================= VERIFY EMAIL =================
 
+// ================= VERIFY EMAIL =================
+
 router.get(
   "/verify-email/:token",
   async (req, res) => {
 
     try {
 
+      const token = req.params.token;
+
       const user =
         await User.findOne({
-          verifyToken: req.params.token
+          verifyToken: token
         });
 
       // TOKEN INVALIDE
@@ -304,17 +308,18 @@ router.get(
       }
 
       // EMAIL DÉJÀ VALIDÉ
-      if (user.isVerified) {
+      if (user.isVerified === true) {
 
         return res.redirect(
           `${process.env.BASE_URL}/verify-email-already`
         );
       }
 
-      // VALIDATION
+      // VALIDATION EMAIL
       user.isVerified = true;
 
-      user.verifyToken = null;
+      // ⚠️ ON GARDE LE TOKEN
+      // user.verifyToken = null;
 
       await user.save();
 

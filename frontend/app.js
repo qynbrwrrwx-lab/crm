@@ -707,6 +707,100 @@ function togglePassword() {
       : "password";
 }
 
+// ================= VERIFY EMAIL ALREADY =================
+
+if (path.includes("/verify-email-already")) {
+
+  document.body.innerHTML = `
+
+    <div style="
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:linear-gradient(
+        135deg,
+        #2563eb 0%,
+        #0f172a 45%,
+        #020617 100%
+      );
+      font-family:Inter,sans-serif;
+      padding:20px;
+    ">
+
+      <div style="
+        width:100%;
+        max-width:420px;
+        position:relative;
+        background:rgba(15,23,42,0.78);
+        border:1px solid rgba(255,255,255,0.08);
+        backdrop-filter:blur(18px);
+        border-radius:28px;
+        padding:55px 34px 30px 34px;
+        box-shadow:0 0 50px rgba(37,99,235,0.25);
+        text-align:center;
+      ">
+
+        <img
+          src="/logo.png"
+          alt="My Prospect"
+          style="
+            width:450px;
+            margin-top:-120px;
+            margin-bottom:-90px;
+            object-fit:contain;
+            display:block;
+            margin-left:auto;
+            margin-right:auto;
+          "
+        >
+
+        <h1 style="
+          color:white;
+          font-size:22px;
+          font-weight:800;
+          margin-bottom:14px;
+        ">
+          ℹ️ Email déjà validé
+        </h1>
+
+        <p style="
+          color:#cbd5e1;
+          font-size:15px;
+          line-height:1.5;
+          margin-bottom:24px;
+        ">
+          Cette adresse email a déjà été confirmée.
+        </p>
+
+        <a
+          href="/login"
+          style="
+            display:block;
+            width:100%;
+            box-sizing:border-box;
+            text-decoration:none;
+            padding:16px;
+            border:none;
+            border-radius:16px;
+            background:linear-gradient(90deg,#22d3ee,#2563eb);
+            color:white;
+            font-size:17px;
+            font-weight:700;
+            cursor:pointer;
+            box-shadow:0 10px 30px rgba(37,99,235,0.35);
+          "
+        >
+          Accéder à l’application
+        </a>
+
+      </div>
+
+    </div>
+
+  `;
+}
+
 // ================= GLOBAL =================
 const API_URL = "https://my-prospect.com";
 let map;
