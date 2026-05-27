@@ -284,8 +284,6 @@ router.post(
 
 // ================= VERIFY EMAIL =================
 
-// ================= VERIFY EMAIL =================
-
 router.get(
   "/verify-email/:token",
   async (req, res) => {
@@ -299,16 +297,16 @@ router.get(
           verifyToken: token
         });
 
-      // TOKEN INVALIDE
+      // TOKEN INVALIDE OU DÉJÀ UTILISÉ
       if (!user) {
 
         return res.redirect(
-          `${process.env.BASE_URL}/verify-email-error`
+          `${process.env.BASE_URL}/verify-email-already`
         );
       }
 
       // EMAIL DÉJÀ VALIDÉ
-      if (user.isVerified === true) {
+      if (user.isVerified) {
 
         return res.redirect(
           `${process.env.BASE_URL}/verify-email-already`
@@ -318,8 +316,8 @@ router.get(
       // VALIDATION EMAIL
       user.isVerified = true;
 
-      // ⚠️ ON GARDE LE TOKEN
-      // user.verifyToken = null;
+      // SUPPRESSION TOKEN
+      user.verifyToken = null;
 
       await user.save();
 
