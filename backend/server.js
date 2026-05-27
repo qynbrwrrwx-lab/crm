@@ -33,6 +33,9 @@ const productRoutes =
 const invoiceRoutes =
   require("./routes/invoiceRoutes");
 
+  const adminRoutes =
+  require("./routes/adminRoutes");
+
 // ================= APP =================
 
 const app = express();
@@ -42,6 +45,7 @@ app.use(
     path.join(__dirname, "../frontend/public")
   )
 );
+
 app.use(cors({
   origin: [
     "https://www.my-prospect.com",
@@ -130,6 +134,11 @@ app.use(
 app.use(
   "/api/invoices",
   invoiceRoutes
+);
+
+app.use(
+  "/api/admin",
+  adminRoutes
 );
 
 // ================= FRONTEND =================
