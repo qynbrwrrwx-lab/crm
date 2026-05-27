@@ -898,6 +898,300 @@ async function apiFetch(url, options = {}) {
   }
 }
 
+// ================= ADMIN LOGIN =================
+
+if (path.includes("/admin-login")) {
+
+  document.body.innerHTML = `
+
+  <div style="
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:linear-gradient(
+      135deg,
+      #2563eb 0%,
+      #0f172a 45%,
+      #020617 100%
+    );
+
+    font-family:Inter,sans-serif;
+    padding:20px;
+  ">
+
+    <div style="
+      width:100%;
+      max-width:420px;
+
+      background:rgba(15,23,42,0.78);
+
+      border:1px solid rgba(255,255,255,0.08);
+
+      backdrop-filter:blur(18px);
+
+      border-radius:28px;
+
+      padding:55px 34px 30px 34px;
+
+      box-shadow:0 0 50px rgba(37,99,235,0.25);
+
+      text-align:center;
+    ">
+
+      <img
+        src="/logo.png"
+        style="
+          width:450px;
+          margin-top:-120px;
+          margin-bottom:-90px;
+          object-fit:contain;
+          display:block;
+          margin-left:auto;
+          margin-right:auto;
+        "
+      >
+
+      <h1 style="
+        color:white;
+        font-size:24px;
+        margin-bottom:12px;
+        font-weight:800;
+      ">
+        👑 Administration
+      </h1>
+
+      <p style="
+        color:#cbd5e1;
+        font-size:14px;
+        margin-bottom:24px;
+      ">
+        Accès réservé administrateur
+      </p>
+
+      <input
+        id="adminEmail"
+        type="email"
+        placeholder="Email admin"
+
+        style="
+          width:100%;
+          padding:16px;
+          margin-bottom:14px;
+          border:none;
+          border-radius:16px;
+          background:#0f172a;
+          color:white;
+          font-size:15px;
+          box-sizing:border-box;
+        "
+      >
+
+      <input
+        id="adminPassword"
+        type="password"
+        placeholder="Mot de passe"
+
+        style="
+          width:100%;
+          padding:16px;
+          margin-bottom:18px;
+          border:none;
+          border-radius:16px;
+          background:#0f172a;
+          color:white;
+          font-size:15px;
+          box-sizing:border-box;
+        "
+      >
+
+      <button
+        onclick="adminLogin()"
+
+        style="
+          width:100%;
+          padding:16px;
+          border:none;
+          border-radius:16px;
+
+          background:linear-gradient(
+            90deg,
+            #22d3ee,
+            #2563eb
+          );
+
+          color:white;
+
+          font-size:16px;
+
+          font-weight:700;
+
+          cursor:pointer;
+        "
+      >
+        Se connecter
+      </button>
+
+    </div>
+
+  </div>
+
+  `;
+}
+
+// ================= ADMIN DASHBOARD =================
+
+if (path.includes("/admin")) {
+
+  document.body.innerHTML = `
+
+  <div style="
+    min-height:100vh;
+
+    background:linear-gradient(
+      135deg,
+      #2563eb 0%,
+      #0f172a 45%,
+      #020617 100%
+    );
+
+    font-family:Inter,sans-serif;
+
+    padding:30px;
+  ">
+
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:30px;
+    ">
+
+      <div>
+
+        <h1 style="
+          color:white;
+          font-size:32px;
+          margin:0;
+          font-weight:800;
+        ">
+          👑 Admin Dashboard
+        </h1>
+
+        <p style="
+          color:#94a3b8;
+          margin-top:8px;
+        ">
+          Gestion plateforme My Prospect
+        </p>
+
+      </div>
+
+      <button
+        onclick="logoutAdmin()"
+
+        style="
+          padding:12px 18px;
+
+          border:none;
+
+          border-radius:14px;
+
+          background:#ef4444;
+
+          color:white;
+
+          font-weight:700;
+
+          cursor:pointer;
+        "
+      >
+        Déconnexion
+      </button>
+
+    </div>
+
+    <div id="adminStats"
+
+      style="
+        display:grid;
+
+        grid-template-columns:
+          repeat(auto-fit,minmax(220px,1fr));
+
+        gap:18px;
+
+        margin-bottom:30px;
+      "
+    >
+
+      <div style="
+        background:rgba(15,23,42,0.78);
+
+        border-radius:22px;
+
+        padding:24px;
+
+        border:1px solid rgba(255,255,255,0.08);
+      ">
+
+        <div style="
+          color:#94a3b8;
+          margin-bottom:8px;
+        ">
+          Utilisateurs
+        </div>
+
+        <div
+          id="totalUsers"
+
+          style="
+            color:white;
+            font-size:32px;
+            font-weight:800;
+          "
+        >
+          ...
+        </div>
+
+      </div>
+
+    </div>
+
+    <div style="
+      background:rgba(15,23,42,0.78);
+
+      border-radius:24px;
+
+      padding:24px;
+
+      border:1px solid rgba(255,255,255,0.08);
+    ">
+
+      <h2 style="
+        color:white;
+        margin-top:0;
+        margin-bottom:24px;
+      ">
+        Utilisateurs inscrits
+      </h2>
+
+      <div id="adminUsers">
+
+        Chargement...
+
+      </div>
+
+    </div>
+
+  </div>
+
+  `;
+
+  loadAdminUsers();
+}
+
 // ================= INIT =================
 
 window.onload = () => {
@@ -2081,4 +2375,148 @@ async function resetPassword() {
 
     alert("Erreur serveur");
   }
+}
+
+async function adminLogin() {
+
+  const email =
+    document.getElementById(
+      "adminEmail"
+    ).value;
+
+  const password =
+    document.getElementById(
+      "adminPassword"
+    ).value;
+
+  try {
+
+    const data =
+      await apiFetch(
+        "/api/auth/login",
+        {
+          method: "POST",
+
+          body: JSON.stringify({
+            email,
+            password
+          })
+        }
+      );
+
+    // TOKEN
+    localStorage.setItem(
+      "token",
+      data.token
+    );
+
+    // REDIRECTION ADMIN
+    window.location.href =
+      "/admin";
+
+  } catch (err) {
+
+    alert(
+      err.message
+    );
+  }
+}
+
+async function loadAdminUsers() {
+
+  try {
+
+    const users =
+      await apiFetch(
+        "/api/admin/users"
+      );
+
+    document.getElementById(
+      "totalUsers"
+    ).innerText = users.length;
+
+    const container =
+      document.getElementById(
+        "adminUsers"
+      );
+
+    container.innerHTML = "";
+
+    users.forEach(user => {
+
+      container.innerHTML += `
+
+        <div style="
+          background:#0f172a;
+
+          padding:18px;
+
+          border-radius:18px;
+
+          margin-bottom:14px;
+
+          border:1px solid rgba(255,255,255,0.06);
+        ">
+
+          <div style="
+            color:white;
+            font-size:16px;
+            font-weight:700;
+            margin-bottom:8px;
+          ">
+            ${user.email}
+          </div>
+
+          <div style="
+            color:#94a3b8;
+            font-size:14px;
+            margin-bottom:6px;
+          ">
+            Role :
+            ${user.role}
+          </div>
+
+          <div style="
+            color:#94a3b8;
+            font-size:14px;
+            margin-bottom:6px;
+          ">
+            Vérifié :
+            ${
+              user.isVerified
+                ? "✅ Oui"
+                : "❌ Non"
+            }
+          </div>
+
+          <div style="
+            color:#94a3b8;
+            font-size:14px;
+          ">
+            Inscription :
+            ${new Date(
+              user.createdAt
+            ).toLocaleDateString()}
+          </div>
+
+        </div>
+      `;
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    alert("Erreur admin");
+  }
+}
+
+function logoutAdmin() {
+
+  localStorage.removeItem(
+    "token"
+  );
+
+  window.location.href =
+    "/admin-login";
 }
