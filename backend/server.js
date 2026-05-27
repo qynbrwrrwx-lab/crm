@@ -49,6 +49,7 @@ app.use(
 app.use(cors({
   origin: [
     "https://www.my-prospect.com",
+    "https://my-prospect.com",
     "https://crm-2-15ox.onrender.com"
   ],
   credentials: true
