@@ -1276,8 +1276,11 @@ async function login() {
           password
         })
       });
-    
-      console.log("LOGIN RESPONSE =", data);
+      
+      console.log("ADMIN LOGIN DATA =", data);
+
+      console.log("TOKEN =", data.token);
+
     setToken(data.token);
 
     showApp();
