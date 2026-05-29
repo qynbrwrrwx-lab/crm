@@ -802,7 +802,7 @@ if (path.includes("/verify-email-already")) {
 }
 
 // ================= GLOBAL =================
-const API_URL = "https://my-prospect.com";
+const API_URL = "https://www.my-prospect.com";
 let map;
 let markers = [];
 
