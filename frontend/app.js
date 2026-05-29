@@ -2314,16 +2314,19 @@ function logout() {
 
   removeToken();
 
-  document.getElementById("app")
-    .style.display = "none";
+  const app = document.getElementById("app");
+  const auth = document.getElementById("auth");
 
-  document.getElementById("auth")
-    .style.display = "flex";
+  if (app) {
+    app.style.display = "none";
+  }
+
+  if (auth) {
+    auth.style.display = "flex";
+  }
 
   if (map) {
-
     map.remove();
-
     map = null;
   }
 
