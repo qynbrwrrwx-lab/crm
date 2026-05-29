@@ -1042,7 +1042,10 @@ if (path.includes("/admin-login")) {
 
 // ================= ADMIN DASHBOARD =================
 
-if (path.includes("/admin")) {
+if (
+  path === "/admin" ||
+  path === "/admin/"
+) {
 
   document.body.innerHTML = `
 
@@ -1188,6 +1191,14 @@ if (path.includes("/admin")) {
   </div>
 
   `;
+
+if (!getToken()) {
+
+  window.location.href =
+    "/admin-login";
+
+  return;
+}
 
   loadAdminUsers();
 }
