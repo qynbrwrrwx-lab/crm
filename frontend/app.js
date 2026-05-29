@@ -1197,9 +1197,10 @@ if (!getToken()) {
   window.location.href =
     "/admin-login";
 
-  return;
-}
+  }
 
+  if (getToken()){
+    
   loadAdminUsers();
 }
 
