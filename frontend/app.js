@@ -1200,8 +1200,10 @@ if (!getToken()) {
   }
 
   if (getToken()){
-    
+
   loadAdminUsers();
+}
+
 }
 
 // ================= INIT =================
@@ -2538,4 +2540,4 @@ function logoutAdmin() {
 
   window.location.href =
     "/admin-login";
-}
+  }
