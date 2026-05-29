@@ -1276,7 +1276,8 @@ async function login() {
           password
         })
       });
-
+    
+      console.log("LOGIN RESPONSE =", data);
     setToken(data.token);
 
     showApp();
