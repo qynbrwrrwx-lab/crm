@@ -18,11 +18,15 @@ const companySchema = new mongoose.Schema({
 
   companyBank: String,
 
+  companyIban: String,
+
+  companyBic: String,
+
+  companyAccountHolder: String,
+
   rcs: String,
 
   ape: String,
-
-  customUnit: String,
 
   logo: String,
 

@@ -2310,6 +2310,26 @@ function logoutAdmin() {
       company.ape || "";
 
     document.getElementById(
+      "companyIban"
+    ).value =
+     company.companyIban || "";
+
+    document.getElementById(
+      "companyBic"
+    ).value =
+     company.companyBic || "";
+
+    document.getElementById(
+      "companyBank"
+    ).value =
+     company.companyBank || "";
+
+    document.getElementById(
+      "companyAccountHolder"
+    ).value =
+     company.companyAccountHolder || "";
+
+    document.getElementById(
       "currency"
     ).value =
       company.currency || "€";
@@ -2386,14 +2406,34 @@ async function saveCompany() {
               "customUnit"
             ).value,
 
-            rcs:
+          rcs:
             document.getElementById(
               "companyRcs"
             ).value,
 
-            ape:
+          ape:
             document.getElementById(
               "companyApe"
+            ).value,
+
+          companyIban:
+            document.getElementById(
+              "companyIban"
+            ).value,
+
+          companyBic:
+            document.getElementById(
+              "companyBic"
+            ).value,
+
+          companyBank:
+            document.getElementById(
+              "companyBank"
+            ).value,
+
+          companyAccountHolder:
+            document.getElementById(
+              "companyAccountHolder"
             ).value,
 
           currency:
