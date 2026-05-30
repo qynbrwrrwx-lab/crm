@@ -2288,6 +2288,16 @@ function logoutAdmin() {
       company.address || "";
 
     document.getElementById(
+     "companyPostalCode"
+    ).value =
+      company.postalCode || "";
+
+    document.getElementById(
+      "companyCity"
+    ).value =
+      company.city || "";
+
+    document.getElementById(
       "activityType"
     ).value =
       company.activityType || "Autre";
@@ -2401,6 +2411,16 @@ async function saveCompany() {
             document.getElementById(
               "companyAddress"
             ).value,
+
+          postalCode:
+           document.getElementById(
+             "companyPostalCode"
+           ).value,
+
+          city:
+            document.getElementById(
+              "companyCity"
+           ).value,
 
           activityType:
             document.getElementById(

@@ -16,6 +16,10 @@ const companySchema = new mongoose.Schema({
 
   address: String,
 
+  postalCode: String,
+
+  city: String,
+
   companyBank: String,
 
   companyIban: String,
