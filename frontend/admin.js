@@ -146,7 +146,13 @@ async function loadAdminUsers() {
   }
 }
 
-loadAdminUsers();
+if (
+  document.getElementById(
+    "adminUsers"
+  )
+) {
+  loadAdminUsers();
+}
 
 function logoutAdmin() {
 
