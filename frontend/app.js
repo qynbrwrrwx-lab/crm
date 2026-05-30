@@ -2303,12 +2303,7 @@ function logoutAdmin() {
       "currency"
     ).value =
       company.currency || "€";
-
-    document.getElementById(
-      "monthlyTarget"
-    ).value =
-      company.monthlyTarget || 0;
-
+      
   } catch (err) {
 
     console.error(err);
@@ -2386,12 +2381,7 @@ async function saveCompany() {
               "currency"
             ).value,
 
-          monthlyTarget:
-            document.getElementById(
-              "monthlyTarget"
-            ).value
-
-        })
+       })
 
       }
     );

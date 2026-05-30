@@ -42,11 +42,7 @@ const companySchema = new mongoose.Schema({
     type: String,
     default: "€"
   },
-
-  monthlyTarget: {
-    type: Number,
-    default: 0
-  }
+  
 
 });
 
