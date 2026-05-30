@@ -16,6 +16,14 @@ const companySchema = new mongoose.Schema({
 
   address: String,
 
+  companyBank: String,
+
+  rcs: String,
+
+  ape: String,
+
+  customUnit: String,
+
   logo: String,
 
   activityType: {
@@ -42,7 +50,7 @@ const companySchema = new mongoose.Schema({
     type: String,
     default: "€"
   },
-  
+
 
 });
 

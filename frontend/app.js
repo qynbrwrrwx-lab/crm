@@ -2297,7 +2297,17 @@ function logoutAdmin() {
     document.getElementById(
       "customUnit"
     ).value =
-      company.quantityUnit || "";
+      company.customUnit || "";
+
+    document.getElementById(
+      "companyRcs"
+    ).value =
+      company.rcs || "";
+
+    document.getElementById(
+      "companyApe"
+    ).value =
+      company.ape || "";
 
     document.getElementById(
       "currency"
@@ -2371,9 +2381,19 @@ async function saveCompany() {
               "quantityUnit"
             ).value,
 
-          quantityUnit:
+          customUnit:
             document.getElementById(
               "customUnit"
+            ).value,
+
+            rcs:
+            document.getElementById(
+              "companyRcs"
+            ).value,
+
+            ape:
+            document.getElementById(
+              "companyApe"
             ).value,
 
           currency:
