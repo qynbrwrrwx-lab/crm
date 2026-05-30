@@ -1030,16 +1030,17 @@ function showSection(sectionId, event) {
     setTimeout(() => {
       map.invalidateSize();
     }, 200);
-  }
 
-  // FAVORITES
-  if (sectionId === "favorites") {
-    loadFavorites();
   }
 
   // ANALYTICS
   if (sectionId === "analytics") {
     loadAnalytics();
+  }
+
+  // COMPANY
+  if (sectionId === "company") {
+    loadCompany();
   }
 
   // SETTINGS

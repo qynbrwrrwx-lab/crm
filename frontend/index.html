@@ -192,81 +192,79 @@
 
   <div class="app-layout">
 
-    <!-- ================= SIDEBAR ================= -->
+   <!-- ================= SIDEBAR ================= -->
 
-    <aside class="sidebar">
+<aside class="sidebar">
 
-      <div class="logo">
+  <div class="logo">
+    <img
+      src="./logo.png"
+      class="logo-big"
+      alt="logo"
+    />
+  </div>
 
-        <img
-          src="./logo.png"
-          class="logo-big"
-          alt="logo"
-        />
+  <nav>
 
-      </div>
+    <button
+      onclick="showSection('dashboard', event)"
+      class="active"
+    >
+      Tableau de bord
+    </button>
 
-      <nav>
+    <button
+      onclick="showSection('contacts', event)"
+    >
+      Contacts
+    </button>
 
-        <button
-          onclick="showSection('dashboard', event)"
-          class="active"
-        >
-          📊 Tableau de bord
-        </button>
+    <button
+      onclick="showSection('products', event)"
+    >
+      Produits
+    </button>
 
-        <button
-          onclick="showSection('contacts', event)"
-        >
-          👥 Contacts
-        </button>
+    <button
+      onclick="showSection('ordersSection', event)"
+    >
+      Commandes
+    </button>
 
-        <button
-          onclick="showSection('products', event)"
-        >
-          📦 Produits
-        </button>
+    <button
+      onclick="showSection('analytics', event)"
+    >
+      Statistiques
+    </button>
 
-        <button
-          onclick="showSection('ordersSection', event)">
-        >
-          🧾 Commandes
-        </button>
+    <button
+      onclick="showSection('mapSection', event)"
+    >
+      Carte
+    </button>
 
-        <button
-          onclick="showSection('favorites', event)"
-        >
-          ⭐ Favoris
-        </button>
+    <button
+      onclick="showSection('company', event)"
+    >
+      Entreprise
+    </button>
 
-        <button
-          onclick="showSection('analytics', event)"
-        >
-          📈 Analytics
-        </button>
+    <button
+      onclick="showSection('settings', event)"
+    >
+      Paramètres
+    </button>
 
-        <button
-          onclick="showSection('mapSection', event)"
-        >
-          🗺️ Carte
-        </button>
+  </nav>
 
-        <button
-          onclick="showSection('settings', event)"
-        >
-          ⚙️ Paramètres
-        </button>
+  <button
+    onclick="logout()"
+    class="logout"
+  >
+    Déconnexion
+  </button>
 
-      </nav>
-
-      <button
-        onclick="logout()"
-        class="logout"
-      >
-        🚪 Déconnexion
-      </button>
-
-    </aside>
+</aside>
 
     <!-- ================= MAIN ================= -->
 
@@ -667,23 +665,6 @@
 
 </div>
 
-        <!-- FAVORITES -->
-
-        <div
-          id="favorites"
-          class="section"
-        >
-
-          <div class="card">
-
-            <h2>⭐ Favoris</h2>
-
-            <div id="favoritesList"></div>
-
-          </div>
-
-        </div>
-
         <!-- ANALYTICS -->
 
         <div
@@ -713,6 +694,25 @@
             <h2>🗺️ Carte</h2>
 
             <div id="map"></div>
+
+          </div>
+
+        </div>
+
+      <div
+          id="company"
+          class="section"
+        >
+
+          <div class="card">
+
+            <h2>Entreprise</h2>
+
+            <div id="companyContent">
+
+              Chargement...
+              
+            </div>
 
           </div>
 
