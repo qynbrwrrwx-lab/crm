@@ -917,12 +917,26 @@
 
     </div>
 
-    <button
-      class="primary-btn"
-      onclick="saveCompany()"
-    >
-      Enregistrer
-    </button>
+    <div class="company-actions">
+
+  <button
+    id="editCompanyBtn"
+    class="primary-btn"
+    onclick="enableCompanyEdit()"
+  >
+    Modifier le profil
+  </button>
+
+  <button
+    id="saveCompanyBtn"
+    class="primary-btn"
+    onclick="saveCompany()"
+    style="display:none;"
+  >
+    Enregistrer
+  </button>
+
+</div>
 
   </div>
 

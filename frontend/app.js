@@ -2529,3 +2529,15 @@ if (logoInput) {
     }
   );
 }
+
+function enableCompanyEdit() {
+   document.getElementById(
+    "editCompanyBtn"
+  ).style.display =
+    "none";
+
+  document.getElementById(
+    "saveCompanyBtn"
+  ).style.display =
+    "inline-flex";
+}
