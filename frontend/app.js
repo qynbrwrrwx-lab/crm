@@ -2234,3 +2234,178 @@ function logoutAdmin() {
   window.location.href =
     "/admin-login";
   }
+
+// ================= COMPANY =================
+
+  async function loadCompany() {
+
+  try {
+
+    const res =
+      await fetch(
+        "/api/company"
+      );
+
+    const company =
+      await res.json();
+
+    document.getElementById(
+      "companyName"
+    ).value =
+      company.companyName || "";
+
+    document.getElementById(
+      "companySiret"
+    ).value =
+      company.siret || "";
+
+    document.getElementById(
+      "companyVat"
+    ).value =
+      company.vatNumber || "";
+
+    document.getElementById(
+      "companyPhone"
+    ).value =
+      company.phone || "";
+
+    document.getElementById(
+      "companyEmail"
+    ).value =
+      company.email || "";
+
+    document.getElementById(
+      "companyWebsite"
+    ).value =
+      company.website || "";
+
+    document.getElementById(
+      "companyAddress"
+    ).value =
+      company.address || "";
+
+    document.getElementById(
+      "activityType"
+    ).value =
+      company.activityType || "Autre";
+
+    document.getElementById(
+      "quantityUnit"
+    ).value =
+      company.quantityUnit || "Pièce";
+
+    document.getElementById(
+      "customUnit"
+    ).value =
+      company.quantityUnit || "";
+
+    document.getElementById(
+      "currency"
+    ).value =
+      company.currency || "€";
+
+    document.getElementById(
+      "monthlyTarget"
+    ).value =
+      company.monthlyTarget || 0;
+
+  } catch (err) {
+
+    console.error(err);
+  }
+}
+
+async function saveCompany() {
+
+  try {
+
+    await fetch(
+      "/api/company",
+      {
+        method: "PUT",
+
+        headers: {
+          "Content-Type":
+          "application/json"
+        },
+
+        body: JSON.stringify({
+
+          companyName:
+            document.getElementById(
+              "companyName"
+            ).value,
+
+          siret:
+            document.getElementById(
+              "companySiret"
+            ).value,
+
+          vatNumber:
+            document.getElementById(
+              "companyVat"
+            ).value,
+
+          phone:
+            document.getElementById(
+              "companyPhone"
+            ).value,
+
+          email:
+            document.getElementById(
+              "companyEmail"
+            ).value,
+
+          website:
+            document.getElementById(
+              "companyWebsite"
+            ).value,
+
+          address:
+            document.getElementById(
+              "companyAddress"
+            ).value,
+
+          activityType:
+            document.getElementById(
+              "activityType"
+            ).value,
+
+          quantityUnit:
+            document.getElementById(
+              "quantityUnit"
+            ).value,
+
+          quantityUnit:
+            document.getElementById(
+              "customUnit"
+            ).value,
+
+          currency:
+            document.getElementById(
+              "currency"
+            ).value,
+
+          monthlyTarget:
+            document.getElementById(
+              "monthlyTarget"
+            ).value
+
+        })
+
+      }
+    );
+
+    alert(
+      "Entreprise enregistrée ✅"
+    );
+
+  } catch (err) {
+
+    console.error(err);
+
+    alert(
+      "Erreur sauvegarde"
+    );
+  }
+}

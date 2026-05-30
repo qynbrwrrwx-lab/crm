@@ -18,7 +18,10 @@ const companySchema = new mongoose.Schema({
 
   logo: String,
 
-  activityType: String,
+  activityType: {
+    type: String,
+    default: "Autre"
+  },
 
   trackQuantity: {
     type: Boolean,
@@ -28,6 +31,21 @@ const companySchema = new mongoose.Schema({
   quantityUnit: {
     type: String,
     default: "Pièce"
+  },
+
+  customUnit: {
+    type: String,
+    default: ""
+  },
+
+  currency: {
+    type: String,
+    default: "€"
+  },
+
+  monthlyTarget: {
+    type: Number,
+    default: 0
   }
 
 });

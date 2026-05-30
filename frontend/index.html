@@ -700,23 +700,154 @@
         </div>
 
       <div
-          id="company"
-          class="section"
-        >
 
-          <div class="card">
+  id="company"
+  class="section"
+>
 
-            <h2>Entreprise</h2>
+  <div class="card">
 
-            <div id="companyContent">
+    <h2>Entreprise</h2>
 
-              Chargement...
-              
-            </div>
+    <div class="contact-grid">
 
-          </div>
+      <input
+        id="companyName"
+        placeholder="Nom entreprise"
+      />
 
-        </div>
+      <input
+        id="companySiret"
+        placeholder="SIRET"
+      />
+
+      <input
+        id="companyVat"
+        placeholder="TVA intracom"
+      />
+
+      <input
+        id="companyPhone"
+        placeholder="Téléphone"
+      />
+
+      <input
+        id="companyEmail"
+        placeholder="Email"
+      />
+
+      <input
+        id="companyWebsite"
+        placeholder="Site internet"
+      />
+
+      <input
+        id="companyAddress"
+        placeholder="Adresse"
+        class="contact-grid-full"
+      />
+
+      <select id="activityType">
+
+        <option value="Vigneron">
+          Vigneron
+        </option>
+
+        <option value="Brasseur">
+          Brasseur
+        </option>
+
+        <option value="Agriculteur">
+          Agriculteur
+        </option>
+
+        <option value="Artisan">
+          Artisan
+        </option>
+
+        <option value="Commerce">
+          Commerce
+        </option>
+
+        <option value="Industrie">
+          Industrie
+        </option>
+
+        <option value="Transport">
+          Transport
+        </option>
+
+        <option value="Services">
+          Services
+        </option>
+
+        <option value="Autre">
+          Autre
+        </option>
+
+      </select>
+
+      <select id="quantityUnit">
+
+  <option value="Pièce">Pièce</option>
+  <option value="g">Grammes (g)</option>
+  <option value="Kg">Kilogrammes (Kg)</option>
+  <option value="Tonne">Tonnes</option>
+  <option value="ml">Millilitres (ml)</option>
+  <option value="cl">Centilitres (cl)</option>
+  <option value="L">Litres (L)</option>
+  <option value="hL">Hectolitres (hL)</option>
+  <option value="m">Mètre (m)</option>
+  <option value="m²">Mètre carré (m²)</option>
+  <option value="m³">Mètre cube (m³)</option>
+  <option value="Palette">Palette</option>
+  <option value="Colis">Colis</option>
+  <option value="Bouteille">Bouteille</option>
+  <option value="Fût">Fût</option>
+  <option value="Sac">Sac</option>
+  <option value="Rouleau">Rouleau</option>
+  <option value="Heure">Heure</option>
+  <option value="Jour">Jour</option>
+
+  <option value="Autre">Autre</option>
+
+</select>
+
+<input
+  id="customUnit"
+  placeholder="Unité personnalisée (facultatif)"
+/>
+
+      <select id="currency">
+
+        <option value="€">€</option>
+
+        <option value="$">$</option>
+
+        <option value="£">£</option>
+
+        <option value="CHF">CHF</option>
+
+      </select>
+
+      <input
+        id="monthlyTarget"
+        type="number"
+        placeholder="Objectif mensuel"
+      />
+
+    </div>
+
+    <button
+      class="primary-btn"
+      onclick="saveCompany()"
+    >
+      Enregistrer
+    </button>
+
+  </div>
+
+</div>
 
         <!-- SETTINGS -->
 
