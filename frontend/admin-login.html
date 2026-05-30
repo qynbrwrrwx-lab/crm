@@ -1,0 +1,147 @@
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+     <meta charset="UTF-8">  
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Admin My-Prospect</title>
+     </head>
+     <body>
+
+
+    <div style="
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:linear-gradient(
+      135deg,
+      #2563eb 0%,
+      #0f172a 45%,
+      #020617 100%
+    );
+
+    font-family:Inter,sans-serif;
+    padding:20px;
+  ">
+
+    <div style="
+      width:100%;
+      max-width:420px;
+
+      background:rgba(15,23,42,0.78);
+
+      border:1px solid rgba(255,255,255,0.08);
+
+      backdrop-filter:blur(18px);
+
+      border-radius:28px;
+
+      padding:55px 34px 30px 34px;
+
+      box-shadow:0 0 50px rgba(37,99,235,0.25);
+
+      text-align:center;
+    ">
+
+      <img
+        src="/logo.png"
+        style="
+          width:450px;
+          margin-top:-120px;
+          margin-bottom:-90px;
+          object-fit:contain;
+          display:block;
+          margin-left:auto;
+          margin-right:auto;
+        "
+      >
+
+      <h1 style="
+        color:white;
+        font-size:24px;
+        margin-bottom:12px;
+        font-weight:800;
+      ">
+        👑 Administration
+      </h1>
+
+      <p style="
+        color:#cbd5e1;
+        font-size:14px;
+        margin-bottom:24px;
+      ">
+        Accès réservé administrateur
+      </p>
+
+      <input
+        id="adminEmail"
+        type="email"
+        placeholder="Email admin"
+
+        style="
+          width:100%;
+          padding:16px;
+          margin-bottom:14px;
+          border:none;
+          border-radius:16px;
+          background:#0f172a;
+          color:white;
+          font-size:15px;
+          box-sizing:border-box;
+        "
+      >
+
+      <input
+        id="adminPassword"
+        type="password"
+        placeholder="Mot de passe"
+
+        style="
+          width:100%;
+          padding:16px;
+          margin-bottom:18px;
+          border:none;
+          border-radius:16px;
+          background:#0f172a;
+          color:white;
+          font-size:15px;
+          box-sizing:border-box;
+        "
+      >
+
+      <button
+        onclick="adminLogin()"
+
+        style="
+          width:100%;
+          padding:16px;
+          border:none;
+          border-radius:16px;
+
+          background:linear-gradient(
+            90deg,
+            #22d3ee,
+            #2563eb
+          );
+
+          color:white;
+
+          font-size:16px;
+
+          font-weight:700;
+
+          cursor:pointer;
+        "
+      >
+        Se connecter
+      </button>
+
+    </div>
+
+  </div>
+
+  <script src="/admin.js"></script>
+
+  </body>
+  </html>

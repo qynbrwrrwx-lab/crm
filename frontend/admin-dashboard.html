@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Dashboard</title>
+
+</head>
+
+<body>
+
+<div style="
+min-height:100vh;
+background:linear-gradient(
+135deg,
+#2563eb 0%,
+#0f172a 45%,
+#020617 100%
+);
+font-family:Inter,sans-serif;
+padding:30px;
+">
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:30px;
+">
+
+<div>
+
+<h1 style="
+color:white;
+font-size:32px;
+margin:0;
+font-weight:800;
+">
+👑 Admin Dashboard
+</h1>
+
+<p style="
+color:#94a3b8;
+margin-top:8px;
+">
+Gestion plateforme My Prospect
+</p>
+
+</div>
+
+<button
+onclick="logoutAdmin()"
+style="
+padding:12px 18px;
+border:none;
+border-radius:14px;
+background:#ef4444;
+color:white;
+font-weight:700;
+cursor:pointer;
+"
+>
+Déconnexion
+</button>
+
+</div>
+
+<div
+id="adminStats"
+
+style="
+display:grid;
+grid-template-columns:
+repeat(auto-fit,minmax(220px,1fr));
+gap:18px;
+margin-bottom:30px;
+"
+>
+
+<div style="
+background:rgba(15,23,42,0.78);
+border-radius:22px;
+padding:24px;
+border:1px solid rgba(255,255,255,0.08);
+">
+
+<div style="
+color:#94a3b8;
+margin-bottom:8px;
+">
+Utilisateurs
+</div>
+
+<div
+id="totalUsers"
+style="
+color:white;
+font-size:32px;
+font-weight:800;
+"
+>
+...
+</div>
+
+</div>
+
+</div>
+
+<div style="
+background:rgba(15,23,42,0.78);
+border-radius:24px;
+padding:24px;
+border:1px solid rgba(255,255,255,0.08);
+">
+
+<h2 style="
+color:white;
+margin-top:0;
+margin-bottom:24px;
+">
+Utilisateurs inscrits
+</h2>
+
+<div id="adminUsers">
+
+Chargement...
+
+</div>
+
+</div>
+
+</div>
+
+<script src="/admin.js"></script>
+
+</body>
+</html>
