@@ -719,62 +719,87 @@
     Informations société
     </h3>
 
-    <div class="contact-grid">
+    <div
+      id="companyForm"
+      class="contact-grid"
+      style="display:none;"
+    >
 
       <input
         id="companyName"
+        class="company-field"
         placeholder="Nom entreprise"
+        readonly
       />
 
       <input
         id="companySiret"
+        class="company-field"
         placeholder="SIRET"
+        readonly
       />
 
       <input
         id="companyRcs"
+        class="company-field"
         placeholder="RCS"
+        readonly
       />
 
      <input
         id="companyApe"
+        class="company-field"
         placeholder="CODE APE"
+        readonly
       />
 
       <input
         id="companyVat"
+        class="company-field"
         placeholder="TVA intracom"
+        readonly
       />
 
       <input
         id="companyPhone"
+        class="company-field"
         placeholder="Téléphone"
+        readonly
       />
 
       <input
         id="companyEmail"
+        class="company-field"
         placeholder="Email"
+        readonly
       />
 
       <input
         id="companyWebsite"
+        class="company-field"
         placeholder="Site internet"
+        readonly
       />
 
       <input
         id="companyAddress"
+        class="company-field contact-grid-full"
         placeholder="Adresse"
-        class="contact-grid-full"
+        readonly
       />
 
       <input
         id="companyPostalCode"
+        class="company-field"
         placeholder="Code postal"
+        readonly
       />
 
       <input
         id="companyCity"
+        class="company-field"
         placeholder="Ville"
+        readonly
       />
 
       </div>
@@ -897,7 +922,14 @@
   placeholder="Titulaire du compte"
 />
 
-    </div>
+   </div>
+
+   </div>
+
+  <div
+    id="companyLogoSection"
+    style="display:none;"
+    >
 
       <h3 class="section-title">
       Logo entreprise
@@ -936,10 +968,7 @@
     Enregistrer
   </button>
 
-</div>
-
   </div>
-
 </div>
 
         <!-- SETTINGS -->

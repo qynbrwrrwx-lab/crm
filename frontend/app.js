@@ -2361,6 +2361,10 @@ function logoutAdmin() {
   }
 }
 
+  document.getElementById(
+  "companyLogoSection"
+).style.display = "none";
+
 async function saveCompany() {
 
   try {
@@ -2484,6 +2488,23 @@ async function saveCompany() {
       "Entreprise enregistrée ✅"
     );
 
+    document
+  .querySelectorAll(".company-field")
+  .forEach(field => {
+    field.setAttribute(
+      "readonly",
+      true
+    );
+  });
+
+    document.getElementById(
+  "editCompanyBtn"
+  ).style.display = "inline-flex";
+
+    document.getElementById(
+  "saveCompanyBtn"
+  ).style.display = "none";
+
   } catch (err) {
 
     console.error(err);
@@ -2531,13 +2552,22 @@ if (logoInput) {
 }
 
 function enableCompanyEdit() {
-   document.getElementById(
+
+  document
+    .querySelectorAll(".company-field")
+    .forEach(field => {
+      field.removeAttribute("readonly");
+    });
+
+  document.getElementById(
+    "companyLogoSection"
+  ).style.display = "block";
+
+  document.getElementById(
     "editCompanyBtn"
-  ).style.display =
-    "none";
+  ).style.display = "none";
 
   document.getElementById(
     "saveCompanyBtn"
-  ).style.display =
-    "inline-flex";
+  ).style.display = "inline-flex";
 }
