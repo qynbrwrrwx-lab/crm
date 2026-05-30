@@ -2252,6 +2252,8 @@ function logoutAdmin() {
     const company =
       await res.json();
 
+    console.log(company);
+
     document.getElementById(
       "companyName"
     ).value =
