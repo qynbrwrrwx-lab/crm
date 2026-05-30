@@ -705,9 +705,19 @@
   class="section"
 >
 
-  <div class="card">
+  <div class="card company-card">
 
-    <h2>Entreprise</h2>
+    <h2>Profil de l'entreprise</h2>
+    <p class="company-subtitle">
+    Informations légales,
+    activité,
+    facturation,
+    et identité visuelle.
+    </p>
+
+    <h3 class="section-title">
+    Informations société
+    </h3>
 
     <div class="contact-grid">
 
@@ -746,6 +756,14 @@
         placeholder="Adresse"
         class="contact-grid-full"
       />
+
+      </div>
+
+      <h3 class="section-title">
+      Activité
+      </h3>
+      
+      <div class="contact-grid">
 
       <select id="activityType">
 
@@ -835,6 +853,52 @@
         type="number"
         placeholder="Objectif mensuel"
       />
+
+      </div>
+
+      <h3 class="section-title">
+      Facturation
+      </h3>
+      
+      <div class="contact-grid">
+
+      <input
+  id="companyIban"
+  placeholder="IBAN"
+/>
+
+<input
+  id="companyBic"
+  placeholder="BIC"
+/>
+
+<input
+  id="companyBank"
+  placeholder="Nom de la banque"
+/>
+
+<input
+  id="companyAccountHolder"
+  placeholder="Titulaire du compte"
+/>
+
+    </div>
+
+      <h3 class="section-title">
+      Logo entreprise
+      </h3>
+      
+      <div class="contact-grid">
+
+        <input
+  type="file"
+  id="companyLogo"
+/>
+
+<img
+  id="logoPreview"
+  class="company-logo-preview"
+/>
 
     </div>
 

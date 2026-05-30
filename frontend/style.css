@@ -1016,3 +1016,53 @@ button:hover {
 
   flex-wrap: wrap;
 }
+
+/* ================= ENTREPRISE ================= */
+
+.company-card {
+
+  max-width: 1200px;
+
+  margin: auto;
+
+  padding: 35px;
+
+}
+
+.section-title {
+
+  color: white;
+
+  font-size: 18px;
+
+  font-weight: 700;
+
+  margin-top: 35px;
+
+  margin-bottom: 18px;
+
+  border-bottom:
+    1px solid rgba(255,255,255,0.08);
+
+  padding-bottom: 10px;
+}
+
+.company-logo-preview {
+
+  width: 180px;
+
+  height: 180px;
+
+  object-fit: contain;
+
+  border-radius: 18px;
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  background: #020617;
+
+  padding: 15px;
+
+  margin-top: 15px;
+}
