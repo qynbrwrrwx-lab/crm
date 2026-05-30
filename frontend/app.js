@@ -803,6 +803,9 @@ if (path.includes("/verify-email-already")) {
 
 // ================= GLOBAL =================
 const API_URL = "https://www.my-prospect.com";
+
+let companyLogoBase64 = "";
+
 let map;
 let markers = [];
 
@@ -2333,6 +2336,14 @@ function logoutAdmin() {
       "currency"
     ).value =
       company.currency || "€";
+
+    companyLogoBase64 =
+      company.logo || "";
+    
+    document.getElementById(
+      "logoPreview"
+    ).src =
+      company.logo || "";
       
   } catch (err) {
 
@@ -2441,6 +2452,9 @@ async function saveCompany() {
               "currency"
             ).value,
 
+          logo:
+            companyLogoBase64
+
        })
 
       }
@@ -2458,4 +2472,40 @@ async function saveCompany() {
       "Erreur sauvegarde"
     );
   }
+}
+
+const logoInput =
+  document.getElementById(
+    "companyLogo"
+  );
+
+if (logoInput) {
+
+  logoInput.addEventListener(
+    "change",
+    function (e) {
+
+      const file =
+        e.target.files[0];
+
+      if (!file) return;
+
+      const reader =
+        new FileReader();
+
+      reader.onload =
+        function (event) {
+
+          companyLogoBase64 =
+            event.target.result;
+
+          document.getElementById(
+            "logoPreview"
+          ).src =
+            companyLogoBase64;
+        };
+
+      reader.readAsDataURL(file);
+    }
+  );
 }
