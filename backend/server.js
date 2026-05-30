@@ -35,6 +35,9 @@ const invoiceRoutes =
   const adminRoutes =
   require("./routes/adminRoutes");
 
+  const companyRoutes =
+  require("./routes/companyRoutes");
+
 // ================= APP =================
 
 const app = express();
@@ -139,6 +142,11 @@ app.use(
 app.use(
   "/api/admin",
   adminRoutes
+);
+
+app.use(
+  "/api/company",
+  companyRoutes
 );
 
 // ================= FRONTEND =================
