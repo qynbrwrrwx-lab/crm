@@ -1021,7 +1021,7 @@ button:hover {
 
 .company-card {
 
-  max-width: 1200px;
+  max-width: 1000px;
 
   margin: 0 auto;
 
@@ -1069,7 +1069,31 @@ button:hover {
 
 .company-header {
 
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
   margin-bottom: 30px;
+
+}
+
+.company-header-logo {
+
+  width: 90px;
+
+  height: 90px;
+
+  object-fit: contain;
+
+  border-radius: 16px;
+
+  background: rgba(255,255,255,0.04);
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  padding: 10px;
 
 }
 
@@ -1101,13 +1125,18 @@ button:hover {
 
   display: flex;
 
-  justify-content: flex-end;
+  justify-content: center;
 
   align-items: center;
 
   gap: 15px;
 
-  margin-top: 30px;
+  margin-top: 35px;
+
+}
+.primary-btn {
+
+  min-width: 220px;
 
 }
 
