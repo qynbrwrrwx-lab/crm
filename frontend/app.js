@@ -2599,7 +2599,7 @@ function enableCompanyEdit() {
 
   document.getElementById(
     "companyLogoSection"
-  ).style.display = "block";
+  ).style.display = "none";
 
   document.getElementById(
     "editCompanyBtn"
