@@ -2350,10 +2350,15 @@ function logoutAdmin() {
     companyLogoBase64 =
       company.logo || "";
    
+   const headerLogo =
     document.getElementById(
-      "logoPreview"
-    ).src =
-      company.logo || "";
+    "headerLogo"
+   );
+
+   if (headerLogo) {
+      headerLogo.src =
+    company.logo || "";
+    }
 
   const headerLogo =
     document.getElementById(
