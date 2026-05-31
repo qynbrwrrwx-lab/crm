@@ -2251,7 +2251,7 @@ function logoutAdmin() {
 
     const company =
       await res.json();
-      
+     
     document.getElementById(
       "companyName"
     ).value =
@@ -2349,7 +2349,7 @@ function logoutAdmin() {
 
     companyLogoBase64 =
       company.logo || "";
-    
+   
     document.getElementById(
       "logoPreview"
     ).src =
@@ -2381,11 +2381,11 @@ function logoutAdmin() {
    });
 
   } catch (err) {
-  
+ 
     console.error(err);
 
   }
-} 
+}
 
 async function saveCompany() {
 
@@ -2507,7 +2507,7 @@ async function saveCompany() {
     );
 
     alert(
-      "Entreprise enregistrée ✅"
+      "Modifications effectuées"
     );
 
     document
@@ -2526,6 +2526,10 @@ async function saveCompany() {
     }
 
   });
+
+    document.getElementById(
+  "companyLogoSection"
+  ).style.display = "none";
 
     document.getElementById(
   "editCompanyBtn"
@@ -2582,11 +2586,7 @@ if (logoInput) {
 }
 
 function enableCompanyEdit() {
-
-  document.getElementById(
-    "companyLogoSection"
-  ).style.display = "none";
-
+  
   document
     .querySelectorAll(".company-field")
     .forEach(field => {
