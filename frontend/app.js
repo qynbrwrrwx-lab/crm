@@ -2583,6 +2583,10 @@ if (logoInput) {
 
 function enableCompanyEdit() {
 
+  document.getElementById(
+    "companyLogoSection"
+  ).style.display = "none";
+
   document
     .querySelectorAll(".company-field")
     .forEach(field => {
@@ -2599,7 +2603,7 @@ function enableCompanyEdit() {
 
   document.getElementById(
     "companyLogoSection"
-  ).style.display = "none";
+  ).style.display = "block";
 
   document.getElementById(
     "editCompanyBtn"
