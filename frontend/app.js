@@ -2356,6 +2356,11 @@ function logoutAdmin() {
       company.logo || "";
 
     document.getElementById(
+      "headerLogo"
+    ).src =
+      company.logo || "";
+
+    document.getElementById(
       "companyForm"
     ).style.display = "grid";
 
