@@ -2584,16 +2584,21 @@ if (logoInput) {
         new FileReader();
 
       reader.onload =
-        function (event) {
+  function (event) {
 
-          companyLogoBase64 =
-            event.target.result;
+    companyLogoBase64 =
+      event.target.result;
 
-          document.getElementById(
-            "logoPreview"
-          ).src =
-            companyLogoBase64;
-        };
+    const headerLogo =
+      document.getElementById(
+        "headerLogo"
+      );
+
+    if (headerLogo) {
+      headerLogo.src =
+        companyLogoBase64;
+    }
+  };
 
       reader.readAsDataURL(file);
     }
