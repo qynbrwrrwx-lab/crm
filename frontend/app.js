@@ -2355,10 +2355,15 @@ function logoutAdmin() {
     ).src =
       company.logo || "";
 
+  const headerLogo =
     document.getElementById(
-      "headerLogo"
-    ).src =
-      company.logo || "";
+    "headerLogo"
+   );
+
+   if (headerLogo) {
+      headerLogo.src =
+    company.logo || "";
+    }
 
     document.getElementById(
       "companyForm"
