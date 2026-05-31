@@ -699,31 +699,35 @@
 
         </div>
 
-      <div
-
-  id="company"
-  class="section"
->
+  <div id="company" class="section">
 
   <div class="card company-card">
 
-    <h2>Profil de l'entreprise</h2>
-    <p class="company-subtitle">
-    Informations légales,
-    activité,
-    facturation,
-    et identité visuelle.
-    </p>
+    <div class="company-header">
 
-    <h3 class="section-title">
-    Informations société
-    </h3>
+      <div>
+        <h2>Profil de l'entreprise</h2>
 
-    <div
-      id="companyForm"
-      class="contact-grid"
-      style="display:none;"
-    >
+        <p class="company-subtitle">
+          Informations légales, activité, facturation et identité visuelle.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- SOCIETE -->
+
+    <div class="company-section">
+
+      <h3 class="section-title">
+        Informations société
+      </h3>
+
+      <div
+        id="companyForm"
+        class="contact-grid"
+        style="display:none;"
+      >
 
       <input
         id="companyName"
@@ -803,12 +807,15 @@
       />
 
       </div>
+      </div>
+
+      <div class="company-section">
 
       <h3 class="section-title">
-      Activité
+       Activité
       </h3>
-      
-      <div class="contact-grid">
+
+        <div class="contact-grid">
 
       <select 
         id="activityType"
@@ -909,12 +916,15 @@
       </select>
 
 </div>
+</div>
 
-      <h3 class="section-title">
-      Facturation
-      </h3>
-      
-      <div class="contact-grid">
+       <div class="company-section">
+
+  <h3 class="section-title">
+    Facturation
+  </h3>
+
+  <div class="contact-grid">
 
 <input
   id="companyIban"
@@ -943,10 +953,13 @@
   placeholder="Titulaire du compte"
   readonly
 />
+
+</div>
 </div>
 
   <div
   id="companyLogoSection"
+  class="company-section"
   style="display:none;"
 >
 
@@ -991,7 +1004,7 @@
   </button>
 
  </div>
- 
+
     <!-- SETTINGS -->
 
         <div

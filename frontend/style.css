@@ -1066,3 +1066,81 @@ button:hover {
 
   margin-top: 15px;
 }
+
+/* ================= ENTREPRISE V2 ================= */
+
+.company-header {
+
+  margin-bottom: 30px;
+
+}
+
+.company-subtitle {
+
+  color: #94a3b8;
+
+  margin-top: 8px;
+
+}
+
+.company-section {
+
+  background: rgba(255,255,255,0.03);
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  border-radius: 20px;
+
+  padding: 25px;
+
+  margin-bottom: 25px;
+
+  backdrop-filter: blur(10px);
+
+}
+
+.company-actions {
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 15px;
+
+  margin-top: 25px;
+
+}
+
+.company-field {
+
+  transition: all 0.25s ease;
+
+}
+
+.company-field:read-only {
+
+  background: rgba(255,255,255,0.04);
+
+  color: #cbd5e1;
+
+  cursor: default;
+
+}
+
+.company-logo-preview {
+
+  width: 200px;
+
+  height: 200px;
+
+  object-fit: contain;
+
+  background: #020617;
+
+  border-radius: 20px;
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  padding: 15px;
+
+}

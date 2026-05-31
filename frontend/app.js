@@ -2507,7 +2507,7 @@ async function saveCompany() {
     );
 
     alert(
-      "Modifications effectuées"
+      "Modifications effectuées ✅"
     );
 
     document
