@@ -2350,13 +2350,13 @@ function logoutAdmin() {
     companyLogoBase64 =
       company.logo || "";
    
-   const headerLogo =
+   const logoPreview =
     document.getElementById(
-    "headerLogo"
+    "logoPreview"
    );
 
-   if (headerLogo) {
-      headerLogo.src =
+   if (logoPreview) {
+      logoPreview.src =
     company.logo || "";
     }
 
