@@ -2355,22 +2355,37 @@ function logoutAdmin() {
     ).src =
       company.logo || "";
 
-    console.log("COMPANY =", company);
-
-      document.getElementById(
+    document.getElementById(
       "companyForm"
     ).style.display = "grid";
-      
-      
+
+    document.getElementById(
+     "companyLogoSection"
+    ).style.display = "none";
+
+    document.getElementById(
+     "editCompanyBtn"
+    ).style.display = "inline-flex";
+
+    document.getElementById(
+     "saveCompanyBtn"
+    ).style.display = "none";
+
+    document
+      .querySelectorAll(".company-field")
+      .forEach(field => {
+        field.setAttribute(
+         "readonly",
+       true
+     );
+   });
+
   } catch (err) {
-
+  
     console.error(err);
-  }
-}
 
-  document.getElementById(
-  "companyLogoSection"
-).style.display = "none";
+  }
+} 
 
 async function saveCompany() {
 
@@ -2498,10 +2513,18 @@ async function saveCompany() {
     document
   .querySelectorAll(".company-field")
   .forEach(field => {
+
     field.setAttribute(
       "readonly",
       true
     );
+
+    if (
+      field.tagName === "SELECT"
+    ) {
+      field.disabled = true;
+    }
+
   });
 
     document.getElementById(
@@ -2563,7 +2586,15 @@ function enableCompanyEdit() {
   document
     .querySelectorAll(".company-field")
     .forEach(field => {
+
       field.removeAttribute("readonly");
+
+      if (
+        field.tagName === "SELECT"
+      ) {
+        field.disabled = false;
+      }
+
     });
 
   document.getElementById(

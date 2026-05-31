@@ -810,7 +810,12 @@
       
       <div class="contact-grid">
 
-      <select id="activityType">
+      <select 
+        id="activityType"
+        class="company-field"
+        disabled
+      >
+        
 
         <option value="Vigneron">
           Vigneron
@@ -850,7 +855,11 @@
 
       </select>
 
-      <select id="quantityUnit">
+      <select 
+        id="quantityUnit"
+        class="company-field"
+        disabled
+      >
 
   <option value="Pièce">Pièce</option>
   <option value="g">Grammes (g)</option>
@@ -878,10 +887,16 @@
 
 <input
   id="customUnit"
+  class="company-field"
   placeholder="Unité personnalisée (facultatif)"
+  readonly
 />
 
-      <select id="currency">
+ <select 
+    id="currency"
+    class="company-field"
+    disabled
+  >
 
         <option value="€">€</option>
 
@@ -901,25 +916,32 @@
       
       <div class="contact-grid">
 
-
-        <input
+<input
   id="companyIban"
+  class="company-field"
   placeholder="IBAN"
+  readonly
 />
 
 <input
   id="companyBic"
+  class="company-field"
   placeholder="BIC"
+  readonly
 />
 
 <input
   id="companyBank"
+  class="company-field"
   placeholder="Nom de la banque"
+  readonly
 />
 
 <input
   id="companyAccountHolder"
+  class="company-field"
   placeholder="Titulaire du compte"
+  readonly
 />
 
    </div>
@@ -949,12 +971,13 @@
 
     </div>
 
-    <div class="company-actions">
+  <div class="company-actions">
 
   <button
     id="editCompanyBtn"
     class="primary-btn"
     onclick="enableCompanyEdit()"
+    style="display:inline-flex;"
   >
     Modifier le profil
   </button>
@@ -968,7 +991,6 @@
     Enregistrer
   </button>
 
-  </div>
 </div>
 
         <!-- SETTINGS -->
