@@ -2354,6 +2354,13 @@ function logoutAdmin() {
       "logoPreview"
     ).src =
       company.logo || "";
+
+    console.log("COMPANY =", company);
+
+      document.getElementById(
+      "companyForm"
+    ).style.display = "grid";
+      
       
   } catch (err) {
 
