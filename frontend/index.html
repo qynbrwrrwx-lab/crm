@@ -512,29 +512,7 @@
   class="section"
 >
 
-  <!-- TABS -->
-
-  <div class="orders-tabs">
-
-    <button
-      onclick="showOrderTab('createOrder')"
-    >
-      ➕ Nouvelle commande / devis
-    </button>
-
-    <button
-      onclick="showOrderTab('quotesTab')"
-    >
-      📄 Devis
-    </button>
-
-    <button
-      onclick="showOrderTab('invoicesTab')"
-    >
-      🧾 Factures
-    </button>
-
-  </div>
+  
 
   <!-- CREATE ORDER -->
 
@@ -548,7 +526,7 @@
       <div class="card">
 
         <h2>
-          ➕ Nouveau devis / facture
+          Nouvelle commande
         </h2>
 
         <div class="invoice-grid">
@@ -583,20 +561,6 @@
             placeholder="Quantité"
           />
 
-          <!-- TYPE -->
-
-          <select id="invoiceType">
-
-            <option value="invoice">
-              Facture
-            </option>
-
-            <option value="quote">
-              Devis
-            </option>
-
-          </select>
-
           <!-- PAYMENT -->
 
           <select
@@ -626,9 +590,9 @@
 
         <button
           class="primary-btn"
-          onclick="createInvoice()"
+          
         >
-          Créer document
+          Créer commande
         </button>
 
       </div>
@@ -639,44 +603,9 @@
 
   <!-- QUOTES -->
 
-  <div
-    id="quotesTab"
-    class="order-tab"
-  >
+  
 
-    <div class="card">
-
-      <h2>
-        📄 Liste des devis
-      </h2>
-
-      <div id="quotesContainer"></div>
-
-    </div>
-
-  </div>
-
-  <!-- INVOICES -->
-
-  <div
-    id="invoicesTab"
-    class="order-tab"
-  >
-
-    <div class="card">
-
-      <h2>
-        🧾 Liste des factures
-      </h2>
-
-      <div id="invoiceList"></div>
-
-    </div>
-
-  </div>
-
-</div>
-
+  
       <!-- DEVIS -->
 
 <div
