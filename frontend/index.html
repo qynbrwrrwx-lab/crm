@@ -617,22 +617,63 @@
 
   <div class="card">
 
-    <div class="section-header">
+  <div class="section-header">
 
-      <h2>
-        Devis
-      </h2>
+    <h2>Devis</h2>
 
-      <button
-        class="primary-btn"
-        id="newQuoteBtn"
-      >
-        Nouveau devis
-      </button>
+    <button
+      class="primary-btn"
+      onclick="toggleQuoteForm()"
+    >
+      Nouveau devis
+    </button>
+
+  </div>
+
+  <div
+    id="quoteForm"
+    style="display:none;margin-top:20px;"
+  >
+
+    <div class="invoice-grid">
+
+      <select id="quoteContact">
+
+        <option value="">
+          Sélectionner un contact
+        </option>
+
+      </select>
+
+      <select id="quoteProduct">
+
+        <option value="">
+          Sélectionner un produit
+        </option>
+
+      </select>
+
+      <input
+        id="quoteQuantity"
+        type="number"
+        min="1"
+        value="1"
+        placeholder="Quantité"
+      />
 
     </div>
 
+    <button
+      class="primary-btn"
+      onclick="createQuote()"
+      style="margin-top:15px;"
+    >
+      Créer le devis
+    </button>
+
   </div>
+
+</div>
 
   <div class="card">
 

@@ -1056,6 +1056,11 @@ function showSection(sectionId, event) {
     loadProducts();
   }
 
+  if (sectionId === "quotesSection") {
+
+  loadQuoteData();
+  }
+
   // INVOICES
   if (sectionId === "invoices") {
 
@@ -1812,6 +1817,48 @@ async function deleteInvoice(id) {
 
     showToast(err.message);
   }
+}
+
+async function loadQuoteData() {
+
+  const contacts =
+    await apiFetch("/api/contacts");
+
+  const products =
+    await apiFetch("/api/products");
+
+  const contactSelect =
+    document.getElementById("quoteContact");
+
+  const productSelect =
+    document.getElementById("quoteProduct");
+
+  if (!contactSelect || !productSelect) return;
+
+  contactSelect.innerHTML =
+    '<option value="">Sélectionner un contact</option>';
+
+ contacts.forEach(contact => {
+
+    contactSelect.innerHTML += `
+      <option value="${contact._id}">
+        ${contact.firstname || ""}
+        ${contact.lastname || ""}
+      </option>
+    `;
+  });
+
+  productSelect.innerHTML =
+    '<option value="">Sélectionner un produit</option>';
+
+  products.forEach(product => {
+
+    productSelect.innerHTML += `
+      <option value="${product._id}">
+        ${product.name}
+      </option>
+    `;
+  });
 }
 
 // ================= ACTIONS =================
@@ -2632,4 +2679,17 @@ function enableCompanyEdit() {
   document.getElementById(
     "saveCompanyBtn"
   ).style.display = "inline-flex";
+}
+
+function toggleQuoteForm() {
+
+  const form =
+    document.getElementById("quoteForm");
+
+  if (!form) return;
+
+  form.style.display =
+    form.style.display === "none"
+      ? "block"
+      : "none";
 }
