@@ -2694,17 +2694,26 @@ function enableCompanyEdit() {
   ).style.display = "inline-flex";
 }
 
-function toggleQuoteForm() {
+async function toggleQuoteForm() {
 
   const form =
     document.getElementById("quoteForm");
 
   if (!form) return;
 
+  const opening =
+    form.style.display === "none";
+
   form.style.display =
-    form.style.display === "none"
-      ? "block"
-      : "none";
+    opening ? "block" : "none";
+
+  if (opening) {
+
+    console.log("QUOTES OPEN");
+
+    await loadQuoteData();
+
+  }
 }
 
 async function createQuote() {
