@@ -1829,8 +1829,12 @@ async function loadQuoteData() {
   const contacts =
     await apiFetch("/api/contacts");
 
+    console.log("CONTACTS =", contacts);
+
   const products =
     await apiFetch("/api/products");
+
+    console.log("PRODUCTS =", products);
 
   const contactSelect =
     document.getElementById("quoteContact");
