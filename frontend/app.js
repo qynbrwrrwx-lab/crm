@@ -1063,7 +1063,7 @@ function showSection(sectionId, event) {
 
   if (sectionId === "quotesSection") {
 
-  loadQuoteData();
+  console.log("QUOTES OPEN");
   }
 
   // INVOICES
