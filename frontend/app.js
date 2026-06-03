@@ -1826,6 +1826,8 @@ async function deleteInvoice(id) {
 
 async function loadQuoteData() {
 
+  console.log("LOAD QUOTE DATA EXECUTE");
+
   const contacts =
     await apiFetch("/api/contacts");
 
