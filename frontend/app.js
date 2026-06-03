@@ -992,6 +992,11 @@ async function login() {
 
     setToken(data.token);
 
+    console.log(
+      "LOCAL STORAGE=",
+      localStorage.getItem("token")
+    ); 
+
     showApp();
 
     showToast("Bienvenue 🚀");
