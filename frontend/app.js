@@ -1,4 +1,4 @@
-console.log("APP JS CHARGE")
+console.log("APP JS CHARGE");
 
 const path = window.location.pathname;
 
