@@ -987,14 +987,11 @@ async function login() {
       });
       
       console.log("LOGIN DATA =", data);
-
-      console.log("TOKEN =", data.token);
-
-    console.log("TOKEN RECU =", data.token);
-    setToken(data.token);
+  
+      setToken(data.token);
 
     console.log(
-      "LOCAL STORAGE=",
+      "TOKEN APRES SET=",
       localStorage.getItem("token")
     ); 
 
