@@ -1970,6 +1970,8 @@ async function addContact() {
       parseFloat(geoData[0].lon);
   }
 
+  console.log("TOKEN AVANT CONTACT =", getToken());
+
 await apiFetch("/api/contacts", {
     method: "POST",
 
