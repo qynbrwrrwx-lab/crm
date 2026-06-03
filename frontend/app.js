@@ -986,10 +986,11 @@ async function login() {
         })
       });
       
-      console.log("ADMIN LOGIN DATA =", data);
+      console.log("LOGIN DATA =", data);
 
       console.log("TOKEN =", data.token);
 
+    console.log("TOKEN RECU =", data.token);
     setToken(data.token);
 
     console.log(
