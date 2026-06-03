@@ -1153,13 +1153,24 @@ async function login() {
 
     const data = await res.json();
 
-    if (data.success) {
+    console.log("LOGIN DATA =", data);
+
+    if (data.token) {
+
+      localStorage.setItem(
+        "token",
+        data.token
+      );
 
       showToast("Connexion réussie ✅");
 
       document.getElementById("auth").style.display = "none";
 
       document.getElementById("app").style.display = "block";
+
+      if (typeof showApp === "function") {
+        showApp();
+      }
 
     } else {
 
@@ -1175,6 +1186,7 @@ async function login() {
     showToast("Serveur indisponible");
   }
 }
+
 
 // ================= REGISTER =================
 
