@@ -2706,3 +2706,52 @@ function toggleQuoteForm() {
       ? "block"
       : "none";
 }
+
+async function createQuote() {
+
+  const contactId =
+    document.getElementById("quoteContact").value;
+
+  const productId =
+    document.getElementById("quoteProduct").value;
+
+  const quantity =
+    parseInt(
+      document.getElementById("quoteQuantity").value
+    );
+
+  if (!contactId) {
+    return showToast("Sélectionnez un contact");
+  }
+
+  if (!productId) {
+    return showToast("Sélectionnez un produit");
+  }
+
+  try {
+
+    await apiFetch("/api/quotes", {
+
+      method: "POST",
+
+      body: JSON.stringify({
+        contactId,
+        productId,
+        quantity
+      })
+
+    });
+
+    showToast("Devis créé ✅");
+
+    loadQuotes();
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast(err.message);
+
+  }
+
+}
