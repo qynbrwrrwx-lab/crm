@@ -1,3 +1,5 @@
+console.log("APP JS CHARGE")
+
 const path = window.location.pathname;
 
 if (path.includes("/reset-password/")) {
