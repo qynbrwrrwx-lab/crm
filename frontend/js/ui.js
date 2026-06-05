@@ -102,7 +102,7 @@ function showSection(sectionId, event) {
   }
 
   if (sectionId === "quotesSection") {
-    loadQuotesData();
+    loadQuoteData();
   }
 
   // INVOICES

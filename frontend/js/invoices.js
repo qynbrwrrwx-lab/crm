@@ -282,7 +282,7 @@ async function deleteInvoice(id) {
 
 async function loadQuoteData() {
 
-  console.log("LOAD QUOTE DATA EXECUTE");
+  console.log("LOAD QUOTES DATA EXECUTE");
 
   const contacts =
     await apiFetch("/api/contacts");
@@ -347,7 +347,7 @@ function showOrderTab(tabId) {
 
 
 
-async function toggleQuoteForm() {
+async function toggleQuotesForm() {
 
   const form =
     document.getElementById("quoteForm");
@@ -418,7 +418,7 @@ async function createQuote() {
     });
 
     showToast("Devis créé ✅");
-    
+
 
   } catch (err) {
 
