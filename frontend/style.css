@@ -1202,3 +1202,27 @@ button:hover {
   grid-column: 1 / -1;
 
 }
+
+.quote-modal {
+
+  position: fixed;
+
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  width: 700px;
+  max-width: 90%;
+
+  background: #0f172a;
+
+  border-radius: 24px;
+
+  padding: 30px;
+
+  z-index: 9999;
+
+  box-shadow:
+    0 0 50px rgba(0,0,0,0.4);
+}
