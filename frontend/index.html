@@ -630,12 +630,43 @@
 
     </div>
   <div
-    id="quoteModal"
-    class="quote-modal"
-    style="display:none;"
-  >
+  id="quoteModal"
+  class="quote-modal"
+  style="display:none;"
+>
 
-  
+  <div class="card">
+
+    <h2>Nouveau devis</h2>
+
+    <select id="quoteContact">
+      <option value="">
+        Sélectionner un contact
+      </option>
+    </select>
+
+    <select id="quoteProduct">
+      <option value="">
+        Sélectionner un produit
+      </option>
+    </select>
+
+    <input
+      id="quoteQuantity"
+      type="number"
+      min="1"
+      value="1"
+    />
+
+    <button
+      class="primary-btn"
+      onclick="createQuote()"
+    >
+      Créer le devis
+    </button>
+
+  </div>
+
 </div>
 
   <div class="card">
