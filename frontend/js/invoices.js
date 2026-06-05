@@ -349,10 +349,25 @@ function showOrderTab(tabId) {
 
 window.toggleQuoteForm = async function() {
 
-    console.log("BOUTON CLIQUE");
+  const form =
+    document.getElementById("quoteModal");
+
+  if (!form) return;
+
+  const opening =
+    form.style.display === "none";
+
+  form.style.display =
+    opening ? "block" : "none";
+
+  if (opening) {
+
+    console.log("QUOTES OPEN");
+
+    await loadQuoteData();
 
   }
-
+}
 
 // ================= CREATE QUOTES =================
 
