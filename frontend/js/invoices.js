@@ -347,7 +347,7 @@ function showOrderTab(tabId) {
 
 
 
-async function toggleQuotesForm() {
+window.toggleQuoteForm = async function() {
 
   const form =
     document.getElementById("quoteForm");
