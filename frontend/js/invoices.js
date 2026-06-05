@@ -169,8 +169,7 @@ async function createInvoice() {
   const quantity =
     document.getElementById("invoiceQuantity").value;
 
-  const type =
-    document.getElementById("invoiceType").value;
+  const type = "invoice";
 
   const paymentMethod =
     document.getElementById("paymentMethod").value;
@@ -327,4 +326,107 @@ async function loadQuoteData() {
       </option>
     `;
   });
+}
+
+// ================= ORDER TABS =================
+
+function showOrderTab(tabId) {
+
+  document
+    .querySelectorAll(".order-tab")
+    .forEach(tab => {
+
+      tab.classList.remove("active");
+
+    });
+
+  document
+    .getElementById(tabId)
+    ?.classList.add("active");
+}
+
+
+
+async function toggleQuoteForm() {
+
+  const form =
+    document.getElementById("quoteForm");
+
+  if (!form) return;
+
+  const opening =
+    form.style.display === "none";
+
+  form.style.display =
+    opening ? "block" : "none";
+
+  if (opening) {
+
+    console.log("QUOTES OPEN");
+
+    await loadQuoteData();
+
+  }
+}
+
+// ================= CREATE QUOTES =================
+
+async function createQuote() {
+
+  const contactId =
+    document.getElementById("quoteContact").value;
+
+  const productId =
+    document.getElementById("quoteProduct").value;
+
+  const quantity =
+    parseInt(
+      document.getElementById("quoteQuantity").value
+    );
+
+  if (!contactId) {
+    return showToast("Sélectionnez un contact");
+  }
+
+  if (!productId) {
+    return showToast("Sélectionnez un produit");
+  }
+
+  try {
+
+    await apiFetch("/api/invoices", {
+
+      method: "POST",
+
+      body: JSON.stringify({
+
+        type: "quote",
+
+        contactId,
+
+        paymentMethod: "pending",
+
+        products: [
+            {
+        
+        productId,
+        quantity
+      }
+    ]
+})
+
+    });
+
+    showToast("Devis créé ✅");
+
+    loadQuotes();
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast(err.message);
+
+  }
+
 }
