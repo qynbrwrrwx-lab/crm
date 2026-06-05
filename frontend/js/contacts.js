@@ -95,7 +95,7 @@ await apiFetch("/api/contacts", {
 
   document.getElementById("lastname").value = "";
 
-  document.getElementById("contacttCompany").value = "";
+  document.getElementById("contactCompany").value = "";
 
   document.getElementById("siret").value = "";
 
