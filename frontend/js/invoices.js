@@ -350,7 +350,7 @@ function showOrderTab(tabId) {
 window.toggleQuoteForm = async function() {
 
   const form =
-    document.getElementById("quoteForm");
+    document.getElementById("quoteModal");
 
   if (!form) return;
 
