@@ -417,6 +417,8 @@ async function createQuote() {
 
     });
 
+    await loadInvoices();
+
     showToast("Devis créé ✅");
 
 
