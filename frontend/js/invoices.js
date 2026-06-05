@@ -418,8 +418,7 @@ async function createQuote() {
     });
 
     showToast("Devis créé ✅");
-
-    loadQuotes();
+    
 
   } catch (err) {
 
