@@ -9,6 +9,11 @@ const invoiceSchema = new mongoose.Schema({
     default: "invoice"
   },
 
+  status: {
+    type: string,
+    default: "draft"
+  }
+
   contactId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Contact"
