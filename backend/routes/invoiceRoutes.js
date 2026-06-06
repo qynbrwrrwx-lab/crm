@@ -96,8 +96,18 @@ router.post("/", auth, async (req, res) => {
       await product.save();
     }
 
+    let prefix = "FAC";
+
+    if (type === "quote") {
+     prefix = "DEV";
+  }
+
+    if (type === "order") {
+     prefix = "CMD";
+  }
+
     const invoiceNumber =
-      "FAC-" + Date.now();
+      prefix + "-" + Date.now();
 
     const invoice =
       await Invoice.create({
