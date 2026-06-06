@@ -421,6 +421,9 @@ async function createQuote() {
 
     showToast("Devis créé ✅");
 
+    closeQuoteModal();
+    
+    loadQuotes();
 
   } catch (err) {
 
@@ -430,4 +433,14 @@ async function createQuote() {
 
   }
 
+}
+
+    function closeQuoteModal() {
+
+  const modal =
+    document.getElementById("quoteModal");
+
+  if (!modal) return;
+
+  modal.style.display = "none";
 }
