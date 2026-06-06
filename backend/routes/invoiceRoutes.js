@@ -96,18 +96,30 @@ router.post("/", auth, async (req, res) => {
       await product.save();
     }
 
+    const year =
+      new Date().getFullYear();
+
     let prefix = "FAC";
 
-    if (type === "quote") {
-     prefix = "DEV";
-  }
+      if (type === "quote") {
+    prefix = "DEV";
+    }
 
     if (type === "order") {
-     prefix = "CMD";
-  }
+      prefix = "CMD";
+    }
+
+    const count =
+      await Invoice.countDocuments({
+      type,
+      createdAt: {
+      $gte: new Date(`${year}-01-01`),
+      $lt: new Date(`${year + 1}-01-01`)
+    }
+  });
 
     const invoiceNumber =
-      prefix + "-" + Date.now();
+     `${prefix}-${year}-${String(count + 1).padStart(5, "0")}`;
 
     const invoice =
       await Invoice.create({
