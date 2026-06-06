@@ -422,8 +422,6 @@ async function createQuote() {
     showToast("Devis créé ✅");
 
     closeQuoteModal();
-    
-    loadQuotes();
 
   } catch (err) {
 
