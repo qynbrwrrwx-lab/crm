@@ -220,4 +220,41 @@ router.delete(
   }
 );
 
+// ================= ACCEPT QUOTE =================
+
+router.put(
+  "/accept/:id",
+  auth,
+  async (req, res) => {
+
+    try {
+
+      const invoice =
+        await Invoice.findById(req.params.id);
+
+      if (!invoice) {
+
+        return res.status(404).json({
+          error: "Devis introuvable"
+        });
+      }
+
+      invoice.status = "accepted";
+
+      await invoice.save();
+
+      res.json(invoice);
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: "Erreur validation devis"
+      });
+    }
+  }
+);
+
+
 module.exports = router;
