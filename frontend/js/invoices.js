@@ -442,3 +442,29 @@ async function createQuote() {
 
   modal.style.display = "none";
 }
+
+// ================= CREATE QUOTES =================
+
+async function acceptQuote(id) {
+
+  try {
+
+    await apiFetch(
+      `/api/invoices/accept/${id}`,
+      {
+        method: "PUT"
+      }
+    );
+
+    await loadInvoices();
+
+    showToast("Devis accepté");
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast(err.message);
+
+  }
+}
