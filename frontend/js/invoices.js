@@ -441,9 +441,17 @@ async function createQuote() {
 
   try {
 
-    await apiFetch("/api/invoices", {
+    const method =
+  editingQuoteId ? "PUT" : "POST";
 
-      method: "POST",
+    const url =
+  editingQuoteId
+    ? `/api/invoices/${editingQuoteId}`
+    : "/api/invoices";
+
+    await apiFetch(url, {
+
+     method,
 
       body: JSON.stringify({
 
@@ -466,7 +474,13 @@ async function createQuote() {
 
     await loadInvoices();
 
-    showToast("Devis créé ✅");
+    showToast(
+    editingQuoteId
+    ? "Devis modifié ✅"
+    : "Devis créé ✅"
+ );
+
+    editingQuoteId = null;
 
     closeQuoteModal();
 

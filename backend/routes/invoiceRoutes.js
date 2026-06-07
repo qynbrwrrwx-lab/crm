@@ -260,7 +260,7 @@ router.put(
 
 router.get(
   "/pdf/:id",
-  
+
   async (req, res) => {
 
     try {
@@ -319,5 +319,49 @@ router.get(
   }
 );
 
+// ================= UPDATE INVOICE =================
+
+router.put(
+  "/:id",
+  auth,
+  async (req, res) => {
+
+    try {
+
+      const {
+        contactId,
+        products
+      } = req.body;
+
+      const invoice =
+        await Invoice.findById(req.params.id);
+
+      if (!invoice) {
+
+        return res.status(404).json({
+          error: "Document introuvable"
+        });
+      }
+
+      invoice.contactId =
+        contactId;
+
+      invoice.products =
+        products;
+
+      await invoice.save();
+
+      res.json(invoice);
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: "Erreur modification document"
+      });
+    }
+  }
+);
 
 module.exports = router;
