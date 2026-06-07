@@ -260,7 +260,7 @@ router.put(
 
 router.get(
   "/pdf/:id",
-  auth,
+  
   async (req, res) => {
 
     try {
