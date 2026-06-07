@@ -166,17 +166,26 @@ function renderInvoices(invoices) {
 
 </div>
 
-
-      </div>
+    
+    </div>
     `;
 
-    if (invoice.type === "quote") {
+   if (invoice.type === "quote") {
 
-      quotesList.innerHTML += html;
+  if (invoice.status === "accepted") {
 
-    } else {
+    acceptedQuotesList.innerHTML += html;
 
-      invoiceList.innerHTML += html;
+  } else {
+
+    quotesList.innerHTML += html;
+
+  }
+
+} else {
+
+  invoiceList.innerHTML += html;
+
     }
   });
 }
