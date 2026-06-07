@@ -74,10 +74,18 @@ function renderInvoices(invoices) {
   const quotesList =
     document.getElementById("quotesContainer");
 
-  if (!invoiceList || !quotesList) return;
+  const acceptedQuotesList =
+    document.getElementById("acceptedQuotesContainer");
+
+  if (
+  !invoiceList ||
+  !quotesList ||
+  !acceptedQuotesList
+) return;
 
   invoiceList.innerHTML = "";
   quotesList.innerHTML = "";
+  acceptedQuotesList.innerHTML = "";
 
   invoices.forEach(invoice => {
 
