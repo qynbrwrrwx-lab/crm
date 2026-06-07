@@ -17,6 +17,8 @@ const products =
 
   if (!contactSelect || !productSelect) return;
 
+  let editingQuoteId = null;
+
   // CONTACTS
   contactSelect.innerHTML =
     `<option value="">Sélectionner un contact</option>`;
@@ -525,8 +527,26 @@ function viewQuote(id) {
 
 async function editQuote(id) {
 
-  alert(
-    "Edition du devis : " + id
-  );
+  const invoices =
+    await apiFetch("/api/invoices");
+
+  const quote =
+    invoices.find(i => i._id === id);
+
+  if (!quote) return;
+
+  editingQuoteId = id;
+
+  document.getElementById("quoteContact").value =
+    quote.contactId;
+
+  document.getElementById("quoteProduct").value =
+    quote.products[0].productId;
+
+  document.getElementById("quoteQuantity").value =
+    quote.products[0].quantity;
+
+  document.getElementById("quoteModal").style.display =
+    "block";
 
 }
