@@ -474,6 +474,8 @@ async function createQuote() {
 
     await loadInvoices();
 
+    editingQuoteId = null;
+
     showToast(
     editingQuoteId
     ? "Devis modifié ✅"
