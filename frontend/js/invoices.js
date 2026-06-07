@@ -138,9 +138,15 @@ function renderInvoices(invoices) {
       </button>
 
       <button
+        onclick="editQuote('${invoice._id}')"
+      >
+        Modifier
+      </button>
+
+      <button
         onclick="acceptQuote('${invoice._id}')"
       >
-        Accepter
+        Valider
       </button>
 
       <button
@@ -513,6 +519,14 @@ function viewQuote(id) {
   window.open(
     `/api/invoices/pdf/${id}`,
     "_blank"
+  );
+
+}
+
+async function editQuote(id) {
+
+  alert(
+    "Edition du devis : " + id
   );
 
 }

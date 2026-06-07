@@ -32,6 +32,10 @@ const companySchema = new mongoose.Schema({
 
   ape: String,
 
+  capitalSocial: String,
+
+  legalMentions: String,
+
   logo: String,
 
   activityType: {
