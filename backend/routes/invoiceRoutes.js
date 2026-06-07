@@ -1,7 +1,7 @@
 const express = require("express");
 
 const router = express.Router();
-
+const PDFDocument = require("pdfkit");
 const Invoice = require("../models/invoice");
 const Contact = require("../models/contact");
 const Product = require("../models/product");
@@ -252,6 +252,69 @@ router.put(
       res.status(500).json({
         error: "Erreur validation devis"
       });
+    }
+  }
+);
+
+// ================= PDF =================
+
+router.get(
+  "/pdf/:id",
+  auth,
+  async (req, res) => {
+
+    try {
+
+      const invoice =
+        await Invoice.findById(req.params.id);
+
+      if (!invoice) {
+
+        return res.status(404).send(
+          "Document introuvable"
+        );
+      }
+
+      const doc =
+        new PDFDocument();
+
+      res.setHeader(
+        "Content-Type",
+        "application/pdf"
+      );
+
+      res.setHeader(
+        "Content-Disposition",
+        `inline; filename="${invoice.invoiceNumber}.pdf"`
+      );
+
+      doc.pipe(res);
+
+      doc.fontSize(22)
+         .text(invoice.invoiceNumber);
+
+      doc.moveDown();
+
+      doc.fontSize(14)
+         .text(`Type : ${invoice.type}`);
+
+      doc.text(
+        `Montant TTC : ${invoice.totalTTC} €`
+      );
+
+      doc.text(
+        `Paiement : ${invoice.paymentMethod}`
+      );
+
+      doc.end();
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).send(
+        "Erreur PDF"
+      );
     }
   }
 );
