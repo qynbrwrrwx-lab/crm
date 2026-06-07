@@ -132,6 +132,12 @@ function renderInvoices(invoices) {
     invoice.type === "quote"
     ? `
       <button
+        onclick="viewQuote('${invoice._id}')"
+      >
+        Voir
+      </button>
+
+      <button
         onclick="acceptQuote('${invoice._id}')"
       >
         Accepter
@@ -500,4 +506,13 @@ async function acceptQuote(id) {
     showToast(err.message);
 
   }
+}
+
+function viewQuote(id) {
+
+  window.open(
+    `/api/invoices/pdf/${id}`,
+    "_blank"
+  );
+
 }
