@@ -118,30 +118,46 @@ function renderInvoices(invoices) {
             : "⌛ En attente"
           }
 
-        </div>
+    <div>
 
-        <div>
+  ${
+    invoice.type === "quote"
+    ? `
+      <button
+        onclick="acceptQuote('${invoice._id}')"
+      >
+        Accepter
+      </button>
 
-          ${
-            invoice.paymentStatus !== "paid"
-            ? `
-              <button
-                onclick="markInvoicePaid('${invoice._id}')"
-              >
-                💰
-              </button>
-            `
-            : ""
-          }
-
+      <button
+        onclick="deleteInvoice('${invoice._id}')"
+      >
+        Supprimer
+      </button>
+    `
+    : `
+      ${
+        invoice.paymentStatus !== "paid"
+        ? `
           <button
-            class="delete"
-            onclick="deleteInvoice('${invoice._id}')"
+            onclick="markInvoicePaid('${invoice._id}')"
           >
-            ❌
+            Marquer payé
           </button>
+        `
+        : ""
+      }
 
-        </div>
+      <button
+        onclick="deleteInvoice('${invoice._id}')"
+      >
+        Supprimer
+      </button>
+    `
+  }
+
+</div>
+
 
       </div>
     `;
