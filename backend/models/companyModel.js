@@ -36,6 +36,11 @@ const companySchema = new mongoose.Schema({
 
   legalMentions: String,
 
+  deliveryTerms: {
+    type: String,
+    default: "30 jours"
+  },
+
   logo: String,
 
   activityType: {
