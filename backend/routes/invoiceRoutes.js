@@ -294,21 +294,62 @@ router.get(
 
       doc.pipe(res);
 
-      doc.fontSize(22)
-         .text(invoice.invoiceNumber);
+      doc.fontSize(24)
+   .text(
+     company?.companyName || "Entreprise",
+     50,
+     50
+   );
 
-      doc.moveDown();
+      doc.fontSize(11)
+  .text(
+     company?.address || "",
+     50,
+     90
+   );
+
+      doc.text(
+     `${company?.postalCode || ""} ${company?.city || ""}`,
+     50,
+     105
+   );
+
+      doc.text(
+     company?.email || "",
+     50,
+     120
+   );
+
+      doc.text(
+     company?.phone || "",
+     50,
+     135
+   );
+
+      doc.text(
+     company?.website || "",
+     50,
+     150
+   );
+
+      doc.fontSize(20)
+   .text(
+     invoice.invoiceNumber,
+     350,
+     50
+   );
 
       doc.fontSize(14)
-         .text(`Type : ${invoice.type}`);
+   .text(
+     invoice.type === "quote"
+       ? "DEVIS"
+       : invoice.type === "order"
+       ? "COMMANDE"
+       : "FACTURE",
+     350,
+     80
+   );
 
-      doc.text(
-        `Montant TTC : ${invoice.totalTTC} €`
-      );
-
-      doc.text(
-        `Paiement : ${invoice.paymentMethod}`
-      );
 
       doc.end();
 
