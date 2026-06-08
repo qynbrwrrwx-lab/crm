@@ -5,7 +5,7 @@ const PDFDocument = require("pdfkit");
 const Invoice = require("../models/invoice");
 const Contact = require("../models/contact");
 const Product = require("../models/product");
-const Company = require("../models/company");
+const Company = require("../models/companyModel");
 
 const auth = require("../middleware/auth");
 
