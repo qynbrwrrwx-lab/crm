@@ -349,7 +349,64 @@ router.get(
      350,
      80
    );
+   
+      const contact =
+  await Contact.findById(
+    invoice.contactId
+  );
 
+      doc.fontSize(14)
+   .text(
+     "CLIENT",
+     350,
+     140
+   );
+
+      doc.fontSize(11)
+   .text(
+     `${contact?.firstname || ""} ${contact?.lastname || ""}`,
+     350,
+     165
+   );
+
+      doc.text(
+     contact?.companyName || "",
+     350,
+     180
+   );
+
+      doc.text(
+     contact?.billingAddress || "",
+     350,
+     195
+   );
+
+      doc.fontSize(11)
+   .text(
+     "Date d'émission",
+     50,
+     210
+   );
+
+      doc.text(
+     new Date(invoice.createdAt)
+       .toLocaleDateString("fr-FR"),
+     50,
+     225
+   );
+
+      doc.text(
+     "Date de livraison",
+     200,
+     210
+   );
+
+      doc.text(
+     new Date(invoice.createdAt)
+       .toLocaleDateString("fr-FR"),
+     200,
+     225
+   );
 
       doc.end();
 
