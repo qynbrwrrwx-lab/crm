@@ -427,6 +427,54 @@ router.get(
    .lineTo(550, 310)
    .stroke();
 
+      let y = 325;
+
+for (const item of invoice.products) {
+
+  const product =
+    await Product.findById(
+      item.productId
+    );
+
+  if (!product) continue;
+
+  const totalLine =
+    Number(product.priceHT) *
+    Number(item.quantity);
+
+      doc.text(
+    product.name,
+    50,
+    y
+  );
+
+      doc.text(
+    String(item.quantity),
+    250,
+    y
+  );
+
+      doc.text(
+    `${product.tva || 20}%`,
+    320,
+    y
+  );
+
+      doc.text(
+    `${Number(product.priceHT).toFixed(2)} €`,
+    390,
+    y
+  );
+
+      doc.text(
+    `${totalLine.toFixed(2)} €`,
+    480,
+    y
+  );
+
+  y += 25;
+}
+
       doc.end();
 
     } catch (err) {
