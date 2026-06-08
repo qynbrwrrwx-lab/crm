@@ -349,7 +349,7 @@ router.get(
      350,
      80
    );
-   
+
       const contact =
   await Contact.findById(
     invoice.contactId
@@ -407,6 +407,25 @@ router.get(
      200,
      225
    );
+      doc.moveTo(50, 280)
+   .lineTo(550, 280)
+   .stroke();
+
+      doc.fontSize(11);
+
+      doc.text("Article", 50, 290);
+
+      doc.text("Qté", 250, 290);
+
+      doc.text("TVA", 320, 290);
+
+      doc.text("PU HT", 390, 290);
+
+      doc.text("Total HT", 480, 290);
+
+      doc.moveTo(50, 310)
+   .lineTo(550, 310)
+   .stroke();
 
       doc.end();
 
