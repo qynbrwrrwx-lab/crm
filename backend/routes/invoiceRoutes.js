@@ -5,6 +5,7 @@ const PDFDocument = require("pdfkit");
 const Invoice = require("../models/invoice");
 const Contact = require("../models/contact");
 const Product = require("../models/product");
+const Company = require("../models/company");
 
 const auth = require("../middleware/auth");
 
@@ -267,6 +268,9 @@ router.get(
 
       const invoice =
         await Invoice.findById(req.params.id);
+
+      const company =
+        await Company.findOne();  
 
       if (!invoice) {
 
