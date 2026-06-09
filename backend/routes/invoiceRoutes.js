@@ -538,6 +538,34 @@ for (const item of invoice.products) {
      y + 255
    );
 
+      doc.moveTo(50, y + 300)
+   .lineTo(550, y + 300)
+   .stroke();
+
+      doc.fontSize(12)
+   .text(
+     "Mentions légales",
+     50,
+     y + 320
+   );
+
+      doc.fontSize(9)
+   .text(
+     company?.legalMentions ||
+     "Paiement selon les conditions convenues entre les parties.",
+     50,
+     y + 345,
+     {
+       width: 500
+     }
+   );
+
+      doc.text(
+     `Conditions de règlement : ${company?.deliveryTerms || "30 jours"}`,
+     50,
+     y + 390
+   );
+
       doc.end();
 
     } catch (err) {
