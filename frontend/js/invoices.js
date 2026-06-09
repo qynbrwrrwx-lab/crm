@@ -344,10 +344,10 @@ async function loadQuoteData() {
   const contactSelect =
     document.getElementById("quoteContact");
 
-  const productSelect =
-    document.getElementById("quoteProduct");
+  const productSelects =
+  document.querySelectorAll(".quote-product");
 
-  if (!contactSelect || !productSelect) return;
+    if (!contactSelect) return;
 
   contactSelect.innerHTML =
     '<option value="">Sélectionner un contact</option>';
@@ -362,17 +362,22 @@ async function loadQuoteData() {
     `;
   });
 
-  productSelect.innerHTML =
+  productSelects.forEach(select => {
+
+  select.innerHTML =
     '<option value="">Sélectionner un produit</option>';
 
   products.forEach(product => {
 
-    productSelect.innerHTML += `
+    select.innerHTML += `
       <option value="${product._id}">
         ${product.name}
       </option>
     `;
+
   });
+
+});
 }
 
 // ================= ORDER TABS =================
