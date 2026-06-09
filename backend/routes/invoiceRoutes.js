@@ -501,6 +501,43 @@ for (const item of invoice.products) {
      y + 90
    );
 
+      doc.moveTo(50, y + 150)
+   .lineTo(550, y + 150)
+   .stroke();
+
+      doc.fontSize(12)
+   .text(
+     "Coordonnées bancaires",
+     50,
+     y + 170
+   );
+
+      doc.fontSize(10)
+
+   .text(
+     `Banque : ${company?.companyBank || ""}`,
+     50,
+     y + 195
+   )
+
+   .text(
+     `IBAN : ${company?.companyIban || ""}`,
+     50,
+     y + 215
+   )
+
+   .text(
+     `BIC : ${company?.companyBic || ""}`,
+     50,
+     y + 235
+   )
+
+   .text(
+     `Titulaire : ${company?.companyAccountHolder || ""}`,
+     50,
+     y + 255
+   );
+
       doc.end();
 
     } catch (err) {
