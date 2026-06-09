@@ -639,24 +639,35 @@
 
     <h2>Nouveau devis</h2>
 
-    <select id="quoteContact">
-      <option value="">
-        Sélectionner un contact
-      </option>
-    </select>
+    <div id="quoteLines">
 
-    <select id="quoteProduct">
+  <div class="quote-line">
+
+    <select class="quote-product">
       <option value="">
         Sélectionner un produit
       </option>
     </select>
 
     <input
-      id="quoteQuantity"
+      class="quote-quantity"
       type="number"
       min="1"
       value="1"
     />
+
+  </div>
+
+</div>
+
+<button
+  type="button"
+  class="secondary-btn"
+  onclick="addQuoteLine()"
+>
+  + Ajouter un article
+</button>
+
 
     <button
       class="primary-btn"
