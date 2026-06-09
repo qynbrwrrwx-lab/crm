@@ -423,21 +423,41 @@ async function createQuote() {
   const contactId =
     document.getElementById("quoteContact").value;
 
-  const productId =
-    document.getElementById("quoteProduct").value;
+  const products = [];
 
-  const quantity =
-    parseInt(
-      document.getElementById("quoteQuantity").value
-    );
+document
+  .querySelectorAll(".quote-line")
+  .forEach(line => {
+
+    const productId =
+      line.querySelector(".quote-product").value;
+
+    const quantity =
+      parseInt(
+        line.querySelector(".quote-quantity").value
+      );
+
+    if (productId && quantity > 0) {
+
+      products.push({
+        productId,
+        quantity,
+        discount: 0
+      });
+
+    }
+
+  });
 
   if (!contactId) {
     return showToast("Sélectionnez un contact");
   }
 
-  if (!productId) {
-    return showToast("Sélectionnez un produit");
-  }
+  if (products.length === 0) {
+  return showToast(
+    "Ajoutez au moins un article"
+  );
+}
 
   try {
 
@@ -461,13 +481,7 @@ async function createQuote() {
 
         paymentMethod: "pending",
 
-        products: [
-            {
-        
-        productId,
-        quantity
-      }
-    ]
+        products
 })
 
     });
