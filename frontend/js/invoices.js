@@ -575,11 +575,21 @@ async function editQuote(id) {
   document.getElementById("quoteContact").value =
     quote.contactId;
 
-  document.getElementById("quoteProduct").value =
-    quote.products[0].productId;
+  const firstProduct =
+  document.querySelector(".quote-product");
 
-  document.getElementById("quoteQuantity").value =
+  const firstQuantity =
+  document.querySelector(".quote-quantity");
+
+    if (firstProduct) {
+  firstProduct.value =
+    quote.products[0].productId;
+}
+
+    if (firstQuantity) {
+  firstQuantity.value =
     quote.products[0].quantity;
+}
 
   document.getElementById("quoteModal").style.display =
     "block";
