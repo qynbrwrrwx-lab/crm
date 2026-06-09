@@ -566,6 +566,27 @@ for (const item of invoice.products) {
      y + 390
    );
 
+      doc.fontSize(8)
+   .text(
+     `${company?.companyName || ""} | SIRET : ${company?.siret || ""} | RCS : ${company?.rcs || ""} | APE : ${company?.ape || ""}`,
+     50,
+     760,
+     {
+       width: 500,
+       align: "center"
+     }
+   );
+
+      doc.text(
+     `TVA : ${company?.vatNumber || ""} | Capital social : ${company?.capitalSocial || ""}`,
+     50,
+     775,
+     {
+       width: 500,
+       align: "center"
+     }
+   );
+
       doc.end();
 
     } catch (err) {
