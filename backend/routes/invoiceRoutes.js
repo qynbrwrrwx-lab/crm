@@ -566,26 +566,41 @@ for (const item of invoice.products) {
      y + 390
    );
 
-      doc.fontSize(8)
-   .text(
-     `${company?.companyName || ""} | SIRET : ${company?.siret || ""} | RCS : ${company?.rcs || ""} | APE : ${company?.ape || ""}`,
-     50,
-     760,
-     {
-       width: 500,
-       align: "center"
-     }
-   );
+      doc.moveTo(50, 730)
+   .lineTo(550, 730)
+   .stroke();
 
-      doc.text(
-     `TVA : ${company?.vatNumber || ""} | Capital social : ${company?.capitalSocial || ""}`,
-     50,
-     775,
-     {
-       width: 500,
-       align: "center"
-     }
-   );
+    doc.fontSize(7);
+
+    doc.text(
+  `${company?.companyName || ""}`,
+  50,
+  740,
+  {
+    width: 500,
+    align: "center"
+  }
+);
+
+    doc.text(
+  `SIRET : ${company?.siret || ""} | RCS : ${company?.rcs || ""} | APE : ${company?.ape || ""}`,
+  50,
+  752,
+  {
+    width: 500,
+    align: "center"
+  }
+);
+
+    doc.text(
+  `TVA : ${company?.vatNumber || ""} | Capital social : ${company?.capitalSocial || ""}`,
+  50,
+  764,
+  {
+    width: 500,
+    align: "center"
+  }
+);
 
       doc.end();
 
