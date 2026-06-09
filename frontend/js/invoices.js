@@ -566,3 +566,49 @@ async function editQuote(id) {
     "block";
 
 }
+
+function addQuoteLine() {
+
+  const container =
+    document.getElementById("quoteLines");
+
+  if (!container) return;
+
+  const firstSelect =
+    document.querySelector(".quote-product");
+
+  const options =
+    firstSelect
+      ? firstSelect.innerHTML
+      : '<option value="">Sélectionner un produit</option>';
+
+  const line =
+    document.createElement("div");
+
+  line.className = "quote-line";
+
+  line.innerHTML = `
+
+    <select class="quote-product">
+      ${options}
+    </select>
+
+    <input
+      class="quote-quantity"
+      type="number"
+      min="1"
+      value="1"
+    />
+
+    <button
+      type="button"
+      onclick="this.parentElement.remove()"
+    >
+      X
+    </button>
+
+  `;
+
+  container.appendChild(line);
+
+}
