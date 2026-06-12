@@ -1,12 +1,12 @@
 // ================= INVOICES =================
-
+let editingQuoteId = null;
 // LOAD SELECT DATA
 async function loadInvoiceData() {
 
   const contacts =
   await apiFetch("/api/contacts");
 
-const products =
+ const products =
   await apiFetch("/api/products");
 
   const contactSelect =
@@ -16,8 +16,6 @@ const products =
     document.getElementById("invoiceProduct");
 
   if (!contactSelect || !productSelect) return;
-
-  let editingQuoteId = null;
 
   // CONTACTS
   contactSelect.innerHTML =
