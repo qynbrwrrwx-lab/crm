@@ -272,6 +272,11 @@ router.get(
       const company =
         await Company.findOne();  
 
+      const contact =
+        await Contact.findById(
+          invoice.contactId
+      );
+
       if (!invoice) {
 
         return res.status(404).send(
@@ -372,6 +377,51 @@ doc
     380,
     105
   );
+
+  // CLIENT
+
+doc
+  .fontSize(14)
+  .text(
+    "CLIENT",
+    350,
+    160
+  );
+
+doc
+  .fontSize(10)
+  .text(
+    `${contact?.firstname || ""} ${contact?.lastname || ""}`,
+    350,
+    185
+  );
+
+doc.text(
+  contact?.companyName || "",
+  350,
+  200
+);
+
+doc.text(
+  contact?.billingAddress || "",
+  350,
+  215,
+  {
+    width: 200
+  }
+);
+
+doc.text(
+  contact?.email || "",
+  350,
+  250
+);
+
+doc.text(
+  contact?.phone || "",
+  350,
+  265
+);
 
 doc.end();
 
