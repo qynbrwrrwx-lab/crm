@@ -280,17 +280,33 @@ router.get(
       }
 
       const doc =
-        new PDFDocument();
+  new PDFDocument({
+    margin: 50
+  });
 
-      res.setHeader(
-        "Content-Type",
-        "application/pdf"
-      );
+res.setHeader(
+  "Content-Type",
+  "application/pdf"
+);
 
-      res.setHeader(
-        "Content-Disposition",
-        `inline; filename="${invoice.invoiceNumber}.pdf"`
-      );
+res.setHeader(
+  "Content-Disposition",
+  `inline; filename="${invoice.invoiceNumber}.pdf"`
+);
+
+doc.pipe(res);
+
+doc
+  .fontSize(24)
+  .text("TEST PDF");
+
+doc.moveDown();
+
+doc
+  .fontSize(14)
+  .text(invoice.invoiceNumber);
+
+doc.end();
 
       
     } catch (err) {
