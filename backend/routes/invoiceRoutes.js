@@ -294,17 +294,82 @@ res.setHeader(
   `inline; filename="${invoice.invoiceNumber}.pdf"`
 );
 
-doc.pipe(res);
+// ENTREPRISE
 
 doc
-  .fontSize(24)
-  .text("TEST PDF");
-
-doc.moveDown();
+  .fontSize(22)
+  .text(
+    company?.companyName || "Entreprise",
+    50,
+    50
+  );
 
 doc
-  .fontSize(14)
-  .text(invoice.invoiceNumber);
+  .fontSize(10)
+  .text(
+    company?.address || "",
+    50,
+    80
+  );
+
+doc.text(
+  `${company?.postalCode || ""} ${company?.city || ""}`,
+  50,
+  95
+);
+
+doc.text(
+  company?.email || "",
+  50,
+  110
+);
+
+doc.text(
+  company?.phone || "",
+  50,
+  125
+);
+
+doc.text(
+  company?.website || "",
+  50,
+  140
+);
+
+// DOCUMENT
+
+const documentTitle =
+  invoice.type === "quote"
+    ? "DEVIS"
+    : invoice.type === "order"
+    ? "COMMANDE"
+    : "FACTURE";
+
+doc
+  .fontSize(22)
+  .text(
+    documentTitle,
+    380,
+    50
+  );
+
+doc
+  .fontSize(12)
+  .text(
+    invoice.invoiceNumber,
+    380,
+    80
+  );
+
+doc
+  .fontSize(10)
+  .text(
+    `Date : ${new Date(
+      invoice.createdAt
+    ).toLocaleDateString("fr-FR")}`,
+    380,
+    105
+  );
 
 doc.end();
 
