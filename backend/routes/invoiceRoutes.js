@@ -294,6 +294,8 @@ res.setHeader(
   `inline; filename="${invoice.invoiceNumber}.pdf"`
 );
 
+doc.pipe(res);
+
 // ENTREPRISE
 
 doc
