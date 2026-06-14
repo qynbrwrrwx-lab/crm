@@ -372,9 +372,9 @@ if (logoBuffer) {
   doc.image(
     logoBuffer,
     50,
-    35,
+    25,
     {
-      fit: [90, 90],
+      fit: [130, 130],
     }
   );
 
@@ -501,7 +501,7 @@ doc.text(
   265
 );
 
-let y = 340;
+let y = 260;
 
 doc
   .fontSize(12)
