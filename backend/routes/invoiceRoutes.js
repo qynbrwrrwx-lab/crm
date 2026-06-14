@@ -371,11 +371,10 @@ if (logoBuffer) {
 
   doc.image(
     logoBuffer,
-    420,
-    40,
+    50,
+    35,
     {
-      fit: [120, 120],
-      align: "right"
+      fit: [90, 90],
     }
   );
 
@@ -386,7 +385,7 @@ doc
   .fontSize(22)
   .text(
     company?.companyName || "Entreprise",
-    50,
+    160,
     50
   );
 
@@ -394,31 +393,31 @@ doc
   .fontSize(10)
   .text(
     company?.address || "",
-    50,
+    160,
     80
   );
 
 doc.text(
   `${company?.postalCode || ""} ${company?.city || ""}`,
-  50,
+  160,
   95
 );
 
 doc.text(
   company?.email || "",
-  50,
+  160,
   110
 );
 
 doc.text(
   company?.phone || "",
-  50,
+  160,
   125
 );
 
 doc.text(
   company?.website || "",
-  50,
+  160,
   140
 );
 
