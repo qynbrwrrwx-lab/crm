@@ -621,6 +621,76 @@ doc.text(
   y
 );
 
+y += 50;
+
+doc.moveTo(50, y)
+   .lineTo(550, y)
+   .stroke();
+
+y += 20;
+
+// MENTIONS LÉGALES
+
+doc
+  .fontSize(12)
+  .text(
+    "Mentions légales",
+    50,
+    y
+  );
+
+y += 20;
+
+doc
+  .fontSize(9)
+  .text(
+    company?.legalMentions ||
+    "Paiement selon les conditions convenues entre les parties.",
+    50,
+    y,
+    {
+      width: 500
+    }
+  );
+
+y += 40;
+
+// CONDITIONS DE RÈGLEMENT
+
+doc.text(
+  `Conditions de règlement : ${company?.deliveryTerms || "30 jours"}`,
+  50,
+  y
+);
+
+y += 35;
+
+// PIED DE PAGE SOCIÉTÉ
+
+doc
+  .fontSize(8)
+  .text(
+    `${company?.companyName || ""} | SIRET : ${company?.siret || ""} | RCS : ${company?.rcs || ""} | APE : ${company?.ape || ""}`,
+    50,
+    y,
+    {
+      width: 500,
+      align: "center"
+    }
+  );
+
+y += 15;
+
+doc.text(
+  `TVA : ${company?.vatNumber || ""} | Capital social : ${company?.capitalSocial || ""}`,
+  50,
+  y,
+  {
+    width: 500,
+    align: "center"
+  }
+);
+
 doc.end();
 
       
