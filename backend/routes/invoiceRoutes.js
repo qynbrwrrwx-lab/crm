@@ -96,7 +96,7 @@ router.post("/", auth, async (req, res) => {
 
       populatedProducts.push({
         productId: product._id,
-        quantity: item.quantity
+        quantity: item.quantity,
         discount: item.discount || 0
       });
 
