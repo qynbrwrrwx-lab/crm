@@ -272,6 +272,35 @@ router.get(
       const company =
         await Company.findOne();  
 
+        const contact =
+  await Contact.findById(
+    invoice.contactId
+  );
+
+        const invoiceProducts = [];
+
+for (const item of invoice.products) {
+
+        const product =
+    await Product.findById(
+      item.productId
+    );
+
+  if (product) {
+
+    invoiceProducts.push({
+      name: product.name,
+      priceHT: product.priceHT,
+      quantity: item.quantity,
+      totalHT:
+        Number(product.priceHT) *
+        Number(item.quantity)
+    });
+
+  }
+
+}
+
       const contact =
         await Contact.findById(
           invoice.contactId
@@ -422,6 +451,54 @@ doc.text(
   350,
   265
 );
+
+let y = 340;
+
+doc
+  .fontSize(12)
+  .text("Produit", 50, y);
+
+doc.text("Qté", 280, y);
+
+doc.text("PU HT", 350, y);
+
+doc.text("Total HT", 470, y);
+
+doc.moveTo(50, y + 20)
+   .lineTo(550, y + 20)
+   .stroke();
+
+y += 35;
+
+invoiceProducts.forEach(product => {
+
+  doc.text(
+    product.name,
+    50,
+    y
+  );
+
+  doc.text(
+    String(product.quantity),
+    280,
+    y
+  );
+
+  doc.text(
+    `${Number(product.priceHT).toFixed(2)} €`,
+    350,
+    y
+  );
+
+  doc.text(
+    `${Number(product.totalHT).toFixed(2)} €`,
+    470,
+    y
+  );
+
+  y += 25;
+
+});
 
 doc.end();
 
