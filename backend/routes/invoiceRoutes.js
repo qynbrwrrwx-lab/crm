@@ -272,16 +272,16 @@ router.get(
       const company =
         await Company.findOne();  
 
-        const contact =
+      const contact =
   await Contact.findById(
     invoice.contactId
   );
 
-        const invoiceProducts = [];
+      const invoiceProducts = [];
 
 for (const item of invoice.products) {
 
-        const product =
+      const product =
     await Product.findById(
       item.productId
     );
@@ -300,13 +300,8 @@ for (const item of invoice.products) {
   }
 
 }
-
-      const contact =
-        await Contact.findById(
-          invoice.contactId
-      );
-
-      if (!invoice) {
+    
+    if (!invoice) {
 
         return res.status(404).send(
           "Document introuvable"
