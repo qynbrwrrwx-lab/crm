@@ -548,6 +548,79 @@ doc.text(
   y
 );
 
+y += 30;
+
+doc
+  .moveTo(320, y)
+  .lineTo(550, y)
+  .stroke();
+
+y += 20;
+
+// TOTAUX
+
+doc
+  .fontSize(11)
+  .text(
+    `Total HT : ${Number(invoice.totalHT).toFixed(2)} €`,
+    350,
+    y
+  );
+
+y += 20;
+
+doc.text(
+  `Total TTC : ${Number(invoice.totalTTC).toFixed(2)} €`,
+  350,
+  y
+);
+
+y += 40;
+
+// COORDONNÉES BANCAIRES
+
+doc
+  .fontSize(13)
+  .text(
+    "Coordonnées bancaires",
+    50,
+    y
+  );
+
+y += 25;
+
+doc
+  .fontSize(10)
+  .text(
+    `Banque : ${company?.companyBank || ""}`,
+    50,
+    y
+  );
+
+y += 15;
+
+doc.text(
+  `IBAN : ${company?.companyIban || ""}`,
+  50,
+  y
+);
+
+y += 15;
+
+doc.text(
+  `BIC : ${company?.companyBic || ""}`,
+  50,
+  y
+);
+
+y += 15;
+
+doc.text(
+  `Titulaire : ${company?.companyAccountHolder || ""}`,
+  50,
+  y
+);
+
 doc.end();
 
       
