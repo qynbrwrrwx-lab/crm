@@ -75,13 +75,21 @@ router.post("/", auth, async (req, res) => {
         });
       }
 
-      const lineHT =
+      const discount =
+       Number(item.discount || 0);
+
+      const lineHTBeforeDiscount =
         Number(product.priceHT) *
         Number(item.quantity);
 
+      const lineHT =
+        lineHTBeforeDiscount *
+        (1 - discount / 100);
+
       const lineTTC =
-        Number(product.priceTTC) *
-        Number(item.quantity);
+        lineHT *
+        (1 + Number(product.tva || 20) / 100);
+
 
       totalHT += lineHT;
       totalTTC += lineTTC;
@@ -89,6 +97,7 @@ router.post("/", auth, async (req, res) => {
       populatedProducts.push({
         productId: product._id,
         quantity: item.quantity
+        discount: item.discount || 0
       });
 
       // UPDATE STOCK
@@ -289,13 +298,15 @@ for (const item of invoice.products) {
   if (product) {
 
     invoiceProducts.push({
-      name: product.name,
-      priceHT: product.priceHT,
-      quantity: item.quantity,
-      totalHT:
-        Number(product.priceHT) *
-        Number(item.quantity)
-    });
+  name: product.name,
+  priceHT: product.priceHT,
+  quantity: item.quantity,
+  discount: item.discount || 0,
+  totalHT:
+    Number(product.priceHT) *
+    Number(item.quantity) *
+    (1 - (item.discount || 0) / 100)
+});
 
   }
 
@@ -453,9 +464,11 @@ doc
   .fontSize(12)
   .text("Produit", 50, y);
 
-doc.text("Qté", 280, y);
+doc.text("Qté", 220, y);
 
-doc.text("PU HT", 350, y);
+doc.text("PU HT", 290, y);
+
+doc.text("Remise", 380, y)
 
 doc.text("Total HT", 470, y);
 
@@ -475,13 +488,19 @@ invoiceProducts.forEach(product => {
 
   doc.text(
     String(product.quantity),
-    280,
+    220,
     y
   );
 
   doc.text(
     `${Number(product.priceHT).toFixed(2)} €`,
-    350,
+    290,
+    y
+  );
+
+  doc.text(
+    `${product.discount}%`,
+    390,
     y
   );
 
