@@ -521,7 +521,7 @@ doc.text("Remise", 390, y)
 
 doc.text("Total HT", 470, y);
 
-doc.font("Helvetica-");
+doc.font("Helvetica");
 
 doc.moveTo(50, y + 20)
    .lineTo(550, y + 20)
