@@ -281,6 +281,35 @@ router.get(
       const company =
         await Company.findOne();  
 
+        let logoBuffer = null;
+
+if (company?.logo) {
+
+  try {
+
+    const base64Data =
+      company.logo.replace(
+        /^data:image\/\w+;base64,/,
+        ""
+      );
+
+    logoBuffer =
+      Buffer.from(
+        base64Data,
+        "base64"
+      );
+
+  } catch (err) {
+
+    console.error(
+      "Erreur logo PDF :",
+      err
+    );
+
+  }
+
+}
+
       const contact =
   await Contact.findById(
     invoice.contactId
@@ -337,6 +366,21 @@ res.setHeader(
 doc.pipe(res);
 
 // ENTREPRISE
+
+if (logoBuffer) {
+
+  doc.image(
+    logoBuffer,
+    420,
+    40,
+    {
+      fit: [120, 120],
+      align: "right"
+    }
+  );
+
+}
+
 
 doc
   .fontSize(22)
