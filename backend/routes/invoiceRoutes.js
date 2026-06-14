@@ -487,7 +487,7 @@ doc.text(
 doc.text(
   contact?.billingAddress || "",
   350,
-  160
+  160,
   {
     width: 200
   }
