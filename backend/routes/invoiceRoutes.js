@@ -382,10 +382,11 @@ if (logoBuffer) {
 
 
 doc
-  .fontSize(22)
+  .fontSize(18)
+  .font("Helvetica-Bold")
   .text(
     company?.companyName || "Entreprise",
-    160,
+    170,
     50
   );
 
@@ -431,11 +432,12 @@ const documentTitle =
     : "FACTURE";
 
 doc
-  .fontSize(22)
+  .fontSize(28)
+  .font("Helvetica-Bold")
   .text(
     documentTitle,
     380,
-    50
+    45
   );
 
 doc
@@ -459,7 +461,8 @@ doc
   // CLIENT
 
 doc
-  .fontSize(14)
+  .fontSize(18)
+  .font("Helvetica-Bold")
   .text(
     "CLIENT",
     350,
@@ -467,11 +470,12 @@ doc
   );
 
 doc
-  .fontSize(10)
+  .fontSize(12)
+  .font("Helvetica-Bold")
   .text(
     `${contact?.firstname || ""} ${contact?.lastname || ""}`,
     350,
-    185
+    190
   );
 
 doc.text(
@@ -504,16 +508,20 @@ doc.text(
 let y = 260;
 
 doc
-  .fontSize(12)
-  .text("Produit", 50, y);
+  .fontSize(11)
+  .font("Helvetica-Bold");
+
+doc.text("Produit", 50, y);
 
 doc.text("Qté", 220, y);
 
 doc.text("PU HT", 290, y);
 
-doc.text("Remise", 380, y)
+doc.text("Remise", 390, y)
 
 doc.text("Total HT", 470, y);
+
+doc.font("Helvetica-");
 
 doc.moveTo(50, y + 20)
    .lineTo(550, y + 20)
