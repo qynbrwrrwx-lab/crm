@@ -495,6 +495,40 @@ invoiceProducts.forEach(product => {
 
 });
 
+y += 30;
+
+doc.moveTo(300, y)
+   .lineTo(550, y)
+   .stroke();
+
+y += 20;
+
+doc.fontSize(11);
+
+doc.text(
+  `Total HT : ${Number(invoice.totalHT).toFixed(2)} €`,
+  350,
+  y
+);
+
+y += 20;
+
+doc.text(
+  `TVA : ${Number(invoice.totalTTC - invoice.totalHT).toFixed(2)} €`,
+  350,
+  y
+);
+
+y += 20;
+
+doc.fontSize(13);
+
+doc.text(
+  `TOTAL TTC : ${Number(invoice.totalTTC).toFixed(2)} €`,
+  350,
+  y
+);
+
 doc.end();
 
       
