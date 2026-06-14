@@ -382,44 +382,44 @@ if (logoBuffer) {
 
 
 doc
-  .fontSize(18)
+  .fontSize(15)
   .font("Helvetica-Bold")
   .text(
     company?.companyName || "Entreprise",
-    170,
-    50
+    50,
+    145
   );
 
 doc
   .fontSize(10)
   .text(
     company?.address || "",
-    160,
-    80
+    50,
+    175
   );
 
 doc.text(
   `${company?.postalCode || ""} ${company?.city || ""}`,
-  160,
-  95
+  50,
+  190
 );
 
 doc.text(
   company?.email || "",
-  160,
-  110
+  50,
+  205
 );
 
 doc.text(
   company?.phone || "",
-  160,
-  125
+  50,
+  220
 );
 
 doc.text(
   company?.website || "",
-  160,
-  140
+  50,
+  235
 );
 
 // DOCUMENT
@@ -432,7 +432,7 @@ const documentTitle =
     : "FACTURE";
 
 doc
-  .fontSize(28)
+  .fontSize(15)
   .font("Helvetica-Bold")
   .text(
     documentTitle,
@@ -461,12 +461,12 @@ doc
   // CLIENT
 
 doc
-  .fontSize(18)
+  .fontSize(15)
   .font("Helvetica-Bold")
   .text(
     "CLIENT",
     350,
-    160
+    145
   );
 
 doc
@@ -475,19 +475,19 @@ doc
   .text(
     `${contact?.firstname || ""} ${contact?.lastname || ""}`,
     350,
-    190
+    175
   );
 
 doc.text(
   contact?.companyName || "",
   350,
-  200
+  205
 );
 
 doc.text(
   contact?.billingAddress || "",
   350,
-  215,
+  235,
   {
     width: 200
   }
@@ -496,16 +496,16 @@ doc.text(
 doc.text(
   contact?.email || "",
   350,
-  250
+  265
 );
 
 doc.text(
   contact?.phone || "",
   350,
-  265
+  295
 );
 
-let y = 260;
+let y = 300;
 
 doc
   .fontSize(11)
@@ -608,25 +608,7 @@ doc
 
 y += 20;
 
-// TOTAUX
 
-doc
-  .fontSize(11)
-  .text(
-    `Total HT : ${Number(invoice.totalHT).toFixed(2)} €`,
-    350,
-    y
-  );
-
-y += 20;
-
-doc.text(
-  `Total TTC : ${Number(invoice.totalTTC).toFixed(2)} €`,
-  350,
-  y
-);
-
-y += 40;
 
 // COORDONNÉES BANCAIRES
 
