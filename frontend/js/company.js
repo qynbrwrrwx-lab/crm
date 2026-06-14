@@ -4,6 +4,8 @@ let companyLogoBase64 = "";
 
   async function loadCompany() {
 
+    console.log("LOAD COMPANY START");
+
   try {
 
     const res =
