@@ -13,6 +13,9 @@ let companyLogoBase64 = "";
 
     const company =
       await res.json();
+
+      console.log("COMPANY =", company);
+      console.log("LOGO =", company.logo);
      
     document.getElementById(
       "companyName"
