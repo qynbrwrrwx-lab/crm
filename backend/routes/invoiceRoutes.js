@@ -622,23 +622,21 @@ doc
 
 y += 25;
 
-doc
-  .fontSize(10)
-  .text(
-    `Banque : ${company?.companyBank || ""}`,
-    50,
-    y
-  );
-
-y += 15;
+doc.fontSize(9);
 
 doc.text(
-  `IBAN : ${company?.companyIban || ""}`,
+  `Banque : ${company?.companyBank || ""}`,
   50,
   y
 );
 
-y += 15;
+doc.text(
+  `IBAN : ${company?.companyIban || ""}`,
+  300,
+  y
+);
+
+y +=18;
 
 doc.text(
   `BIC : ${company?.companyBic || ""}`,
@@ -646,21 +644,21 @@ doc.text(
   y
 );
 
-y += 15;
-
 doc.text(
   `Titulaire : ${company?.companyAccountHolder || ""}`,
-  50,
+  300,
   y
 );
-
-y += 50;
 
 doc.moveTo(50, y)
    .lineTo(550, y)
    .stroke();
 
 y += 20;
+
+doc.moveTo(50, y)
+  .lineTo(550, y)
+  .stroke();
 
 // MENTIONS LÉGALES
 
@@ -672,7 +670,7 @@ doc
     y
   );
 
-y += 20;
+y += 10;
 
 doc
   .fontSize(9)
