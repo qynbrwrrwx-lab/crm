@@ -387,7 +387,7 @@ if (logoBuffer) {
 
 
 doc
-  .fontSize(13)
+  .fontSize(10)
   .font("Helvetica-Bold")
   .text(
     company?.companyName || "Entreprise",
@@ -396,7 +396,7 @@ doc
   );
 
 doc
-  .fontSize(10)
+  .fontSize(8)
   .font("Helvetica")
   .text(
     company?.address || "",
@@ -438,7 +438,7 @@ const documentTitle =
     : "FACTURE";
 
 doc
-  .fontSize(8)
+  .fontSize(10)
   .font("Helvetica-Bold")
   .text(
     `${documentTitle} ${invoice.invoiceNumber}`,
@@ -447,19 +447,19 @@ doc
   );
 
 doc
-  .fontSize(5)
+  .fontSize(8)
   .text(
     `Date : ${new Date(
       invoice.createdAt
     ).toLocaleDateString("fr-FR")}`,
     RIGHT_X,
-    60
+    55
   );
 
   // CLIENT
 
 doc
-  .fontSize(13)
+  .fontSize(10)
   .font("Helvetica-Bold")
   .text(
     "CLIENT",
@@ -468,7 +468,7 @@ doc
   );
 
 doc
-  .fontSize(10)
+  .fontSize(8)
   .font("Helvetica-Bold")
   .text(
     `${contact?.firstname || ""} ${contact?.lastname || ""}`,
