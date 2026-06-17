@@ -368,7 +368,7 @@ doc.pipe(res);
 // COORDONÉES DE MISE EN PAGE
 
 const LEFT_X = 70;
-const RIGHT_X = 280;
+const RIGHT_X = 400;
 
 // ENTREPRISE
 
