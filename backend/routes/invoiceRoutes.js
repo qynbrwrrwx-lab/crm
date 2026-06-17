@@ -401,31 +401,31 @@ doc
   .text(
     company?.address || "",
     LEFT_X,
-    130
+    120
   );
 
 doc.text(
   `${company?.postalCode || ""} ${company?.city || ""}`,
   LEFT_X,
-  145
+  135
 );
 
 doc.text(
   company?.email || "",
   LEFT_X,
-  160
+  150
 );
 
 doc.text(
   company?.phone || "",
   LEFT_X,
-  175
+  165
 );
 
 doc.text(
   company?.website || "",
   LEFT_X,
-  190
+  180
 );
 
 // DOCUMENT
@@ -438,7 +438,7 @@ const documentTitle =
     : "FACTURE";
 
 doc
-  .fontSize(13)
+  .fontSize(8)
   .font("Helvetica-Bold")
   .text(
     `${documentTitle} ${invoice.invoiceNumber}`,
@@ -447,7 +447,7 @@ doc
   );
 
 doc
-  .fontSize(10)
+  .fontSize(5)
   .text(
     `Date : ${new Date(
       invoice.createdAt
@@ -473,19 +473,19 @@ doc
   .text(
     `${contact?.firstname || ""} ${contact?.lastname || ""}`,
     RIGHT_X,
-    130
+    120
   );
 
 doc.text(
   contact?.companyName || "",
   RIGHT_X,
-  145
+  135
 );
 
 doc.text(
   contact?.billingAddress || "",
   RIGHT_X,
-  160,
+  150,
   {
     width: 200
   }
@@ -494,18 +494,18 @@ doc.text(
 doc.text(
   contact?.email || "",
   RIGHT_X,
-  175
+  165
 );
 
 doc.text(
   contact?.phone || "",
   RIGHT_X,
-  190
+  180
 );
 
 // PRODUITS
 
-let y = 270;
+let y = 230;
 
 doc
   .fontSize(11)
