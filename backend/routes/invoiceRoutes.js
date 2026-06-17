@@ -386,40 +386,41 @@ doc
   .font("Helvetica-Bold")
   .text(
     company?.companyName || "Entreprise",
-    50,
-    105
+    70,
+    135
   );
 
 doc
   .fontSize(10)
+  .font("Helvetica")
   .text(
     company?.address || "",
-    50,
-    130
+    70,
+    160
   );
 
 doc.text(
   `${company?.postalCode || ""} ${company?.city || ""}`,
-  50,
-  145
-);
-
-doc.text(
-  company?.email || "",
-  50,
-  160
-);
-
-doc.text(
-  company?.phone || "",
-  50,
+  70,
   175
 );
 
 doc.text(
-  company?.website || "",
-  50,
+  company?.email || "",
+  70,
   190
+);
+
+doc.text(
+  company?.phone || "",
+  70,
+  205
+);
+
+doc.text(
+  company?.website || "",
+  70,
+  220
 );
 
 // DOCUMENT
@@ -436,16 +437,16 @@ doc
   .font("Helvetica-Bold")
   .text(
     documentTitle,
-    380,
-    40
+    410,
+    35
   );
 
 doc
   .fontSize(10)
   .text(
     invoice.invoiceNumber,
-    380,
-    65
+    410,
+    60
   );
 
 doc
@@ -454,8 +455,8 @@ doc
     `Date : ${new Date(
       invoice.createdAt
     ).toLocaleDateString("fr-FR")}`,
-    380,
-    85
+    410,
+    78
   );
 
   // CLIENT
@@ -465,8 +466,8 @@ doc
   .font("Helvetica-Bold")
   .text(
     "CLIENT",
-    350,
-    105
+    340,
+    135
   );
 
 doc
@@ -474,20 +475,20 @@ doc
   .font("Helvetica-Bold")
   .text(
     `${contact?.firstname || ""} ${contact?.lastname || ""}`,
-    350,
-    130
+    340,
+    160
   );
 
 doc.text(
   contact?.companyName || "",
-  350,
-  145
+  340,
+  175
 );
 
 doc.text(
   contact?.billingAddress || "",
-  350,
-  160,
+  340,
+  190,
   {
     width: 200
   }
@@ -495,19 +496,19 @@ doc.text(
 
 doc.text(
   contact?.email || "",
-  350,
-  175
+  340,
+  220
 );
 
 doc.text(
   contact?.phone || "",
-  350,
-  190
+  340,
+  235
 );
 
 // PRODUITS
 
-let y = 300;
+let y = 270;
 
 doc
   .fontSize(11)
