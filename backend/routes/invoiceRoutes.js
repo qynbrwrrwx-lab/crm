@@ -379,7 +379,7 @@ if (logoBuffer) {
     LEFT_X,
     25,
     {
-      fit: [130, 130],
+      fit: [150, 150],
     }
   );
 
@@ -438,7 +438,7 @@ const documentTitle =
     : "FACTURE";
 
 doc
-  .fontSize(10)
+  .fontSize(12)
   .font("Helvetica-Bold")
   .text(
     `${documentTitle} ${invoice.invoiceNumber}`,
@@ -508,7 +508,7 @@ doc.text(
 let y = 230;
 
 doc
-  .fontSize(11)
+  .fontSize(10)
   .font("Helvetica-Bold");
 
 doc.text("Produit", 50, y);
@@ -565,7 +565,7 @@ invoiceProducts.forEach(product => {
 
 });
 
-y += 30;
+y += 10;
 
 doc.moveTo(300, y)
    .lineTo(550, y)
@@ -573,7 +573,7 @@ doc.moveTo(300, y)
 
 y += 20;
 
-doc.fontSize(11);
+doc.fontSize(10);
 
 doc.text(
   `Total HT : ${Number(invoice.totalHT).toFixed(2)} €`,
@@ -591,7 +591,7 @@ doc.text(
 
 y += 20;
 
-doc.fontSize(13);
+doc.fontSize(10);
 
 doc.text(
   `TOTAL TTC : ${Number(invoice.totalTTC).toFixed(2)} €`,
@@ -599,21 +599,21 @@ doc.text(
   y
 );
 
-y += 30;
+y += 10;
 
 doc
   .moveTo(320, y)
   .lineTo(550, y)
   .stroke();
 
-y += 20;
+y += 10;
 
 
 
 // COORDONNÉES BANCAIRES
 
 doc
-  .fontSize(13)
+  .fontSize(10)
   .text(
     "Coordonnées bancaires",
     50,
