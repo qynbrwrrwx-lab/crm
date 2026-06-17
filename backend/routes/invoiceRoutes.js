@@ -371,7 +371,7 @@ if (logoBuffer) {
 
   doc.image(
     logoBuffer,
-    50,
+    70,
     25,
     {
       fit: [130, 130],
@@ -437,7 +437,7 @@ doc
   .font("Helvetica-Bold")
   .text(
     `${documentTitle} ${invoice.invoiceNumber}`,
-    350,
+    330,
     40
   );
 
@@ -447,7 +447,7 @@ doc
     `Date : ${new Date(
       invoice.createdAt
     ).toLocaleDateString("fr-FR")}`,
-    350,
+    330,
     60
   );
 
@@ -458,7 +458,7 @@ doc
   .font("Helvetica-Bold")
   .text(
     "CLIENT",
-    380,
+    330,
     105
   );
 
@@ -467,19 +467,19 @@ doc
   .font("Helvetica-Bold")
   .text(
     `${contact?.firstname || ""} ${contact?.lastname || ""}`,
-    380,
+    330,
     130
   );
 
 doc.text(
   contact?.companyName || "",
-  380,
+  330,
   145
 );
 
 doc.text(
   contact?.billingAddress || "",
-  380,
+  330,
   160,
   {
     width: 200
@@ -488,13 +488,13 @@ doc.text(
 
 doc.text(
   contact?.email || "",
-  380,
+  330,
   175
 );
 
 doc.text(
   contact?.phone || "",
-  380,
+  330,
   190
 );
 
