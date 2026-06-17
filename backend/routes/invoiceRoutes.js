@@ -396,7 +396,7 @@ doc
   );
 
 doc
-  .fontSize(8)
+  .fontSize(10)
   .font("Helvetica")
   .text(
     company?.address || "",
@@ -447,13 +447,13 @@ doc
   );
 
 doc
-  .fontSize(8)
+  .fontSize(10)
   .text(
     `Date : ${new Date(
       invoice.createdAt
     ).toLocaleDateString("fr-FR")}`,
     RIGHT_X,
-    55
+    50
   );
 
   // CLIENT
@@ -468,7 +468,7 @@ doc
   );
 
 doc
-  .fontSize(8)
+  .fontSize(10)
   .font("Helvetica-Bold")
   .text(
     `${contact?.firstname || ""} ${contact?.lastname || ""}`,
