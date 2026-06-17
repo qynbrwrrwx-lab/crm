@@ -365,13 +365,18 @@ res.setHeader(
 
 doc.pipe(res);
 
+// COORDONÉES DE MISE EN PAGE
+
+const LEFT_X = 70;
+const RIGHT_X = 280;
+
 // ENTREPRISE
 
 if (logoBuffer) {
 
   doc.image(
     logoBuffer,
-    70,
+    LEFT_X,
     25,
     {
       fit: [130, 130],
@@ -386,7 +391,7 @@ doc
   .font("Helvetica-Bold")
   .text(
     company?.companyName || "Entreprise",
-    70,
+    LEFT_X,
     105
   );
 
@@ -395,31 +400,31 @@ doc
   .font("Helvetica")
   .text(
     company?.address || "",
-    70,
+    LEFT_X,
     130
   );
 
 doc.text(
   `${company?.postalCode || ""} ${company?.city || ""}`,
-  70,
+  LEFT_X,
   145
 );
 
 doc.text(
   company?.email || "",
-  70,
+  LEFT_X,
   160
 );
 
 doc.text(
   company?.phone || "",
-  70,
+  LEFT_X,
   175
 );
 
 doc.text(
   company?.website || "",
-  70,
+  LEFT_X,
   190
 );
 
@@ -437,7 +442,7 @@ doc
   .font("Helvetica-Bold")
   .text(
     `${documentTitle} ${invoice.invoiceNumber}`,
-    330,
+    RIGHT_X,
     40
   );
 
@@ -447,7 +452,7 @@ doc
     `Date : ${new Date(
       invoice.createdAt
     ).toLocaleDateString("fr-FR")}`,
-    330,
+    RIGHT_X,
     60
   );
 
@@ -458,7 +463,7 @@ doc
   .font("Helvetica-Bold")
   .text(
     "CLIENT",
-    330,
+    RIGHT_X,
     105
   );
 
@@ -467,19 +472,19 @@ doc
   .font("Helvetica-Bold")
   .text(
     `${contact?.firstname || ""} ${contact?.lastname || ""}`,
-    330,
+    RIGHT_X,
     130
   );
 
 doc.text(
   contact?.companyName || "",
-  330,
+  RIGHT_X,
   145
 );
 
 doc.text(
   contact?.billingAddress || "",
-  330,
+  RIGHT_X,
   160,
   {
     width: 200
@@ -488,13 +493,13 @@ doc.text(
 
 doc.text(
   contact?.email || "",
-  330,
+  RIGHT_X,
   175
 );
 
 doc.text(
   contact?.phone || "",
-  330,
+  RIGHT_X,
   190
 );
 
