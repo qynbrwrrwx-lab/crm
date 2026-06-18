@@ -650,15 +650,13 @@ doc.text(
   y
 );
 
+y += 25;
+
 doc.moveTo(50, y)
    .lineTo(550, y)
    .stroke();
 
-y += 30;
-
-doc.moveTo(50, y)
-  .lineTo(550, y)
-  .stroke();
+y += 25;
 
 // MENTIONS LÉGALES
 
