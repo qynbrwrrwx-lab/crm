@@ -456,6 +456,14 @@ doc
     50
   );
 
+  doc.fontSize(9);
+
+doc.text(
+  "Validité du devis : 30 jours",
+  400,
+  105
+);
+
   // CLIENT
 
 doc
@@ -588,10 +596,10 @@ y += 25;
 const totalBoxY = y - 55;
 
 doc.rect(
-  330,
+  340,
   totalBoxY,
-  220,
-  80
+  200,
+  60
 ).stroke();
 
 doc
@@ -604,46 +612,56 @@ doc.text(
   y
 );
 
-y += 35;
+y += 15;
 
 
 // COORDONNÉES BANCAIRES
 
-doc
-  .fontSize(9)
-  .text(
-    "Coordonnées bancaires",
-    50,
-    y
-  );
-
-y += 25;
-
 doc.fontSize(8);
 
+// Ligne 1
+
+doc.font("Helvetica-Bold");
+doc.text("Banque :", 50, y);
+
+doc.font("Helvetica");
 doc.text(
-  `Banque : ${company?.companyBank || ""}`,
-  50,
+  company?.companyBank || "",
+  95,
   y
 );
 
+doc.font("Helvetica-Bold");
+doc.text("IBAN :", 300, y);
+
+doc.font("Helvetica");
 doc.text(
-  `IBAN : ${company?.companyIban || ""}`,
-  300,
+  company?.companyIban || "",
+  340,
   y
 );
 
-y +=18;
+y += 18;
 
+// Ligne 2
+
+doc.font("Helvetica-Bold");
+doc.text("BIC :", 50, y);
+
+doc.font("Helvetica");
 doc.text(
-  `BIC : ${company?.companyBic || ""}`,
-  50,
+  company?.companyBic || "",
+  95,
   y
 );
 
+doc.font("Helvetica-Bold");
+doc.text("Titulaire :", 300, y);
+
+doc.font("Helvetica");
 doc.text(
-  `Titulaire : ${company?.companyAccountHolder || ""}`,
-  300,
+  company?.companyAccountHolder || "",
+  355,
   y
 );
 
@@ -658,17 +676,19 @@ y += 25;
 // MENTIONS LÉGALES
 
 doc
-  .fontSize(12)
+  .font("Helvetica-Bold")
+  .fontSize(10)
   .text(
     "Mentions légales",
     50,
     y
   );
 
-y += 30;
+y += 20;
 
 doc
-  .fontSize(9)
+  .font("Helvetica")
+  .fontSize(8)
   .text(
     company?.legalMentions ||
     "Paiement selon les conditions convenues entre les parties.",
@@ -679,7 +699,7 @@ doc
     }
   );
 
-y += 40;
+y += 30;
 
 // CONDITIONS DE RÈGLEMENT
 
