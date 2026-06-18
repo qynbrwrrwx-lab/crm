@@ -453,7 +453,7 @@ doc
       invoice.createdAt
     ).toLocaleDateString("fr-FR")}`,
     RIGHT_X,
-    50
+    55
   );
 
 doc
@@ -462,7 +462,7 @@ doc
 doc.text(
   "Validité du devis : 30 jours",
   RIGHT_X,
-  60
+  65
 );
 
   // CLIENT
@@ -511,6 +511,10 @@ doc.text(
   RIGHT_X,
   180
 );
+
+doc.moveTo(50, 205)
+   .lineTo(550, 205)
+   .stroke();
 
 // PRODUITS
 
@@ -594,7 +598,7 @@ doc.text(
 
 y += 25;
 
-const totalBoxY = y - 75;
+const totalBoxY = y - 50;
 
 doc.rect(
   330,
@@ -602,6 +606,8 @@ doc.rect(
   220,
   70
 ).stroke();
+
+y = totalBoxY + 15;
 
 doc
   .fontSize(14)
@@ -617,6 +623,17 @@ y += 15;
 
 
 // COORDONNÉES BANCAIRES
+
+doc.fontSize(10)
+  .font("Helvetica-Bold");
+
+doc.text(
+  "Coordonnées bancaires",
+  50,
+  y  
+);
+
+y += 20;
 
 doc.fontSize(8);
 
