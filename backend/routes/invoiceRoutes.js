@@ -569,6 +569,13 @@ y += 10;
 
 doc.fontSize(10);
 
+doc.rect(
+  320,
+  totalBoxY,
+  230,
+  90
+).stroke();
+
 doc.text(
   `Total HT : ${Number(invoice.totalHT).toFixed(2)} €`,
   350,
@@ -609,7 +616,7 @@ y += 10;
 // COORDONNÉES BANCAIRES
 
 doc
-  .fontSize(10)
+  .fontSize(9)
   .text(
     "Coordonnées bancaires",
     50,
@@ -618,7 +625,7 @@ doc
 
 y += 25;
 
-doc.fontSize(9);
+doc.fontSize(8);
 
 doc.text(
   `Banque : ${company?.companyBank || ""}`,
