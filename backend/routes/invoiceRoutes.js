@@ -567,12 +567,6 @@ invoiceProducts.forEach(product => {
 
 y += 10;
 
-doc.moveTo(300, y)
-   .lineTo(550, y)
-   .stroke();
-
-y += 20;
-
 doc.fontSize(10);
 
 doc.text(
@@ -589,9 +583,20 @@ doc.text(
   y
 );
 
-y += 20;
+y += 25;
 
-doc.fontSize(10);
+const totalBoxY = y - 15;
+
+doc.rect(
+  330,
+  totalBoxY,
+  220,
+  90
+).stroke();
+
+doc
+  .fontSize(14)
+  .font("Helvetica-Bold");
 
 doc.text(
   `TOTAL TTC : ${Number(invoice.totalTTC).toFixed(2)} €`,
@@ -600,15 +605,6 @@ doc.text(
 );
 
 y += 10;
-
-doc
-  .moveTo(320, y)
-  .lineTo(550, y)
-  .stroke();
-
-y += 10;
-
-
 
 // COORDONNÉES BANCAIRES
 
