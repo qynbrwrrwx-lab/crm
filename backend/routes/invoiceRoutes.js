@@ -456,12 +456,13 @@ doc
     50
   );
 
-  doc.fontSize(9);
+doc
+.fontSize(10);
 
 doc.text(
   "Validité du devis : 30 jours",
-  400,
-  105
+  RIGHT_X,
+  60
 );
 
   // CLIENT
@@ -593,13 +594,13 @@ doc.text(
 
 y += 25;
 
-const totalBoxY = y - 55;
+const totalBoxY = y - 75;
 
 doc.rect(
-  340,
+  330,
   totalBoxY,
-  200,
-  60
+  220,
+  70
 ).stroke();
 
 doc
