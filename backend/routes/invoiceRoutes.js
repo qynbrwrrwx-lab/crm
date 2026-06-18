@@ -654,7 +654,7 @@ doc.moveTo(50, y)
    .lineTo(550, y)
    .stroke();
 
-y += 20;
+y += 30;
 
 doc.moveTo(50, y)
   .lineTo(550, y)
@@ -670,7 +670,7 @@ doc
     y
   );
 
-y += 10;
+y += 30;
 
 doc
   .fontSize(9)
