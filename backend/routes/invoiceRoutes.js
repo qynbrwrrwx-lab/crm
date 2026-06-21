@@ -460,7 +460,7 @@ doc
 .fontSize(10);
 
 doc.text(
-  "Validité du devis : 30 jours",
+  `Validité du devis : ${company?.quoteValidity || 30} jours`,
   RIGHT_X,
   65
 );
@@ -598,7 +598,7 @@ doc.text(
 
 y += 25;
 
-const totalBoxY = y - 50;
+const totalBoxY = y - 90;
 
 doc.rect(
   330,
@@ -616,10 +616,10 @@ doc
 doc.text(
   `TOTAL TTC : ${Number(invoice.totalTTC).toFixed(2)} €`,
   350,
-  y
+  y + 5
 );
 
-y += 15;
+y += 50;
 
 
 // COORDONNÉES BANCAIRES
