@@ -578,7 +578,7 @@ invoiceProducts.forEach(product => {
     }
   );
 
-  y += 25;
+  y += 20;
 
 });
 
@@ -589,7 +589,7 @@ doc.fontSize(10);
 // BLOC TOTAUX
 
 const totalBoxX = 330;
-const totalBoxY = y;
+const totalBoxY = y -35;
 const totalBoxWidth = 220;
 const totalBoxHeight = 80;
 
@@ -626,12 +626,12 @@ doc.text(
   totalBoxY + 55
 );
 
-y += 110;
+y += 95;
 
 
 // COORDONNÉES BANCAIRES
 
-doc.fontSize(10)
+doc.fontSize(9)
   .font("Helvetica-Bold");
 
 doc.text(
@@ -690,13 +690,13 @@ doc.text(
   y
 );
 
-y += 25;
+y += 15;
 
 doc.moveTo(50, y)
    .lineTo(550, y)
    .stroke();
 
-y += 25;
+y += 15;
 
 // MENTIONS LÉGALES
 
