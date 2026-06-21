@@ -428,12 +428,6 @@ doc.text(
   180
 );
 
-doc.rect(
-  LEFT_X - 15,
-  95,
-  220,
-  105
-).stroke();
 
 // DOCUMENT
 
@@ -519,13 +513,6 @@ doc.text(
   180
 );
 
-doc.rect(
-  RIGHT_X - 15,
-  95,
-  220,
-  105
-).stroke();
-
 doc.moveTo(50, 205)
    .lineTo(550, 205)
    .stroke();
@@ -590,6 +577,7 @@ invoiceProducts.forEach(product => {
       width: 80,
       align: "right"
     }
+
   );
 
   y += 20;
@@ -606,10 +594,10 @@ doc.moveTo(300, y -10)
     .lineTo(550, y -10)
     .stroke();
 
-const totalBoxX = 330;
+const totalBoxX = 310;
 const totalBoxY = y;
-const totalBoxWidth = 220;
-const totalBoxHeight = 90;
+const totalBoxWidth = 240;
+const totalBoxHeight = 95;
 
 doc.rect(
   totalBoxX,
@@ -623,15 +611,35 @@ doc
   .font("Helvetica");
 
 doc.text(
-  `Total HT : ${Number(invoice.totalHT).toFixed(2)} €`,
+  "Total HT :",
   totalBoxX + 15,
   totalBoxY + 12
 );
 
 doc.text(
-  `TVA : ${Number(invoice.totalTTC - invoice.totalHT).toFixed(2)} €`,
+  `${Number(invoice.totalHT).toFixed(2)} €`,
+  totalBoxX + 120,
+  totalBoxY + 12,
+  {
+    width: 90,
+    align: "right"
+  }
+);
+
+doc.text(
+  "TVA :",
   totalBoxX + 15,
   totalBoxY + 32
+);
+
+doc.text(
+  `${Number(invoice.totalTTC - invoice.totalHT).toFixed(2)} €`,
+  totalBoxX + 120,
+  totalBoxY + 32,
+  {
+    width: 90,
+    align: "right"
+  }
 );
 
 doc
@@ -645,6 +653,10 @@ doc.text(
 );
 
 y = totalBoxY + totalBoxHeight + 25;
+
+ doc.moveTo(50, y -10)
+    .lineTo(550, y -10)
+    .stroke();
 
 
 // COORDONNÉES BANCAIRES
@@ -727,7 +739,7 @@ doc
     y
   );
 
-y += 5;
+y += 20;
 
 doc
   .font("Helvetica")
@@ -752,7 +764,7 @@ doc.text(
   y
 );
 
-y += 35;
+y += 20;
 
 // PIED DE PAGE SOCIÉTÉ
 
