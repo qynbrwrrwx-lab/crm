@@ -570,8 +570,12 @@ invoiceProducts.forEach(product => {
 
   doc.text(
     `${Number(product.totalHT).toFixed(2)} €`,
-    470,
-    y
+    430,
+    y,
+    {
+      width: 80,
+      align: "right"
+    }
   );
 
   y += 25;
