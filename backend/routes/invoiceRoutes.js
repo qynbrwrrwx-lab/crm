@@ -582,32 +582,35 @@ y += 10;
 
 doc.fontSize(10);
 
+// BLOC TOTAUX
+
+const totalBoxX = 330;
+const totalBoxY = y;
+const totalBoxWidth = 220;
+const totalBoxHeight = 80;
+
+doc.rect(
+  totalBoxX,
+  totalBoxY,
+  totalBoxWidth,
+  totalBoxHeight
+).stroke();
+
+doc
+  .fontSize(10)
+  .font("Helvetica");
+
 doc.text(
   `Total HT : ${Number(invoice.totalHT).toFixed(2)} €`,
-  350,
-  y
+  totalBoxX + 15,
+  totalBoxY + 12
 );
-
-y += 20;
 
 doc.text(
   `TVA : ${Number(invoice.totalTTC - invoice.totalHT).toFixed(2)} €`,
-  350,
-  y
+  totalBoxX + 15,
+  totalBoxY + 32
 );
-
-y += 25;
-
-const totalBoxY = y - 90;
-
-doc.rect(
-  330,
-  totalBoxY,
-  220,
-  70
-).stroke();
-
-y = totalBoxY + 15;
 
 doc
   .fontSize(14)
@@ -615,11 +618,11 @@ doc
 
 doc.text(
   `TOTAL TTC : ${Number(invoice.totalTTC).toFixed(2)} €`,
-  350,
-  y + 5
+  totalBoxX + 15,
+  totalBoxY + 55
 );
 
-y += 50;
+y += 110;
 
 
 // COORDONNÉES BANCAIRES
