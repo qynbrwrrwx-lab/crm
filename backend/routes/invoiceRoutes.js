@@ -428,6 +428,13 @@ doc.text(
   180
 );
 
+doc.rect(
+  LEFT_X - 15,
+  95,
+  220,
+  105
+).stroke();
+
 // DOCUMENT
 
 const documentTitle =
@@ -512,6 +519,13 @@ doc.text(
   180
 );
 
+doc.rect(
+  RIGHT_X - 15,
+  95,
+  220,
+  105
+).stroke();
+
 doc.moveTo(50, 205)
    .lineTo(550, 205)
    .stroke();
@@ -588,10 +602,14 @@ doc.fontSize(10);
 
 // BLOC TOTAUX
 
+doc.moveTo(300, y -10)
+    .lineTo(550, y -10)
+    .stroke();
+
 const totalBoxX = 330;
 const totalBoxY = y;
 const totalBoxWidth = 220;
-const totalBoxHeight = 80;
+const totalBoxHeight = 90;
 
 doc.rect(
   totalBoxX,
@@ -631,7 +649,7 @@ y = totalBoxY + totalBoxHeight + 25;
 
 // COORDONNÉES BANCAIRES
 
-doc.fontSize(9)
+doc.fontSize(10)
   .font("Helvetica-Bold");
 
 doc.text(
@@ -642,7 +660,7 @@ doc.text(
 
 y += 20;
 
-doc.fontSize(8);
+doc.fontSize(9);
 
 // Ligne 1
 
@@ -709,11 +727,11 @@ doc
     y
   );
 
-y += 20;
+y += 5;
 
 doc
   .font("Helvetica")
-  .fontSize(8)
+  .fontSize(9)
   .text(
     company?.legalMentions ||
     "Paiement selon les conditions convenues entre les parties.",
@@ -739,7 +757,7 @@ y += 35;
 // PIED DE PAGE SOCIÉTÉ
 
 doc
-  .fontSize(8)
+  .fontSize(9)
   .text(
     `${company?.companyName || ""} | SIRET : ${company?.siret || ""} | RCS : ${company?.rcs || ""} | APE : ${company?.ape || ""}`,
     50,
