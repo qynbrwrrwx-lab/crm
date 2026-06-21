@@ -595,7 +595,7 @@ doc.moveTo(300, y -10)
     .stroke();
 
 const totalBoxX = 310;
-const totalBoxY = y;
+const totalBoxY = y - 15 ;
 const totalBoxWidth = 240;
 const totalBoxHeight = 95;
 
@@ -672,7 +672,7 @@ doc.text(
 
 y += 20;
 
-doc.fontSize(9);
+doc.fontSize(10);
 
 // Ligne 1
 
@@ -769,7 +769,7 @@ y += 20;
 // PIED DE PAGE SOCIÉTÉ
 
 doc
-  .fontSize(9)
+  .fontSize(10)
   .text(
     `${company?.companyName || ""} | SIRET : ${company?.siret || ""} | RCS : ${company?.rcs || ""} | APE : ${company?.ape || ""}`,
     50,
