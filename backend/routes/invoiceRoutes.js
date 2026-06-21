@@ -589,7 +589,7 @@ doc.fontSize(10);
 // BLOC TOTAUX
 
 const totalBoxX = 330;
-const totalBoxY = y -35;
+const totalBoxY = y;
 const totalBoxWidth = 220;
 const totalBoxHeight = 80;
 
@@ -626,7 +626,7 @@ doc.text(
   totalBoxY + 55
 );
 
-y += 95;
+y = totalBoxY + totalBoxHeight + 25;
 
 
 // COORDONNÉES BANCAIRES
