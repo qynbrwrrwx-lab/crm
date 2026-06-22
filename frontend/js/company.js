@@ -114,6 +114,11 @@ let companyLogoBase64 = "";
     ).value =
       company.currency || "€";
 
+    document.getElementById(
+      "quoteValidity"
+    ).value =
+      company.quoteValidity || 30;
+
     companyLogoBase64 =
       company.logo || "";
    
@@ -279,6 +284,13 @@ async function saveCompany() {
             document.getElementById(
               "currency"
             ).value,
+
+          quoteValidity:
+           Number(      
+            document.getElementById(
+              "quoteValidity"
+            ).value,
+           ),
 
           logo:
             companyLogoBase64

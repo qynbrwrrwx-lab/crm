@@ -595,7 +595,7 @@ doc.moveTo(300, y -10)
     .stroke();
 
 const totalBoxX = 310;
-const totalBoxY = y - 15 ;
+const totalBoxY = y;
 const totalBoxWidth = 240;
 const totalBoxHeight = 95;
 

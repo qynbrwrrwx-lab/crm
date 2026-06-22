@@ -41,6 +41,11 @@ const companySchema = new mongoose.Schema({
     default: "30 jours"
   },
 
+  quoteValidity: {
+    type: Number,
+    default: 30
+  },
+
   logo: String,
 
   activityType: {
