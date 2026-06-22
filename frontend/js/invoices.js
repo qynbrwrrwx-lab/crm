@@ -90,43 +90,50 @@ function renderInvoices(invoices) {
   invoices.forEach(invoice => {
 
     const html = `
+  <div class="erp-card">
 
-      <div class="client">
+    <div class="client-info">
 
-        <div class="client-info">
+      <strong style="font-size:16px;">
+        ${invoice.invoiceNumber}
+      </strong>
 
-          <strong>
-            ${invoice.invoiceNumber}
-          </strong>
+      <br>
 
-          <br>
+      ${
+        invoice.type === "quote"
+        ? "📄 Devis"
+        : "🧾 Facture"
+      }
 
-          ${
-            invoice.type === "quote"
-            ? "📄 Devis"
-            : "🧾 Facture"
-          }
+      <br>
 
-          <br>
+      <strong>
+        ${Number(invoice.totalTTC).toFixed(2)} €
+      </strong>
 
-          Total TTC :
-          ${Number(invoice.totalTTC).toFixed(2)} €
+      <br>
 
-          <br>
+      Paiement :
+      ${invoice.paymentMethod}
 
-          Paiement :
-          ${invoice.paymentMethod}
+      <br>
 
-          <br>
+      Statut :
+      ${
+        invoice.paymentStatus === "paid"
+        ? "✅ Payé"
+        : "⌛ En attente"
+      }
 
-          Statut :
-          ${
-            invoice.paymentStatus === "paid"
-            ? "✅ Payé"
-            : "⌛ En attente"
-          }
+      <div style="margin-top:15px;">
 
-    <div>
+            </div>
+
+    </div>
+
+  </div>
+;
 
   ${
     invoice.type === "quote"
