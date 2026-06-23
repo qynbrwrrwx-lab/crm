@@ -646,16 +646,44 @@ async function openInvoice(id) {
 
   if (!invoice) return;
 
-  alert(
-    `${invoice.invoiceNumber}
+  document.getElementById(
+    "invoiceDetailsModal"
+  ).style.display = "flex";
 
-Client :
-${invoice.contactId?.companyName ||
-invoice.contactId?.firstname + " " +
-invoice.contactId?.lastname}
+  document.getElementById(
+    "detailNumber"
+  ).innerText =
+    invoice.invoiceNumber;
 
-Montant TTC :
-${invoice.totalTTC} €`
-  );
+  document.getElementById(
+    "invoiceDetailsBody"
+  ).innerHTML = `
 
+    <p>
+      <strong>Client :</strong>
+      ${
+        invoice.contactId?.companyName ||
+        invoice.contactId?.firstname + " " +
+        invoice.contactId?.lastname
+      }
+    </p>
+
+    <p>
+      <strong>Total HT :</strong>
+      ${invoice.totalHT} €
+    </p>
+
+    <p>
+      <strong>Total TTC :</strong>
+      ${invoice.totalTTC} €
+    </p>
+
+  `;
+}
+
+function closeInvoiceDetails() {
+
+  document.getElementById(
+    "invoiceDetailsModal"
+  ).style.display = "none";
 }

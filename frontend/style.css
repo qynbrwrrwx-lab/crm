@@ -1386,3 +1386,52 @@ button:hover {
 
   color:#60a5fa;
 }
+
+.invoice-details-modal {
+
+  position: fixed;
+
+  inset: 0;
+
+  background:
+    rgba(0,0,0,0.7);
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  z-index: 99999;
+}
+
+.invoice-details-content {
+
+  width: 900px;
+
+  max-width: 95%;
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  background: #0f172a;
+
+  border-radius: 20px;
+
+  padding: 30px;
+
+  box-shadow:
+    0 0 40px rgba(0,0,0,.5);
+}
+
+.invoice-details-header {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 20px;
+}
