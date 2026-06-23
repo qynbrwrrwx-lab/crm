@@ -89,108 +89,70 @@ function renderInvoices(invoices) {
 
   invoices.forEach(invoice => {
 
-console.log(invoice);
+  const date = new Date(invoice.createdAt);
 
-    const html = `
-  <div class="erp-card">
+const day =
+  String(date.getDate()).padStart(2, "0");
 
-    <div class="client-info">
+const month =
+  date.toLocaleString(
+    "fr-FR",
+    { month: "short" }
+  );
 
-      <strong style="font-size:16px;">
-        ${invoice.invoiceNumber}
-      </strong>
+const customerName =
+  invoice.contactId?.companyName ||
+  `${invoice.contactId?.firstname || ""}
+   ${invoice.contactId?.lastname || ""}`;
 
-      <br>
+const html = `
 
-      ${
-        invoice.type === "quote"
-        ? "📄 Devis"
-        : "🧾 Facture"
-      }
+<div
+  class="erp-row"
+>
 
-      <br>
+  <div class="erp-date">
 
-      <strong>
-        ${Number(invoice.totalTTC).toFixed(2)} €
-      </strong>
-
-      <br>
-
-      Paiement :
-      ${invoice.paymentMethod}
-
-      <br>
-
-      Statut :
-      ${
-        invoice.paymentStatus === "paid"
-        ? "✅ Payé"
-        : "⌛ En attente"
-      }
-
-      <div style="margin-top:15px;">
-
-            </div>
-
+    <div class="erp-day">
+      ${day}
     </div>
 
-  
-<div class="invoice-actions">
+    <div class="erp-month">
+      ${month}
+    </div>
 
-  ${
-    invoice.type === "quote"
-    ? `
-      <button
-        onclick="viewQuote('${invoice._id}')"
-      >
-        Voir
-      </button>
+  </div>
 
-      <button
-        onclick="editQuote('${invoice._id}')"
-      >
-        Modifier
-      </button>
+  <div class="erp-customer">
 
-      <button
-        onclick="acceptQuote('${invoice._id}')"
-      >
-        Valider
-      </button>
+    <div class="erp-number">
+      ${invoice.invoiceNumber}
+    </div>
 
-      <button
-        onclick="deleteInvoice('${invoice._id}')"
-      >
-        Supprimer
-      </button>
-    `
-    : `
-      ${
-        invoice.paymentStatus !== "paid"
-        ? `
-          <button
-            onclick="markInvoicePaid('${invoice._id}')"
-          >
-            Marquer payé
-          </button>
-        `
-        : ""
-      }
+    <div class="erp-name">
+      ${customerName}
+    </div>
 
-      <button
-        onclick="deleteInvoice('${invoice._id}')"
-      >
-        Supprimer
-      </button>
-    `
-  }
+  </div>
+
+  <div class="erp-amounts">
+
+    <div>
+      ${Number(invoice.totalTTC).toFixed(2)} €
+      TTC
+    </div>
+
+    <small>
+      ${Number(invoice.totalHT).toFixed(2)} €
+      HT
+    </small>
+
+  </div>
 
 </div>
 
-    
-    </div>
-    `;
-
+`;
+   
    if (invoice.type === "quote") {
 
   if (invoice.status === "accepted") {

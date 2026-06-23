@@ -1282,3 +1282,87 @@ button:hover {
   min-width: 110px;
 
 }
+
+.erp-row{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:25px;
+
+  padding:18px 25px;
+
+  border-bottom:
+  1px solid rgba(255,255,255,.06);
+
+  cursor:pointer;
+
+  transition:.2s;
+}
+
+.erp-row:hover{
+
+  background:
+  rgba(59,130,246,.08);
+}
+
+.erp-date{
+
+  width:70px;
+
+  text-align:center;
+}
+
+.erp-day{
+
+  font-size:28px;
+
+  font-weight:700;
+
+  color:white;
+}
+
+.erp-month{
+
+  color:#94a3b8;
+
+  text-transform:lowercase;
+}
+
+.erp-customer{
+
+  flex:1;
+}
+
+.erp-number{
+
+  font-weight:700;
+
+  color:white;
+}
+
+.erp-name{
+
+  margin-top:4px;
+
+  color:#94a3b8;
+}
+
+.erp-amounts{
+
+  text-align:right;
+
+  min-width:160px;
+
+  font-weight:700;
+}
+
+.erp-amounts small{
+
+  display:block;
+
+  color:#94a3b8;
+
+  margin-top:5px;
+}
