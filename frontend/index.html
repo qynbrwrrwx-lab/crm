@@ -1371,5 +1371,33 @@ async function requestReset() {
 
 </div>
 
+<!-- POPUP DETAILS DEVIS / FACTURE -->
+
+<div
+  id="invoiceDetailsModal"
+  class="invoice-details-modal"
+  style="display:none;"
+>
+
+  <div class="invoice-details-content">
+
+    <div class="invoice-details-header">
+
+      <h2 id="detailNumber"></h2>
+
+      <button
+        onclick="closeInvoiceDetails()"
+      >
+        ✕
+      </button>
+
+    </div>
+
+    <div id="invoiceDetailsBody"></div>
+
+  </div>
+
+</div>
+
 </body>
 </html>
