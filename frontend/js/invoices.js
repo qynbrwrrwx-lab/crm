@@ -635,3 +635,27 @@ function addQuoteLine() {
   container.appendChild(line);
 
 }
+
+async function openInvoice(id) {
+
+  const invoices =
+    await apiFetch("/api/invoices");
+
+  const invoice =
+    invoices.find(i => i._id === id);
+
+  if (!invoice) return;
+
+  alert(
+    `${invoice.invoiceNumber}
+
+Client :
+${invoice.contactId?.companyName ||
+invoice.contactId?.firstname + " " +
+invoice.contactId?.lastname}
+
+Montant TTC :
+${invoice.totalTTC} €`
+  );
+
+}
