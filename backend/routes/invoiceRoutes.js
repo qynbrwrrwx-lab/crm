@@ -15,9 +15,13 @@ router.get("/", auth, async (req, res) => {
 
   try {
 
-    const invoices =
-      await Invoice.find()
-      .sort({ createdAt: -1 });
+  const invoices =
+    await Invoice.find()
+    .populate(
+      "contactId",
+      "firstname lastname companyName"
+    )
+    .sort({ createdAt: -1 });
 
     res.json(invoices);
 

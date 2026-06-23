@@ -89,6 +89,8 @@ function renderInvoices(invoices) {
 
   invoices.forEach(invoice => {
 
+console.log(invoice);
+
     const html = `
   <div class="erp-card">
 
