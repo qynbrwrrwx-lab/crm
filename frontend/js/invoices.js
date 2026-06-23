@@ -87,6 +87,30 @@ function renderInvoices(invoices) {
   quotesList.innerHTML = "";
   acceptedQuotesList.innerHTML = "";
 
+const quotes =
+  invoices.filter(
+    i =>
+      i.type === "quote" &&
+      i.status !== "accepted"
+  );
+
+const acceptedQuotes =
+  invoices.filter(
+    i =>
+      i.type === "quote" &&
+      i.status === "accepted"
+  );
+
+document.getElementById(
+  "quotesCount"
+).textContent =
+  `${quotes.length} devis`;
+
+document.getElementById(
+  "acceptedQuotesCount"
+).textContent =
+  `${acceptedQuotes.length} devis`;
+
   invoices.forEach(invoice => {
 
   const date = new Date(invoice.createdAt);
@@ -109,6 +133,7 @@ const html = `
 
 <div
   class="erp-row"
+  onclick="openInvoice('${invoice._id}')"
 >
 
   <div class="erp-date">
