@@ -1262,3 +1262,23 @@ button:hover {
   transform: translateY(-2px);
 
 }
+
+.invoice-actions {
+
+  display: flex;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
+
+  margin-top: 15px;
+
+}
+
+.invoice-actions button {
+
+  width: auto;
+
+  min-width: 110px;
+
+}

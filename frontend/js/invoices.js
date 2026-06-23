@@ -132,8 +132,8 @@ function renderInvoices(invoices) {
 
     </div>
 
-  </div>
-;
+  
+<div class="invoice-actions">
 
   ${
     invoice.type === "quote"
