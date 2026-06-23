@@ -656,29 +656,67 @@ async function openInvoice(id) {
     invoice.invoiceNumber;
 
   document.getElementById(
-    "invoiceDetailsBody"
-  ).innerHTML = `
+  "invoiceDetailsBody"
+).innerHTML = `
 
-    <p>
-      <strong>Client :</strong>
+  <div class="invoice-detail-card">
+
+    <h3>
       ${
         invoice.contactId?.companyName ||
         invoice.contactId?.firstname + " " +
         invoice.contactId?.lastname
       }
-    </p>
+    </h3>
+
+    <hr>
 
     <p>
       <strong>Total HT :</strong>
-      ${invoice.totalHT} €
+      ${invoice.totalHT.toFixed(2)} €
     </p>
 
     <p>
       <strong>Total TTC :</strong>
-      ${invoice.totalTTC} €
+      ${invoice.totalTTC.toFixed(2)} €
     </p>
 
-  `;
+    <div
+      class="invoice-detail-actions"
+      style="
+        margin-top:30px;
+        display:flex;
+        gap:10px;
+      "
+    >
+
+      <button
+        class="primary-btn"
+        onclick="editQuote('${invoice._id}')"
+      >
+        Modifier
+      </button>
+
+      <button
+        class="secondary-btn"
+        onclick="deleteInvoice('${invoice._id}')"
+      >
+        Supprimer
+      </button>
+
+      <button
+        class="secondary-btn"
+        onclick="closeInvoiceDetails()"
+      >
+        Fermer
+      </button>
+
+    </div>
+
+  </div>
+
+`;
+
 }
 
 function closeInvoiceDetails() {
