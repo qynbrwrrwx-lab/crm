@@ -1366,3 +1366,14 @@ button:hover {
 
   margin-top:5px;
 }
+
+.section-header{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  margin-bottom:25px;
+}
