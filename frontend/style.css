@@ -1535,3 +1535,39 @@ button:hover {
   color:#8f97b2;
   font-weight:500;
 }
+
+.quote-table-header,
+.quote-product-row{
+
+    display:grid;
+    grid-template-columns:2fr 80px 120px 120px;
+    align-items:center;
+
+    padding:14px 0;
+}
+
+.quote-table-header{
+
+    font-weight:700;
+
+    border-bottom:1px solid rgba(255,255,255,.15);
+
+    margin-bottom:10px;
+}
+
+.quote-product-row{
+
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.quote-product-name{
+
+    font-weight:600;
+}
+
+.quote-product-qty,
+.quote-product-price,
+.quote-product-total{
+
+    text-align:right;
+}

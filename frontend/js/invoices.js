@@ -132,7 +132,7 @@ const customerName =
 console.log(invoice);
 
 const articlesCount =
-  invoices.products?.lenght || 0;
+  invoice.products?.length || 0;
 
 const html = `
 
@@ -682,20 +682,34 @@ async function openInvoice(id) {
 
 <h4>Articles</h4>
 
+<div class="quote-table-header">
+
+    <div>Produit</div>
+    <div>Qté</div>
+    <div>PU HT</div>
+    <div>Total</div>
+
+</div>
+
 ${invoice.products.map(item => `
 
-<div style="
-padding:12px 0;
-border-bottom:1px solid rgba(255,255,255,.1);
-">
+<div class="quote-product-row">
 
-<strong>${item.productId.name}</strong><br>
+    <div class="quote-product-name">
+        ${item.productId.name}
+    </div>
 
-Quantité : ${item.quantity}<br>
+    <div class="quote-product-qty">
+        ${item.quantity}
+    </div>
 
-Prix HT : ${item.productId.priceHT} €<br>
+    <div class="quote-product-price">
+        ${item.productId.priceHT.toFixed(2)} €
+    </div>
 
-TVA : ${item.productId.tva}%<br>
+    <div class="quote-product-total">
+        ${(item.productId.priceHT * item.quantity).toFixed(2)} €
+    </div>
 
 </div>
 
