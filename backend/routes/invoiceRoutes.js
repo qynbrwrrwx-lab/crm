@@ -21,6 +21,10 @@ router.get("/", auth, async (req, res) => {
       "contactId",
       "firstname lastname companyName"
     )
+    .populate(
+      "products.productId"
+    )
+    
     .sort({ createdAt: -1 });
 
     res.json(invoices);
