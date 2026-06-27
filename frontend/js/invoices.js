@@ -129,8 +129,10 @@ const customerName =
   `${invoice.contactId?.firstname || ""}
    ${invoice.contactId?.lastname || ""}`;
 
+console.log(invoice);
+
 const articlesCount =
-  invoices.products.lenght;
+  invoices.products?.lenght || 0;
 
 const html = `
 
