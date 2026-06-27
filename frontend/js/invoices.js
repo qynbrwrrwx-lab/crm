@@ -646,6 +646,8 @@ async function openInvoice(id) {
 
   if (!invoice) return;
 
+  console.log(invoice.products);
+
   document.getElementById(
     "invoiceDetailsModal"
   ).style.display = "flex";
