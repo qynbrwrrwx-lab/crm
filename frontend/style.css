@@ -1542,16 +1542,14 @@ button:hover {
     display:grid;
 
     grid-template-columns:
-    minmax(300px,1fr)
-    80px
+    1fr
+    90px
     140px
     140px;
 
     align-items:center;
 
-    column-gap:20px;
-
-    padding:15px 0;
+    padding:14px 0;
 }
 
 .quote-table-header{
@@ -1559,8 +1557,6 @@ button:hover {
     font-weight:700;
 
     border-bottom:1px solid rgba(255,255,255,.15);
-
-    color:white;
 }
 
 .quote-product-row{
@@ -1568,8 +1564,16 @@ button:hover {
     border-bottom:1px solid rgba(255,255,255,.08);
 }
 
-.quote-product-row div:not(:first-child),
-.quote-table-header div:not(:first-child){
+.quote-product-name{
 
-    text-align:right;
+    text-align:left;
+}
+
+.quote-product-qty,
+.quote-product-price,
+.quote-product-total{
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
