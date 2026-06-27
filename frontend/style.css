@@ -1542,13 +1542,12 @@ button:hover {
     display:grid;
 
     grid-template-columns:
-    1fr
-    90px
-    140px
-    140px;
+        minmax(0,1fr)
+        90px
+        130px
+        130px;
 
     align-items:center;
-
     padding:14px 0;
 }
 
@@ -1564,16 +1563,15 @@ button:hover {
     border-bottom:1px solid rgba(255,255,255,.08);
 }
 
-.quote-product-name{
-
-    text-align:left;
-}
-
-.quote-product-qty,
-.quote-product-price,
-.quote-product-total{
+.quote-table-header div,
+.quote-product-row div{
 
     display:flex;
     justify-content:center;
-    align-items:center;
+}
+
+.quote-table-header div:first-child,
+.quote-product-name{
+
+    justify-content:flex-start;
 }
