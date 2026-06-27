@@ -646,8 +646,6 @@ async function openInvoice(id) {
 
   if (!invoice) return;
 
-  console.log(invoice.products);
-
   document.getElementById(
     "invoiceDetailsModal"
   ).style.display = "flex";
@@ -673,15 +671,39 @@ async function openInvoice(id) {
 
     <hr>
 
-    <p>
-      <strong>Total HT :</strong>
-      ${invoice.totalHT.toFixed(2)} €
-    </p>
+<h4>Articles</h4>
 
-    <p>
-      <strong>Total TTC :</strong>
-      ${invoice.totalTTC.toFixed(2)} €
-    </p>
+${invoice.products.map(item => `
+
+<div style="
+padding:12px 0;
+border-bottom:1px solid rgba(255,255,255,.1);
+">
+
+<strong>${item.productId.name}</strong><br>
+
+Quantité : ${item.quantity}<br>
+
+Prix HT : ${item.productId.priceHT} €<br>
+
+TVA : ${item.productId.tva}%<br>
+
+</div>
+
+`).join("")}
+
+<br>
+
+<p>
+<strong>Total HT :</strong>
+${invoice.totalHT.toFixed(2)} €
+</p>
+
+<p>
+<strong>Total TTC :</strong>
+${invoice.totalTTC.toFixed(2)} €
+</p>
+
 
     <div
       class="invoice-detail-actions"
