@@ -129,6 +129,9 @@ const customerName =
   `${invoice.contactId?.firstname || ""}
    ${invoice.contactId?.lastname || ""}`;
 
+const articlesCount =
+  invoices.products.lenght;
+
 const html = `
 
 <div
@@ -156,6 +159,10 @@ const html = `
 
     <div class="erp-name">
       ${customerName}
+    </div>
+
+    <div class="erp-items">
+      ${articlesCount} articles${articlesCount > 1 ? "s" : ""}
     </div>
 
   </div>
