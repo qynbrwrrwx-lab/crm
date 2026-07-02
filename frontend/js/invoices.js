@@ -672,9 +672,7 @@ async function openInvoice(id) {
 
     <h3>
       ${
-        invoice.contactId?.companyName ||
-        invoice.contactId?.firstname + " " +
-        invoice.contactId?.lastname
+        invoice.contactId?.companyName || `${invoice.contactId?.firstname || ""} ${invoice.contactId?.lastname || ""}`.trim()
       }
     </h3>
 
