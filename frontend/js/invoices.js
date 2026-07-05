@@ -702,8 +702,25 @@ ${invoice.products.map(item => `
     </div>
 
     <div class="quote-product-qty">
-        ${item.quantity}
-    </div>
+
+${
+    isEditingQuote
+    ? `
+        <input
+            type="number"
+            min="1"
+            value="${item.quantity}"
+            class="edit-qty"
+            style="
+                width:60px;
+                text-align:center;
+            "
+        >
+      `
+    : item.quantity
+}
+
+</div>
 
     <div class="quote-product-price">
         ${item.productId.priceHT.toFixed(2)} €
