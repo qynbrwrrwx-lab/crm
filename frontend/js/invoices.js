@@ -1,8 +1,8 @@
 // ================= INVOICES =================
 
 let editingQuoteId = null;
-
 let isEditingQuote = false;
+let currentInvoiceId = null;
 
 // LOAD SELECT DATA
 async function loadInvoiceData() {
@@ -651,6 +651,8 @@ function addQuoteLine() {
 
 async function openInvoice(id) {
 
+  currentInvoiceId = id;
+
   const invoices =
     await apiFetch("/api/invoices");
 
@@ -790,9 +792,7 @@ function enableInvoiceEdition() {
 
     isEditingQuote = true;
 
-    document.getElementById(
-        "editInvoiceBtn"
-    ).innerText = "Enregistrer";
+    openInvoice(currentInvoiceId);
 
 }
 
