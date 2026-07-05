@@ -3,6 +3,7 @@
 let editingQuoteId = null;
 let isEditingQuote = false;
 let currentInvoiceId = null;
+let currentInvoice = null;
 
 // LOAD SELECT DATA
 async function loadInvoiceData() {
@@ -658,6 +659,7 @@ async function openInvoice(id) {
 
   const invoice =
     invoices.find(i => i._id === id);
+    currentInvoice = structuredClone(invoice);
 
   if (!invoice) return;
 
@@ -724,7 +726,7 @@ ${invoice.invoiceNumber}
 
 </div>
 
-${invoice.products.map(item => `
+${invoice.products.map((item, itemIndex) => `
 
 <div class="quote-product-row">
 
@@ -767,6 +769,23 @@ ${
     <div class="quote-product-delete">
 
     </div>
+
+    <div class="quote-product-delete">
+
+${
+    isEditingQuote
+    ? `
+        <button
+            class="delete-line-btn"
+            onclick="removeInvoiceLine(${itemIndex})"
+        >
+            ✕
+        </button>
+      `
+    : ""
+}
+
+</div>
 
 </div>
 
@@ -858,5 +877,13 @@ function closeInvoiceDetails() {
     document.getElementById(
         "invoiceDetailsModal"
     ).style.display = "none";
+
+}
+
+function removeInvoiceLine(index){
+
+    currentInvoice.products.splice(index,1);
+
+    openInvoice(currentInvoice._id);
 
 }

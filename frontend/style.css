@@ -1622,3 +1622,19 @@ button:hover {
     line-height:1.5;
 
 }
+
+.delete-line-btn{
+
+    background:none;
+    border:none;
+    color:#ff5f5f;
+    font-size:20px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.delete-line-btn:hover{
+
+    transform:scale(1.2);
+    color:#ff2d2d;
+}
