@@ -843,10 +843,7 @@ router.put(
 
       invoice.contactId = contactId;
 
-let totalHT = 0;
-let totalTTC = 0;
-
-for (const item of products) {
+    for (const item of products) {
 
   const product =
     await Product.findById(item.productId);
