@@ -828,6 +828,9 @@ router.put(
         products
       } = req.body;
 
+      let totalHT = 0;
+      let totalTTC = 0;
+
       const invoice =
         await Invoice.findById(req.params.id);
 
@@ -838,13 +841,43 @@ router.put(
         });
       }
 
-      invoice.contactId =
-        contactId;
+      invoice.contactId = contactId;
 
-      invoice.products =
-        products;
+let totalHT = 0;
+let totalTTC = 0;
 
-      await invoice.save();
+for (const item of products) {
+
+  const product =
+    await Product.findById(item.productId);
+
+  if (!product) continue;
+
+  const discount =
+    Number(item.discount || 0);
+
+  const lineHTBeforeDiscount =
+    Number(product.priceHT) *
+    Number(item.quantity);
+
+  const lineHT =
+    lineHTBeforeDiscount *
+    (1 - discount / 100);
+
+  const lineTTC =
+    lineHT *
+    (1 + Number(product.tva || 20) / 100);
+
+  totalHT += lineHT;
+  totalTTC += lineTTC;
+}
+
+invoice.products = products;
+
+invoice.totalHT = totalHT;
+invoice.totalTTC = totalTTC;
+
+await invoice.save();
 
       res.json(invoice);
 

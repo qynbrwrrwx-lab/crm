@@ -650,6 +650,16 @@ function addQuoteLine() {
 
 }
 
+function renderInvoiceModal(invoice){
+
+    document.getElementById(
+        "invoiceDetailsBody"
+    ).innerHTML = `
+
+    `;
+
+}
+
 async function openInvoice(id) {
 
   currentInvoiceId = id;
@@ -659,7 +669,11 @@ async function openInvoice(id) {
 
   const invoice =
     invoices.find(i => i._id === id);
+    if(!currentInvoice){
+
     currentInvoice = structuredClone(invoice);
+
+}
 
   if (!invoice) return;
 
@@ -726,7 +740,7 @@ ${invoice.invoiceNumber}
 
 </div>
 
-${invoice.products.map((item, itemIndex) => `
+${currentInvoice.products.map((item, itemIndex) => `
 
 <div class="quote-product-row">
 
@@ -768,11 +782,7 @@ ${
 
     <div class="quote-product-delete">
 
-    </div>
-
-    <div class="quote-product-delete">
-
-${
+  ${
     isEditingQuote
     ? `
         <button
@@ -862,9 +872,56 @@ function enableInvoiceEdition() {
 
 }
 
-function saveInvoiceEdition(){
+async function saveInvoiceEdition(){
 
-    console.log("Sauvegarde du devis");
+    try{
+
+        document
+            .querySelectorAll(".edit-qty")
+            .forEach((input,index)=>{
+
+                currentInvoice.products[index].quantity =
+                    Number(input.value);
+
+            });
+
+        await apiFetch(
+
+            `/api/invoices/${currentInvoice._id}`,
+
+            {
+
+                method:"PUT",
+
+                body:JSON.stringify({
+
+                    contactId: currentInvoice.contactId,
+
+                    products: currentInvoice.products
+
+                })
+
+            }
+
+        );
+
+        isEditingQuote = false;
+
+        await loadInvoices();
+
+        closeInvoiceDetails();
+
+        showToast("Devis enregistré ✅");
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+        showToast(err.message);
+
+    }
 
 }
 
@@ -882,8 +939,10 @@ function closeInvoiceDetails() {
 
 function removeInvoiceLine(index){
 
-    currentInvoice.products.splice(index,1);
+    currentInvoice.products.splice(index, 1);
 
-    openInvoice(currentInvoice._id);
+    isEditingQuote = true;
+
+    openInvoice(currentInvoiceId);
 
 }
