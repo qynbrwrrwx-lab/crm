@@ -1,5 +1,9 @@
 // ================= INVOICES =================
+
 let editingQuoteId = null;
+
+let isEditingQuote = false;
+
 // LOAD SELECT DATA
 async function loadInvoiceData() {
 
@@ -733,11 +737,12 @@ ${invoice.totalTTC.toFixed(2)} €
         display:flex;
         gap:10px;
       "
-    >
+      >
 
       <button
+        id="editInvoiceBtn"
         class="primary-btn"
-        onclick="editQuote('${invoice._id}')"
+        onclick="enableInvoiceEdition()"
       >
         Modifier
       </button>
@@ -761,6 +766,16 @@ ${invoice.totalTTC.toFixed(2)} €
   </div>
 
 `;
+
+}
+
+function enableInvoiceEdition() {
+
+    isEditingQuote = true;
+
+    document.getElementById(
+        "editInvoiceBtn"
+    ).innerText = "Enregistrer";
 
 }
 
