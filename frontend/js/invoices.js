@@ -759,12 +759,23 @@ ${invoice.totalTTC.toFixed(2)} €
       >
 
       <button
-        id="editInvoiceBtn"
-        class="primary-btn"
-        onclick="enableInvoiceEdition()"
-      >
-        Modifier
-      </button>
+    id="editInvoiceBtn"
+    class="primary-btn"
+    onclick="
+        ${
+            isEditingQuote
+            ? `saveInvoiceEdition()`
+            : `enableInvoiceEdition()`
+        }
+    "
+>
+    ${
+        isEditingQuote
+        ? "Enregistrer"
+        : "Modifier"
+    }
+</button>
+
 
       <button
         class="secondary-btn"
@@ -795,6 +806,13 @@ function enableInvoiceEdition() {
     openInvoice(currentInvoiceId);
 
 }
+
+function saveInvoiceEdition(){
+
+    console.log("Sauvegarde du devis");
+
+}
+
 
 function closeInvoiceDetails() {
 
