@@ -676,13 +676,40 @@ async function openInvoice(id) {
 
   <div class="invoice-detail-card">
 
-    <h3>
-      ${
-        invoice.contactId?.companyName || `${invoice.contactId?.firstname || ""} ${invoice.contactId?.lastname || ""}`.trim()
-      }
-    </h3>
+  <div class="quote-header">
 
-    <hr>
+<div class="quote-header-left">
+
+<p>
+<strong>Client</strong><br>
+${
+    invoice.contactId?.companyName ||
+    `${invoice.contactId?.firstname || ""} ${invoice.contactId?.lastname || ""}`
+}
+</p>
+
+<p>
+<strong>Date du devis</strong><br>
+${new Date(invoice.createdAt).toLocaleDateString("fr-FR")}
+</p>
+
+</div>
+
+<div class="quote-header-right">
+
+<p>
+<strong>N°</strong><br>
+${invoice.invoiceNumber}
+</p>
+
+<p>
+<strong>Livraison</strong><br>
+À définir
+</p>
+
+</div>
+
+</div>
 
 <h4>Articles</h4>
 

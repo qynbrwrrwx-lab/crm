@@ -1588,3 +1588,35 @@ button:hover {
 
     text-align:center;
 }
+
+
+/* ================= DETAILS DEVIS ================= */
+
+.quote-header{
+
+    display:flex;
+    justify-content:space-between;
+    gap:40px;
+
+    margin-bottom:30px;
+    padding-bottom:20px;
+
+    border-bottom:1px solid rgba(255,255,255,.1);
+
+}
+
+.quote-header-left,
+.quote-header-right{
+
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+
+}
+
+.quote-header p{
+
+    margin:0;
+    line-height:1.5;
+
+}
