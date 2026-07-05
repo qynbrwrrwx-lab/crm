@@ -1542,12 +1542,15 @@ button:hover {
     display:grid;
 
     grid-template-columns:
-        1fr
+        minmax(260px,1fr)
+        80px
         110px
-        140px
-        140px;
+        110px
+        120px
+        40px;
 
     align-items:center;
+    gap:10px;
     padding:14px 0;
 }
 
@@ -1563,30 +1566,29 @@ button:hover {
     border-bottom:1px solid rgba(255,255,255,.08);
 }
 
-.quote-product-name{
+.quote-table-header div,
+.quote-product-row div{
 
-    text-align:left;
-    padding-left:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
-.quote-product-qty,
-.quote-product-price,
-.quote-product-total{
+.quote-product-name{
 
-    text-align:center;
+    justify-content:flex-start !important;
+    padding-left:8px;
 }
 
 .quote-table-header div:first-child{
 
-    text-align:left;
+    justify-content:flex-start;
     padding-left:8px;
 }
 
-.quote-table-header div:nth-child(2),
-.quote-table-header div:nth-child(3),
-.quote-table-header div:nth-child(4){
+.quote-product-delete{
 
-    text-align:center;
+    justify-content:center;
 }
 
 
