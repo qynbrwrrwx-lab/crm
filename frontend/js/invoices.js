@@ -734,8 +734,10 @@ ${invoice.invoiceNumber}
     <div>Produit</div>
     <div>Qté</div>
     <div>PU HT</div>
+    <div>PU TTC</div>
     <div>Remise</div>
-    <div>Total</div>
+    <div>Total HT</div>
+    <div>TOTAL TTC</div>
     <div></div>
 
 </div>
@@ -750,19 +752,19 @@ ${currentInvoice.products.map((item, itemIndex) => `
 
     <div class="quote-product-qty">
 
-${
-    isEditingQuote
-    ? `
-        <input
-            type="number"
-            min="1"
-            value="${item.quantity}"
-            class="edit-qty"
-            style="width:60px;text-align:center;"
-        >
-      `
-    : item.quantity
-}
+        ${
+            isEditingQuote
+            ? `
+                <input
+                    type="number"
+                    min="1"
+                    value="${item.quantity}"
+                    class="edit-qty"
+                    style="width:60px;text-align:center;"
+                >
+            `
+            : item.quantity
+        }
 
     </div>
 
@@ -770,32 +772,42 @@ ${
         ${item.productId.priceHT.toFixed(2)} €
     </div>
 
-    <div class="quote-product-discount">
-
-        —
-
+    <div class="quote-product-price-ttc">
+        ${(item.productId.priceHT * (1 + item.productId.tva / 100)).toFixed(2)} €
     </div>
 
-    <div class="quote-product-total">
+    <div class="quote-product-discount">
+      —
+    </div>
+
+    <div class="quote-product-total-ht">
         ${(item.productId.priceHT * item.quantity).toFixed(2)} €
+    </div>
+
+    <div class="quote-product-total-ttc">
+        ${(
+            item.productId.priceHT *
+            item.quantity *
+            (1 + item.productId.tva / 100)
+        ).toFixed(2)} €
     </div>
 
     <div class="quote-product-delete">
 
-  ${
-    isEditingQuote
-    ? `
-        <button
-            class="delete-line-btn"
-            onclick="removeInvoiceLine(${itemIndex})"
-        >
-            ✕
-        </button>
-      `
-    : ""
-}
+        ${
+            isEditingQuote
+            ? `
+                <button
+                    class="delete-line-btn"
+                    onclick="removeInvoiceLine(${itemIndex})"
+                >
+                    ✕
+                </button>
+            `
+            : ""
+        }
 
-</div>
+    </div>
 
 </div>
 

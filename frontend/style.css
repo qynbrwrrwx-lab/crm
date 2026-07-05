@@ -1542,16 +1542,29 @@ button:hover {
     display:grid;
 
     grid-template-columns:
-        minmax(260px,1fr)
-        80px
-        110px
-        110px
-        120px
-        40px;
+
+        minmax(220px,1fr)   /* Produit */
+
+        70px                /* Qté */
+
+        110px               /* PU HT */
+
+        110px               /* PU TTC */
+
+        90px                /* Remise */
+
+        120px               /* Total HT */
+
+        120px               /* Total TTC */
+
+        40px;               /* X */
 
     align-items:center;
+
     gap:10px;
+
     padding:14px 0;
+
 }
 
 .quote-table-header{
@@ -1572,23 +1585,33 @@ button:hover {
     display:flex;
     align-items:center;
     justify-content:center;
+
 }
 
 .quote-product-name{
 
     justify-content:flex-start !important;
     padding-left:8px;
+
+}
+
+.quote-product-qty,
+.quote-product-price,
+.quote-product-price-ttc,
+.quote-product-discount,
+.quote-product-total-ht,
+.quote-product-total-ttc,
+.quote-product-delete{
+
+    justify-content:center;
+
 }
 
 .quote-table-header div:first-child{
 
     justify-content:flex-start;
     padding-left:8px;
-}
 
-.quote-product-delete{
-
-    justify-content:center;
 }
 
 
