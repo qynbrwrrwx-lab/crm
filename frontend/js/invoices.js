@@ -798,7 +798,11 @@ function enableInvoiceEdition() {
 
 function closeInvoiceDetails() {
 
-  document.getElementById(
-    "invoiceDetailsModal"
-  ).style.display = "none";
+    isEditingQuote = false;
+    currentInvoiceId = null;
+
+    document.getElementById(
+        "invoiceDetailsModal"
+    ).style.display = "none";
+
 }
