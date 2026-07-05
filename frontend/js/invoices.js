@@ -718,7 +718,9 @@ ${invoice.invoiceNumber}
     <div>Produit</div>
     <div>Qté</div>
     <div>PU HT</div>
+    <div>Remise</div>
     <div>Total</div>
+    <div></div>
 
 </div>
 
@@ -740,23 +742,30 @@ ${
             min="1"
             value="${item.quantity}"
             class="edit-qty"
-            style="
-                width:60px;
-                text-align:center;
-            "
+            style="width:60px;text-align:center;"
         >
       `
     : item.quantity
 }
 
-</div>
+    </div>
 
     <div class="quote-product-price">
         ${item.productId.priceHT.toFixed(2)} €
     </div>
 
+    <div class="quote-product-discount">
+
+        —
+
+    </div>
+
     <div class="quote-product-total">
         ${(item.productId.priceHT * item.quantity).toFixed(2)} €
+    </div>
+
+    <div class="quote-product-delete">
+
     </div>
 
 </div>
