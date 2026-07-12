@@ -1016,8 +1016,6 @@ function recalculateInvoice(){
 
         });
 
-}
-
 currentInvoice.products.forEach(item => {
 
     item.unitHT =
@@ -1040,4 +1038,5 @@ currentInvoice.products.forEach(item => {
         item.quantity *
         (1 - remise / 100);
 
-});
+  });
+}
