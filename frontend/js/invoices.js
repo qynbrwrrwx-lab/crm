@@ -673,6 +673,8 @@ async function openInvoice(id) {
 
     currentInvoice = structuredClone(invoice);
 
+    recalculateInvoice(currentInvoice);
+
 }
 
   if (!invoice) return;
