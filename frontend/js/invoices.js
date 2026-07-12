@@ -830,61 +830,34 @@ ${
 
 <br>
 
-<div class="quote-summary">
-
-    <div class="summary-row">
-        <span>Sous-total HT</span>
-        <strong>${invoice.totalHT.toFixed(2)} €</strong>
-    </div>
-
-    <div class="summary-row">
-        <span>Remises</span>
-        <strong>0,00 €</strong>
-    </div>
-
-    <div class="summary-row">
-        <span>TVA</span>
-        <strong>${(invoice.totalTTC - invoice.totalHT).toFixed(2)} €</strong>
-    </div>
-
-    <div class="summary-total">
-
-        <span>TOTAL TTC</span>
-
-        <strong>${invoice.totalTTC.toFixed(2)} €</strong>
-
-    </div>
-
-</div>
-
+<div class="quote-footer">
 
     <div
       class="invoice-detail-actions"
-      style="
-        margin-top:30px;
+       style="
         display:flex;
         gap:10px;
+        align-items:flex-end;
       "
-      >
+    >
 
       <button
-    id="editInvoiceBtn"
-    class="primary-btn"
-    onclick="
+        id="editInvoiceBtn"
+        class="primary-btn"
+        onclick="
         ${
             isEditingQuote
             ? `saveInvoiceEdition()`
             : `enableInvoiceEdition()`
         }
-    "
->
-    ${
-        isEditingQuote
-        ? "Enregistrer"
-        : "Modifier"
-    }
-</button>
-
+        "
+      >
+        ${
+            isEditingQuote
+            ? "Enregistrer"
+            : "Modifier"
+        }
+      </button>
 
       <button
         class="secondary-btn"
@@ -902,7 +875,31 @@ ${
 
     </div>
 
-  </div>
+    <div class="quote-summary">
+
+        <div class="summary-row">
+            <span>Sous-total HT</span>
+            <strong>${invoice.totalHT.toFixed(2)} €</strong>
+        </div>
+
+        <div class="summary-row">
+            <span>Remises</span>
+            <strong>0,00 €</strong>
+        </div>
+
+        <div class="summary-row">
+            <span>TVA</span>
+            <strong>${(invoice.totalTTC - invoice.totalHT).toFixed(2)} €</strong>
+        </div>
+
+        <div class="summary-total">
+            <span>TOTAL TTC</span>
+            <strong>${invoice.totalTTC.toFixed(2)} €</strong>
+        </div>
+
+    </div>
+
+</div>
 
 `;
 
