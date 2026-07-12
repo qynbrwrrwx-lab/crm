@@ -1661,3 +1661,72 @@ button:hover {
     transform:scale(1.2);
     color:#ff2d2d;
 }
+
+/* ================= RÉCAPITULATIF DEVIS ================= */
+
+.quote-summary{
+
+    width:340px;
+
+    margin-left:auto;
+    margin-top:30px;
+
+    background:#182233;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:14px;
+
+    padding:18px 22px;
+
+}
+
+.summary-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:8px 0;
+
+    font-size:15px;
+
+    color:#d6d9e3;
+
+}
+
+.summary-row strong{
+
+    color:white;
+
+}
+
+.summary-total{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-top:15px;
+
+    padding-top:15px;
+
+    border-top:2px solid rgba(255,255,255,.15);
+
+    font-size:20px;
+
+    font-weight:700;
+
+}
+
+.summary-total strong{
+
+    color:#4ade80;
+
+    font-size:24px;
+
+}

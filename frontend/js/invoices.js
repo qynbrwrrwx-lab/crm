@@ -770,11 +770,11 @@ ${currentInvoice.products.map((item, itemIndex) => `
     </div>
 
     <div class="quote-product-price">
-        ${item.productId.priceHT.toFixed(2)} €
+        ${item.unitHT.toFixed(2)} €
     </div>
 
     <div class="quote-product-price-ttc">
-        ${(item.productId.priceHT * (1 + item.productId.tva / 100)).toFixed(2)} €
+        ${item.unitTTC.toFixed(2)} €
     </div>
 
     <div class="quote-product-discount">
@@ -798,15 +798,11 @@ ${
 </div>
 
     <div class="quote-product-total-ht">
-        ${(item.productId.priceHT * item.quantity).toFixed(2)} €
+        ${item.lineHT.toFixed(2)} €
     </div>
 
     <div class="quote-product-total-ttc">
-        ${(
-            item.productId.priceHT *
-            item.quantity *
-            (1 + item.productId.tva / 100)
-        ).toFixed(2)} €
+        ${item.lineTTC.toFixed(2)} €
     </div>
 
     <div class="quote-product-delete">
@@ -832,15 +828,32 @@ ${
 
 <br>
 
-<p>
-<strong>Total HT :</strong>
-${invoice.totalHT.toFixed(2)} €
-</p>
+<div class="quote-summary">
 
-<p>
-<strong>Total TTC :</strong>
-${invoice.totalTTC.toFixed(2)} €
-</p>
+    <div class="summary-row">
+        <span>Sous-total HT</span>
+        <strong>${invoice.totalHT.toFixed(2)} €</strong>
+    </div>
+
+    <div class="summary-row">
+        <span>Remises</span>
+        <strong>0,00 €</strong>
+    </div>
+
+    <div class="summary-row">
+        <span>TVA</span>
+        <strong>${(invoice.totalTTC - invoice.totalHT).toFixed(2)} €</strong>
+    </div>
+
+    <div class="summary-total">
+
+        <span>TOTAL TTC</span>
+
+        <strong>${invoice.totalTTC.toFixed(2)} €</strong>
+
+    </div>
+
+</div>
 
 
     <div
@@ -1005,10 +1018,24 @@ function recalculateInvoice(){
 
 currentInvoice.products.forEach(item => {
 
-    item.unitHT = Number(item.productId.priceHT);
+    item.unitHT =
+        Number(item.productId.priceHT);
 
     item.unitTTC =
         item.unitHT *
         (1 + Number(item.productId.tva || 20) / 100);
+
+    const remise =
+        Number(item.discount || 0);
+
+    item.lineHT =
+        item.unitHT *
+        item.quantity *
+        (1 - remise / 100);
+
+    item.lineTTC =
+        item.unitTTC *
+        item.quantity *
+        (1 - remise / 100);
 
 });
