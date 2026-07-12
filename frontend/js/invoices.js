@@ -777,8 +777,23 @@ ${currentInvoice.products.map((item, itemIndex) => `
     </div>
 
     <div class="quote-product-discount">
-      —
-    </div>
+
+${
+    isEditingQuote
+    ? `
+        <input
+            type="number"
+            min="0"
+            max="100"
+            value="${item.discount || 0}"
+            class="edit-discount"
+            style="width:65px;text-align:center;"
+        >
+      `
+    : `${item.discount || 0} %`
+}
+
+</div>
 
     <div class="quote-product-total-ht">
         ${(item.productId.priceHT * item.quantity).toFixed(2)} €
@@ -888,14 +903,21 @@ async function saveInvoiceEdition(){
 
     try{
 
-        document
-            .querySelectorAll(".edit-qty")
-            .forEach((input,index)=>{
+        const qtyInputs =
+    document.querySelectorAll(".edit-qty");
 
-                currentInvoice.products[index].quantity =
-                    Number(input.value);
+const discountInputs =
+    document.querySelectorAll(".edit-discount");
 
-            });
+qtyInputs.forEach((input, index) => {
+
+    currentInvoice.products[index].quantity =
+        Number(input.value);
+
+    currentInvoice.products[index].discount =
+        Number(discountInputs[index].value) || 0;
+
+});
 
         await apiFetch(
 
@@ -956,5 +978,24 @@ function removeInvoiceLine(index){
     isEditingQuote = true;
 
     openInvoice(currentInvoiceId);
+
+}
+
+function recalculateInvoice(){
+
+    currentInvoice.products.forEach((item, index)=>{
+
+        const qty =
+            Number(document.querySelectorAll(".edit-qty")[index].value);
+
+        const discount =
+            Number(document.querySelectorAll(".edit-discount")[index].value);
+
+        item.quantity = qty;
+        item.discount = discount;
+
+    });
+
+    openInvoice(currentInvoice._id);
 
 }
