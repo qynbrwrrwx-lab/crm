@@ -756,12 +756,13 @@ ${currentInvoice.products.map((item, itemIndex) => `
             isEditingQuote
             ? `
                 <input
-                    type="number"
-                    min="1"
-                    value="${item.quantity}"
-                    class="edit-qty"
-                    style="width:60px;text-align:center;"
-                >
+    type="number"
+    min="1"
+    value="${item.quantity}"
+    class="edit-qty"
+    oninput="recalculateInvoice()"
+    style="width:60px;text-align:center;"
+>
             `
             : item.quantity
         }
@@ -782,13 +783,14 @@ ${
     isEditingQuote
     ? `
         <input
-            type="number"
-            min="0"
-            max="100"
-            value="${item.discount || 0}"
-            class="edit-discount"
-            style="width:65px;text-align:center;"
-        >
+    type="number"
+    min="0"
+    max="100"
+    value="${item.discount || 0}"
+    class="edit-discount"
+    oninput="recalculateInvoice()"
+    style="width:65px;text-align:center;"
+>
       `
     : `${item.discount || 0} %`
 }
@@ -983,19 +985,30 @@ function removeInvoiceLine(index){
 
 function recalculateInvoice(){
 
-    currentInvoice.products.forEach((item, index)=>{
+    document.querySelectorAll(".edit-qty")
+        .forEach((input,index)=>{
 
-        const qty =
-            Number(document.querySelectorAll(".edit-qty")[index].value);
+            currentInvoice.products[index].quantity =
+                Number(input.value);
 
-        const discount =
-            Number(document.querySelectorAll(".edit-discount")[index].value);
+        });
 
-        item.quantity = qty;
-        item.discount = discount;
+    document.querySelectorAll(".edit-discount")
+        .forEach((input,index)=>{
 
-    });
+            currentInvoice.products[index].discount =
+                Number(input.value);
 
-    openInvoice(currentInvoice._id);
+        });
 
 }
+
+currentInvoice.products.forEach(item => {
+
+    item.unitHT = Number(item.productId.priceHT);
+
+    item.unitTTC =
+        item.unitHT *
+        (1 + Number(item.productId.tva || 20) / 100);
+
+});
