@@ -1039,4 +1039,6 @@ currentInvoice.products.forEach(item => {
         (1 - remise / 100);
 
   });
+
+    renderInvoiceModal(currentInvoice);
 }
