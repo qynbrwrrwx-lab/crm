@@ -1020,6 +1020,31 @@ function recalculateInvoice(){
 
         });
 
+        currentInvoice.products.forEach(item => {
+
+    item.unitHT =
+        Number(item.productId.priceHT);
+
+    item.unitTTC =
+        item.unitHT *
+        (1 + Number(item.productId.tva || 20) / 100);
+
+    const remise =
+        Number(item.discount || 0);
+
+    item.lineHT =
+        item.unitHT *
+        item.quantity *
+        (1 - remise / 100);
+
+    item.lineTTC =
+        item.unitTTC *
+        item.quantity *
+        (1 - remise / 100);
+
+  });
+
+
         let totalHT = 0;
         let totalTTC = 0;
 
@@ -1077,30 +1102,5 @@ if(totalTTCElement){
     totalTTCElement.textContent =
         `${currentInvoice.totalTTC.toFixed(2)} €`;
 
-}
-
-currentInvoice.products.forEach(item => {
-
-    item.unitHT =
-        Number(item.productId.priceHT);
-
-    item.unitTTC =
-        item.unitHT *
-        (1 + Number(item.productId.tva || 20) / 100);
-
-    const remise =
-        Number(item.discount || 0);
-
-    item.lineHT =
-        item.unitHT *
-        item.quantity *
-        (1 - remise / 100);
-
-    item.lineTTC =
-        item.unitTTC *
-        item.quantity *
-        (1 - remise / 100);
-
-  });
-  
+  }
 }
