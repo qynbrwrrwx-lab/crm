@@ -1033,16 +1033,28 @@ async function openAddProductModal(){
             ${products.map(product => `
 
                 <div
-                    class="product-picker-row"
-                >
+    class="product-picker-row"
+    onclick="addProductToInvoice('${product._id}')"
+>
 
-                    <strong>${product.name}</strong>
+    <div>
 
-                    <span>
-                        ${Number(product.priceHT).toFixed(2)} € HT
-                    </span>
+        <strong>${product.name}</strong>
 
-                </div>
+        <div class="erp-items">
+            ${Number(product.priceHT).toFixed(2)} € HT
+        </div>
+
+    </div>
+
+    <button
+        class="primary-btn"
+        type="button"
+    >
+        Ajouter
+    </button>
+
+</div>
 
             `).join("")}
 
@@ -1054,6 +1066,36 @@ async function openAddProductModal(){
 
 }
 
+function addProductToInvoice(productId){
+
+    const product = products.find(
+        p => p._id === productId
+    );
+
+    if(!product) return;
+
+    currentInvoice.products.push({
+
+        productId: product,
+
+        quantity: 1,
+
+        discount: 0,
+
+        unitHT: Number(product.priceHT),
+
+        unitTTC:
+            Number(product.priceHT) *
+            (1 + Number(product.tva || 20) / 100)
+
+    });
+
+    document.getElementById("addProductModal").style.display = "none";
+
+    recalculateInvoice();
+    renderInvoiceModal(currentInvoice);
+
+}
 
 function closeAddProductModal(){
 

@@ -1662,6 +1662,35 @@ button:hover {
     color:#ff2d2d;
 }
 
+/* ================= FENÊTRE AJOUT DEVIS ================= */
+
+.product-picker-row{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:15px;
+
+    margin-bottom:10px;
+
+    border-radius:12px;
+
+    background:#1b2436;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.product-picker-row:hover{
+
+    background:#24334f;
+
+    transform:translateY(-2px);
+
+}
+
 /* ================= RÉCAPITULATIF DEVIS ================= */
 
 .quote-summary{
