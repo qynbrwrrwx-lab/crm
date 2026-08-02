@@ -799,11 +799,11 @@ ${
 
 </div>
 
-    <div class="quote-product-total-ht">
+    <div class="quote-product-total line-total-ht">
         ${item.lineHT.toFixed(2)} €
     </div>
 
-    <div class="quote-product-total-ttc">
+    <div class="quote-product-total-ttc line-total-ttc">
         ${item.lineTTC.toFixed(2)} €
     </div>
 
@@ -879,7 +879,10 @@ ${
 
         <div class="summary-row">
             <span>Sous-total HT</span>
-            <strong>${invoice.totalHT.toFixed(2)} €</strong>
+            <strong id="summaryTotalHT">
+           ${currentInvoice.totalHT.toFixed(2)} €
+            </strong>
+
         </div>
 
         <div class="summary-row">
@@ -889,12 +892,16 @@ ${
 
         <div class="summary-row">
             <span>TVA</span>
-            <strong>${(invoice.totalTTC - invoice.totalHT).toFixed(2)} €</strong>
+            <strong id="summaryTVA">
+            ${(currentInvoice.totalTTC - currentInvoice.totalHT).toFixed(2)} €
+            </strong>
         </div>
 
         <div class="summary-total">
             <span>TOTAL TTC</span>
-            <strong>${invoice.totalTTC.toFixed(2)} €</strong>
+            <strong id="summaryTotalTTC">
+            ${currentInvoice.totalTTC.toFixed(2)} €
+            </strong>
         </div>
 
     </div>
@@ -1012,6 +1019,35 @@ function recalculateInvoice(){
                 Number(input.value);
 
         });
+
+        let totalHT = 0;
+        let totalTTC = 0;
+
+  currentInvoice.products.forEach(item => {
+
+        totalHT += item.lineHT;
+        totalTTC += item.lineTTC;
+
+        });
+
+currentInvoice.totalHT = totalHT;
+currentInvoice.totalTTC = totalTTC;
+
+        document.querySelectorAll(".line-total-ht")
+    .forEach((cell, index) => {
+
+        cell.textContent =
+            `${currentInvoice.products[index].lineHT.toFixed(2)} €`;
+
+    });
+
+document.querySelectorAll(".line-total-ttc")
+    .forEach((cell, index) => {
+
+        cell.textContent =
+            `${currentInvoice.products[index].lineTTC.toFixed(2)} €`;
+
+    });
 
 currentInvoice.products.forEach(item => {
 
