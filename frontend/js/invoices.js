@@ -1108,8 +1108,7 @@ if(existing){
     document.getElementById("addProductModal").style.display = "none";
 
     recalculateInvoice();
-    openInvoice(currentInvoice._id);
-
+    
 }
 
 function closeAddProductModal(){
