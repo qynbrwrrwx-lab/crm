@@ -729,6 +729,23 @@ ${invoice.invoiceNumber}
 
 </div>
 
+${
+    isEditingQuote
+    ? `
+        <div class="quote-toolbar">
+
+            <button
+                class="primary-btn"
+                onclick="openAddProductModal()"
+            >
+                ➕ Ajouter un produit
+            </button>
+
+        </div>
+      `
+    : ""
+}
+
 <h4>Articles</h4>
 
 <div class="quote-table-header">
@@ -989,6 +1006,19 @@ function closeInvoiceDetails() {
     document.getElementById(
         "invoiceDetailsModal"
     ).style.display = "none";
+
+}
+
+async function openAddProductModal(){
+
+    document.getElementById("addProductModal").style.display = "flex";
+
+}
+
+
+function closeAddProductModal(){
+
+    document.getElementById("addProductModal").style.display = "none";
 
 }
 
