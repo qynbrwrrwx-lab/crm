@@ -1011,6 +1011,45 @@ function closeInvoiceDetails() {
 
 async function openAddProductModal(){
 
+    const products =
+        await apiFetch("/api/products");
+
+    document.getElementById("addProductBody").innerHTML = `
+
+        <input
+            id="productSearch"
+            type="text"
+            placeholder="Rechercher un produit..."
+            style="
+                width:100%;
+                padding:12px;
+                margin-bottom:20px;
+                border-radius:10px;
+            "
+        >
+
+        <div id="productList">
+
+            ${products.map(product => `
+
+                <div
+                    class="product-picker-row"
+                >
+
+                    <strong>${product.name}</strong>
+
+                    <span>
+                        ${Number(product.priceHT).toFixed(2)} € HT
+                    </span>
+
+                </div>
+
+            `).join("")}
+
+        </div>
+
+    `;
+
     document.getElementById("addProductModal").style.display = "flex";
 
 }
