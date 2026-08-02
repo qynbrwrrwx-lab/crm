@@ -1049,6 +1049,36 @@ document.querySelectorAll(".line-total-ttc")
 
     });
 
+    const totalHTElement =
+    document.getElementById("summaryTotalHT");
+
+const totalTVAElement =
+    document.getElementById("summaryTVA");
+
+const totalTTCElement =
+    document.getElementById("summaryTotalTTC");
+
+if(totalHTElement){
+
+    totalHTElement.textContent =
+        `${currentInvoice.totalHT.toFixed(2)} €`;
+
+}
+
+if(totalTVAElement){
+
+    totalTVAElement.textContent =
+        `${(currentInvoice.totalTTC - currentInvoice.totalHT).toFixed(2)} €`;
+
+}
+
+if(totalTTCElement){
+
+    totalTTCElement.textContent =
+        `${currentInvoice.totalTTC.toFixed(2)} €`;
+
+}
+
 currentInvoice.products.forEach(item => {
 
     item.unitHT =
