@@ -4,6 +4,7 @@ let editingQuoteId = null;
 let isEditingQuote = false;
 let currentInvoiceId = null;
 let currentInvoice = null;
+let availableProducts = [];
 
 // LOAD SELECT DATA
 async function loadInvoiceData() {
@@ -1011,7 +1012,7 @@ function closeInvoiceDetails() {
 
 async function openAddProductModal(){
 
-    const products =
+    availableProducts =
         await apiFetch("/api/products");
 
     document.getElementById("addProductBody").innerHTML = `
@@ -1030,7 +1031,7 @@ async function openAddProductModal(){
 
         <div id="productList">
 
-            ${products.map(product => `
+            ${availableProducts.map(product => `
 
                 <div
     class="product-picker-row"
@@ -1068,7 +1069,7 @@ async function openAddProductModal(){
 
 function addProductToInvoice(productId){
 
-    const product = products.find(
+    const product = availableProducts.find(
         p => p._id === productId
     );
 
