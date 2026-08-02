@@ -1075,6 +1075,18 @@ function addProductToInvoice(productId){
 
     if(!product) return;
 
+    const existing = currentInvoice.products.find(
+
+    item => item.productId._id === productId
+
+);
+
+if(existing){
+
+    existing.quantity += 1;
+
+}else{
+
     currentInvoice.products.push({
 
         productId: product,
@@ -1091,10 +1103,12 @@ function addProductToInvoice(productId){
 
     });
 
+}
+
     document.getElementById("addProductModal").style.display = "none";
 
     recalculateInvoice();
-    renderInvoiceModal(currentInvoice);
+    openInvoice(currentInvoice._id);
 
 }
 
