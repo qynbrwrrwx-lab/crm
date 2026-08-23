@@ -107,12 +107,7 @@ router.post("/", auth, async (req, res) => {
         quantity: item.quantity,
         discount: item.discount || 0
       });
-
-      // UPDATE STOCK
-      product.stock -= item.quantity;
-
-      await product.save();
-    }
+     }
 
     const year =
       new Date().getFullYear();
@@ -271,6 +266,167 @@ router.put(
         error: "Erreur validation devis"
       });
     }
+  }
+);
+
+// ================= CONVERT QUOTE TO ORDER =================
+
+router.post(
+  "/convert-to-order/:id",
+  auth,
+  async (req, res) => {
+
+    try {
+
+      // Récupérer le devis
+      const quote =
+        await Invoice.findById(req.params.id);
+
+      if (!quote) {
+
+        return res.status(404).json({
+          error: "Devis introuvable"
+        });
+
+      }
+
+      // Vérifier que c'est bien un devis
+      if (quote.type !== "quote") {
+
+        return res.status(400).json({
+          error: "Ce document n'est pas un devis"
+        });
+
+      }
+
+      // Vérifier que le devis est accepté
+      if (quote.status !== "accepted") {
+
+        return res.status(400).json({
+          error: "Le devis doit être accepté avant de pouvoir être transformé en commande"
+        });
+
+      }
+
+      // Empêcher une deuxième conversion
+      if (quote.convertedToOrderId) {
+
+        return res.status(400).json({
+          error: "Ce devis a déjà été transformé en commande"
+        });
+
+      }
+
+      // ================= STOCK =================
+
+      for (const item of quote.products) {
+
+        const product =
+          await Product.findById(item.productId);
+
+        if (!product) {
+
+          return res.status(404).json({
+            error: "Produit introuvable"
+          });
+
+        }
+
+        if (
+          Number(product.stock) <
+          Number(item.quantity)
+        ) {
+
+          return res.status(400).json({
+            error:
+              `Stock insuffisant pour le produit ${product.name}`
+          });
+
+        }
+
+      }
+
+      // ================= NUMÉRO COMMANDE =================
+
+      const year =
+        new Date().getFullYear();
+
+      const count =
+        await Invoice.countDocuments({
+          type: "order",
+          createdAt: {
+            $gte: new Date(`${year}-01-01`),
+            $lt: new Date(`${year + 1}-01-01`)
+          }
+        });
+
+      const orderNumber =
+        `CMD-${year}-${String(count + 1).padStart(5, "0")}`;
+
+      // ================= CRÉATION COMMANDE =================
+
+      const order =
+        await Invoice.create({
+
+          invoiceNumber: orderNumber,
+
+          type: "order",
+
+          status: "draft",
+
+          contactId: quote.contactId,
+
+          sourceQuoteId: quote._id,
+
+          products: quote.products.map(item => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            discount: item.discount || 0
+          })),
+
+          totalHT: quote.totalHT,
+
+          totalTTC: quote.totalTTC,
+
+          paymentMethod: "pending",
+
+          paymentStatus: "pending"
+
+        });
+
+      // ================= MISE À JOUR STOCK =================
+
+      for (const item of quote.products) {
+
+        const product =
+          await Product.findById(item.productId);
+
+        product.stock -=
+          Number(item.quantity);
+
+        await product.save();
+
+      }
+
+      // ================= LIEN DEPUIS LE DEVIS =================
+
+      quote.convertedToOrderId =
+        order._id;
+
+      await quote.save();
+
+      res.json(order);
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: "Erreur transformation du devis en commande"
+      });
+
+    }
+
   }
 );
 

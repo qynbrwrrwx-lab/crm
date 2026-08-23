@@ -25,6 +25,18 @@ const invoiceSchema = new mongoose.Schema({
     ref: "Contact"
   },
 
+  sourceQuoteId: {
+    type: mongoose.Schema.Types.ObjectId,
+   ref: "Invoice",
+    default: null
+  },
+
+  convertedToOrderId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Invoice",
+    default: null
+  },
+
   products: [{
   productId: {
     type: mongoose.Schema.Types.ObjectId,
