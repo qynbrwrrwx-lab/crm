@@ -871,6 +871,21 @@ ${
     : ""
 }
 
+    ${
+    invoice.type === "quote" &&
+    invoice.status === "accepted" &&
+    !invoice.convertedToOrderId
+    ? `
+      <button
+        class="primary-btn"
+        onclick="convertQuoteToOrder('${invoice._id}')"
+      >
+        Transformer en commande
+      </button>
+    `
+    : ""
+}
+
       <button
         id="editInvoiceBtn"
         class="primary-btn"
