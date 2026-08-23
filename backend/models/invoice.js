@@ -14,6 +14,12 @@ const invoiceSchema = new mongoose.Schema({
     default: "draft"
   },
 
+    sourceDocumentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Invoice",
+    default: null
+  },
+
   contactId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Contact"

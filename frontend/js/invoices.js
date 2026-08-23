@@ -669,16 +669,14 @@ async function openInvoice(id) {
     await apiFetch("/api/invoices");
 
   const invoice =
-    invoices.find(i => i._id === id);
-    if(!currentInvoice){
+   invoices.find(i => i._id === id);
 
-    currentInvoice = structuredClone(invoice);
+if (!invoice) return;
 
-    recalculateInvoice(currentInvoice);
+currentInvoice =
+    structuredClone(invoice);
 
-}
-
-  if (!invoice) return;
+recalculateInvoice();
 
   document.getElementById(
     "invoiceDetailsModal"
