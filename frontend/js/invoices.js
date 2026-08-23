@@ -560,6 +560,43 @@ async function acceptQuote(id) {
   }
 }
 
+// ================= CONVERT QUOTE TO ORDER =================
+
+async function convertQuoteToOrder(id) {
+
+  try {
+
+    const order =
+      await apiFetch(
+        `/api/invoices/convert-to-order/${id}`,
+        {
+          method: "POST"
+        }
+      );
+
+    showToast(
+      `Commande ${order.invoiceNumber} créée ✅`
+    );
+
+    // Actualiser la liste des documents
+    await loadInvoices();
+
+    // Fermer la fiche actuelle
+    closeInvoiceDetails();
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast(
+      err.message ||
+      "Erreur lors de la transformation en commande"
+    );
+
+  }
+
+}
+
 function viewQuote(id) {
 
   window.open(
