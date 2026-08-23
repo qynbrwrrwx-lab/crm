@@ -857,6 +857,20 @@ ${
       "
     >
 
+    ${
+    invoice.type === "quote" &&
+    invoice.status !== "accepted"
+    ? `
+      <button
+        class="primary-btn"
+        onclick="acceptQuote('${invoice._id}')"
+      >
+        Accepter le devis
+      </button>
+    `
+    : ""
+}
+
       <button
         id="editInvoiceBtn"
         class="primary-btn"
