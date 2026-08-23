@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+<script src="https://unpkg.com/lucide@latest"></script>
 
 <head>
 
@@ -204,44 +205,62 @@
     />
   </div>
 
-  <nav>
-
-    <button
-      onclick="showSection('dashboard', event)"
-      class="active"
-    >
-      Tableau de bord
-    </button>
-
-    <button
-      onclick="showSection('contacts', event)"
-    >
-      Contacts
-    </button>
-
-    <button
-      onclick="showSection('products', event)"
-    >
-      Stock
-    </button>
-
-    <button
-    onclick="showSection('quotesSection', event)"
-    >
-      Devis
-    </button>
+ <nav>
 
   <button
-      onclick="showSection('company', event)"
-    >
-      Entreprise
-    </button>
+    onclick="showSection('dashboard', event)"
+    class="active"
+  >
+    <i data-lucide="layout-dashboard"></i>
+    <span>Tableau de bord</span>
+  </button>
 
-    <button
-      onclick="showSection('settings', event)"
-    >
-      Paramètres
-    </button>
+  <button
+    onclick="showSection('contacts', event)"
+  >
+    <i data-lucide="users"></i>
+    <span>Contacts</span>
+  </button>
+
+  <button
+    onclick="showSection('products', event)"
+  >
+    <i data-lucide="package"></i>
+    <span>Produits</span>
+  </button>
+
+  <button
+    onclick="showSection('quotesSection', event)"
+  >
+    <i data-lucide="file-text"></i>
+    <span>Devis</span>
+  </button>
+
+  <div class="sidebar-separator"></div>
+
+  <button
+    onclick="showSection('company', event)"
+  >
+    <i data-lucide="building-2"></i>
+    <span>Mon entreprise</span>
+  </button>
+
+  <button
+    onclick="showSection('settings', event)"
+  >
+    <i data-lucide="settings"></i>
+    <span>Paramètres</span>
+  </button>
+
+</nav>
+
+<button
+  onclick="logout()"
+  class="logout"
+>
+  <i data-lucide="log-out"></i>
+  <span>Déconnexion</span>
+</button>
 
 </nav>
 
@@ -1408,6 +1427,10 @@ async function requestReset() {
     </div>
 
 </div>
+
+<script>
+  lucide.createIcons();
+</script>
 
 </body>
 </html>

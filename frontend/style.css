@@ -1759,3 +1759,26 @@ button:hover {
     font-size:20px;
 
 }
+
+/* ================= SIDEBAR ================= */
+
+.sidebar nav button,
+.sidebar .logout {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar nav button svg,
+.sidebar .logout svg {
+    width: 19px;
+    height: 19px;
+    stroke-width: 1.8;
+    flex-shrink: 0;
+}
+
+.sidebar-separator {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+    margin: 18px 8px;
+}
