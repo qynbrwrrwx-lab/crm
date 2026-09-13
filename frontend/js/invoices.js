@@ -1097,7 +1097,8 @@ ${
 }
 
     ${
-    invoice.type === "order"
+    invoice.type === "order" &&
+    !invoice.convertedToInvoiceId
     ? `
       <button
         class="primary-btn"

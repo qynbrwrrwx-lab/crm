@@ -488,21 +488,37 @@ router.post(
 
       }
 
-      // Vérifier si une facture existe déjà
-      const existingInvoice =
-        await Invoice.findOne({
-          type: "invoice",
-          sourceOrderId: order._id
-        });
+      // Vérifier si la commande a déjà été facturée
 
-      if (existingInvoice) {
+if (order.convertedToInvoiceId) {
 
-        return res.status(400).json({
-          error:
-            "Cette commande a déjà été transformée en facture"
-        });
+  return res.status(400).json({
+    error:
+      "Cette commande a déjà été transformée en facture"
+  });
 
-      }
+}
+
+const existingInvoice =
+  await Invoice.findOne({
+    type: "invoice",
+    sourceOrderId: order._id
+  });
+
+if (existingInvoice) {
+
+  // Réparer le lien si nécessaire
+  order.convertedToInvoiceId =
+    existingInvoice._id;
+
+  await order.save();
+
+  return res.status(400).json({
+    error:
+      "Cette commande a déjà été transformée en facture"
+  });
+
+}
 
       const year =
         new Date().getFullYear();
@@ -551,6 +567,11 @@ router.post(
           paymentStatus: "pending"
 
         });
+
+    order.convertedToInvoiceId =
+  invoice._id;
+
+await order.save();
 
       res.json(invoice);
 
