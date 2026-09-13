@@ -386,27 +386,75 @@ async function createInvoice() {
 // MARK PAID
 async function markInvoicePaid(id) {
 
-  try {
-
-   await apiFetch(
-  `/api/invoices/pay/${id}`,
-      {
-        method: "PUT"
-      }
+  const paymentMethod =
+    prompt(
+      "Moyen de paiement :\n\n" +
+      "1 - Espèces\n" +
+      "2 - Carte bancaire\n" +
+      "3 - Chèque\n" +
+      "4 - Virement bancaire\n\n" +
+      "Entrez le numéro correspondant :"
     );
 
-    await loadInvoices();
+  const methods = {
+    "1": "Espèces",
+    "2": "Carte bancaire",
+    "3": "Chèque",
+    "4": "Virement bancaire"
+  };
+
+  const selectedMethod =
+    methods[paymentMethod];
+
+  if (!selectedMethod) {
 
     showToast(
-      "Facture payée ✅"
+      "Moyen de paiement invalide"
+    );
+
+    return;
+  }
+
+  try {
+
+    const updatedInvoice =
+      await apiFetch(
+        `/api/invoices/pay/${id}`,
+        {
+          method: "PUT",
+
+          body: JSON.stringify({
+            paymentMethod: selectedMethod
+          })
+        }
+      );
+
+    // Mettre à jour immédiatement
+    // la facture actuellement ouverte
+    currentInvoice =
+      structuredClone(updatedInvoice);
+
+    // Recharger la liste
+    await loadInvoices();
+
+    // Réafficher immédiatement la fiche
+    await openInvoice(id);
+
+    showToast(
+      `Facture payée · ${selectedMethod} ✅`
     );
 
   } catch (err) {
 
     console.error(err);
 
-    showToast(err.message);
+    showToast(
+      err.message ||
+      "Erreur lors du paiement"
+    );
+
   }
+
 }
 
 // DELETE INVOICE

@@ -175,6 +175,10 @@ router.put(
 
     try {
 
+      const {
+        paymentMethod
+      } = req.body;
+
       const invoice =
         await Invoice.findById(
           req.params.id
@@ -187,8 +191,32 @@ router.put(
         });
       }
 
+      if (invoice.type !== "invoice") {
+
+        return res.status(400).json({
+          error: "Ce document n'est pas une facture"
+        });
+      }
+
+      if (invoice.paymentStatus === "paid") {
+
+        return res.status(400).json({
+          error: "Cette facture est déjà payée"
+        });
+      }
+
+      if (!paymentMethod) {
+
+        return res.status(400).json({
+          error: "Le moyen de paiement est obligatoire"
+        });
+      }
+
       invoice.paymentStatus =
         "paid";
+
+      invoice.paymentMethod =
+        paymentMethod;
 
       await invoice.save();
 
@@ -201,7 +229,9 @@ router.put(
       res.status(500).json({
         error: "Erreur paiement"
       });
+
     }
+
   }
 );
 
