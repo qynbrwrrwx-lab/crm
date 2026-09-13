@@ -229,11 +229,25 @@
     <span>Produits</span>
   </button>
 
-  <button
+    <button
     onclick="showSection('quotesSection', event)"
   >
     <i data-lucide="file-text"></i>
     <span>Devis</span>
+  </button>
+
+  <button
+    onclick="showSection('ordersSection', event)"
+  >
+    <i data-lucide="clipboard-list"></i>
+    <span>Commandes</span>
+  </button>
+
+  <button
+    onclick="showSection('invoicesSection', event)"
+  >
+    <i data-lucide="file-check"></i>
+    <span>Factures</span>
   </button>
 
   <div class="sidebar-separator"></div>
@@ -495,101 +509,40 @@
 
         <!-- COMMANDES / DEVIS / FACTURES -->
 
+
+        <!-- ================= COMMANDES ================= -->
+
 <div
   id="ordersSection"
   class="section"
->
-
-  
-
-  <!-- CREATE ORDER -->
-
-  <div
-    id="createOrder"
-    class="order-tab active"
   >
 
-    <div class="grid">
+  <div class="card">
 
-      <div class="card">
+    <div class="section-header">
 
-        <h2>
-          Nouvelle commande
-        </h2>
+      <div>
+        <h2>Commandes</h2>
 
-        <div class="invoice-grid">
-
-          <!-- CONTACT -->
-
-          <select id="invoiceContact">
-
-            <option value="">
-              Sélectionner un contact
-            </option>
-
-          </select>
-
-          <!-- PRODUCT -->
-
-          <select id="invoiceProduct">
-
-            <option value="">
-              Sélectionner un produit
-            </option>
-
-          </select>
-
-          <!-- QUANTITY -->
-
-          <input
-            id="invoiceQuantity"
-            type="number"
-            min="1"
-            value="1"
-            placeholder="Quantité"
-          />
-
-          <!-- PAYMENT -->
-
-          <select
-            id="paymentMethod"
-            class="invoice-grid-full"
-          >
-
-            <option value="transfer">
-              Virement
-            </option>
-
-            <option value="cb">
-              Carte bancaire
-            </option>
-
-            <option value="cash">
-              Espèces
-            </option>
-
-            <option value="check">
-              Chèque
-            </option>
-
-          </select>
-
-        </div>
-
-        <button
-          class="primary-btn"
-
-        >
-          Créer commande
-        </button>
-
-        </div>
-
+        <p class="company-subtitle">
+          Suivi des commandes créées à partir de vos devis.
+        </p>
       </div>
+
+      <span id="ordersCount">
+        0 commande
+      </span>
 
     </div>
 
+    <div
+      id="ordersContainer"
+      class="erp-list"
+    ></div>
+
   </div>
+
+</div>
 
   <!-- QUOTES -->
 

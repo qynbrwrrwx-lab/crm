@@ -430,6 +430,114 @@ router.post(
   }
 );
 
+// ================= CONVERT ORDER TO INVOICE =================
+
+router.post(
+  "/convert-to-invoice/:id",
+  auth,
+  async (req, res) => {
+
+    try {
+
+      const order =
+        await Invoice.findById(req.params.id);
+
+      if (!order) {
+
+        return res.status(404).json({
+          error: "Commande introuvable"
+        });
+
+      }
+
+      if (order.type !== "order") {
+
+        return res.status(400).json({
+          error: "Ce document n'est pas une commande"
+        });
+
+      }
+
+      // Vérifier si une facture existe déjà
+      const existingInvoice =
+        await Invoice.findOne({
+          type: "invoice",
+          sourceOrderId: order._id
+        });
+
+      if (existingInvoice) {
+
+        return res.status(400).json({
+          error:
+            "Cette commande a déjà été transformée en facture"
+        });
+
+      }
+
+      const year =
+        new Date().getFullYear();
+
+      const count =
+        await Invoice.countDocuments({
+          type: "invoice",
+          createdAt: {
+            $gte: new Date(`${year}-01-01`),
+            $lt: new Date(`${year + 1}-01-01`)
+          }
+        });
+
+      const invoiceNumber =
+        `FAC-${year}-${String(count + 1).padStart(5, "0")}`;
+
+      const invoice =
+        await Invoice.create({
+
+          invoiceNumber,
+
+          type: "invoice",
+
+          status: "draft",
+
+          contactId: order.contactId,
+
+          sourceOrderId: order._id,
+
+          products: order.products.map(item => ({
+
+            productId: item.productId,
+
+            quantity: item.quantity,
+
+            discount: item.discount || 0
+
+          })),
+
+          totalHT: order.totalHT,
+
+          totalTTC: order.totalTTC,
+
+          paymentMethod: "pending",
+
+          paymentStatus: "pending"
+
+        });
+
+      res.json(invoice);
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error:
+          "Erreur transformation de la commande en facture"
+      });
+
+    }
+
+  }
+);
+
 // ================= PDF =================
 
 router.get(

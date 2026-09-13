@@ -31,6 +31,12 @@ const invoiceSchema = new mongoose.Schema({
     default: null
   },
 
+  SourceOrderId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Invoice",
+    default: null
+  },
+
   convertedToOrderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Invoice",

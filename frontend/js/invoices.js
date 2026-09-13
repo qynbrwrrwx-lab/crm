@@ -83,134 +83,233 @@ function renderInvoices(invoices) {
   const acceptedQuotesList =
     document.getElementById("acceptedQuotesContainer");
 
+  const ordersContainer =
+    document.getElementById("ordersContainer");
+
+
+  // Vérifier que les conteneurs principaux existent
+
   if (
-  !invoiceList ||
-  !quotesList ||
-  !acceptedQuotesList
-) return;
+    !invoiceList ||
+    !quotesList ||
+    !acceptedQuotesList
+  ) {
+    return;
+  }
+
+
+  // Vider les listes
 
   invoiceList.innerHTML = "";
+
   quotesList.innerHTML = "";
+
   acceptedQuotesList.innerHTML = "";
 
-const quotes =
-  invoices.filter(
-    i =>
-      i.type === "quote" &&
-      i.status !== "accepted"
-  );
+  if (ordersContainer) {
+    ordersContainer.innerHTML = "";
+  }
 
-const acceptedQuotes =
-  invoices.filter(
-    i =>
-      i.type === "quote" &&
-      i.status === "accepted"
-  );
 
-document.getElementById(
-  "quotesCount"
-).textContent =
-  `${quotes.length} devis`;
+  // ================= DEVIS =================
 
-document.getElementById(
-  "acceptedQuotesCount"
-).textContent =
-  `${acceptedQuotes.length} devis`;
+  const quotes =
+    invoices.filter(
+      i =>
+        i.type === "quote" &&
+        i.status !== "accepted"
+    );
 
-  invoices.forEach(invoice => {
 
-  const date = new Date(invoice.createdAt);
+  // ================= DEVIS ACCEPTÉS =================
 
-const day =
-  String(date.getDate()).padStart(2, "0");
+  const acceptedQuotes =
+    invoices.filter(
+      i =>
+        i.type === "quote" &&
+        i.status === "accepted"
+    );
 
-const month =
-  date.toLocaleString(
-    "fr-FR",
-    { month: "short" }
-  );
 
-const customerName =
-  invoice.contactId?.companyName ||
-  `${invoice.contactId?.firstname || ""}
-   ${invoice.contactId?.lastname || ""}`;
+  // ================= COMMANDES =================
 
-console.log(invoice);
+  const orders =
+    invoices.filter(
+      i =>
+        i.type === "order"
+    );
 
-const articlesCount =
-  invoice.products?.length || 0;
 
-const html = `
+  // ================= COMPTEURS =================
 
-<div
-  class="erp-row"
-  onclick="openInvoice('${invoice._id}')"
->
+  const quotesCount =
+    document.getElementById("quotesCount");
 
-  <div class="erp-date">
+  if (quotesCount) {
 
-    <div class="erp-day">
-      ${day}
-    </div>
-
-    <div class="erp-month">
-      ${month}
-    </div>
-
-  </div>
-
-  <div class="erp-customer">
-
-    <div class="erp-number">
-      ${invoice.invoiceNumber}
-    </div>
-
-    <div class="erp-name">
-      ${customerName}
-    </div>
-
-    <div class="erp-items">
-      ${articlesCount} articles${articlesCount > 1 ? "s" : ""}
-    </div>
-
-  </div>
-
-  <div class="erp-amounts">
-
-    <div>
-      ${Number(invoice.totalTTC).toFixed(2)} €
-      TTC
-    </div>
-
-    <small>
-      ${Number(invoice.totalHT).toFixed(2)} €
-      HT
-    </small>
-
-  </div>
-
-</div>
-
-`;
-   
-   if (invoice.type === "quote") {
-
-  if (invoice.status === "accepted") {
-
-    acceptedQuotesList.innerHTML += html;
-
-  } else {
-
-    quotesList.innerHTML += html;
+    quotesCount.textContent =
+      `${quotes.length} devis`;
 
   }
 
-} else {
 
-  invoiceList.innerHTML += html;
+  const acceptedQuotesCount =
+    document.getElementById(
+      "acceptedQuotesCount"
+    );
+
+  if (acceptedQuotesCount) {
+
+    acceptedQuotesCount.textContent =
+      `${acceptedQuotes.length} devis`;
+
+  }
+
+
+  const ordersCount =
+    document.getElementById("ordersCount");
+
+  if (ordersCount) {
+
+    ordersCount.textContent =
+      `${orders.length} commande${
+        orders.length > 1 ? "s" : ""
+      }`;
+
+  }
+
+
+  // ================= AFFICHAGE =================
+
+  invoices.forEach(invoice => {
+
+    const date =
+      new Date(invoice.createdAt);
+
+
+    const day =
+      String(
+        date.getDate()
+      ).padStart(2, "0");
+
+
+    const month =
+      date.toLocaleString(
+        "fr-FR",
+        {
+          month: "short"
+        }
+      );
+
+
+    const customerName =
+      invoice.contactId?.companyName ||
+      `${invoice.contactId?.firstname || ""}
+       ${invoice.contactId?.lastname || ""}`;
+
+    const articlesCount =
+      invoice.products?.length || 0;
+
+
+    const html = `
+
+      <div
+        class="erp-row"
+        onclick="openInvoice('${invoice._id}')"
+      >
+
+        <div class="erp-date">
+
+          <div class="erp-day">
+            ${day}
+          </div>
+
+          <div class="erp-month">
+            ${month}
+          </div>
+
+        </div>
+
+
+        <div class="erp-customer">
+
+          <div class="erp-number">
+            ${invoice.invoiceNumber}
+          </div>
+
+          <div class="erp-name">
+            ${customerName}
+          </div>
+
+          <div class="erp-items">
+            ${articlesCount}
+            article${articlesCount > 1 ? "s" : ""}
+          </div>
+
+        </div>
+
+
+        <div class="erp-amounts">
+
+          <div>
+            ${Number(invoice.totalTTC).toFixed(2)}
+            €
+            TTC
+          </div>
+
+          <small>
+            ${Number(invoice.totalHT).toFixed(2)}
+            €
+            HT
+          </small>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    // ================= DEVIS =================
+
+    if (invoice.type === "quote") {
+
+      if (invoice.status === "accepted") {
+
+        acceptedQuotesList.innerHTML += html;
+
+      } else {
+
+        quotesList.innerHTML += html;
+
+      }
 
     }
+
+
+    // ================= COMMANDES =================
+
+    else if (invoice.type === "order") {
+
+      if (ordersContainer) {
+
+        ordersContainer.innerHTML += html;
+
+      }
+
+    }
+
+
+    // ================= FACTURES =================
+
+    else {
+
+      invoiceList.innerHTML += html;
+
+    }
+
   });
+
 }
 
 // CREATE INVOICE
@@ -597,6 +696,41 @@ async function convertQuoteToOrder(id) {
 
 }
 
+// ================= CONVERT ORDER TO INVOICE =================
+
+async function convertOrderToInvoice(id) {
+
+  try {
+
+    const invoice =
+      await apiFetch(
+        `/api/invoices/convert-to-invoice/${id}`,
+        {
+          method: "POST"
+        }
+      );
+
+    showToast(
+      `Facture ${invoice.invoiceNumber} créée ✅`
+    );
+
+    await loadInvoices();
+
+    closeInvoiceDetails();
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast(
+      err.message ||
+      "Erreur lors de la transformation de la commande en facture"
+    );
+
+  }
+
+}
+
 function viewQuote(id) {
 
   window.open(
@@ -903,6 +1037,19 @@ ${
         onclick="acceptQuote('${invoice._id}')"
       >
         Accepter le devis
+      </button>
+    `
+    : ""
+}
+
+    ${
+    invoice.type === "order"
+    ? `
+      <button
+        class="primary-btn"
+        onclick="convertOrderToInvoice('${invoice._id}')"
+      >
+        Transformer en facture
       </button>
     `
     : ""
