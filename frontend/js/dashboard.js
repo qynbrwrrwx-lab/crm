@@ -50,17 +50,36 @@ function updateKPI(contacts) {
   document.getElementById("total")
     .innerText = contacts.length;
 
-  const favorites =
-    contacts.filter(c => c.favorite).length;
+}
 
-  document.getElementById("favCount")
-    .innerText = favorites;
+function updateBusinessKPI(invoices) {
+  const quotes = invoices.filter(
+    invoice => invoice.type === "quote" && invoice.status !== "accepted"
+  );
+  const orders = invoices.filter(invoice => invoice.type === "order");
+  const pending = invoices.filter(
+    invoice => invoice.type === "invoice" && invoice.paymentStatus !== "paid"
+  );
+  const paid = invoices.filter(
+    invoice => invoice.type === "invoice" && invoice.paymentStatus === "paid"
+  );
 
-  const recent =
-    contacts.slice(0, 5).length;
+  document.getElementById("dashboardQuotes").innerText = quotes.length;
+  document.getElementById("dashboardOrders").innerText = orders.length;
+  document.getElementById("dashboardPendingInvoices").innerText = pending.length;
+  document.getElementById("dashboardPendingTotal").innerText =
+    `${pending.reduce((total, invoice) => total + Number(invoice.totalTTC || 0), 0).toFixed(2)} €`;
+  document.getElementById("dashboardPaidTotal").innerText =
+    `${paid.reduce((total, invoice) => total + Number(invoice.totalTTC || 0), 0).toFixed(2)} €`;
+}
 
-  document.getElementById("newCount")
-    .innerText = recent;
+function updateStockKPI(products) {
+  const lowStock = products.filter(
+    product => Number(product.stock || 0) <= 5
+  ).length;
+
+  const element = document.getElementById("dashboardLowStock");
+  if (element) element.innerText = lowStock;
 }
 
 // ================= ANALYTICS =================

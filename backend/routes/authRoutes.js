@@ -1,9 +1,18 @@
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
 const User = require("../models/user");
+const Contact = require("../models/contact");
+const Product = require("../models/product");
+const Invoice = require("../models/invoice");
+const Company = require("../models/companyModel");
+const StockMovement = require("../models/stockMovement");
+const AuditLog = require("../models/auditLog");
+const auth = require("../middleware/auth");
+const { recordAuditEvent } = require("../services/auditService");
 
 const {
   sendResetEmail,
@@ -13,6 +22,15 @@ const {
 const router = express.Router();
 
 const TOKEN_LIFETIME_MS = 60 * 60 * 1000;
+
+const sensitiveAccountLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  keyGenerator: req => String(req.userId),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Trop de tentatives. Réessayez dans quelques minutes." }
+});
 
 function hashToken(token) {
   return crypto
@@ -24,6 +42,103 @@ function hashToken(token) {
 function isValidPassword(password) {
   return typeof password === "string" && password.length >= 12;
 }
+
+router.get("/export-data", auth, async (req, res) => {
+  try {
+    const [user, company, contacts, products, invoices, stockMovements] = await Promise.all([
+      User.findById(req.userId).select("email createdAt updatedAt"),
+      Company.findOne({ userId: req.userId }),
+      Contact.find({ userId: req.userId }),
+      Product.find({ userId: req.userId }),
+      Invoice.find({ userId: req.userId }),
+      StockMovement.find({ userId: req.userId })
+    ]);
+
+    res.json({
+      exportedAt: new Date().toISOString(),
+      account: user,
+      company,
+      contacts,
+      products,
+      invoices,
+      stockMovements
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Impossible d'exporter les données" });
+  }
+});
+
+router.get("/activity", auth, async (req, res) => {
+  try {
+    const events = await AuditLog.find({ userId: req.userId })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .select("action metadata createdAt");
+    res.json(events);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Impossible de récupérer l'activité" });
+  }
+});
+
+router.put("/change-password", auth, sensitiveAccountLimiter, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.userId);
+
+    if (!user || typeof currentPassword !== "string" || typeof newPassword !== "string") {
+      return res.status(400).json({ error: "Informations de mot de passe invalides" });
+    }
+
+    if (!(await bcrypt.compare(currentPassword, user.password))) {
+      return res.status(400).json({ error: "Mot de passe actuel incorrect" });
+    }
+
+    if (!isValidPassword(newPassword)) {
+      return res.status(400).json({ error: "Le nouveau mot de passe doit contenir au moins 12 caractères" });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+    await recordAuditEvent({ userId: user._id, action: "user.password_changed" });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Impossible de modifier le mot de passe" });
+  }
+});
+
+router.delete("/delete-account", auth, sensitiveAccountLimiter, async (req, res) => {
+  try {
+    const { password } = req.body;
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "Compte introuvable" });
+    }
+
+    if (typeof password !== "string" || !(await bcrypt.compare(password, user.password))) {
+      return res.status(400).json({ error: "Mot de passe incorrect" });
+    }
+
+    await Promise.all([
+      Company.deleteMany({ userId: req.userId }),
+      Contact.deleteMany({ userId: req.userId }),
+      Product.deleteMany({ userId: req.userId }),
+      Invoice.deleteMany({ userId: req.userId }),
+      StockMovement.deleteMany({ userId: req.userId }),
+      AuditLog.deleteMany({ userId: req.userId })
+    ]);
+    await user.deleteOne();
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Impossible de supprimer le compte" });
+  }
+});
 
 // REGISTER
 router.post("/register", async (req, res) => {
@@ -147,6 +262,11 @@ router.post("/login", async (req, res) => {
           expiresIn: "7d"
         }
       );
+
+    await recordAuditEvent({
+      userId: user._id,
+      action: "user.login"
+    });
 
     res.json({
       success: true,

@@ -2,17 +2,32 @@
 
 let companyLogoBase64 = "";
 
-  async function loadCompany() {
+async function loadCompanySetupStatus() {
+  const notice = document.getElementById("companySetupNotice");
+  if (!notice) return;
 
-    console.log("LOAD COMPANY START");
+  try {
+    const company = await apiFetch("/api/company");
+    const requiredFields = [
+      company.companyName,
+      company.siret,
+      company.email,
+      company.address,
+      company.city
+    ];
+
+    notice.hidden = requiredFields.every(value => String(value || "").trim());
+  } catch (err) {
+    notice.hidden = false;
+  }
+}
+
+  async function loadCompany() {
 
   try {
 
     const company = await apiFetch("/api/company");
 
-      console.log("COMPANY =", company);
-      console.log("LOGO =", company.logo);
-     
     document.getElementById(
       "companyName"
     ).value =

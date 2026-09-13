@@ -2,6 +2,15 @@ const mongoose = require("mongoose");
 
 const companySchema = new mongoose.Schema({
 
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+    unique: true,
+    sparse: true,
+    index: true
+  },
+
   companyName: String,
 
   siret: String,

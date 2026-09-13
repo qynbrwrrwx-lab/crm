@@ -1,4 +1,5 @@
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 
 const router = express.Router();
 const PDFDocument = require("pdfkit");
@@ -6,8 +7,91 @@ const Invoice = require("../models/invoice");
 const Contact = require("../models/contact");
 const Product = require("../models/product");
 const Company = require("../models/companyModel");
+const StockMovement = require("../models/stockMovement");
+const { sendInvoiceEmail } = require("../services/emailService");
+const { recordAuditEvent } = require("../services/auditService");
 
 const auth = require("../middleware/auth");
+
+const documentEmailLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 10,
+  keyGenerator: req => String(req.userId),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Trop d'envois d'e-mails. Réessayez dans quelques minutes." }
+});
+
+function createEmailPdf(invoice, contact, company) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 50 });
+    const chunks = [];
+
+    doc.on("data", chunk => chunks.push(chunk));
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.on("error", reject);
+
+    const title = invoice.type === "quote" ? "DEVIS" : "FACTURE";
+    doc.fontSize(20).text(`${title} ${invoice.invoiceNumber}`);
+    doc.moveDown();
+    doc.fontSize(11).text(company?.companyName || "Mon entreprise");
+    doc.text(company?.address || "");
+    doc.text(`${company?.postalCode || ""} ${company?.city || ""}`.trim());
+    doc.text(company?.email || "");
+    doc.text(company?.phone || "");
+    doc.text(`SIRET : ${company?.siret || ""}`);
+    doc.moveDown();
+    doc.font("Helvetica-Bold").text("Client");
+    doc.font("Helvetica").text(
+      [contact?.firstname, contact?.lastname].filter(Boolean).join(" ") ||
+      contact?.companyName || "Client"
+    );
+    doc.text(contact?.companyName || "");
+    doc.text(contact?.billingAddress || "");
+    doc.text(contact?.email || "");
+    doc.moveDown();
+    doc.text(`Date : ${new Date(invoice.createdAt).toLocaleDateString("fr-FR")}`);
+    if (invoice.type === "quote") {
+      doc.text(`Validité : ${company?.quoteValidity || 30} jours`);
+    }
+    doc.moveDown();
+    doc.font("Helvetica-Bold").text("Articles");
+    doc.font("Helvetica");
+    invoice.products.forEach(item => {
+      const quantity = Number(item.quantity || 0);
+      const unitHT = Number(item.unitHT || 0);
+      const lineHT = Number(item.lineHT ?? unitHT * quantity);
+      doc.text(`${item.productName || "Produit"} — ${quantity} × ${unitHT.toFixed(2)} HT = ${lineHT.toFixed(2)} HT`);
+    });
+    doc.moveDown();
+    doc.text(`Total HT : ${Number(invoice.totalHT || 0).toFixed(2)} €`);
+    doc.font("Helvetica-Bold").text(`Total TTC : ${Number(invoice.totalTTC || 0).toFixed(2)} €`);
+    doc.moveDown();
+    doc.font("Helvetica").text(`Conditions de règlement : ${company?.deliveryTerms || "30 jours"}`);
+    doc.text(company?.legalMentions || "Paiement selon les conditions convenues entre les parties.");
+    doc.end();
+  });
+}
+
+async function requireCompanyConfiguration(req, res) {
+  const company = await Company.findOne({ userId: req.userId });
+  const requiredFields = [
+    company?.companyName,
+    company?.siret,
+    company?.email,
+    company?.address,
+    company?.city
+  ];
+
+  if (!requiredFields.every(value => String(value || "").trim())) {
+    res.status(400).json({
+      error: "Complétez les informations de votre entreprise avant de créer un document"
+    });
+    return null;
+  }
+
+  return company;
+}
 
 // ================= GET INVOICES =================
 
@@ -16,7 +100,7 @@ router.get("/", auth, async (req, res) => {
   try {
 
   const invoices =
-    await Invoice.find()
+    await Invoice.find({ userId: req.userId })
     .populate(
       "contactId",
       "firstname lastname companyName"
@@ -45,7 +129,9 @@ router.post("/", auth, async (req, res) => {
 
   try {
 
-    const {
+    if (!(await requireCompanyConfiguration(req, res))) return;
+
+  const {
       type,
       contactId,
       paymentMethod,
@@ -54,7 +140,10 @@ router.post("/", auth, async (req, res) => {
 
     // CONTACT
     const contact =
-      await Contact.findById(contactId);
+      await Contact.findOne({
+        _id: contactId,
+        userId: req.userId
+      });
 
     if (!contact) {
 
@@ -72,9 +161,10 @@ router.post("/", auth, async (req, res) => {
     for (const item of products) {
 
       const product =
-        await Product.findById(
-          item.productId
-        );
+        await Product.findOne({
+          _id: item.productId,
+          userId: req.userId
+        });
 
       if (!product) {
 
@@ -105,7 +195,13 @@ router.post("/", auth, async (req, res) => {
       populatedProducts.push({
         productId: product._id,
         quantity: item.quantity,
-        discount: item.discount || 0
+        discount: item.discount || 0,
+        productName: product.name,
+        unitHT: Number(product.priceHT),
+        unitTTC: Number(product.priceHT) * (1 + Number(product.tva || 20) / 100),
+        tva: Number(product.tva || 20),
+        lineHT,
+        lineTTC
       });
      }
 
@@ -124,6 +220,7 @@ router.post("/", auth, async (req, res) => {
 
     const count =
       await Invoice.countDocuments({
+      userId: req.userId,
       type,
       createdAt: {
       $gte: new Date(`${year}-01-01`),
@@ -134,10 +231,12 @@ router.post("/", auth, async (req, res) => {
     const invoiceNumber =
      `${prefix}-${year}-${String(count + 1).padStart(5, "0")}`;
 
-    const invoice =
+      const invoice =
       await Invoice.create({
 
         invoiceNumber,
+
+        userId: req.userId,
 
         type,
 
@@ -154,11 +253,24 @@ router.post("/", auth, async (req, res) => {
         paymentStatus: "pending"
       });
 
+    await recordAuditEvent({
+      userId: req.userId,
+      action: "document.created",
+      documentId: invoice._id,
+      metadata: { invoiceNumber, type }
+    });
+
     res.json(invoice);
 
   } catch (err) {
 
     console.error(err);
+
+    if (err.code === 11000) {
+      return res.status(409).json({
+        error: "Un numéro de document identique existe déjà. Réessayez."
+      });
+    }
 
     res.status(500).json({
       error: "Erreur création facture"
@@ -180,9 +292,10 @@ router.put(
       } = req.body;
 
       const invoice =
-        await Invoice.findById(
-          req.params.id
-        );
+        await Invoice.findOne({
+          _id: req.params.id,
+          userId: req.userId
+        });
 
       if (!invoice) {
 
@@ -231,7 +344,16 @@ router.put(
       invoice.paymentMethod =
         paymentMethod;
 
+      invoice.paidAt = new Date();
+
       await invoice.save();
+
+      await recordAuditEvent({
+        userId: req.userId,
+        action: "invoice.paid",
+        documentId: invoice._id,
+        metadata: { invoiceNumber: invoice.invoiceNumber, paymentMethod }
+      });
 
       res.json(invoice);
 
@@ -257,9 +379,24 @@ router.delete(
 
     try {
 
-      await Invoice.findByIdAndDelete(
-        req.params.id
-      );
+      const invoice = await Invoice.findOne({
+        _id: req.params.id,
+        userId: req.userId
+      });
+
+      if (!invoice) {
+        return res.status(404).json({
+          error: "Document introuvable"
+        });
+      }
+
+      if (invoice.type !== "quote" || invoice.status === "accepted") {
+        return res.status(409).json({
+          error: "Seul un devis non accepté peut être supprimé"
+        });
+      }
+
+      await invoice.deleteOne();
 
       res.json({
         success: true
@@ -286,7 +423,10 @@ router.put(
     try {
 
       const invoice =
-        await Invoice.findById(req.params.id);
+        await Invoice.findOne({
+          _id: req.params.id,
+          userId: req.userId
+        });
 
       if (!invoice) {
 
@@ -295,9 +435,22 @@ router.put(
         });
       }
 
+      if (invoice.type !== "quote" || invoice.status === "accepted") {
+        return res.status(409).json({
+          error: "Seul un devis en attente peut être accepté"
+        });
+      }
+
       invoice.status = "accepted";
 
       await invoice.save();
+
+      await recordAuditEvent({
+        userId: req.userId,
+        action: "quote.accepted",
+        documentId: invoice._id,
+        metadata: { invoiceNumber: invoice.invoiceNumber }
+      });
 
       res.json(invoice);
 
@@ -323,7 +476,10 @@ router.post(
 
       // Récupérer le devis
       const quote =
-        await Invoice.findById(req.params.id);
+        await Invoice.findOne({
+          _id: req.params.id,
+          userId: req.userId
+        });
 
       if (!quote) {
 
@@ -365,7 +521,10 @@ router.post(
       for (const item of quote.products) {
 
         const product =
-          await Product.findById(item.productId);
+          await Product.findOne({
+            _id: item.productId,
+            userId: req.userId
+          });
 
         if (!product) {
 
@@ -396,6 +555,7 @@ router.post(
 
       const count =
         await Invoice.countDocuments({
+          userId: req.userId,
           type: "order",
           createdAt: {
             $gte: new Date(`${year}-01-01`),
@@ -413,6 +573,8 @@ router.post(
 
           invoiceNumber: orderNumber,
 
+          userId: req.userId,
+
           type: "order",
 
           status: "draft",
@@ -424,7 +586,13 @@ router.post(
           products: quote.products.map(item => ({
             productId: item.productId,
             quantity: item.quantity,
-            discount: item.discount || 0
+            discount: item.discount || 0,
+            productName: item.productName,
+            unitHT: item.unitHT,
+            unitTTC: item.unitTTC,
+            tva: item.tva,
+            lineHT: item.lineHT,
+            lineTTC: item.lineTTC
           })),
 
           totalHT: quote.totalHT,
@@ -439,15 +607,53 @@ router.post(
 
       // ================= MISE À JOUR STOCK =================
 
+      const decrementedProducts = [];
+
       for (const item of quote.products) {
 
-        const product =
-          await Product.findById(item.productId);
+        const quantity = Number(item.quantity);
 
-        product.stock -=
-          Number(item.quantity);
+        const product = await Product.findOneAndUpdate(
+          {
+            _id: item.productId,
+            userId: req.userId,
+            stock: { $gte: quantity }
+          },
+          { $inc: { stock: -quantity } },
+          { new: true }
+        );
 
-        await product.save();
+        if (!product) {
+          await Promise.all(
+            decrementedProducts.map(({ productId, quantity: restoredQuantity }) =>
+              Product.updateOne(
+                { _id: productId, userId: req.userId },
+                { $inc: { stock: restoredQuantity } }
+              )
+            )
+          );
+
+          await StockMovement.deleteMany({ documentId: order._id });
+
+          await order.deleteOne();
+
+          return res.status(409).json({
+            error: "Stock insuffisant : la commande n'a pas été créée"
+          });
+        }
+
+        decrementedProducts.push({
+          productId: item.productId,
+          quantity
+        });
+
+        await StockMovement.create({
+          userId: req.userId,
+          productId: item.productId,
+          quantity: -quantity,
+          type: "sale",
+          documentId: order._id
+        });
 
       }
 
@@ -483,7 +689,10 @@ router.post(
     try {
 
       const order =
-        await Invoice.findById(req.params.id);
+        await Invoice.findOne({
+          _id: req.params.id,
+          userId: req.userId
+        });
 
       if (!order) {
 
@@ -514,6 +723,7 @@ if (order.convertedToInvoiceId) {
 
 const existingInvoice =
   await Invoice.findOne({
+    userId: req.userId,
     type: "invoice",
     sourceOrderId: order._id
   });
@@ -538,6 +748,7 @@ if (existingInvoice) {
 
       const count =
         await Invoice.countDocuments({
+          userId: req.userId,
           type: "invoice",
           createdAt: {
             $gte: new Date(`${year}-01-01`),
@@ -553,6 +764,8 @@ if (existingInvoice) {
 
           invoiceNumber,
 
+          userId: req.userId,
+
           type: "invoice",
 
           status: "draft",
@@ -567,7 +780,13 @@ if (existingInvoice) {
 
             quantity: item.quantity,
 
-            discount: item.discount || 0
+            discount: item.discount || 0,
+            productName: item.productName,
+            unitHT: item.unitHT,
+            unitTTC: item.unitTTC,
+            tva: item.tva,
+            lineHT: item.lineHT,
+            lineTTC: item.lineTTC
 
           })),
 
@@ -604,6 +823,73 @@ await order.save();
 
 // ================= PDF =================
 
+router.post(
+  "/:id/send-email",
+  auth,
+  documentEmailLimiter,
+  async (req, res) => {
+    let invoice;
+
+    try {
+      invoice = await Invoice.findOne({ _id: req.params.id, userId: req.userId });
+      if (!invoice || !["quote", "invoice"].includes(invoice.type)) {
+        return res.status(404).json({ error: "Document introuvable" });
+      }
+
+      const contact = await Contact.findOne({ _id: invoice.contactId, userId: req.userId });
+      if (!contact?.email) {
+        return res.status(400).json({ error: "Le contact ne possède pas d'adresse email" });
+      }
+
+      const company = await Company.findOne({ userId: req.userId });
+      const sent = await sendInvoiceEmail({
+        to: contact.email,
+        invoice,
+        pdfBuffer: await createEmailPdf(invoice, contact, company)
+      });
+
+      if (!sent) {
+        invoice.emailStatus = "failed";
+        invoice.emailFailedAt = new Date();
+        await invoice.save();
+        await recordAuditEvent({
+          userId: req.userId,
+          action: "document.email_failed",
+          documentId: invoice._id,
+          metadata: { invoiceNumber: invoice.invoiceNumber }
+        });
+        return res.status(502).json({ error: "L'email n'a pas pu être envoyé" });
+      }
+
+      invoice.emailSentAt = new Date();
+      invoice.emailStatus = "sent";
+      invoice.emailFailedAt = null;
+      await invoice.save();
+      await recordAuditEvent({
+        userId: req.userId,
+        action: "document.email_sent",
+        documentId: invoice._id,
+        metadata: { invoiceNumber: invoice.invoiceNumber }
+      });
+      res.json({ success: true, sentAt: invoice.emailSentAt });
+    } catch (err) {
+      console.error(err);
+      if (invoice) {
+        invoice.emailStatus = "failed";
+        invoice.emailFailedAt = new Date();
+        await invoice.save().catch(() => {});
+        await recordAuditEvent({
+          userId: req.userId,
+          action: "document.email_failed",
+          documentId: invoice._id,
+          metadata: { invoiceNumber: invoice.invoiceNumber }
+        });
+      }
+      res.status(500).json({ error: "Erreur lors de l'envoi de l'email" });
+    }
+  }
+);
+
 router.get(
   "/pdf/:id",
 
@@ -614,7 +900,10 @@ router.get(
     try {
 
       const invoice =
-        await Invoice.findById(req.params.id);
+        await Invoice.findOne({
+          _id: req.params.id,
+          userId: req.userId
+        });
 
       if (!invoice) {
         return res.status(404).send(
@@ -623,7 +912,7 @@ router.get(
       }
 
       const company =
-        await Company.findOne();  
+        await Company.findOne({ userId: req.userId });
 
         let logoBuffer = null;
 
@@ -655,30 +944,33 @@ if (company?.logo) {
 }
 
       const contact =
-  await Contact.findById(
-    invoice.contactId
-  );
+  await Contact.findOne({
+    _id: invoice.contactId,
+    userId: req.userId
+  });
 
       const invoiceProducts = [];
 
 for (const item of invoice.products) {
 
       const product =
-    await Product.findById(
-      item.productId
-    );
+    await Product.findOne({
+      _id: item.productId,
+      userId: req.userId
+    });
 
   if (product) {
 
     invoiceProducts.push({
-  name: product.name,
-  priceHT: product.priceHT,
+  name: item.productName || product.name,
+  priceHT: item.unitHT ?? product.priceHT,
   quantity: item.quantity,
   discount: item.discount || 0,
-  totalHT:
+  totalHT: item.lineHT ?? (
     Number(product.priceHT) *
     Number(item.quantity) *
     (1 - (item.discount || 0) / 100)
+  )
 });
 
   }
@@ -775,6 +1067,13 @@ const documentTitle =
     ? "COMMANDE"
     : "FACTURE";
 
+const documentDateLabel =
+  invoice.type === "quote"
+    ? "Date du devis"
+    : invoice.type === "order"
+    ? "Date de la commande"
+    : "Date de la facture";
+
 doc
   .fontSize(12)
   .font("Helvetica-Bold")
@@ -787,21 +1086,44 @@ doc
 doc
   .fontSize(10)
   .text(
-    `Date : ${new Date(
+    `${documentDateLabel} : ${new Date(
       invoice.createdAt
     ).toLocaleDateString("fr-FR")}`,
     RIGHT_X,
     55
   );
 
-doc
-.fontSize(10);
+if (invoice.type === "quote") {
+  doc.fontSize(10).text(
+    `Validité : ${company?.quoteValidity || 30} jours`,
+    RIGHT_X,
+    65
+  );
+}
 
-doc.text(
-  `Validité du devis : ${company?.quoteValidity || 30} jours`,
-  RIGHT_X,
-  65
-);
+if (invoice.type === "order") {
+  doc.fontSize(10).text(
+    "Livraison : À définir",
+    RIGHT_X,
+    65
+  );
+}
+
+if (invoice.type === "invoice") {
+  const paymentText = invoice.paymentStatus === "paid"
+    ? `Paiement : Payée · ${invoice.paymentMethod}`
+    : "Paiement : En attente";
+
+  doc.fontSize(10).text(paymentText, RIGHT_X, 65);
+
+  if (invoice.paidAt) {
+    doc.text(
+      `Réglée le : ${new Date(invoice.paidAt).toLocaleDateString("fr-FR")}`,
+      RIGHT_X,
+      80
+    );
+  }
+}
 
   // CLIENT
 
@@ -1159,9 +1481,13 @@ router.put(
 
       let totalHT = 0;
       let totalTTC = 0;
+      const updatedProducts = [];
 
       const invoice =
-        await Invoice.findById(req.params.id);
+        await Invoice.findOne({
+          _id: req.params.id,
+          userId: req.userId
+        });
 
       if (!invoice) {
 
@@ -1170,14 +1496,56 @@ router.put(
         });
       }
 
+      if (invoice.type !== "quote" || invoice.status === "accepted") {
+        return res.status(409).json({
+          error: "Seul un devis non accepté peut être modifié"
+        });
+      }
+
+      const contact = await Contact.findOne({
+        _id: contactId,
+        userId: req.userId
+      });
+
+      if (!contact) {
+        return res.status(404).json({
+          error: "Contact introuvable"
+        });
+      }
+
+      if (!Array.isArray(products) || products.length === 0) {
+        return res.status(400).json({
+          error: "Ajoutez au moins un produit"
+        });
+      }
+
       invoice.contactId = contactId;
 
     for (const item of products) {
 
   const product =
-    await Product.findById(item.productId);
+    await Product.findOne({
+      _id: item.productId,
+      userId: req.userId
+    });
 
-  if (!product) continue;
+  if (!product) {
+    return res.status(404).json({
+      error: "Produit introuvable"
+    });
+  }
+
+  if (
+    !Number.isFinite(Number(item.quantity)) ||
+    Number(item.quantity) <= 0 ||
+    !Number.isFinite(Number(item.discount || 0)) ||
+    Number(item.discount || 0) < 0 ||
+    Number(item.discount || 0) > 100
+  ) {
+    return res.status(400).json({
+      error: "Quantité ou remise invalide"
+    });
+  }
 
   const discount =
     Number(item.discount || 0);
@@ -1196,9 +1564,21 @@ router.put(
 
   totalHT += lineHT;
   totalTTC += lineTTC;
+
+  updatedProducts.push({
+    productId: product._id,
+    quantity: item.quantity,
+    discount,
+    productName: product.name,
+    unitHT: Number(product.priceHT),
+    unitTTC: Number(product.priceHT) * (1 + Number(product.tva || 20) / 100),
+    tva: Number(product.tva || 20),
+    lineHT,
+    lineTTC
+  });
 }
 
-invoice.products = products;
+invoice.products = updatedProducts;
 
 invoice.totalHT = totalHT;
 invoice.totalTTC = totalTTC;

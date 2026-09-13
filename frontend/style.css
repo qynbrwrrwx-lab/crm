@@ -1864,7 +1864,168 @@ button:hover {
   color: #fbbf24;
 }
 
+.document-status {
+  display: inline-block;
+  margin-top: 7px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.document-status.accepted,
+.document-status.completed,
+.document-status.paid {
+  color: #4ade80;
+}
+
+.document-status.draft,
+.document-status.pending {
+  color: #fbbf24;
+}
+
+.invoice-counters,
+.invoice-filters {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.invoice-counters span {
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #cbd5e1;
+  background: #182233;
+  font-size: 13px;
+}
+
+.invoice-filters {
+  margin: 20px 0;
+}
+
+.invoice-filters input {
+  flex: 1 1 260px;
+}
+
+.stock-adjustment {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.stock-adjustment input {
+  width: 95px;
+}
+
+.stock-adjustment .secondary-btn {
+  min-width: 0;
+  padding: 8px 10px;
+}
+
+.stock-history-toggle {
+  margin-top: 10px;
+  border: 0;
+  color: #93c5fd;
+  background: transparent;
+  cursor: pointer;
+}
+
+.stock-history {
+  display: none;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stock-history.visible {
+  display: block;
+}
+
+.stock-history-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.stock-history-row.in strong { color: #4ade80; }
+.stock-history-row.out strong { color: #fca5a5; }
+
+.stock-low {
+  color: #fca5a5;
+}
+
+.stock-alert {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.18);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.empty-state {
+  margin: 16px 0;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.setup-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 20px;
+  padding: 16px 18px;
+  border: 1px solid rgba(251, 191, 36, 0.38);
+  border-radius: 12px;
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.setup-notice span {
+  display: block;
+  margin-top: 4px;
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+.delete-account-btn {
+  display: block;
+  margin-top: 22px;
+  border: 0;
+  color: #fca5a5;
+  background: transparent;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.settings-subtitle {
+  margin: 26px 0 10px;
+}
+
+.account-activity {
+  max-width: 560px;
+}
+
+.activity-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.activity-row small {
+  color: #94a3b8;
+}
+
 @media (max-width: 560px) {
+  .activity-row { align-items: flex-start; flex-direction: column; gap: 3px; }
+  .setup-notice { align-items: flex-start; flex-direction: column; }
   .payment-method-options {
     grid-template-columns: 1fr;
   }

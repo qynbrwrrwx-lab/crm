@@ -14,12 +14,14 @@ router.get("/", auth, async (req, res) => {
   try {
 
     let company =
-      await Company.findOne();
+      await Company.findOne({ userId: req.userId });
 
     if (!company) {
 
       company =
-        await Company.create({});
+        await Company.create({
+          userId: req.userId
+        });
     }
 
     res.json(company);
@@ -42,18 +44,23 @@ router.put("/", auth, async (req, res) => {
   try {
 
     let company =
-      await Company.findOne();
+      await Company.findOne({ userId: req.userId });
 
     if (!company) {
 
       company =
-        await Company.create(req.body);
+        await Company.create({
+          ...req.body,
+          userId: req.userId
+        });
 
     } else {
 
+      const { userId, ...companyData } = req.body;
+
       Object.assign(
         company,
-        req.body
+        companyData
       );
 
       await company.save();

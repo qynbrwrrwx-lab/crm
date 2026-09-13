@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 
 const invoiceSchema = new mongoose.Schema({
 
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+    index: true
+  },
+
   invoiceNumber: String,
 
   type: {
@@ -57,6 +64,18 @@ const invoiceSchema = new mongoose.Schema({
 
   quantity: Number,
 
+  productName: String,
+
+  unitHT: Number,
+
+  unitTTC: Number,
+
+  tva: Number,
+
+  lineHT: Number,
+
+  lineTTC: Number,
+
   discount: {
     type: Number,
     default: 0
@@ -72,11 +91,35 @@ const invoiceSchema = new mongoose.Schema({
   paymentStatus: {
     type: String,
     default: "pending"
+  },
+
+  paidAt: {
+    type: Date,
+    default: null
+  },
+
+  emailSentAt: {
+    type: Date,
+    default: null
+  },
+
+  emailStatus: {
+    type: String,
+    enum: ["pending", "sent", "failed"],
+    default: "pending"
+  },
+
+  emailFailedAt: {
+    type: Date,
+    default: null
   }
 
 }, {
   timestamps: true
 });
+
+// Empêche qu'un même compte obtienne deux fois le même numéro de document.
+invoiceSchema.index({ userId: 1, invoiceNumber: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model(
   "Invoice",

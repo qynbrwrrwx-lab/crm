@@ -42,6 +42,9 @@ const invoiceRoutes =
 
 const app = express();
 
+app.disable("x-powered-by");
+app.set("json escape", true);
+
 app.use(
   express.static(
     path.join(__dirname, "../frontend/public")
@@ -70,6 +73,7 @@ app.use(
 app.use(
   express.urlencoded({
     extended: true,
+    limit: "20mb"
   })
 );
 
@@ -123,25 +127,25 @@ app.use(
 
 // ================= DATABASE =================
 
-mongoose
-  .connect(process.env.MONGO_URI)
+async function connectDatabase(uri = process.env.MONGO_URI) {
+  if (!uri) throw new Error("MONGO_URI manquant");
+  await mongoose.connect(uri);
+}
 
-  .then(() => {
+function validateRuntimeConfig() {
+  const missing = ["MONGO_URI", "JWT_SECRET"].filter(name => !process.env[name]);
+  if (missing.length) {
+    throw new Error(`Configuration manquante : ${missing.join(", ")}`);
+  }
+}
 
-    console.log(
-      "✅ MongoDB connecté"
-    );
-  })
-
-  .catch(err => {
-
-    console.error(
-      "❌ MongoDB error:",
-      err
-    );
-
-    process.exit(1);
+app.get("/api/health", (req, res) => {
+  const databaseConnected = mongoose.connection.readyState === 1;
+  res.status(databaseConnected ? 200 : 503).json({
+    status: databaseConnected ? "ok" : "degraded",
+    database: databaseConnected ? "connected" : "disconnected"
   });
+});
 
 // ================= API ROUTES =================
 
@@ -224,12 +228,22 @@ app.get("*", (req, res) => {
 
 // ================= SERVER =================
 
-const PORT =
-  process.env.PORT || 3000;
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+  Promise.resolve()
+    .then(validateRuntimeConfig)
+    .then(connectDatabase)
+    .then(() => {
+      console.log("✅ MongoDB connecté");
+      app.listen(PORT, () => {
+        console.log(`🚀 Serveur lancé sur port ${PORT}`);
+      });
+    })
+    .catch(err => {
+      console.error("❌ MongoDB error:", err);
+      process.exit(1);
+    });
+}
 
-  console.log(
-    `🚀 Serveur lancé sur port ${PORT}`
-  );
-});
+module.exports = { app, connectDatabase, validateRuntimeConfig };

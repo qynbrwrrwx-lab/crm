@@ -5,6 +5,7 @@ let isEditingQuote = false;
 let currentInvoiceId = null;
 let currentInvoice = null;
 let availableProducts = [];
+let allInvoices = [];
 
 // LOAD SELECT DATA
 async function loadInvoiceData() {
@@ -31,9 +32,9 @@ async function loadInvoiceData() {
 
     contactSelect.innerHTML += `
       <option value="${contact._id}">
-        ${contact.firstname || ""}
-        ${contact.lastname || ""}
-        ${contact.companyName || ""}
+        ${escapeHtml(contact.firstname)}
+        ${escapeHtml(contact.lastname)}
+        ${escapeHtml(contact.companyName)}
       </option>
     `;
   });
@@ -46,7 +47,7 @@ async function loadInvoiceData() {
 
     productSelect.innerHTML += `
       <option value="${product._id}">
-        ${product.name}
+        ${escapeHtml(product.name)}
         (${product.stock} stock)
       </option>
     `;
@@ -61,7 +62,9 @@ async function loadInvoices() {
     const invoices =
   await apiFetch("/api/invoices");
 
+    allInvoices = invoices;
     renderInvoices(invoices);
+    updateBusinessKPI(invoices);
 
   } catch (err) {
 
@@ -69,6 +72,10 @@ async function loadInvoices() {
 
     showToast(err.message);
   }
+}
+
+function filterInvoices() {
+  renderInvoices(allInvoices);
 }
 
 // RENDER INVOICES
@@ -138,6 +145,44 @@ function renderInvoices(invoices) {
       i =>
         i.type === "order"
     );
+
+  const invoiceDocuments = invoices.filter(
+    invoice => invoice.type === "invoice"
+  );
+
+  const search = document.getElementById("invoiceSearch")?.value
+    .trim()
+    .toLocaleLowerCase("fr-FR") || "";
+  const status = document.getElementById("invoiceStatusFilter")?.value || "all";
+
+  const visibleInvoiceIds = new Set(
+    invoiceDocuments.filter(invoice => {
+      const customer = [
+        invoice.contactId?.companyName,
+        invoice.contactId?.firstname,
+        invoice.contactId?.lastname
+      ].filter(Boolean).join(" ").toLocaleLowerCase("fr-FR");
+
+      return (
+        (!search || invoice.invoiceNumber?.toLocaleLowerCase("fr-FR").includes(search) || customer.includes(search)) &&
+        (status === "all" || invoice.paymentStatus === status)
+      );
+    }).map(invoice => invoice._id)
+  );
+
+  const paidTotal = invoiceDocuments
+    .filter(invoice => invoice.paymentStatus === "paid")
+    .reduce((total, invoice) => total + Number(invoice.totalTTC || 0), 0);
+  const pendingTotal = invoiceDocuments
+    .filter(invoice => invoice.paymentStatus !== "paid")
+    .reduce((total, invoice) => total + Number(invoice.totalTTC || 0), 0);
+
+  const invoiceSummary = document.getElementById("invoiceSummary");
+  if (invoiceSummary) {
+    invoiceSummary.textContent = `${visibleInvoiceIds.size} facture${visibleInvoiceIds.size > 1 ? "s" : ""}`;
+  }
+  document.getElementById("paidInvoicesTotal").textContent = `${paidTotal.toFixed(2)} € encaissé`;
+  document.getElementById("pendingInvoicesTotal").textContent = `${pendingTotal.toFixed(2)} € à encaisser`;
 
 
   // ================= COMPTEURS =================
@@ -234,17 +279,33 @@ function renderInvoices(invoices) {
         <div class="erp-customer">
 
           <div class="erp-number">
-            ${invoice.invoiceNumber}
+            ${escapeHtml(invoice.invoiceNumber)}
           </div>
 
           <div class="erp-name">
-            ${customerName}
+            ${escapeHtml(customerName)}
           </div>
 
           <div class="erp-items">
             ${articlesCount}
             article${articlesCount > 1 ? "s" : ""}
           </div>
+
+          <span class="document-status ${
+            invoice.type === "quote"
+              ? (invoice.status === "accepted" ? "accepted" : "draft")
+              : invoice.type === "order"
+              ? (invoice.convertedToInvoiceId ? "completed" : "pending")
+              : (invoice.paymentStatus === "paid" ? "paid" : "pending")
+          }">
+            ${
+              invoice.type === "quote"
+                ? (invoice.status === "accepted" ? "Devis accepté" : "Devis en attente")
+                : invoice.type === "order"
+                ? (invoice.convertedToInvoiceId ? "Facturée" : "À facturer")
+                : (invoice.paymentStatus === "paid" ? "Payée" : "En attente")
+            }
+          </span>
 
         </div>
 
@@ -269,7 +330,7 @@ function renderInvoices(invoices) {
                   invoice.paymentStatus === "paid" ? "paid" : "pending"
                 }">${
                   invoice.paymentStatus === "paid"
-                    ? `Payée · ${invoice.paymentMethod || "Paiement"}`
+                    ? `Payée · ${escapeHtml(invoice.paymentMethod || "Paiement")}`
                     : "En attente"
                 }</span>`
               : ""
@@ -314,13 +375,17 @@ function renderInvoices(invoices) {
 
     // ================= FACTURES =================
 
-    else {
+    else if (visibleInvoiceIds.has(invoice._id)) {
 
       invoiceList.innerHTML += html;
 
     }
 
   });
+
+  if (!visibleInvoiceIds.size) {
+    invoiceList.innerHTML = '<p class="empty-state">Aucune facture ne correspond à ces critères.</p>';
+  }
 
 }
 
@@ -475,8 +540,21 @@ async function confirmInvoicePayment() {
   }
 }
 
+async function sendDocumentEmail(id) {
+  if (!confirm("Envoyer ce document par email au contact ?")) return;
+
+  try {
+    await apiFetch(`/api/invoices/${id}/send-email`, { method: "POST" });
+    showToast("Email envoyé au client ✅");
+  } catch (err) {
+    console.error(err);
+    showToast(err.message || "Erreur lors de l'envoi de l'email");
+  }
+}
+
 // DELETE INVOICE
 async function deleteInvoice(id) {
+  if (!window.confirm("Supprimer définitivement ce devis ?")) return;
 
   try {
 
@@ -503,17 +581,12 @@ async function deleteInvoice(id) {
 
 async function loadQuoteData() {
 
-  console.log("LOAD QUOTES DATA EXECUTE");
-
   const contacts =
     await apiFetch("/api/contacts");
-
-    console.log("CONTACTS =", contacts);
 
   const products =
     await apiFetch("/api/products");
 
-    console.log("PRODUCTS =", products);
 
   const contactSelect =
     document.getElementById("quoteContact");
@@ -530,8 +603,8 @@ async function loadQuoteData() {
 
     contactSelect.innerHTML += `
       <option value="${contact._id}">
-        ${contact.firstname || ""}
-        ${contact.lastname || ""}
+        ${escapeHtml(contact.firstname)}
+        ${escapeHtml(contact.lastname)}
       </option>
     `;
   });
@@ -545,7 +618,7 @@ async function loadQuoteData() {
 
     select.innerHTML += `
       <option value="${product._id}">
-        ${product.name}
+        ${escapeHtml(product.name)}
       </option>
     `;
 
@@ -587,8 +660,6 @@ window.toggleQuoteForm = async function() {
     opening ? "block" : "none";
 
   if (opening) {
-
-    console.log("QUOTES OPEN");
 
     await loadQuoteData();
 
@@ -955,8 +1026,8 @@ recalculateInvoice();
 <p>
 <strong>Client</strong><br>
 ${
-    invoice.contactId?.companyName ||
-    `${invoice.contactId?.firstname || ""} ${invoice.contactId?.lastname || ""}`
+    escapeHtml(invoice.contactId?.companyName ||
+    `${invoice.contactId?.firstname || ""} ${invoice.contactId?.lastname || ""}`)
 }
 </p>
 
@@ -977,13 +1048,28 @@ ${new Date(invoice.createdAt).toLocaleDateString("fr-FR")}
 
 <p>
 <strong>N°</strong><br>
-${invoice.invoiceNumber}
+${escapeHtml(invoice.invoiceNumber)}
 </p>
 
 <p>
 <strong>Livraison</strong><br>
 À définir
 </p>
+
+${
+  ["quote", "invoice"].includes(invoice.type)
+    ? `<p>
+        <strong>Email</strong><br>
+        ${
+          invoice.emailStatus === "sent"
+            ? "Envoyé"
+            : invoice.emailStatus === "failed"
+              ? "Échec d'envoi"
+              : "Non envoyé"
+        }
+      </p>`
+    : ""
+}
 
 </div>
 
@@ -1026,7 +1112,7 @@ ${currentInvoice.products.map((item, itemIndex) => `
 <div class="quote-product-row">
 
     <div class="quote-product-name">
-        ${item.productId.name}
+        ${escapeHtml(item.productName || item.productId?.name)}
     </div>
 
     <div class="quote-product-qty">
@@ -1119,6 +1205,19 @@ ${
     >
 
     ${
+      invoice.type === "quote" || invoice.type === "invoice"
+      ? `
+        <button
+          class="secondary-btn"
+          onclick="sendDocumentEmail('${invoice._id}')"
+        >
+          Envoyer par email
+        </button>
+      `
+      : ""
+    }
+
+    ${
     invoice.type === "quote" &&
     invoice.status !== "accepted"
     ? `
@@ -1162,7 +1261,8 @@ ${
 }
 
      ${
-  invoice.type !== "invoice"
+  invoice.type === "quote" &&
+  invoice.status !== "accepted"
   ? `
     <button
       id="editInvoiceBtn"
@@ -1220,7 +1320,11 @@ ${
         font-weight:600;
       "
     >
-      Payée
+      Payée${
+        invoice.paymentMethod
+          ? ` · ${escapeHtml(invoice.paymentMethod)}`
+          : ""
+      }
     </span>
   `
   : ""
@@ -1375,7 +1479,7 @@ async function openAddProductModal(){
 
     <div>
 
-        <strong>${product.name}</strong>
+        <strong>${escapeHtml(product.name)}</strong>
 
         <div class="erp-items">
             ${Number(product.priceHT).toFixed(2)} € HT
@@ -1481,27 +1585,25 @@ function recalculateInvoice(){
         });
 
         currentInvoice.products.forEach(item => {
+    const product = item.productId || {};
+    const remise = Number(item.discount || 0);
+    const shouldRecalculateFromCatalog = isEditingQuote || !Number.isFinite(Number(item.unitHT));
 
-    item.unitHT =
-        Number(item.productId.priceHT);
-
-    item.unitTTC =
-        item.unitHT *
-        (1 + Number(item.productId.tva || 20) / 100);
-
-    const remise =
-        Number(item.discount || 0);
-
-    item.lineHT =
-        item.unitHT *
-        item.quantity *
-        (1 - remise / 100);
-
-    item.lineTTC =
-        item.unitTTC *
-        item.quantity *
-        (1 - remise / 100);
-
+    if (shouldRecalculateFromCatalog) {
+      item.productName = product.name || item.productName || "Produit";
+      item.unitHT = Number(product.priceHT || 0);
+      item.unitTTC = item.unitHT * (1 + Number(product.tva || 20) / 100);
+      item.tva = Number(product.tva || 20);
+      item.lineHT = item.unitHT * item.quantity * (1 - remise / 100);
+      item.lineTTC = item.unitTTC * item.quantity * (1 - remise / 100);
+    } else {
+      item.lineHT = Number.isFinite(Number(item.lineHT))
+        ? Number(item.lineHT)
+        : item.unitHT * item.quantity * (1 - remise / 100);
+      item.lineTTC = Number.isFinite(Number(item.lineTTC))
+        ? Number(item.lineTTC)
+        : item.unitTTC * item.quantity * (1 - remise / 100);
+    }
   });
 
 

@@ -2,13 +2,16 @@ const sgMail = require("@sendgrid/mail");
 
 // ================= SENDGRID CONFIG =================
 
-sgMail.setApiKey(
-  process.env.SENDGRID_API_KEY
+const isSendGridConfigured = Boolean(
+  process.env.SENDGRID_API_KEY && process.env.EMAIL_FROM
 );
 
-console.log(
-  "✅ SendGrid configuré"
-);
+if (isSendGridConfigured) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  console.log("✅ SendGrid configuré");
+} else {
+  console.warn("⚠️ SendGrid non configuré : l'envoi e-mail est désactivé.");
+}
 
 // ================= SEND EMAIL =================
 
@@ -19,6 +22,10 @@ async function sendInvoiceEmail({
 }) {
 
   try {
+
+    if (!isSendGridConfigured) {
+      return false;
+    }
 
     if (!to) {
 
@@ -187,12 +194,16 @@ async function sendInvoiceEmail({
       `✅ Email envoyé à ${to}`
     );
 
+    return true;
+
   } catch (err) {
 
     console.error(
       "❌ EMAIL ERROR :",
       err
     );
+
+    return false;
   }
 }
 

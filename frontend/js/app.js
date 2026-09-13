@@ -1,5 +1,7 @@
 // ================= GLOBAL =================
-const API_URL = "https://www.my-prospect.com";
+// Par défaut, le frontend utilise le serveur qui l'a servi (localhost ou production).
+// Une URL peut être fournie avant le chargement via window.MY_PROSPECT_API_URL si besoin.
+const API_URL = window.MY_PROSPECT_API_URL || window.location.origin;
 
 
 
@@ -8,6 +10,15 @@ let markers = [];
 
 let chart;
 let analyticsChart;
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 
 

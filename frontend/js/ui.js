@@ -45,6 +45,10 @@ function showApp() {
   loadInvoices().catch(console.error);
 
   loadInvoiceData().catch(console.error);
+
+  loadCompanySetupStatus?.().catch(console.error);
+
+  loadAccountActivity?.().catch(console.error);
 }
 
 

@@ -1,3 +1,6 @@
+let editingContactId = null;
+let allContacts = [];
+
 // ================= ADD CONTACT =================
 
 async function addContact() {
@@ -12,7 +15,7 @@ async function addContact() {
     document.getElementById("lastname").value;
 
   const companyName =
-    document.getElementById("companyName").value;
+    document.getElementById("contactCompany").value;
 
   const siret =
     document.getElementById("siret").value;
@@ -41,29 +44,26 @@ async function addContact() {
 
   showLoader();
 
-  const geoRes = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(billingAddress)}`
-  );
-
-  const geoData =
-    await geoRes.json();
-
   let lat = null;
   let lng = null;
 
-  if (geoData.length) {
+  try {
+    const geoRes = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(billingAddress)}`
+    );
+    const geoData = geoRes.ok ? await geoRes.json() : [];
 
-    lat =
-      parseFloat(geoData[0].lat);
-
-    lng =
-      parseFloat(geoData[0].lon);
+    if (geoData.length) {
+      lat = parseFloat(geoData[0].lat);
+      lng = parseFloat(geoData[0].lon);
+    }
+  } catch (geoError) {
+    console.warn("Géolocalisation indisponible : contact enregistré sans coordonnées.");
   }
 
-  console.log("TOKEN AVANT CONTACT =", getToken());
-
-await apiFetch("/api/contacts", {
-    method: "POST",
+  try {
+    await apiFetch(editingContactId ? `/api/contacts/${editingContactId}` : "/api/contacts", {
+    method: editingContactId ? "PUT" : "POST",
 
     body: JSON.stringify({
 
@@ -89,7 +89,7 @@ await apiFetch("/api/contacts", {
       lat,
       lng
     })
-  });
+    });
 
   document.getElementById("firstname").value = "";
 
@@ -109,13 +109,19 @@ await apiFetch("/api/contacts", {
 
   document.getElementById("notes").value = "";
 
+  editingContactId = null;
+  resetContactFormMode();
+
   loadContacts();
 
   loadInvoiceData();
 
-  hideLoader();
-
-  showToast("Contact ajouté ✅");
+    showToast("Contact enregistré ✅");
+  } catch (err) {
+    showToast(err.message || "Impossible d'enregistrer le contact");
+  } finally {
+    hideLoader();
+  }
 }
 
 // ================= CONTACTS =================
@@ -127,6 +133,11 @@ function renderContacts(contacts) {
 
   list.innerHTML = "";
 
+  if (!contacts.length) {
+    list.innerHTML = '<p class="empty-state">Aucun contact ne correspond à votre recherche.</p>';
+    return;
+  }
+
   contacts.forEach(contact => {
 
     list.innerHTML += `
@@ -137,8 +148,8 @@ function renderContacts(contacts) {
 
           <strong>
 
-            ${contact.firstname || ""}
-            ${contact.lastname || ""}
+            ${escapeHtml(contact.firstname)}
+            ${escapeHtml(contact.lastname)}
 
           </strong>
 
@@ -146,19 +157,19 @@ function renderContacts(contacts) {
 
           <br>
 
-          ${contact.companyName || ""}
+          ${escapeHtml(contact.companyName)}
 
           <br>
 
-          ${contact.email || ""}
+          ${escapeHtml(contact.email)}
 
           <br>
 
-          ${contact.phone || ""}
+          ${escapeHtml(contact.phone)}
 
           <br>
 
-          ${contact.billingAddress || ""}
+          ${escapeHtml(contact.billingAddress)}
 
         </div>
 
@@ -169,6 +180,8 @@ function renderContacts(contacts) {
           >
             ⭐
           </button>
+
+          <button onclick="editContact('${contact._id}')">Modifier</button>
 
           <button
             class="delete"
@@ -187,19 +200,16 @@ function renderContacts(contacts) {
 // ================= DELETE CONTACT =================
 
 async function deleteContact(id) {
+  if (!window.confirm("Supprimer définitivement ce contact ?")) return;
 
- await apiFetch(
-  `/api/contacts/${id}`,
-    {
-      method: "DELETE"
-    }
-  );
-
-  loadContacts();
-
-  loadInvoiceData();
-
-  showToast("Contact supprimé 🗑️");
+  try {
+    await apiFetch(`/api/contacts/${id}`, { method: "DELETE" });
+    await loadContacts();
+    await loadInvoiceData();
+    showToast("Contact supprimé 🗑️");
+  } catch (err) {
+    showToast(err.message || "Impossible de supprimer ce contact");
+  }
 }
 
 // ================= LOAD CONTACTS =================
@@ -214,6 +224,8 @@ async function loadContacts(query = "") {
 
   const contacts =
     await apiFetch(url);
+
+  allContacts = contacts;
 
   updateKPI(contacts);
 
@@ -256,6 +268,42 @@ async function loadContacts(query = "") {
       }
     });
   }
+}
+
+function editContact(id) {
+  const contact = allContacts.find(item => item._id === id);
+  if (!contact) return;
+
+  editingContactId = id;
+  document.getElementById("contactFormTitle").textContent = "👥 Modifier le contact";
+  document.getElementById("contactSubmitButton").textContent = "Enregistrer les modifications";
+  document.getElementById("cancelContactEditButton").hidden = false;
+  document.getElementById("type").value = contact.type || "particulier";
+  document.getElementById("contactCompany").value = contact.companyName || "";
+  document.getElementById("firstname").value = contact.firstname || "";
+  document.getElementById("lastname").value = contact.lastname || "";
+  document.getElementById("siret").value = contact.siret || "";
+  document.getElementById("emailContact").value = contact.email || "";
+  document.getElementById("phone").value = contact.phone || "";
+  document.getElementById("billingAddress").value = contact.billingAddress || "";
+  document.getElementById("shippingAddress").value = contact.shippingAddress || "";
+  document.getElementById("notes").value = contact.notes || "";
+  showToast("Modifiez le contact puis enregistrez-le");
+}
+
+function resetContactFormMode() {
+  document.getElementById("contactFormTitle").textContent = "👥 Ajouter contact";
+  document.getElementById("contactSubmitButton").textContent = "Ajouter contact";
+  document.getElementById("cancelContactEditButton").hidden = true;
+}
+
+function cancelContactEdit() {
+  editingContactId = null;
+  ["firstname", "lastname", "contactCompany", "siret", "emailContact", "phone", "billingAddress", "shippingAddress", "notes"]
+    .forEach(id => { document.getElementById(id).value = ""; });
+  document.getElementById("type").value = "particulier";
+  resetContactFormMode();
+  showToast("Modification annulée");
 }
 
 // ================= FILTER CONTACTS =================

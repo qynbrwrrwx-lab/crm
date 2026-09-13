@@ -301,15 +301,45 @@
             </div>
 
             <div class="kpi">
-              <h3>Favoris</h3>
-              <span id="favCount">0</span>
+              <h3>Devis en cours</h3>
+              <span id="dashboardQuotes">0</span>
             </div>
 
             <div class="kpi">
-              <h3>Nouveaux</h3>
-              <span id="newCount">0</span>
+              <h3>Commandes</h3>
+              <span id="dashboardOrders">0</span>
             </div>
 
+            <div class="kpi">
+              <h3>Factures impayées</h3>
+              <span id="dashboardPendingInvoices">0</span>
+            </div>
+
+            <div class="kpi">
+              <h3>À encaisser</h3>
+              <span id="dashboardPendingTotal">0,00 €</span>
+            </div>
+
+            <div class="kpi">
+              <h3>Chiffre d'affaires encaissé</h3>
+              <span id="dashboardPaidTotal">0,00 €</span>
+            </div>
+
+            <div class="kpi">
+              <h3>Stock faible</h3>
+              <span id="dashboardLowStock">0</span>
+            </div>
+
+          </div>
+
+          <div id="companySetupNotice" class="setup-notice" hidden>
+            <div>
+              <strong>Complétez les informations de votre entreprise</strong>
+              <span>Ajoutez au minimum le nom, le SIRET, l’adresse et l’e-mail avant d’émettre vos documents.</span>
+            </div>
+            <button type="button" class="secondary-btn" onclick="showSection('company')">
+              Configurer mon entreprise
+            </button>
           </div>
 
           <div class="card">
@@ -343,7 +373,7 @@
 
             <div class="card">
 
-              <h2>👥 Ajouter contact</h2>
+              <h2 id="contactFormTitle">👥 Ajouter contact</h2>
 
               <div class="contact-grid">
 
@@ -385,6 +415,7 @@
 
                 <input
                   id="emailContact"
+                  type="email"
                   placeholder="Email"
                 />
 
@@ -414,10 +445,15 @@
               </div>
 
               <button
+                id="contactSubmitButton"
                 class="primary-btn"
                 onclick="addContact()"
               >
                 Ajouter contact
+              </button>
+
+              <button id="cancelContactEditButton" class="secondary-btn" onclick="cancelContactEdit()" hidden>
+                Annuler
               </button>
 
             </div>
@@ -445,7 +481,7 @@
 
             <div class="card">
 
-              <h2>📦 Ajouter produit</h2>
+              <h2 id="productFormTitle">📦 Ajouter produit</h2>
 
               <div class="product-grid">
 
@@ -462,12 +498,17 @@
                 <input
                   id="productPriceHT"
                   type="number"
+                  min="0"
+                  step="0.01"
                   placeholder="Prix HT"
                 />
 
                 <input
                   id="productTVA"
                   type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
                   value="20"
                   placeholder="TVA"
                 />
@@ -475,6 +516,8 @@
                 <input
                   id="productStock"
                   type="number"
+                  min="0"
+                  step="1"
                   placeholder="Stock"
                 />
 
@@ -487,10 +530,15 @@
               </div>
 
               <button
+                id="productSubmitButton"
                 class="primary-btn"
                 onclick="addProduct()"
               >
                 Ajouter produit
+              </button>
+
+              <button id="cancelProductEditButton" class="secondary-btn" onclick="cancelProductEdit()" hidden>
+                Annuler
               </button>
 
             </div>
@@ -498,6 +546,13 @@
             <div class="card">
 
               <h2>📋 Liste produits</h2>
+
+              <input
+                id="productsFilter"
+                class="search-input"
+                placeholder="🔎 Rechercher un produit ou une référence..."
+                oninput="filterProducts()"
+              />
 
               <div id="productsList"></div>
 
@@ -685,9 +740,25 @@
 
   <div class="card">
 
-    <h2>
-      Liste des factures
-    </h2>
+    <div class="section-header">
+      <div>
+        <h2>Liste des factures</h2>
+        <p class="company-subtitle" id="invoiceSummary">0 facture</p>
+      </div>
+      <div class="invoice-counters">
+        <span id="paidInvoicesTotal">0,00 € encaissé</span>
+        <span id="pendingInvoicesTotal">0,00 € à encaisser</span>
+      </div>
+    </div>
+
+    <div class="invoice-filters">
+      <input id="invoiceSearch" type="search" placeholder="Rechercher un numéro ou un client" oninput="filterInvoices()" />
+      <select id="invoiceStatusFilter" onchange="filterInvoices()">
+        <option value="all">Toutes les factures</option>
+        <option value="pending">En attente</option>
+        <option value="paid">Payées</option>
+      </select>
+    </div>
 
     <div id="invoiceList"></div>
 
@@ -1068,6 +1139,30 @@
               onclick="logout()"
             >
               Déconnexion
+            </button>
+
+            <button
+              class="secondary-btn"
+              onclick="exportAccountData()"
+            >
+              Télécharger mes données
+            </button>
+
+            <button
+              class="secondary-btn"
+              onclick="changePassword()"
+            >
+              Modifier mon mot de passe
+            </button>
+
+            <h3 class="settings-subtitle">Activité récente</h3>
+            <div id="accountActivity" class="account-activity"></div>
+
+            <button
+              class="delete-account-btn"
+              onclick="deleteAccount()"
+            >
+              Supprimer mon compte
             </button>
 
           </div>
