@@ -877,7 +877,13 @@ ${
 </p>
 
 <p>
-<strong>Date du devis</strong><br>
+<strong>${
+  invoice.type === "quote"
+    ? "Date du devis"
+    : invoice.type === "order"
+      ? "Date de la commande"
+      : "Date de la facture"
+}</strong><br>
 ${new Date(invoice.createdAt).toLocaleDateString("fr-FR")}
 </p>
 
@@ -1070,37 +1076,70 @@ ${
     : ""
 }
 
-      <button
-        id="editInvoiceBtn"
-        class="primary-btn"
-        onclick="
-        ${
-            isEditingQuote
-            ? `saveInvoiceEdition()`
-            : `enableInvoiceEdition()`
-        }
-        "
-      >
-        ${
-            isEditingQuote
-            ? "Enregistrer"
-            : "Modifier"
-        }
-      </button>
+     ${
+  invoice.type !== "invoice"
+  ? `
+    <button
+      id="editInvoiceBtn"
+      class="primary-btn"
+      onclick="
+      ${
+          isEditingQuote
+          ? `saveInvoiceEdition()`
+          : `enableInvoiceEdition()`
+      }
+      "
+    >
+      ${
+          isEditingQuote
+          ? "Enregistrer"
+          : "Modifier"
+      }
+    </button>
 
-      <button
-        class="secondary-btn"
-        onclick="deleteInvoice('${invoice._id}')"
-      >
-        Supprimer
-      </button>
+    <button
+      class="secondary-btn"
+      onclick="deleteInvoice('${invoice._id}')"
+    >
+      Supprimer
+    </button>
+  `
+  : ""
+}
 
-      <button
-        class="secondary-btn"
-        onclick="closeInvoiceDetails()"
-      >
-        Fermer
-      </button>
+${
+  invoice.type === "invoice" &&
+  invoice.paymentStatus !== "paid"
+  ? `
+    <button
+      class="primary-btn"
+      onclick="markInvoicePaid('${invoice._id}')"
+    >
+      Marquer comme payée
+    </button>
+  `
+  : ""
+}
+
+${
+  invoice.type === "invoice" &&
+  invoice.paymentStatus === "paid"
+  ? `
+    <span
+      class="invoice-paid-badge"
+      style="
+        display:inline-flex;
+        align-items:center;
+        padding:10px 16px;
+        border-radius:10px;
+        font-weight:600;
+      "
+    >
+      Payée
+    </span>
+  `
+  : ""
+}
 
     </div>
 
