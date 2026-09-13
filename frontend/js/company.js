@@ -8,13 +8,7 @@ let companyLogoBase64 = "";
 
   try {
 
-    const res =
-      await fetch(
-        "/api/company"
-      );
-
-    const company =
-      await res.json();
+    const company = await apiFetch("/api/company");
 
       console.log("COMPANY =", company);
       console.log("LOGO =", company.logo);
@@ -178,15 +172,8 @@ async function saveCompany() {
 
   try {
 
-    await fetch(
-      "/api/company",
-      {
+    await apiFetch("/api/company", {
         method: "PUT",
-
-        headers: {
-          "Content-Type":
-          "application/json"
-        },
 
         body: JSON.stringify({
 
@@ -296,9 +283,7 @@ async function saveCompany() {
             companyLogoBase64
 
        })
-
-      }
-    );
+    });
 
     alert(
       "Modifications effectuées ✅"

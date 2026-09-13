@@ -1284,34 +1284,6 @@ async function requestReset() {
 
 </script>
 
-<div
-  id="invoiceDetailsModal"
-  class="invoice-details-modal"
-  style="display:none;"
->
-
-  <div class="invoice-details-content">
-
-    <div class="invoice-details-header">
-
-      <h2 id="detailNumber">
-        Devis
-      </h2>
-
-      <button
-        onclick="closeInvoiceDetails()"
-      >
-        X
-      </button>
-
-    </div>
-
-    <div id="invoiceDetailsBody"></div>
-
-  </div>
-
-</div>
-
 <!-- POPUP DETAILS DEVIS / FACTURE -->
 
 <div
@@ -1371,6 +1343,52 @@ async function requestReset() {
         </div>
 
     </div>
+
+</div>
+
+<!-- ================= PAIEMENT FACTURE ================= -->
+
+<div
+  id="paymentModal"
+  class="invoice-details-modal"
+  style="display:none;"
+>
+
+  <div class="invoice-details-content payment-modal-content">
+
+    <div class="invoice-details-header">
+
+      <div>
+        <h2>Enregistrer le paiement</h2>
+        <p id="paymentInvoiceNumber" class="company-subtitle">Facture</p>
+      </div>
+
+      <button type="button" onclick="closePaymentModal()">✕</button>
+
+    </div>
+
+    <div class="payment-amount">
+      <span>Montant à régler</span>
+      <strong id="paymentInvoiceAmount">0,00 € TTC</strong>
+    </div>
+
+    <div class="payment-method-section">
+      <h3>Moyen de paiement</h3>
+
+      <div class="payment-method-options">
+        <button type="button" class="payment-method-btn" data-method="Espèces" onclick="selectPaymentMethod('Espèces')">Espèces</button>
+        <button type="button" class="payment-method-btn" data-method="Carte bancaire" onclick="selectPaymentMethod('Carte bancaire')">Carte bancaire</button>
+        <button type="button" class="payment-method-btn" data-method="Chèque" onclick="selectPaymentMethod('Chèque')">Chèque</button>
+        <button type="button" class="payment-method-btn" data-method="Virement bancaire" onclick="selectPaymentMethod('Virement bancaire')">Virement bancaire</button>
+      </div>
+    </div>
+
+    <div class="payment-modal-actions">
+      <button type="button" class="secondary-btn" onclick="closePaymentModal()">Annuler</button>
+      <button type="button" class="primary-btn" onclick="confirmInvoicePayment()">Confirmer le paiement</button>
+    </div>
+
+  </div>
 
 </div>
 

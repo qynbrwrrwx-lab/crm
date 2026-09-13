@@ -263,6 +263,18 @@ function renderInvoices(invoices) {
             HT
           </small>
 
+          ${
+            invoice.type === "invoice"
+              ? `<span class="invoice-status ${
+                  invoice.paymentStatus === "paid" ? "paid" : "pending"
+                }">${
+                  invoice.paymentStatus === "paid"
+                    ? `Payée · ${invoice.paymentMethod || "Paiement"}`
+                    : "En attente"
+                }</span>`
+              : ""
+          }
+
         </div>
 
       </div>
@@ -384,77 +396,83 @@ async function createInvoice() {
 }
 
 // MARK PAID
+let paymentInvoiceId = null;
+let selectedPaymentMethod = null;
+
 async function markInvoicePaid(id) {
+  try {
+    const invoices = await apiFetch("/api/invoices");
+    const invoice = invoices.find(item => item._id === id);
 
-  const paymentMethod =
-    prompt(
-      "Moyen de paiement :\n\n" +
-      "1 - Espèces\n" +
-      "2 - Carte bancaire\n" +
-      "3 - Chèque\n" +
-      "4 - Virement bancaire\n\n" +
-      "Entrez le numéro correspondant :"
-    );
+    if (!invoice || invoice.type !== "invoice") {
+      throw new Error("Facture introuvable");
+    }
 
-  const methods = {
-    "1": "Espèces",
-    "2": "Carte bancaire",
-    "3": "Chèque",
-    "4": "Virement bancaire"
-  };
+    paymentInvoiceId = id;
+    selectedPaymentMethod = null;
 
-  const selectedMethod =
-    methods[paymentMethod];
+    document.getElementById("paymentInvoiceNumber").textContent =
+      `Facture ${invoice.invoiceNumber}`;
+    document.getElementById("paymentInvoiceAmount").textContent =
+      `${Number(invoice.totalTTC).toFixed(2)} € TTC`;
+    document.querySelectorAll(".payment-method-btn").forEach(button => {
+      button.classList.remove("selected");
+    });
 
-  if (!selectedMethod) {
+    document.getElementById("paymentModal").style.display = "flex";
+  } catch (err) {
+    console.error(err);
+    showToast(err.message || "Impossible d'ouvrir le paiement");
+  }
+}
 
-    showToast(
-      "Moyen de paiement invalide"
-    );
+function selectPaymentMethod(method) {
+  selectedPaymentMethod = method;
 
+  document.querySelectorAll(".payment-method-btn").forEach(button => {
+    button.classList.toggle("selected", button.dataset.method === method);
+  });
+}
+
+function closePaymentModal() {
+  paymentInvoiceId = null;
+  selectedPaymentMethod = null;
+
+  const modal = document.getElementById("paymentModal");
+  if (modal) modal.style.display = "none";
+}
+
+async function confirmInvoicePayment() {
+  if (!paymentInvoiceId || !selectedPaymentMethod) {
+    showToast("Sélectionnez un moyen de paiement");
     return;
   }
 
+  const invoiceId = paymentInvoiceId;
+  const paymentMethod = selectedPaymentMethod;
+
   try {
+    const updatedInvoice = await apiFetch(
+      `/api/invoices/pay/${invoiceId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ paymentMethod })
+      }
+    );
 
-    const updatedInvoice =
-      await apiFetch(
-        `/api/invoices/pay/${id}`,
-        {
-          method: "PUT",
-
-          body: JSON.stringify({
-            paymentMethod: selectedMethod
-          })
-        }
-      );
-
-    // Mettre à jour immédiatement
-    // la facture actuellement ouverte
-    currentInvoice =
-      structuredClone(updatedInvoice);
-
-    // Recharger la liste
+    currentInvoice = structuredClone(updatedInvoice);
     await loadInvoices();
+    closePaymentModal();
 
-    // Réafficher immédiatement la fiche
-    await openInvoice(id);
+    if (currentInvoiceId === invoiceId) {
+      await openInvoice(invoiceId);
+    }
 
-    showToast(
-      `Facture payée · ${selectedMethod} ✅`
-    );
-
+    showToast(`Facture payée · ${paymentMethod} ✅`);
   } catch (err) {
-
     console.error(err);
-
-    showToast(
-      err.message ||
-      "Erreur lors du paiement"
-    );
-
+    showToast(err.message || "Erreur lors du paiement");
   }
-
 }
 
 // DELETE INVOICE
@@ -779,12 +797,30 @@ async function convertOrderToInvoice(id) {
 
 }
 
-function viewQuote(id) {
+async function viewQuote(id) {
 
-  window.open(
-    `/api/invoices/pdf/${id}`,
-    "_blank"
-  );
+  try {
+    const response = await fetch(
+      `${API_URL}/api/invoices/pdf/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${getToken()}`
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Impossible de générer le PDF");
+    }
+
+    const pdfUrl = URL.createObjectURL(await response.blob());
+    window.open(pdfUrl, "_blank", "noopener");
+    window.setTimeout(() => URL.revokeObjectURL(pdfUrl), 60_000);
+
+  } catch (err) {
+    console.error(err);
+    showToast(err.message);
+  }
 
 }
 

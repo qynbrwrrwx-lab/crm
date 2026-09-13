@@ -13,11 +13,13 @@ const userSchema = new mongoose.Schema({
     required: true
   },
 
-  resetToken: String,
+  resetTokenHash: String,
+
+  resetTokenExpiresAt: Date,
   
-  verifyToken: {
-    type: String
-  },
+  verifyTokenHash: String,
+
+  verifyTokenExpiresAt: Date,
 
   isVerified: {
     type: Boolean,

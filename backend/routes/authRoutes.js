@@ -12,12 +12,31 @@ const {
 
 const router = express.Router();
 
+const TOKEN_LIFETIME_MS = 60 * 60 * 1000;
+
+function hashToken(token) {
+  return crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+}
+
+function isValidPassword(password) {
+  return typeof password === "string" && password.length >= 12;
+}
+
 // REGISTER
 router.post("/register", async (req, res) => {
 
   try {
 
     let { email, password } = req.body;
+
+    if (typeof email !== "string" || !isValidPassword(password)) {
+      return res.status(400).json({
+        error: "Utilisez un email valide et un mot de passe d'au moins 12 caractères"
+      });
+    }
 
     email = email.toLowerCase().trim();
 
@@ -44,7 +63,9 @@ router.post("/register", async (req, res) => {
 
         password: hash,
 
-        verifyToken,
+        verifyTokenHash: hashToken(verifyToken),
+
+        verifyTokenExpiresAt: new Date(Date.now() + TOKEN_LIFETIME_MS),
 
         isVerified: false
       });
@@ -79,6 +100,12 @@ router.post("/login", async (req, res) => {
 
     let { email, password } = req.body;
 
+    if (typeof email !== "string" || typeof password !== "string") {
+      return res.status(400).json({
+        error: "Email et mot de passe requis"
+      });
+    }
+
     email = email.toLowerCase().trim();
 
     const user =
@@ -101,6 +128,12 @@ router.post("/login", async (req, res) => {
 
       return res.status(400).json({
         error: "Mot de passe incorrect"
+      });
+    }
+
+    if (!user.isVerified) {
+      return res.status(403).json({
+        error: "Veuillez vérifier votre adresse email avant de vous connecter"
       });
     }
 
@@ -140,15 +173,17 @@ router.post(
 
       const { email } = req.body;
 
-      if (!email) {
+      if (typeof email !== "string" || !email.trim()) {
 
         return res.status(400).json({
           error: "Email requis"
         });
       }
 
+      const normalizedEmail = email.toLowerCase().trim();
+
       const user =
-        await User.findOne({ email });
+        await User.findOne({ email: normalizedEmail });
 
       if (!user) {
 
@@ -160,7 +195,11 @@ router.post(
       const resetToken =
         crypto.randomBytes(32).toString("hex");
 
-      user.resetToken = resetToken;
+      user.resetTokenHash = hashToken(resetToken);
+
+      user.resetTokenExpiresAt = new Date(
+        Date.now() + TOKEN_LIFETIME_MS
+      );
 
       await user.save();
 
@@ -200,9 +239,16 @@ router.post(
 
       const { password } = req.body;
 
+      if (!isValidPassword(password)) {
+        return res.status(400).json({
+          error: "Le mot de passe doit contenir au moins 12 caractères"
+        });
+      }
+
       const user =
         await User.findOne({
-          resetToken: token
+          resetTokenHash: hashToken(token),
+          resetTokenExpiresAt: { $gt: new Date() }
         });
 
       if (!user) {
@@ -217,7 +263,9 @@ router.post(
 
       user.password = hashedPassword;
 
-      user.resetToken = null;
+      user.resetTokenHash = null;
+
+      user.resetTokenExpiresAt = null;
 
       await user.save();
 
@@ -247,22 +295,40 @@ router.post(
 
       const { email } = req.body;
 
-      if (!email) {
+      if (typeof email !== "string" || !email.trim()) {
 
         return res.status(400).json({
           error: "Email requis"
         });
       }
 
+      const normalizedEmail = email.toLowerCase().trim();
+
+      const user = await User.findOne({
+        email: normalizedEmail
+      });
+
+      if (!user || user.isVerified) {
+        return res.json({ success: true });
+      }
+
       const verifyToken =
         crypto.randomBytes(32).toString("hex");
+
+      user.verifyTokenHash = hashToken(verifyToken);
+
+      user.verifyTokenExpiresAt = new Date(
+        Date.now() + TOKEN_LIFETIME_MS
+      );
+
+      await user.save();
 
       await sendVerificationEmail({
 
         to: email,
 
         verificationLink:
-          `${process.env.BASE_URL}/verify-email/${verifyToken}`
+          `${process.env.BASE_URL}/api/auth/verify-email/${verifyToken}`
       });
 
       res.json({
@@ -294,7 +360,8 @@ router.get(
 
       const user =
         await User.findOne({
-          verifyToken: token
+          verifyTokenHash: hashToken(token),
+          verifyTokenExpiresAt: { $gt: new Date() }
         });
 
       // TOKEN INVALIDE OU DÉJÀ UTILISÉ
@@ -317,7 +384,9 @@ router.get(
       user.isVerified = true;
 
       // SUPPRESSION TOKEN
-      user.verifyToken = null;
+      user.verifyTokenHash = null;
+
+      user.verifyTokenExpiresAt = null;
 
       await user.save();
 

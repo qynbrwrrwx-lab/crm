@@ -105,6 +105,22 @@ app.use(
   })
 );
 
+app.use(
+  "/api/auth/request-reset",
+  rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 5
+  })
+);
+
+app.use(
+  "/api/auth/resend-verification",
+  rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 5
+  })
+);
+
 // ================= DATABASE =================
 
 mongoose

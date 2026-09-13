@@ -5,9 +5,11 @@ const router = express.Router();
 const Company =
   require("../models/companyModel");
 
+const auth = require("../middleware/auth");
+
 // GET COMPANY
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
 
   try {
 
@@ -35,7 +37,7 @@ router.get("/", async (req, res) => {
 
 // UPDATE COMPANY
 
-router.put("/", async (req, res) => {
+router.put("/", auth, async (req, res) => {
 
   try {
 

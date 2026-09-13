@@ -212,6 +212,19 @@ router.put(
         });
       }
 
+      const allowedPaymentMethods = [
+        "Espèces",
+        "Carte bancaire",
+        "Chèque",
+        "Virement bancaire"
+      ];
+
+      if (!allowedPaymentMethods.includes(paymentMethod)) {
+        return res.status(400).json({
+          error: "Moyen de paiement invalide"
+        });
+      }
+
       invoice.paymentStatus =
         "paid";
 
@@ -594,12 +607,20 @@ await order.save();
 router.get(
   "/pdf/:id",
 
+  auth,
+
   async (req, res) => {
 
     try {
 
       const invoice =
         await Invoice.findById(req.params.id);
+
+      if (!invoice) {
+        return res.status(404).send(
+          "Document introuvable"
+        );
+      }
 
       const company =
         await Company.findOne();  
@@ -664,13 +685,6 @@ for (const item of invoice.products) {
 
 }
     
-    if (!invoice) {
-
-        return res.status(404).send(
-          "Document introuvable"
-        );
-      }
-
       const doc =
   new PDFDocument({
     margin: 50
