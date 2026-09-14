@@ -420,90 +420,97 @@
 
           <div class="grid">
 
-            <div class="card">
+            <div class="card form-card contact-form-card">
 
-              <h2 id="contactFormTitle">👥 Ajouter contact</h2>
-
-              <div class="contact-grid">
-
-                <select id="type">
-
-                  <option value="particulier">
-                    Particulier
-                  </option>
-
-                  <option value="pro">
-                    Professionnel
-                  </option>
-
-                  <option value="association">
-                    Association
-                  </option>
-
-                </select>
-
-                <input
-                  id="contactCompany"
-                  placeholder="Entreprise"
-                />
-
-                <input
-                  id="firstname"
-                  placeholder="Prénom"
-                />
-
-                <input
-                  id="lastname"
-                  placeholder="Nom"
-                />
-
-                <input
-                  id="siret"
-                  placeholder="SIRET"
-                />
-
-                <input
-                  id="emailContact"
-                  type="email"
-                  placeholder="Email"
-                />
-
-                <input
-                  id="phone"
-                  placeholder="Téléphone"
-                />
-
-                <input
-                  id="billingAddress"
-                  placeholder="Adresse facturation"
-                  class="contact-grid-full"
-                />
-
-                <input
-                  id="shippingAddress"
-                  placeholder="Adresse livraison"
-                  class="contact-grid-full"
-                />
-
-                <textarea
-                  id="notes"
-                  placeholder="Notes"
-                  class="contact-grid-full"
-                ></textarea>
-
+              <div class="form-card-header">
+                <div>
+                  <p class="form-eyebrow">Répertoire clients</p>
+                  <h2 id="contactFormTitle">Ajouter un client</h2>
+                  <p class="form-intro">Renseignez les informations utiles à vos devis, commandes et factures.</p>
+                </div>
+                <span class="form-step">1 · Client</span>
               </div>
 
-              <button
-                id="contactSubmitButton"
-                class="primary-btn"
-                onclick="addContact()"
-              >
-                Ajouter contact
-              </button>
+              <div class="form-completeness" aria-live="polite">
+                <div><span>Dossier client</span><strong id="contactCompletenessText">À compléter</strong></div>
+                <div class="form-completeness-track"><span id="contactCompletenessBar"></span></div>
+              </div>
 
-              <button id="cancelContactEditButton" class="secondary-btn" onclick="cancelContactEdit()" hidden>
-                Annuler
-              </button>
+              <div class="form-section">
+                <h3>Identité</h3>
+                <div class="contact-grid">
+                  <label class="form-field">
+                    <span>Type de client</span>
+                    <select id="type">
+                      <option value="particulier">Particulier</option>
+                      <option value="pro">Professionnel</option>
+                      <option value="association">Association</option>
+                    </select>
+                  </label>
+
+                  <label class="form-field professional-only">
+                    <span>Entreprise</span>
+                    <input id="contactCompany" placeholder="Ex. Atelier Martin" />
+                  </label>
+
+                  <label class="form-field">
+                    <span>Prénom</span>
+                    <input id="firstname" placeholder="Ex. Camille" />
+                  </label>
+
+                  <label class="form-field">
+                    <span>Nom</span>
+                    <input id="lastname" placeholder="Ex. Martin" />
+                  </label>
+
+                  <label class="form-field contact-grid-full professional-only">
+                    <span>SIRET <small>Optionnel</small></span>
+                    <input id="siret" placeholder="Ex. 123 456 789 00012" />
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h3>Coordonnées</h3>
+                <div class="contact-grid">
+                  <label class="form-field">
+                    <span>Adresse e-mail</span>
+                    <input id="emailContact" type="email" placeholder="client@entreprise.fr" />
+                  </label>
+
+                  <label class="form-field">
+                    <span>Téléphone</span>
+                    <input id="phone" type="tel" placeholder="06 00 00 00 00" />
+                  </label>
+
+                  <label class="form-field contact-grid-full required-field">
+                    <span>Adresse de facturation <small>Obligatoire</small></span>
+                    <input id="billingAddress" placeholder="N°, rue, code postal, ville" />
+                  </label>
+
+                  <label class="copy-address-toggle contact-grid-full">
+                    <input id="copyBillingAddress" type="checkbox" />
+                    <span>Utiliser aussi cette adresse pour la livraison</span>
+                  </label>
+
+                  <label class="form-field contact-grid-full">
+                    <span>Adresse de livraison <small>Si différente</small></span>
+                    <input id="shippingAddress" placeholder="N°, rue, code postal, ville" />
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-section form-section-last">
+                <label class="form-field">
+                  <span>Note interne <small>Optionnel</small></span>
+                  <textarea id="notes" placeholder="Informations utiles pour votre équipe..."></textarea>
+                </label>
+              </div>
+
+              <div class="form-actions">
+                <button id="contactSubmitButton" class="primary-btn" onclick="addContact()">Enregistrer le client</button>
+                <button id="cancelContactEditButton" class="secondary-btn" onclick="cancelContactEdit()" hidden>Annuler les modifications</button>
+              </div>
 
             </div>
 
@@ -528,67 +535,70 @@
 
           <div class="grid">
 
-            <div class="card">
+            <div class="card form-card product-form-card">
 
-              <h2 id="productFormTitle">📦 Ajouter produit</h2>
-
-              <div class="product-grid">
-
-                <input
-                  id="productName"
-                  placeholder="Nom produit"
-                />
-
-                <input
-                  id="productReference"
-                  placeholder="Référence"
-                />
-
-                <input
-                  id="productPriceHT"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="Prix HT"
-                />
-
-                <input
-                  id="productTVA"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value="20"
-                  placeholder="TVA"
-                />
-
-                <input
-                  id="productStock"
-                  type="number"
-                  min="0"
-                  step="1"
-                  placeholder="Stock"
-                />
-
-                <textarea
-                  id="productDescription"
-                  placeholder="Description"
-                  class="product-grid-full"
-                ></textarea>
-
+              <div class="form-card-header">
+                <div>
+                  <p class="form-eyebrow">Catalogue & inventaire</p>
+                  <h2 id="productFormTitle">Ajouter un produit</h2>
+                  <p class="form-intro">Créez une fiche produit complète et définissez son stock de départ.</p>
+                </div>
+                <span class="form-step stock-step">2 · Stock</span>
               </div>
 
-              <button
-                id="productSubmitButton"
-                class="primary-btn"
-                onclick="addProduct()"
-              >
-                Ajouter produit
-              </button>
+              <div class="price-preview" aria-live="polite">
+                <span>Prix de vente TTC</span>
+                <strong id="productPriceTTCPreview">0,00 €</strong>
+                <small id="productPriceTTCDetail">Renseignez le prix HT et la TVA</small>
+              </div>
 
-              <button id="cancelProductEditButton" class="secondary-btn" onclick="cancelProductEdit()" hidden>
-                Annuler
-              </button>
+              <div class="form-section">
+                <h3>Fiche produit</h3>
+                <div class="product-grid">
+                  <label class="form-field product-grid-full">
+                    <span>Nom du produit <small>Obligatoire</small></span>
+                    <input id="productName" placeholder="Ex. Pack accompagnement mensuel" />
+                  </label>
+
+                  <label class="form-field">
+                    <span>Référence</span>
+                    <input id="productReference" placeholder="Ex. PACK-001" />
+                  </label>
+
+                  <label class="form-field stock-field">
+                    <span>Stock initial</span>
+                    <div class="input-suffix-wrap"><input id="productStock" type="number" min="0" step="1" placeholder="0" /><span>unités</span></div>
+                    <small class="field-help">Le réassort se fera ensuite depuis la liste.</small>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h3>Prix de vente</h3>
+                <div class="product-grid">
+                  <label class="form-field required-field">
+                    <span>Prix hors taxes <small>Obligatoire</small></span>
+                    <div class="input-suffix-wrap"><input id="productPriceHT" type="number" min="0" step="0.01" placeholder="0,00" /><span>€ HT</span></div>
+                  </label>
+
+                  <label class="form-field">
+                    <span>TVA appliquée</span>
+                    <div class="input-suffix-wrap"><input id="productTVA" type="number" min="0" max="100" step="0.01" value="20" placeholder="20" /><span>%</span></div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-section form-section-last">
+                <label class="form-field">
+                  <span>Description <small>Optionnel</small></span>
+                  <textarea id="productDescription" placeholder="Décrivez le produit ou la prestation pour vos documents commerciaux..."></textarea>
+                </label>
+              </div>
+
+              <div class="form-actions">
+                <button id="productSubmitButton" class="primary-btn" onclick="addProduct()">Créer le produit</button>
+                <button id="cancelProductEditButton" class="secondary-btn" onclick="cancelProductEdit()" hidden>Annuler les modifications</button>
+              </div>
 
             </div>
 
@@ -1500,6 +1510,49 @@ async function requestReset() {
 
     </div>
 
+</div>
+
+<!-- ================= REASSORT STOCK ================= -->
+
+<div id="restockModal" class="invoice-details-modal" style="display:none;">
+  <div class="invoice-details-content restock-modal-content">
+    <div class="invoice-details-header">
+      <div>
+        <p class="form-eyebrow">Inventaire</p>
+        <h2>Ajouter du stock</h2>
+      </div>
+      <button type="button" onclick="closeRestockModal()">✕</button>
+    </div>
+
+    <div class="restock-product-summary">
+      <span id="restockProductReference">Référence</span>
+      <strong id="restockProductName">Produit</strong>
+      <div><span>Stock actuel</span><b id="restockCurrentStock">0</b><small>unités</small></div>
+    </div>
+
+    <label class="form-field restock-quantity-field">
+      <span>Quantité à ajouter</span>
+      <div class="input-suffix-wrap"><input id="restockQuantity" type="number" min="1" step="1" placeholder="Ex. 10" /><span>unités</span></div>
+    </label>
+    <div class="restock-quick-actions" aria-label="Quantités rapides">
+      <span>Ajout rapide</span>
+      <button type="button" onclick="setRestockQuantity(1)">+1</button>
+      <button type="button" onclick="setRestockQuantity(5)">+5</button>
+      <button type="button" onclick="setRestockQuantity(10)">+10</button>
+      <button type="button" onclick="setRestockQuantity(25)">+25</button>
+    </div>
+    <p id="restockResult" class="restock-result">Le nouveau stock apparaîtra ici.</p>
+
+    <div class="restock-history-block">
+      <h3>Derniers mouvements</h3>
+      <div id="restockHistory">Chargement…</div>
+    </div>
+
+    <div class="payment-modal-actions">
+      <button type="button" class="secondary-btn" onclick="closeRestockModal()">Annuler</button>
+      <button type="button" class="primary-btn" onclick="confirmRestock()">Confirmer le réassort</button>
+    </div>
+  </div>
 </div>
 
 <!-- ================= PAIEMENT FACTURE ================= -->

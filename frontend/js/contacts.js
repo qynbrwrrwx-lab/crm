@@ -108,9 +108,12 @@ async function addContact() {
   document.getElementById("shippingAddress").value = "";
 
   document.getElementById("notes").value = "";
+  document.getElementById("copyBillingAddress").checked = false;
+  document.getElementById("shippingAddress").readOnly = false;
 
   editingContactId = null;
   resetContactFormMode();
+  updateContactFormExperience();
 
   loadContacts();
 
@@ -269,7 +272,7 @@ function editContact(id) {
   if (!contact) return;
 
   editingContactId = id;
-  document.getElementById("contactFormTitle").textContent = "👥 Modifier le contact";
+  document.getElementById("contactFormTitle").textContent = "Modifier le client";
   document.getElementById("contactSubmitButton").textContent = "Enregistrer les modifications";
   document.getElementById("cancelContactEditButton").hidden = false;
   document.getElementById("type").value = contact.type || "particulier";
@@ -282,12 +285,16 @@ function editContact(id) {
   document.getElementById("billingAddress").value = contact.billingAddress || "";
   document.getElementById("shippingAddress").value = contact.shippingAddress || "";
   document.getElementById("notes").value = contact.notes || "";
+  document.getElementById("copyBillingAddress").checked =
+    Boolean(contact.shippingAddress) && contact.shippingAddress === contact.billingAddress;
+  syncShippingAddress();
+  updateContactFormExperience();
   showToast("Modifiez le contact puis enregistrez-le");
 }
 
 function resetContactFormMode() {
-  document.getElementById("contactFormTitle").textContent = "👥 Ajouter contact";
-  document.getElementById("contactSubmitButton").textContent = "Ajouter contact";
+  document.getElementById("contactFormTitle").textContent = "Ajouter un client";
+  document.getElementById("contactSubmitButton").textContent = "Enregistrer le client";
   document.getElementById("cancelContactEditButton").hidden = true;
 }
 
@@ -296,9 +303,65 @@ function cancelContactEdit() {
   ["firstname", "lastname", "contactCompany", "siret", "emailContact", "phone", "billingAddress", "shippingAddress", "notes"]
     .forEach(id => { document.getElementById(id).value = ""; });
   document.getElementById("type").value = "particulier";
+  document.getElementById("copyBillingAddress").checked = false;
+  document.getElementById("shippingAddress").readOnly = false;
   resetContactFormMode();
+  updateContactFormExperience();
   showToast("Modification annulée");
 }
+
+// ================= EXPERIENCE FORMULAIRE CLIENT =================
+
+function updateContactFormExperience() {
+  const type = document.getElementById("type")?.value || "particulier";
+  const isProfessional = type !== "particulier";
+
+  document.querySelectorAll(".professional-only").forEach(element => {
+    element.classList.toggle("is-hidden", !isProfessional);
+  });
+
+  const fields = ["firstname", "lastname", "emailContact", "phone", "billingAddress"];
+  if (isProfessional) fields.push("contactCompany", "siret");
+  const completed = fields.filter(id => document.getElementById(id)?.value.trim()).length;
+  const percentage = Math.round((completed / fields.length) * 100);
+  const bar = document.getElementById("contactCompletenessBar");
+  const text = document.getElementById("contactCompletenessText");
+
+  if (bar) bar.style.width = `${percentage}%`;
+  if (text) {
+    text.textContent = percentage === 100
+      ? "Dossier complet"
+      : `${percentage}% renseigné`;
+  }
+}
+
+function syncShippingAddress() {
+  const checkbox = document.getElementById("copyBillingAddress");
+  const billing = document.getElementById("billingAddress");
+  const shipping = document.getElementById("shippingAddress");
+  if (!checkbox || !billing || !shipping) return;
+
+  if (checkbox.checked) {
+    shipping.value = billing.value;
+    shipping.readOnly = true;
+  } else {
+    shipping.readOnly = false;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const trackedFields = ["type", "firstname", "lastname", "contactCompany", "siret", "emailContact", "phone", "billingAddress"];
+  trackedFields.forEach(id => {
+    document.getElementById(id)?.addEventListener("input", updateContactFormExperience);
+    document.getElementById(id)?.addEventListener("change", updateContactFormExperience);
+  });
+
+  document.getElementById("copyBillingAddress")?.addEventListener("change", syncShippingAddress);
+  document.getElementById("billingAddress")?.addEventListener("input", () => {
+    if (document.getElementById("copyBillingAddress")?.checked) syncShippingAddress();
+  });
+  updateContactFormExperience();
+});
 
 // ================= FILTER CONTACTS =================
 
