@@ -16,6 +16,25 @@ const productSchema = new mongoose.Schema({
 
   reference: String,
 
+  category: {
+    type: String,
+    trim: true,
+    default: "Non classé",
+    maxlength: 80
+  },
+
+  supplierName: {
+    type: String,
+    trim: true,
+    maxlength: 120
+  },
+
+  supplierReference: {
+    type: String,
+    trim: true,
+    maxlength: 80
+  },
+
   description: String,
 
   priceHT: {
@@ -40,6 +59,16 @@ const productSchema = new mongoose.Schema({
     type: Number,
     default: 0,
     min: 0
+  },
+
+  lowStockThreshold: {
+    type: Number,
+    default: 5,
+    min: 0,
+    validate: {
+      validator: Number.isInteger,
+      message: "Le seuil de stock doit être un entier positif ou nul"
+    }
   }
 
 }, {

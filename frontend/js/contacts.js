@@ -119,6 +119,7 @@ async function addContact() {
 
   loadInvoiceData();
 
+    celebrateFormCard(".contact-form-card");
     showToast("Contact enregistré ✅");
   } catch (err) {
     showToast(err.message || "Impossible d'enregistrer le contact");
@@ -319,6 +320,9 @@ function updateContactFormExperience() {
   document.querySelectorAll(".professional-only").forEach(element => {
     element.classList.toggle("is-hidden", !isProfessional);
   });
+  document.querySelectorAll("[data-contact-type]").forEach(button => {
+    button.classList.toggle("active", button.dataset.contactType === type);
+  });
 
   const fields = ["firstname", "lastname", "emailContact", "phone", "billingAddress"];
   if (isProfessional) fields.push("contactCompany", "siret");
@@ -333,6 +337,41 @@ function updateContactFormExperience() {
       ? "Dossier complet"
       : `${percentage}% renseigné`;
   }
+
+  const firstname = document.getElementById("firstname")?.value.trim() || "";
+  const lastname = document.getElementById("lastname")?.value.trim() || "";
+  const company = document.getElementById("contactCompany")?.value.trim() || "";
+  const email = document.getElementById("emailContact")?.value.trim() || "";
+  const phone = document.getElementById("phone")?.value.trim() || "";
+  const displayName = isProfessional && company
+    ? company
+    : `${firstname} ${lastname}`.trim() || "Client à renseigner";
+  const initials = displayName === "Client à renseigner"
+    ? "CL"
+    : displayName.split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase();
+  const typeLabels = { particulier: "Particulier", pro: "Professionnel", association: "Association" };
+
+  document.getElementById("contactPreviewInitials").textContent = initials;
+  document.getElementById("contactPreviewType").textContent = typeLabels[type];
+  document.getElementById("contactPreviewName").textContent = displayName;
+  document.getElementById("contactPreviewDetails").textContent = email || phone || "Ses coordonnées apparaîtront ici.";
+  document.getElementById("contactPreviewStatus").textContent = percentage === 100 ? "Prêt à enregistrer" : "Brouillon";
+}
+
+function setContactType(type) {
+  const select = document.getElementById("type");
+  if (!select || !["particulier", "pro", "association"].includes(type)) return;
+  select.value = type;
+  updateContactFormExperience();
+}
+
+function celebrateFormCard(selector) {
+  const card = document.querySelector(selector);
+  if (!card) return;
+  card.classList.remove("form-success-pulse");
+  void card.offsetWidth;
+  card.classList.add("form-success-pulse");
+  window.setTimeout(() => card.classList.remove("form-success-pulse"), 850);
 }
 
 function syncShippingAddress() {
@@ -402,6 +441,63 @@ function filterContacts() {
   });
 
   renderContacts(sortedContacts);
+}
+
+function exportContactsCsv() {
+  const lines = [
+    ["Type", "Entreprise", "Prénom", "Nom", "SIRET", "E-mail", "Téléphone", "Adresse facturation", "Adresse livraison", "Notes"],
+    ...allContacts.map(contact => [
+      contact.type || "",
+      contact.companyName || "",
+      contact.firstname || "",
+      contact.lastname || "",
+      contact.siret || "",
+      contact.email || "",
+      contact.phone || "",
+      contact.billingAddress || "",
+      contact.shippingAddress || "",
+      contact.notes || ""
+    ])
+  ];
+  downloadCsvFile(lines, "clients");
+}
+
+async function handleContactsCsvImport(event) {
+  try {
+    const rows = await readCsvImport(event);
+    if (!rows) return;
+    const validRows = rows.filter(row => row["adresse facturation"] && (row["nom"] || row["entreprise"]));
+    if (!validRows.length) throw new Error("Aucune ligne valide : nom ou entreprise et adresse de facturation sont obligatoires");
+    if (!window.confirm(`${validRows.length} client(s) vont être ajoutés. Continuer ?`)) return;
+
+    showLoader();
+    const failures = [];
+    for (const [index, row] of validRows.entries()) {
+      try {
+        await apiFetch("/api/contacts", {
+          method: "POST",
+          body: JSON.stringify({
+            type: row.type || "particulier",
+            companyName: row.entreprise || "",
+            firstname: row["prénom"] || row.prenom || "",
+            lastname: row.nom || "",
+            siret: row.siret || "",
+            email: row["e-mail"] || row.email || "",
+            phone: row["téléphone"] || row.telephone || "",
+            billingAddress: row["adresse facturation"],
+            shippingAddress: row["adresse livraison"] || "",
+            notes: row.notes || ""
+          })
+        });
+      } catch (err) { failures.push(index + 1); }
+    }
+    await loadContacts();
+    showToast(failures.length ? `${validRows.length - failures.length} clients importés, ${failures.length} ligne(s) ignorée(s)` : `${validRows.length} clients importés ✅`);
+  } catch (err) {
+    showToast(err.message || "Import clients impossible");
+  } finally {
+    hideLoader();
+  }
 }
 
 // ================= TOOGLE FAVORITES =================

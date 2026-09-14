@@ -360,7 +360,36 @@
               <span id="dashboardLowStock">0</span>
             </div>
 
+            <div class="kpi">
+              <h3>Ruptures de stock</h3>
+              <span id="dashboardOutOfStock">0</span>
+            </div>
+
+            <div class="kpi">
+              <h3>Valeur du stock HT</h3>
+              <span id="dashboardStockValue">0,00 €</span>
+            </div>
+
+            <div class="kpi">
+              <h3>Produits catalogués</h3>
+              <span id="dashboardProductCount">0</span>
+            </div>
+
           </div>
+
+          <section class="dashboard-insights">
+            <article class="dashboard-insight-card monthly-revenue-card">
+              <span class="insight-eyebrow">Encaissements</span>
+              <h3>Chiffre d’affaires du mois</h3>
+              <strong id="dashboardMonthlyRevenue">0,00 €</strong>
+              <p id="dashboardMonthlyRevenueDetail">Aucune facture réglée ce mois-ci.</p>
+            </article>
+
+            <article class="dashboard-insight-card best-sellers-card">
+              <div class="insight-heading"><div><span class="insight-eyebrow">Ventes</span><h3>Produits les plus vendus</h3></div><span class="insight-period">Commandes</span></div>
+              <div id="dashboardBestSellers" class="best-sellers-list"><p class="empty-state">Pas encore de vente enregistrée.</p></div>
+            </article>
+          </section>
 
           <div id="companySetupNotice" class="setup-notice" hidden>
             <div>
@@ -436,17 +465,32 @@
                 <div class="form-completeness-track"><span id="contactCompletenessBar"></span></div>
               </div>
 
+              <aside class="contact-live-preview" aria-live="polite">
+                <div class="contact-preview-avatar" id="contactPreviewInitials">CL</div>
+                <div>
+                  <span id="contactPreviewType">Nouveau client</span>
+                  <strong id="contactPreviewName">Client à renseigner</strong>
+                  <small id="contactPreviewDetails">Ses coordonnées apparaîtront ici.</small>
+                </div>
+                <div class="contact-preview-check"><span id="contactPreviewStatus">Brouillon</span></div>
+              </aside>
+
               <div class="form-section">
                 <h3>Identité</h3>
                 <div class="contact-grid">
-                  <label class="form-field">
+                  <div class="form-field contact-type-picker">
                     <span>Type de client</span>
-                    <select id="type">
+                    <div class="type-picker-buttons" role="group" aria-label="Type de client">
+                      <button type="button" data-contact-type="particulier" onclick="setContactType('particulier')">Particulier</button>
+                      <button type="button" data-contact-type="pro" onclick="setContactType('pro')">Professionnel</button>
+                      <button type="button" data-contact-type="association" onclick="setContactType('association')">Association</button>
+                    </div>
+                    <select id="type" class="visually-hidden" tabindex="-1" aria-hidden="true">
                       <option value="particulier">Particulier</option>
                       <option value="pro">Professionnel</option>
                       <option value="association">Association</option>
                     </select>
-                  </label>
+                  </div>
 
                   <label class="form-field professional-only">
                     <span>Entreprise</span>
@@ -500,12 +544,13 @@
                 </div>
               </div>
 
-              <div class="form-section form-section-last">
+              <details class="form-section form-section-last form-details-section">
+                <summary>Informations internes <small>Optionnel</small></summary>
                 <label class="form-field">
                   <span>Note interne <small>Optionnel</small></span>
                   <textarea id="notes" placeholder="Informations utiles pour votre équipe..."></textarea>
                 </label>
-              </div>
+              </details>
 
               <div class="form-actions">
                 <button id="contactSubmitButton" class="primary-btn" onclick="addContact()">Enregistrer le client</button>
@@ -516,7 +561,14 @@
 
             <div class="card">
 
-              <h2>📋 Liste contacts</h2>
+              <div class="list-card-header">
+                <h2>📋 Liste contacts</h2>
+                <div class="list-card-actions">
+                  <button type="button" class="secondary-btn compact-export-btn" onclick="document.getElementById('contactsCsvInput').click()">Importer CSV</button>
+                  <button type="button" class="secondary-btn compact-export-btn" onclick="exportContactsCsv()">Exporter CSV</button>
+                </div>
+              </div>
+              <input id="contactsCsvInput" type="file" accept=".csv,text/csv" hidden onchange="handleContactsCsvImport(event)" />
 
               <div id="list"></div>
 
@@ -552,6 +604,16 @@
                 <small id="productPriceTTCDetail">Renseignez le prix HT et la TVA</small>
               </div>
 
+              <aside class="product-live-preview" aria-live="polite">
+                <div class="product-preview-mark">P</div>
+                <div>
+                  <span>Prévisualisation catalogue</span>
+                  <strong id="productPreviewName">Nouveau produit</strong>
+                  <small id="productPreviewMeta">Référence et stock à renseigner</small>
+                </div>
+                <b id="productPreviewStock">0 unité</b>
+              </aside>
+
               <div class="form-section">
                 <h3>Fiche produit</h3>
                 <div class="product-grid">
@@ -565,10 +627,32 @@
                     <input id="productReference" placeholder="Ex. PACK-001" />
                   </label>
 
+                  <label class="form-field">
+                    <span>Catégorie</span>
+                    <input id="productCategory" list="productCategories" placeholder="Ex. Prestations" />
+                    <datalist id="productCategories"></datalist>
+                  </label>
+
+                  <label class="form-field">
+                    <span>Fournisseur <small>Optionnel</small></span>
+                    <input id="productSupplierName" placeholder="Ex. Fournitures Pro" />
+                  </label>
+
+                  <label class="form-field">
+                    <span>Référence fournisseur <small>Optionnel</small></span>
+                    <input id="productSupplierReference" placeholder="Ex. FP-4521" />
+                  </label>
+
                   <label class="form-field stock-field">
                     <span>Stock initial</span>
                     <div class="input-suffix-wrap"><input id="productStock" type="number" min="0" step="1" placeholder="0" /><span>unités</span></div>
                     <small class="field-help">Le réassort se fera ensuite depuis la liste.</small>
+                  </label>
+
+                  <label class="form-field stock-field">
+                    <span>Alerte stock faible</span>
+                    <div class="input-suffix-wrap"><input id="productLowStockThreshold" type="number" min="0" step="1" value="5" /><span>unités</span></div>
+                    <small class="field-help">Une alerte apparaît à ce seuil ou en dessous.</small>
                   </label>
                 </div>
               </div>
@@ -588,12 +672,13 @@
                 </div>
               </div>
 
-              <div class="form-section form-section-last">
+              <details class="form-section form-section-last form-details-section">
+                <summary>Description commerciale <small>Optionnel</small></summary>
                 <label class="form-field">
                   <span>Description <small>Optionnel</small></span>
                   <textarea id="productDescription" placeholder="Décrivez le produit ou la prestation pour vos documents commerciaux..."></textarea>
                 </label>
-              </div>
+              </details>
 
               <div class="form-actions">
                 <button id="productSubmitButton" class="primary-btn" onclick="addProduct()">Créer le produit</button>
@@ -604,7 +689,14 @@
 
             <div class="card">
 
-              <h2>📋 Liste produits</h2>
+              <div class="list-card-header">
+                <h2>📋 Liste produits</h2>
+                <div class="list-card-actions">
+                  <button type="button" class="secondary-btn compact-export-btn" onclick="document.getElementById('productsCsvInput').click()">Importer CSV</button>
+                  <button type="button" class="secondary-btn compact-export-btn" onclick="exportProductsCsv()">Exporter CSV</button>
+                </div>
+              </div>
+              <input id="productsCsvInput" type="file" accept=".csv,text/csv" hidden onchange="handleProductsCsvImport(event)" />
 
               <input
                 id="productsFilter"
@@ -617,6 +709,10 @@
                 <option value="all">Tous les stocks</option>
                 <option value="low">Stock faible (5 ou moins)</option>
                 <option value="available">Stock disponible</option>
+              </select>
+
+              <select id="productCategoryFilter" onchange="filterProducts()" aria-label="Filtrer les catégories">
+                <option value="all">Toutes les catégories</option>
               </select>
 
               <div id="productsList"></div>
@@ -1190,14 +1286,14 @@
           class="section"
         >
 
-          <div class="card">
+          <div class="card settings-card">
 
-            <h2>⚙️ Paramètres</h2>
+            <div class="settings-header">
+              <div><p class="form-eyebrow">Compte & sécurité</p><h2>Paramètres</h2><p>Gérez vos données, votre sécurité et l’activité de votre compte.</p></div>
+              <span class="settings-stat"><b id="userStats">0</b> contacts</span>
+            </div>
 
-            <p>
-              Total contacts :
-              <span id="userStats">0</span>
-            </p>
+            <div class="settings-action-grid">
 
             <button
               class="primary-btn"
@@ -1226,6 +1322,7 @@
             >
               Modifier mon mot de passe
             </button>
+            </div>
 
             <h3 class="settings-subtitle">Activité récente</h3>
             <div id="accountActivity" class="account-activity"></div>

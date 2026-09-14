@@ -50,20 +50,30 @@ router.post("/", auth, async (req, res) => {
     const priceHT = Number(data.priceHT);
     const tva = Number(data.tva ?? 20);
     const stock = Number(data.stock ?? 0);
+    const lowStockThreshold = Number(data.lowStockThreshold ?? 5);
+    const category = String(data.category || "Non classé").trim() || "Non classé";
+    const supplierName = String(data.supplierName || "").trim();
+    const supplierReference = String(data.supplierReference || "").trim();
 
     if (
       !Number.isFinite(priceHT) || priceHT < 0 ||
       !Number.isFinite(tva) || tva < 0 || tva > 100 ||
-      !Number.isFinite(stock) || stock < 0
+      !Number.isFinite(stock) || stock < 0 ||
+      !Number.isInteger(lowStockThreshold) || lowStockThreshold < 0 ||
+      category.length > 80 || supplierName.length > 120 || supplierReference.length > 80
     ) {
       return res.status(400).json({
-        error: "Prix, TVA ou stock invalide"
+        error: "Prix, TVA, stock, catégorie, fournisseur ou seuil d'alerte invalide"
       });
     }
 
     data.priceHT = priceHT;
     data.tva = tva;
     data.stock = stock;
+    data.lowStockThreshold = lowStockThreshold;
+    data.category = category;
+    data.supplierName = supplierName;
+    data.supplierReference = supplierReference;
 
     data.priceTTC =
       priceHT * (1 + tva / 100);
@@ -135,17 +145,21 @@ router.patch("/:id/stock", auth, async (req, res) => {
 
 router.put("/:id", auth, async (req, res) => {
   try {
-    const { name, reference, description, priceHT, tva } = req.body;
+    const { name, reference, description, priceHT, tva, category, lowStockThreshold, supplierName, supplierReference } = req.body;
     const price = Number(priceHT);
     const tax = Number(tva ?? 20);
+    const threshold = Number(lowStockThreshold ?? 5);
+    const normalizedCategory = String(category || "Non classé").trim() || "Non classé";
+    const normalizedSupplierName = String(supplierName || "").trim();
+    const normalizedSupplierReference = String(supplierReference || "").trim();
 
-    if (!name?.trim() || !Number.isFinite(price) || price < 0 || !Number.isFinite(tax) || tax < 0 || tax > 100) {
-      return res.status(400).json({ error: "Produit, prix ou TVA invalide" });
+    if (!name?.trim() || !Number.isFinite(price) || price < 0 || !Number.isFinite(tax) || tax < 0 || tax > 100 || !Number.isInteger(threshold) || threshold < 0 || normalizedCategory.length > 80 || normalizedSupplierName.length > 120 || normalizedSupplierReference.length > 80) {
+      return res.status(400).json({ error: "Produit, prix, TVA, catégorie, fournisseur ou seuil invalide" });
     }
 
     const product = await Product.findOneAndUpdate(
       { _id: req.params.id, userId: req.userId },
-      { name: name.trim(), reference, description, priceHT: price, tva: tax, priceTTC: price * (1 + tax / 100) },
+      { name: name.trim(), reference, description, category: normalizedCategory, supplierName: normalizedSupplierName, supplierReference: normalizedSupplierReference, lowStockThreshold: threshold, priceHT: price, tva: tax, priceTTC: price * (1 + tax / 100) },
       { new: true, runValidators: true }
     );
 

@@ -74,6 +74,18 @@ test("un produit ne peut pas avoir de TVA ou stock négatif", async () => {
   );
 });
 
+test("un produit impose un seuil de stock entier positif ou nul", async () => {
+  await assert.rejects(
+    new Product({
+      userId: objectId(),
+      name: "Produit",
+      priceHT: 10,
+      lowStockThreshold: 2.5
+    }).validate(),
+    /seuil/i
+  );
+});
+
 test("un mouvement de stock utilise un type contrôlé", async () => {
   await assert.rejects(
     new StockMovement({

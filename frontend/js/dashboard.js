@@ -71,15 +71,73 @@ function updateBusinessKPI(invoices) {
     `${pending.reduce((total, invoice) => total + Number(invoice.totalTTC || 0), 0).toFixed(2)} €`;
   document.getElementById("dashboardPaidTotal").innerText =
     `${paid.reduce((total, invoice) => total + Number(invoice.totalTTC || 0), 0).toFixed(2)} €`;
+
+  updateCommercialInsights(invoices, paid);
+}
+
+function updateCommercialInsights(documents, paidInvoices) {
+  const now = new Date();
+  const monthPaidInvoices = paidInvoices.filter(invoice => {
+    const date = new Date(invoice.paidAt || invoice.updatedAt || invoice.createdAt);
+    return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+  });
+  const monthlyRevenue = monthPaidInvoices.reduce(
+    (total, invoice) => total + Number(invoice.totalTTC || 0),
+    0
+  );
+  const revenue = document.getElementById("dashboardMonthlyRevenue");
+  const revenueDetail = document.getElementById("dashboardMonthlyRevenueDetail");
+  if (revenue) revenue.textContent = `${monthlyRevenue.toFixed(2)} €`;
+  if (revenueDetail) {
+    revenueDetail.textContent = monthPaidInvoices.length
+      ? `${monthPaidInvoices.length} facture${monthPaidInvoices.length > 1 ? "s" : ""} réglée${monthPaidInvoices.length > 1 ? "s" : ""} ce mois-ci.`
+      : "Aucune facture réglée ce mois-ci.";
+  }
+
+  const sales = new Map();
+  documents
+    .filter(document => document.type === "order")
+    .forEach(order => {
+      (order.products || []).forEach(line => {
+        const name = line.productName || "Produit sans nom";
+        sales.set(name, (sales.get(name) || 0) + Number(line.quantity || 0));
+      });
+    });
+
+  const bestSellers = [...sales.entries()]
+    .sort(([, left], [, right]) => right - left)
+    .slice(0, 3);
+  const container = document.getElementById("dashboardBestSellers");
+  if (!container) return;
+  container.innerHTML = bestSellers.length
+    ? bestSellers.map(([name, quantity], index) => `
+        <div class="best-seller-row">
+          <span class="best-seller-rank">${index + 1}</span>
+          <strong>${escapeHtml(name)}</strong>
+          <span>${quantity} unité${quantity > 1 ? "s" : ""}</span>
+        </div>
+      `).join("")
+    : '<p class="empty-state">Pas encore de vente enregistrée.</p>';
 }
 
 function updateStockKPI(products) {
   const lowStock = products.filter(
-    product => Number(product.stock || 0) <= 5
+    product => Number(product.stock || 0) <= Number(product.lowStockThreshold ?? 5)
   ).length;
+  const outOfStock = products.filter(product => Number(product.stock || 0) === 0).length;
+  const stockValue = products.reduce(
+    (total, product) => total + Number(product.stock || 0) * Number(product.priceHT || 0),
+    0
+  );
 
   const element = document.getElementById("dashboardLowStock");
   if (element) element.innerText = lowStock;
+  const outOfStockElement = document.getElementById("dashboardOutOfStock");
+  if (outOfStockElement) outOfStockElement.innerText = outOfStock;
+  const valueElement = document.getElementById("dashboardStockValue");
+  if (valueElement) valueElement.innerText = `${stockValue.toFixed(2)} €`;
+  const countElement = document.getElementById("dashboardProductCount");
+  if (countElement) countElement.innerText = products.length;
 }
 
 async function loadOnboardingChecklist() {
