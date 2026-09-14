@@ -119,10 +119,15 @@ function filterProducts() {
     .trim()
     .toLocaleLowerCase("fr-FR") || "";
 
+  const stockFilter = document.getElementById("productStockFilter")?.value || "all";
+
   const filteredProducts = allProducts.filter(product =>
     [product.name, product.reference, product.description]
       .filter(Boolean)
-      .some(value => String(value).toLocaleLowerCase("fr-FR").includes(query))
+      .some(value => String(value).toLocaleLowerCase("fr-FR").includes(query)) &&
+    (stockFilter === "all" ||
+      (stockFilter === "low" && Number(product.stock) <= 5) ||
+      (stockFilter === "available" && Number(product.stock) > 5))
   );
 
   renderProducts(filteredProducts);

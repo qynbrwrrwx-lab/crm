@@ -147,7 +147,7 @@ function renderInvoices(invoices) {
     );
 
   const invoiceDocuments = invoices.filter(
-    invoice => invoice.type === "invoice"
+    invoice => ["invoice", "credit_note"].includes(invoice.type)
   );
 
   const search = document.getElementById("invoiceSearch")?.value
@@ -165,7 +165,7 @@ function renderInvoices(invoices) {
 
       return (
         (!search || invoice.invoiceNumber?.toLocaleLowerCase("fr-FR").includes(search) || customer.includes(search)) &&
-        (status === "all" || invoice.paymentStatus === status)
+        (status === "all" || (invoice.type === "invoice" && invoice.paymentStatus === status))
       );
     }).map(invoice => invoice._id)
   );
@@ -296,6 +296,8 @@ function renderInvoices(invoices) {
               ? (invoice.status === "accepted" ? "accepted" : "draft")
               : invoice.type === "order"
               ? (invoice.convertedToInvoiceId ? "completed" : "pending")
+              : invoice.type === "credit_note"
+              ? "completed"
               : (invoice.paymentStatus === "paid" ? "paid" : "pending")
           }">
             ${
@@ -303,6 +305,8 @@ function renderInvoices(invoices) {
                 ? (invoice.status === "accepted" ? "Devis accepté" : "Devis en attente")
                 : invoice.type === "order"
                 ? (invoice.convertedToInvoiceId ? "Facturée" : "À facturer")
+                : invoice.type === "credit_note"
+                ? "Avoir émis"
                 : (invoice.paymentStatus === "paid" ? "Payée" : "En attente")
             }
           </span>
@@ -549,6 +553,18 @@ async function sendDocumentEmail(id) {
   } catch (err) {
     console.error(err);
     showToast(err.message || "Erreur lors de l'envoi de l'email");
+  }
+}
+
+async function createCreditNote(id) {
+  if (!window.confirm("Créer un avoir pour cette facture ? Cette action est définitive.")) return;
+  try {
+    const creditNote = await apiFetch(`/api/invoices/credit-note/${id}`, { method: "POST" });
+    await loadInvoices();
+    showToast(`Avoir ${creditNote.invoiceNumber} créé ✅`);
+    await openInvoice(creditNote._id);
+  } catch (err) {
+    showToast(err.message || "Impossible de créer l'avoir");
   }
 }
 
@@ -1037,6 +1053,8 @@ ${
     ? "Date du devis"
     : invoice.type === "order"
       ? "Date de la commande"
+      : invoice.type === "credit_note"
+        ? "Date de l'avoir"
       : "Date de la facture"
 }</strong><br>
 ${new Date(invoice.createdAt).toLocaleDateString("fr-FR")}
@@ -1050,6 +1068,12 @@ ${new Date(invoice.createdAt).toLocaleDateString("fr-FR")}
 <strong>N°</strong><br>
 ${escapeHtml(invoice.invoiceNumber)}
 </p>
+
+${
+  invoice.type === "credit_note" && invoice.sourceDocumentId?.invoiceNumber
+    ? `<p><strong>Facture d'origine</strong><br>${escapeHtml(invoice.sourceDocumentId.invoiceNumber)}</p>`
+    : ""
+}
 
 <p>
 <strong>Livraison</strong><br>
@@ -1074,6 +1098,24 @@ ${
 </div>
 
 </div>
+
+${
+  invoice.type === "invoice" && (invoice.payments?.length || invoice.paidAt)
+    ? `<section class="payment-history">
+        <h4>Historique du paiement</h4>
+        ${(invoice.payments?.length
+          ? invoice.payments
+          : [{ amount: invoice.totalTTC, method: invoice.paymentMethod, paidAt: invoice.paidAt }]
+        ).map(payment => `
+          <div class="payment-history-row">
+            <span>${escapeHtml(payment.method || "Paiement")}</span>
+            <small>${new Date(payment.paidAt).toLocaleDateString("fr-FR")}</small>
+            <strong>${Number(payment.amount || 0).toFixed(2)} EUR</strong>
+          </div>
+        `).join("")}
+      </section>`
+    : ""
+}
 
 ${
     isEditingQuote
@@ -1205,7 +1247,7 @@ ${
     >
 
     ${
-      invoice.type === "quote" || invoice.type === "invoice"
+      ["quote", "invoice", "credit_note"].includes(invoice.type)
       ? `
         <button
           class="secondary-btn"
@@ -1327,6 +1369,12 @@ ${
       }
     </span>
   `
+  : ""
+}
+
+${
+  invoice.type === "invoice" && !invoice.creditNoteId
+  ? `<button class="secondary-btn" onclick="createCreditNote('${invoice._id}')">Créer un avoir</button>`
   : ""
 }
 

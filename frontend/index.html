@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="fr">
-<script src="https://unpkg.com/lucide@latest"></script>
 
 <head>
 
@@ -11,7 +10,7 @@
   content="width=device-width, initial-scale=1.0"
 />
 
-<title>My Prospect ERP</title>
+<title>My Prospect - Gestion commerciale</title>
 
 <link
   href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
@@ -26,6 +25,8 @@
 />
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://unpkg.com/lucide@latest"></script>
 
 
 </head>
@@ -97,6 +98,35 @@
 
 </div>
 
+  <section class="launch-offer" aria-label="Offre de lancement">
+    <div class="launch-offer-header">
+      <span class="launch-offer-badge">Offre de lancement</span>
+      <strong>Tout My Prospect, sans engagement</strong>
+    </div>
+
+    <div class="launch-prices">
+      <div>
+        <span>Mensuel</span>
+        <strong>9,90 <small>EUR HT / mois</small></strong>
+      </div>
+      <div class="launch-price-annual">
+        <span>Annuel</span>
+        <strong>99 <small>EUR HT / an</small></strong>
+        <em>2 mois offerts</em>
+      </div>
+    </div>
+
+    <p>14 jours d'essai gratuit. Clients, devis, factures, stock et pilotage inclus.</p>
+
+    <button
+      type="button"
+      class="launch-offer-cta"
+      onclick="document.getElementById('email').focus()"
+    >
+      Demarrer mon essai gratuit
+    </button>
+  </section>
+
     </div>
 
     <div class="auth-right">
@@ -120,6 +150,8 @@
           <input
             id="password"
             type="password"
+            minlength="12"
+            autocomplete="current-password"
             placeholder="Mot de passe"
           >
 
@@ -276,8 +308,6 @@
   <span>Déconnexion</span>
 </button>
 
-  </nav>
-
   </aside>
 
     <!-- ================= MAIN ================= -->
@@ -342,6 +372,18 @@
             </button>
           </div>
 
+          <section id="onboardingChecklist" class="onboarding-checklist" hidden>
+            <div class="onboarding-heading">
+              <div>
+                <span class="onboarding-eyebrow">Bien demarrer</span>
+                <h2>Votre premier devis en 4 etapes</h2>
+              </div>
+              <span id="onboardingProgress" class="onboarding-progress">0/4</span>
+            </div>
+
+            <div id="onboardingSteps" class="onboarding-steps"></div>
+          </section>
+
           <div class="card">
 
             <h2>📊 Évolution</h2>
@@ -366,6 +408,13 @@
               placeholder="🔎 Rechercher..."
               oninput="filterContacts()"
             />
+
+            <select id="contactSort" onchange="filterContacts()" aria-label="Trier les contacts">
+              <option value="recent">Plus recents</option>
+              <option value="name">Nom</option>
+              <option value="company">Entreprise</option>
+              <option value="favorite">Favoris</option>
+            </select>
 
           </div>
 
@@ -553,6 +602,12 @@
                 placeholder="🔎 Rechercher un produit ou une référence..."
                 oninput="filterProducts()"
               />
+
+              <select id="productStockFilter" onchange="filterProducts()" aria-label="Filtrer les stocks">
+                <option value="all">Tous les stocks</option>
+                <option value="low">Stock faible (5 ou moins)</option>
+                <option value="available">Stock disponible</option>
+              </select>
 
               <div id="productsList"></div>
 
@@ -1150,6 +1205,13 @@
 
             <button
               class="secondary-btn"
+              onclick="exportSalesCsv()"
+            >
+              Exporter les ventes CSV
+            </button>
+
+            <button
+              class="secondary-btn"
               onclick="changePassword()"
             >
               Modifier mon mot de passe
@@ -1184,7 +1246,6 @@
 
 
 <script src="/js/ui.js"></script>
-<script src="/js/auth.js"></script>
 <script src="/js/admin.js"></script>
 
 <script src="/js/map.js"></script>
@@ -1232,8 +1293,6 @@ async function login() {
     });
 
     const data = await res.json();
-
-    console.log("LOGIN DATA =", data);
 
     if (data.token) {
 
@@ -1378,6 +1437,8 @@ async function requestReset() {
 }
 
 </script>
+
+<script src="/js/auth.js"></script>
 
 <!-- POPUP DETAILS DEVIS / FACTURE -->
 

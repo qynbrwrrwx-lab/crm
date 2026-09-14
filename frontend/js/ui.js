@@ -48,6 +48,8 @@ function showApp() {
 
   loadCompanySetupStatus?.().catch(console.error);
 
+  loadOnboardingChecklist?.().catch(console.error);
+
   loadAccountActivity?.().catch(console.error);
 }
 

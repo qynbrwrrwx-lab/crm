@@ -13,6 +13,7 @@ const invoiceSchema = new mongoose.Schema({
 
   type: {
     type: String,
+    enum: ["quote", "order", "invoice", "credit_note"],
     default: "invoice"
   },
 
@@ -93,10 +94,22 @@ const invoiceSchema = new mongoose.Schema({
     default: "pending"
   },
 
+  creditNoteId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Invoice",
+    default: null
+  },
+
   paidAt: {
     type: Date,
     default: null
   },
+
+  payments: [{
+    amount: { type: Number, required: true, min: 0 },
+    method: { type: String, required: true },
+    paidAt: { type: Date, required: true }
+  }],
 
   emailSentAt: {
     type: Date,
@@ -120,6 +133,33 @@ const invoiceSchema = new mongoose.Schema({
 
 // Empêche qu'un même compte obtienne deux fois le même numéro de document.
 invoiceSchema.index({ userId: 1, invoiceNumber: 1 }, { unique: true, sparse: true });
+
+// A quote and an order can each be converted only once, even if two requests
+// arrive at the same time. Partial indexes exclude the legacy null values.
+invoiceSchema.index(
+  { userId: 1, sourceQuoteId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { sourceQuoteId: { $type: "objectId" } }
+  }
+);
+invoiceSchema.index(
+  { userId: 1, sourceOrderId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { sourceOrderId: { $type: "objectId" } }
+  }
+);
+invoiceSchema.index(
+  { userId: 1, sourceDocumentId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      type: "credit_note",
+      sourceDocumentId: { $type: "objectId" }
+    }
+  }
+);
 
 module.exports = mongoose.model(
   "Invoice",

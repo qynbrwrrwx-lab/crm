@@ -1,5 +1,6 @@
 # ENV (sécurité)
 backend/.env 
+backend/.npm-cache/
 
 # Node modules
 node_modules/

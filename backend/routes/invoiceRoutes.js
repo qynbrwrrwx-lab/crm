@@ -10,6 +10,7 @@ const Company = require("../models/companyModel");
 const StockMovement = require("../models/stockMovement");
 const { sendInvoiceEmail } = require("../services/emailService");
 const { recordAuditEvent } = require("../services/auditService");
+const { nextDocumentNumber } = require("../services/documentNumberService");
 
 const auth = require("../middleware/auth");
 
@@ -31,7 +32,7 @@ function createEmailPdf(invoice, contact, company) {
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    const title = invoice.type === "quote" ? "DEVIS" : "FACTURE";
+    const title = invoice.type === "quote" ? "DEVIS" : invoice.type === "credit_note" ? "AVOIR" : "FACTURE";
     doc.fontSize(20).text(`${title} ${invoice.invoiceNumber}`);
     doc.moveDown();
     doc.fontSize(11).text(company?.companyName || "Mon entreprise");
@@ -108,6 +109,7 @@ router.get("/", auth, async (req, res) => {
     .populate(
       "products.productId"
     )
+    .populate("sourceDocumentId", "invoiceNumber")
     
     .sort({ createdAt: -1 });
 
@@ -205,31 +207,7 @@ router.post("/", auth, async (req, res) => {
       });
      }
 
-    const year =
-      new Date().getFullYear();
-
-    let prefix = "FAC";
-
-      if (type === "quote") {
-    prefix = "DEV";
-    }
-
-    if (type === "order") {
-      prefix = "CMD";
-    }
-
-    const count =
-      await Invoice.countDocuments({
-      userId: req.userId,
-      type,
-      createdAt: {
-      $gte: new Date(`${year}-01-01`),
-      $lt: new Date(`${year + 1}-01-01`)
-    }
-  });
-
-    const invoiceNumber =
-     `${prefix}-${year}-${String(count + 1).padStart(5, "0")}`;
+    const invoiceNumber = await nextDocumentNumber(req.userId, type);
 
       const invoice =
       await Invoice.create({
@@ -346,6 +324,12 @@ router.put(
 
       invoice.paidAt = new Date();
 
+      invoice.payments.push({
+        amount: Number(invoice.totalTTC || 0),
+        method: paymentMethod,
+        paidAt: invoice.paidAt
+      });
+
       await invoice.save();
 
       await recordAuditEvent({
@@ -371,6 +355,53 @@ router.put(
 );
 
 // ================= DELETE INVOICE =================
+
+router.post("/credit-note/:id", auth, async (req, res) => {
+  try {
+    const sourceInvoice = await Invoice.findOne({
+      _id: req.params.id,
+      userId: req.userId,
+      type: "invoice"
+    });
+
+    if (!sourceInvoice) {
+      return res.status(404).json({ error: "Facture introuvable" });
+    }
+    if (sourceInvoice.creditNoteId) {
+      return res.status(409).json({ error: "Un avoir existe déjà pour cette facture" });
+    }
+
+    const invoiceNumber = await nextDocumentNumber(req.userId, "credit_note");
+    const creditNote = await Invoice.create({
+      invoiceNumber,
+      userId: req.userId,
+      type: "credit_note",
+      status: "issued",
+      sourceDocumentId: sourceInvoice._id,
+      contactId: sourceInvoice.contactId,
+      products: sourceInvoice.products,
+      totalHT: -Math.abs(Number(sourceInvoice.totalHT || 0)),
+      totalTTC: -Math.abs(Number(sourceInvoice.totalTTC || 0)),
+      paymentStatus: "pending"
+    });
+    sourceInvoice.creditNoteId = creditNote._id;
+    await sourceInvoice.save();
+    await recordAuditEvent({
+      userId: req.userId,
+      action: "invoice.credit_note_created",
+      documentId: creditNote._id,
+      metadata: { invoiceNumber, sourceInvoiceNumber: sourceInvoice.invoiceNumber }
+    });
+    res.status(201).json(creditNote);
+  } catch (err) {
+    console.error(err);
+    if (err.code === 11000 && err.keyPattern?.sourceDocumentId) {
+      return res.status(409).json({ error: "Un avoir existe deja pour cette facture" });
+    }
+    if (err.code === 11000) return res.status(409).json({ error: "Numéro d'avoir déjà utilisé. Réessayez." });
+    res.status(500).json({ error: "Impossible de créer l'avoir" });
+  }
+});
 
 router.delete(
   "/:id",
@@ -550,21 +581,7 @@ router.post(
 
       // ================= NUMÉRO COMMANDE =================
 
-      const year =
-        new Date().getFullYear();
-
-      const count =
-        await Invoice.countDocuments({
-          userId: req.userId,
-          type: "order",
-          createdAt: {
-            $gte: new Date(`${year}-01-01`),
-            $lt: new Date(`${year + 1}-01-01`)
-          }
-        });
-
-      const orderNumber =
-        `CMD-${year}-${String(count + 1).padStart(5, "0")}`;
+      const orderNumber = await nextDocumentNumber(req.userId, "order");
 
       // ================= CRÉATION COMMANDE =================
 
@@ -664,11 +681,27 @@ router.post(
 
       await quote.save();
 
+      await recordAuditEvent({
+        userId: req.userId,
+        action: "document.converted_to_order",
+        documentId: order._id,
+        metadata: {
+          orderNumber: order.invoiceNumber,
+          sourceQuoteNumber: quote.invoiceNumber
+        }
+      });
+
       res.json(order);
 
     } catch (err) {
 
       console.error(err);
+
+      if (err.code === 11000) {
+        return res.status(409).json({
+          error: "Ce devis a deja ete transforme en commande"
+        });
+      }
 
       res.status(500).json({
         error: "Erreur transformation du devis en commande"
@@ -743,21 +776,7 @@ if (existingInvoice) {
 
 }
 
-      const year =
-        new Date().getFullYear();
-
-      const count =
-        await Invoice.countDocuments({
-          userId: req.userId,
-          type: "invoice",
-          createdAt: {
-            $gte: new Date(`${year}-01-01`),
-            $lt: new Date(`${year + 1}-01-01`)
-          }
-        });
-
-      const invoiceNumber =
-        `FAC-${year}-${String(count + 1).padStart(5, "0")}`;
+      const invoiceNumber = await nextDocumentNumber(req.userId, "invoice");
 
       const invoice =
         await Invoice.create({
@@ -805,11 +824,27 @@ if (existingInvoice) {
 
 await order.save();
 
+      await recordAuditEvent({
+        userId: req.userId,
+        action: "document.converted_to_invoice",
+        documentId: invoice._id,
+        metadata: {
+          invoiceNumber: invoice.invoiceNumber,
+          sourceOrderNumber: order.invoiceNumber
+        }
+      });
+
       res.json(invoice);
 
     } catch (err) {
 
       console.error(err);
+
+      if (err.code === 11000) {
+        return res.status(409).json({
+          error: "Cette commande a deja ete transformee en facture"
+        });
+      }
 
       res.status(500).json({
         error:
@@ -832,7 +867,7 @@ router.post(
 
     try {
       invoice = await Invoice.findOne({ _id: req.params.id, userId: req.userId });
-      if (!invoice || !["quote", "invoice"].includes(invoice.type)) {
+      if (!invoice || !["quote", "invoice", "credit_note"].includes(invoice.type)) {
         return res.status(404).json({ error: "Document introuvable" });
       }
 
@@ -910,6 +945,10 @@ router.get(
           "Document introuvable"
         );
       }
+
+      const sourceInvoice = invoice.type === "credit_note" && invoice.sourceDocumentId
+        ? await Invoice.findOne({ _id: invoice.sourceDocumentId, userId: req.userId })
+        : null;
 
       const company =
         await Company.findOne({ userId: req.userId });
@@ -1065,6 +1104,8 @@ const documentTitle =
     ? "DEVIS"
     : invoice.type === "order"
     ? "COMMANDE"
+    : invoice.type === "credit_note"
+    ? "AVOIR"
     : "FACTURE";
 
 const documentDateLabel =
@@ -1072,6 +1113,8 @@ const documentDateLabel =
     ? "Date du devis"
     : invoice.type === "order"
     ? "Date de la commande"
+    : invoice.type === "credit_note"
+    ? "Date de l'avoir"
     : "Date de la facture";
 
 doc
@@ -1123,6 +1166,14 @@ if (invoice.type === "invoice") {
       80
     );
   }
+}
+
+if (invoice.type === "credit_note" && sourceInvoice) {
+  doc.fontSize(10).text(
+    `Facture d'origine : ${sourceInvoice.invoiceNumber}`,
+    RIGHT_X,
+    65
+  );
 }
 
   // CLIENT

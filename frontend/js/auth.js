@@ -22,6 +22,11 @@ async function register() {
   const password =
     document.getElementById("password").value;
 
+  if (password.length < 12) {
+    showToast("Le mot de passe doit contenir au moins 12 caracteres");
+    return;
+  }
+
   showLoader();
 
   try {
@@ -116,6 +121,11 @@ async function resetPassword() {
 
   const password =
     document.getElementById("newPassword").value;
+
+  if (password.length < 12) {
+    showToast("Le mot de passe doit contenir au moins 12 caracteres");
+    return;
+  }
 
   const token =
     window.location.pathname.split("/").pop();
@@ -237,6 +247,45 @@ async function exportAccountData() {
   }
 }
 
+function escapeCsvValue(value) {
+  return `"${String(value ?? "").replaceAll("\"", "\"\"")}"`;
+}
+
+async function exportSalesCsv() {
+  try {
+    const documents = await apiFetch("/api/invoices");
+    const salesDocuments = documents.filter(document =>
+      ["invoice", "credit_note"].includes(document.type)
+    );
+
+    const lines = [
+      ["Date", "Type", "Numero", "Client", "Total HT", "Total TTC", "Statut paiement", "Moyen de paiement", "Date paiement"],
+      ...salesDocuments.map(document => [
+        new Date(document.createdAt).toLocaleDateString("fr-FR"),
+        document.type === "credit_note" ? "Avoir" : "Facture",
+        document.invoiceNumber,
+        document.contactId?.companyName || `${document.contactId?.firstname || ""} ${document.contactId?.lastname || ""}`.trim(),
+        Number(document.totalHT || 0).toFixed(2),
+        Number(document.totalTTC || 0).toFixed(2),
+        document.paymentStatus === "paid" ? "Payee" : "En attente",
+        document.paymentMethod || "",
+        document.paidAt ? new Date(document.paidAt).toLocaleDateString("fr-FR") : ""
+      ])
+    ];
+
+    const csv = `\uFEFF${lines.map(line => line.map(escapeCsvValue).join(";")).join("\r\n")}`;
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `my-prospect-ventes-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast("Export CSV telecharge");
+  } catch (err) {
+    showToast(err.message || "Impossible d'exporter les ventes");
+  }
+}
+
 async function loadAccountActivity() {
   const container = document.getElementById("accountActivity");
   if (!container) return;
@@ -249,9 +298,13 @@ async function loadAccountActivity() {
       "document.created": "Document créé",
       "quote.accepted": "Devis accepté",
       "invoice.paid": "Paiement enregistré",
+      "invoice.credit_note_created": "Avoir créé",
       "document.email_sent": "Document envoyé par e-mail",
       "document.email_failed": "Échec d'envoi d'e-mail"
     };
+
+    labels["document.converted_to_order"] = "Commande creee depuis un devis";
+    labels["document.converted_to_invoice"] = "Facture creee depuis une commande";
 
     container.innerHTML = events.length
       ? events.map(event => `<div class="activity-row">

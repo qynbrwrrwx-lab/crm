@@ -214,16 +214,10 @@ async function deleteContact(id) {
 
 // ================= LOAD CONTACTS =================
 
-async function loadContacts(query = "") {
-
-  let url = "/api/contacts";
-
-  if (query) {
-    url += `?${query}`;
-  }
+async function loadContacts() {
 
   const contacts =
-    await apiFetch(url);
+    await apiFetch("/api/contacts");
 
   allContacts = contacts;
 
@@ -311,13 +305,40 @@ function cancelContactEdit() {
 function filterContacts() {
 
   const query =
-    document.getElementById("search").value;
+    document.getElementById("search").value.trim().toLocaleLowerCase("fr-FR");
 
-  loadContacts(
-    query
-      ? `search=${encodeURIComponent(query)}`
-      : ""
-  );
+  const filteredContacts = !query
+    ? allContacts
+    : allContacts.filter(contact => [
+      contact.firstname,
+      contact.lastname,
+      contact.companyName,
+      contact.email,
+      contact.phone,
+      contact.siret
+    ].some(value => String(value || "").toLocaleLowerCase("fr-FR").includes(query)));
+
+  const sort = document.getElementById("contactSort")?.value || "recent";
+  const sortedContacts = [...filteredContacts].sort((left, right) => {
+    if (sort === "favorite") return Number(right.favorite) - Number(left.favorite);
+
+    if (sort === "name") {
+      const leftName = `${left.lastname || ""} ${left.firstname || ""}`;
+      const rightName = `${right.lastname || ""} ${right.firstname || ""}`;
+      return leftName.localeCompare(rightName, "fr-FR");
+    }
+
+    if (sort === "company") {
+      return String(left.companyName || "").localeCompare(
+        String(right.companyName || ""),
+        "fr-FR"
+      );
+    }
+
+    return new Date(right.createdAt || 0) - new Date(left.createdAt || 0);
+  });
+
+  renderContacts(sortedContacts);
 }
 
 // ================= TOOGLE FAVORITES =================

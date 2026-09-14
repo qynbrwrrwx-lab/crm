@@ -12,6 +12,8 @@ const AuditLog = require("../models/auditLog");
 
 process.env.JWT_SECRET = "test-secret-only";
 
+const { app } = require("../server");
+
 function objectId() {
   return new mongoose.Types.ObjectId();
 }
@@ -84,6 +86,64 @@ test("un mouvement de stock utilise un type contrôlé", async () => {
   );
 });
 
+test("commercial conversions are unique per source document", () => {
+  const indexes = Invoice.schema.indexes();
+  const hasUniqueQuoteConversion = indexes.some(([fields, options]) =>
+    fields.userId === 1 && fields.sourceQuoteId === 1 && options.unique === true
+  );
+  const hasUniqueOrderConversion = indexes.some(([fields, options]) =>
+    fields.userId === 1 && fields.sourceOrderId === 1 && options.unique === true
+  );
+  const hasUniqueCreditNote = indexes.some(([fields, options]) =>
+    fields.userId === 1 && fields.sourceDocumentId === 1 && options.unique === true
+  );
+
+  assert.equal(hasUniqueQuoteConversion, true);
+  assert.equal(hasUniqueOrderConversion, true);
+  assert.equal(hasUniqueCreditNote, true);
+});
+
+test("payment history rejects a negative amount", async () => {
+  await assert.rejects(
+    new Invoice({
+      userId: objectId(),
+      payments: [{ amount: -1, method: "Virement bancaire", paidAt: new Date() }]
+    }).validate(),
+    /payments.0.amount/
+  );
+});
+
+test("health endpoint reports the current database state", () => {
+  const router = app._router || app.router;
+  const layer = router.stack.find(item => item.route?.path === "/api/health");
+  assert.ok(layer, "health route must exist");
+
+  let statusCode;
+  let body;
+  const response = {
+    status(code) {
+      statusCode = code;
+      return this;
+    },
+    json(value) {
+      body = value;
+    }
+  };
+
+  layer.route.stack[0].handle({}, response);
+
+  const connected = mongoose.connection.readyState === 1;
+  assert.equal(statusCode, connected ? 200 : 503);
+  assert.equal(body.database, connected ? "connected" : "disconnected");
+});
+
+test("document numbering reads the highest existing sequence", () => {
+  const { getHighestSequence } = require("../services/documentNumberService");
+  assert.equal(getHighestSequence("DEV-2026-00042"), 42);
+  assert.equal(getHighestSequence("DEV-2026-invalid"), 0);
+  assert.equal(getHighestSequence(), 0);
+});
+
 test("le statut d'envoi e-mail est contrôlé", async () => {
   await assert.rejects(
     new Invoice({ userId: objectId(), emailStatus: "inconnu" }).validate(),
@@ -123,4 +183,11 @@ test("un document conserve l'instantané tarifaire de ses lignes", () => {
   assert.equal(invoice.products[0].productName, "Prestation");
   assert.equal(invoice.products[0].unitHT, 100);
   assert.equal(invoice.products[0].lineTTC, 240);
+});
+
+test("le type de document est contrôlé", async () => {
+  await assert.rejects(
+    new Invoice({ userId: objectId(), type: "type-invalide" }).validate(),
+    /type/
+  );
 });
