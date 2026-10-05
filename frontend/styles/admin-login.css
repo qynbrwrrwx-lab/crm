@@ -1,0 +1,72 @@
+.admin-login-page {
+  min-height: 100vh;
+  margin: 0;
+  background: linear-gradient(135deg, #2563eb 0%, #0f172a 45%, #020617 100%);
+  font-family: Inter, sans-serif;
+}
+
+.admin-login-layout {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.admin-login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 55px 34px 30px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  background: rgba(15, 23, 42, 0.78);
+  box-shadow: 0 0 50px rgba(37, 99, 235, 0.25);
+  text-align: center;
+  backdrop-filter: blur(18px);
+}
+
+.admin-login-logo {
+  display: block;
+  width: 450px;
+  max-width: 100%;
+  margin: -120px auto -70px;
+  object-fit: contain;
+}
+
+.admin-login-intro {
+  margin-bottom: 24px;
+  color: #cbd5e1;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.admin-login-input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 16px;
+  border: 0;
+  border-radius: 16px;
+  background: #0f172a;
+  color: white;
+  font: inherit;
+  font-size: 15px;
+}
+
+.admin-login-input + .admin-login-input {
+  margin-top: 14px;
+}
+
+.admin-login-submit {
+  width: 100%;
+  margin-top: 18px;
+  padding: 16px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(90deg, #22d3ee, #2563eb);
+  color: white;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}

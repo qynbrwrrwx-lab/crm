@@ -10,5 +10,6 @@
 | `business.css` | Écrans métier généraux, entreprise, clients, produits et réassort. |
 | `commerce.css` | Listes, devis, documents commerciaux, paiements et tableau de bord. |
 | `app-shell.css` | Cadre applicatif, système de composants et adaptations responsive finales. |
+| `admin-login.css` | Connexion administrateur autonome. |
 
 Ajouter une règle dans le module le plus proche de son écran. Si une règle doit remplacer une règle existante, conserver l’ordre d’import afin de préserver la cascade CSS.
