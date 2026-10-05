@@ -1,6 +1,6 @@
 # Scripts des pages autonomes
 
-Chaque fichier est chargé à la place du bloc script de la page HTML du même nom : `forgot-password`, `resend-verification`, `reset-password`, `quote-client`, `reset` et `success`.
+Chaque fichier est chargé à la place du bloc script de la page HTML du même nom : `admin-login`, `forgot-password`, `resend-verification`, `reset-password`, `quote-client`, `reset` et `success`.
 
 Les scripts gardent leur position de chargement, leurs routes et leur comportement. Les pages autonomes ne chargent pas les états de l’application principale. Le script historique `reset.js` reste distinct de `reset-password.js` pour conserver le contrat de sa page.
 
