@@ -11,6 +11,19 @@ test('shared stylesheet imports each visual module in cascade order',()=>{
  assert.deepEqual(imports,expected);
  for(const name of expected)assert.ok(fs.existsSync(path.join(frontend,'styles',name)),name);
 });
+test('main page loads every domain module once after its shared state',()=>{
+ const html=fs.readFileSync(path.join(frontend,'index.html'),'utf8');
+ const scripts=[...html.matchAll(/<script\s+src="([^"]+)"[^>]*>/g)].map(([,src])=>src);
+ for(const domain of ['ui','admin','dashboard','contacts','opportunities','tasks','products','suppliers','expenses','treasury','invoices','company','app','auth']){
+  const root=`/js/${domain}.js`,directory=path.join(frontend,'js',domain);
+  assert.equal(scripts.filter(src=>src===root).length,1,root);
+  for(const file of fs.readdirSync(directory).filter(file=>file.endsWith('.js'))){
+   const module=`/js/${domain}/${file}`;
+   assert.equal(scripts.filter(src=>src===module).length,1,module);
+   assert.ok(scripts.indexOf(module)>scripts.indexOf(root),module);
+  }
+ }
+});
 test('early session preview tolerates blocked storage and adds restoring class only with a token',()=>{
  const classes=[];const globals={document:{documentElement:{classList:{add:c=>classes.push(c)}}},localStorage:{getItem:()=>null}};run('core/session-preview.js',globals);assert.equal(classes.length,0);globals.localStorage.getItem=()=> 'fixture';run('core/session-preview.js',globals);assert.deepEqual(classes,['session-restoring']);globals.localStorage.getItem=()=>{throw new Error('blocked');};assert.doesNotThrow(()=>run('core/session-preview.js',globals));
 });
