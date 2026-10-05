@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 
 const auth = require("../middleware/auth");
+const adminAuth = require("../middleware/authMiddleware");
 const Contact = require("../models/contact");
 const Product = require("../models/product");
 const Invoice = require("../models/invoice");
@@ -22,7 +23,7 @@ function objectId() {
   return new mongoose.Types.ObjectId();
 }
 
-function executeAuth(authorization) {
+function executeAuth(authorization, middleware = auth) {
   return new Promise(resolve => {
     const req = { headers: { authorization } };
     const res = {
@@ -35,7 +36,7 @@ function executeAuth(authorization) {
       }
     };
 
-    auth(req, res, () => resolve({ nextCalled: true, req }));
+    middleware(req, res, () => resolve({ nextCalled: true, req }));
   });
 }
 
@@ -48,12 +49,26 @@ test("auth refuse une requête sans jeton", async () => {
 
 test("auth refuse un jeton malformé", async () => {
   const originalConsoleError = console.error;
-  console.error = () => {};
+  const errors = [];
+  console.error = (...args) => errors.push(args);
   const result = await executeAuth("Bearer mauvais-jeton");
   console.error = originalConsoleError;
   assert.equal(result.nextCalled, false);
   assert.equal(result.statusCode, 401);
   assert.equal(result.body.error, "Token invalide");
+  assert.deepEqual(errors, []);
+});
+
+test("les jetons administrateur invalides n'écrivent pas une pile d'erreur attendue", async () => {
+  const originalConsoleError = console.error;
+  const errors = [];
+  console.error = (...args) => errors.push(args);
+  const result = await executeAuth("Bearer mauvais-jeton", adminAuth);
+  console.error = originalConsoleError;
+  assert.equal(result.nextCalled, false);
+  assert.equal(result.statusCode, 401);
+  assert.equal(result.body.error, "Token invalide");
+  assert.deepEqual(errors, []);
 });
 
 test("auth attribue le bon userId à un jeton valide", async () => {
