@@ -6,7 +6,7 @@ async function openSubscriptionBilling(userId, email) {
   if (!modal) {
     modal = document.createElement("div");
     modal.id = "adminSubscriptionBillingModal";
-    modal.style.cssText = "position:fixed;inset:0;z-index:30;overflow:auto;padding:20px;background:rgba(2,6,23,.78);";
+    modal.className = "admin-modal-overlay admin-billing-modal";
     document.body.append(modal);
   }
   modal.dataset.userId = userId;

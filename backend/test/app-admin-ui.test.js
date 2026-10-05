@@ -44,6 +44,9 @@ test('admin user filters combine verification and subscription and escape email'
 test('admin statistics keep the total counter after rendering their cards',()=>{
  const b=browser(true);const markup=b.ctx.renderAdminStats({totalUsers:2,verifiedUsers:1,pendingVerification:1,trials:1,trialsEndingSoon:0,activeSubscriptions:0,revenue:0});assert.match(markup,/id="totalUsers"/);assert.match(markup,/admin-stat-live-value/);
 });
+test('admin modal templates use classes instead of embedded presentation',()=>{
+ const b=browser(true);const summary=b.ctx.renderAdminUserSummary({user:{email:'admin@example.test',isVerified:true},documents:1,invoices:1},'Aujourd’hui','Demain');const billing=b.ctx.renderSubscriptionBillingModal('admin@example.test');const rows=b.ctx.renderSubscriptionInvoiceRows([{_id:'i',invoiceNumber:'F1',planName:'Pro',totalTTC:12,status:'draft'}]);for(const markup of [summary,billing,rows])assert.doesNotMatch(markup,/style=/);assert.match(summary,/admin-summary-card/);assert.match(billing,/admin-billing-card/);assert.match(rows,/admin-invoice-row/);
+});
 test('suspension confirmation describes the requested action and cancellation prevents writes',async()=>{
  const b=browser(true);const messages=[];b.ctx.confirm=m=>{messages.push(m);return false;};await b.ctx.toggleAdminSuspension('u',true);await b.ctx.toggleAdminSuspension('u',false);assert.deepEqual(messages,['Suspendre ce compte ?','Réactiver ce compte ?']);assert.equal(b.calls.length,0);
 });

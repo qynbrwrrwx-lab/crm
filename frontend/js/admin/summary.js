@@ -1,12 +1,21 @@
-// admin : summary.
+// admin : synthèse d'un compte.
+
+function renderAdminUserSummary(summary, activity, trialEnd) {
+  return `<section class="admin-summary-card"><button class="admin-modal-close" onclick="document.getElementById('adminSummaryModal').remove()">×</button><p class="admin-modal-eyebrow">Synthèse du compte</p><h2 class="admin-summary-title">${escapeAdminHtml(summary.user.email)}</h2><div class="admin-summary-grid"><div>Vérification<br><b>${summary.user.isVerified ? "Vérifié" : "En attente"}</b></div><div>Fin d’essai<br><b>${trialEnd}</b></div><div>Documents<br><b>${summary.documents}</b></div><div>Factures<br><b>${summary.invoices}</b></div><div>Dernière activité<br><b>${activity}</b></div></div><label class="admin-summary-label">Abonnement<select id="adminSubscriptionSelect" class="admin-summary-select"><option value="trial">Essai</option><option value="active">Actif</option><option value="suspended">Suspendu</option><option value="cancelled">Résilié</option></select></label><button id="adminSubscriptionSave" class="admin-modal-button admin-modal-button--primary">Enregistrer l’abonnement</button><button id="adminSubscriptionBilling" class="admin-modal-button admin-modal-button--billing">Facturation abonnement</button></section>`;
+}
 
 async function showAdminUserSummary(id) {
   const summary = await adminApiFetch(`/api/admin/users/${id}/summary`);
   const activity = summary.lastActivityAt ? new Date(summary.lastActivityAt).toLocaleDateString("fr-FR") : "Aucune activité";
   const trialEnd = summary.user.trialEndsAt ? new Date(summary.user.trialEndsAt).toLocaleDateString("fr-FR") : "Non définie";
   let modal = document.getElementById("adminSummaryModal");
-  if (!modal) { modal = document.createElement("div"); modal.id = "adminSummaryModal"; modal.style.cssText = "position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px;background:rgba(2,6,23,.72);"; document.body.append(modal); }
-  modal.innerHTML = `<section style="width:min(500px,100%);padding:26px;border:1px solid rgba(96,165,250,.25);border-radius:20px;background:#0f172a;color:white;box-shadow:0 24px 70px rgba(0,0,0,.45)"><button onclick="document.getElementById('adminSummaryModal').remove()" style="float:right;border:0;background:none;color:#94a3b8;font-size:20px;cursor:pointer">×</button><p style="margin:0;color:#60a5fa;font-size:12px;font-weight:800;text-transform:uppercase">Synthèse du compte</p><h2 style="margin:9px 0 20px;font-size:20px">${escapeAdminHtml(summary.user.email)}</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;color:#cbd5e1"><div>Vérification<br><b>${summary.user.isVerified ? "Vérifié" : "En attente"}</b></div><div>Fin d’essai<br><b>${trialEnd}</b></div><div>Documents<br><b>${summary.documents}</b></div><div>Factures<br><b>${summary.invoices}</b></div><div>Dernière activité<br><b>${activity}</b></div></div><label style="display:block;margin-top:22px;color:#94a3b8;font-size:12px">Abonnement<select id="adminSubscriptionSelect" style="display:block;width:100%;margin-top:7px;padding:10px;border-radius:9px;background:#020617;color:white;border:1px solid #334155"><option value="trial">Essai</option><option value="active">Actif</option><option value="suspended">Suspendu</option><option value="cancelled">Résilié</option></select></label><button id="adminSubscriptionSave" style="margin-top:12px;padding:10px 13px;border:0;border-radius:9px;background:#2563eb;color:white;cursor:pointer">Enregistrer l’abonnement</button><button id="adminSubscriptionBilling" style="margin:12px 0 0 8px;padding:10px 13px;border:1px solid #0ea5e9;border-radius:9px;background:#082f49;color:#bae6fd;cursor:pointer">Facturation abonnement</button></section>`;
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "adminSummaryModal";
+    modal.className = "admin-modal-overlay admin-summary-modal";
+    document.body.append(modal);
+  }
+  modal.innerHTML = renderAdminUserSummary(summary, activity, trialEnd);
   document.getElementById("adminSubscriptionSelect").value = summary.user.subscriptionStatus || "trial";
   document.getElementById("adminSubscriptionSave").onclick = async () => { await adminApiFetch(`/api/admin/users/${id}/subscription`, { method: "PUT", body: JSON.stringify({ status: document.getElementById("adminSubscriptionSelect").value }) }); await loadAdminUsers(); document.getElementById("adminSummaryModal").remove(); };
   document.getElementById("adminSubscriptionBilling").onclick = () => openSubscriptionBilling(id, summary.user.email);

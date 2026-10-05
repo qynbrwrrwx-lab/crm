@@ -230,6 +230,226 @@
   color: #64748b;
 }
 
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  padding: 20px;
+  background: rgba(2, 6, 23, 0.72);
+}
+
+.admin-summary-modal {
+  z-index: 20;
+  display: grid;
+  place-items: center;
+}
+
+.admin-billing-modal {
+  z-index: 30;
+  overflow: auto;
+  background: rgba(2, 6, 23, 0.78);
+}
+
+.admin-summary-card,
+.admin-billing-card {
+  border: 1px solid rgba(96, 165, 250, 0.25);
+  border-radius: 20px;
+  background: #0f172a;
+  color: white;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+}
+
+.admin-summary-card {
+  width: min(500px, 100%);
+  padding: 26px;
+}
+
+.admin-billing-card {
+  width: min(850px, 100%);
+  margin: 24px auto;
+  padding: 28px;
+  border-color: rgba(96, 165, 250, 0.28);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+}
+
+.admin-modal-close {
+  float: right;
+  border: 0;
+  background: none;
+  color: #94a3b8;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.admin-summary-card .admin-modal-close {
+  font-size: 20px;
+}
+
+.admin-modal-eyebrow {
+  margin: 0;
+  color: #60a5fa;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.admin-modal-eyebrow--billing {
+  color: #38bdf8;
+  letter-spacing: 0.08em;
+}
+
+.admin-summary-title {
+  margin: 9px 0 20px;
+  font-size: 20px;
+}
+
+.admin-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  color: #cbd5e1;
+}
+
+.admin-summary-label {
+  display: block;
+  margin-top: 22px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.admin-summary-select,
+.admin-billing-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #334155;
+  border-radius: 9px;
+  background: #020617;
+  color: white;
+}
+
+.admin-summary-select {
+  margin-top: 7px;
+}
+
+.admin-modal-button,
+.admin-billing-submit {
+  padding: 10px 13px;
+  border: 0;
+  border-radius: 9px;
+  color: white;
+  cursor: pointer;
+}
+
+.admin-modal-button--primary {
+  margin-top: 12px;
+  background: #2563eb;
+}
+
+.admin-modal-button--billing {
+  margin: 12px 0 0 8px;
+  border: 1px solid #0ea5e9;
+  background: #082f49;
+  color: #bae6fd;
+}
+
+.admin-billing-title {
+  margin: 8px 0 6px;
+}
+
+.admin-billing-description {
+  margin: 0 0 22px;
+  color: #94a3b8;
+}
+
+.admin-billing-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  align-items: end;
+  gap: 12px;
+}
+
+.admin-billing-field {
+  display: grid;
+  gap: 7px;
+  color: #cbd5e1;
+  font-size: 12px;
+}
+
+.admin-billing-input {
+  padding: 11px;
+  border-radius: 10px;
+}
+
+.admin-billing-submit {
+  grid-column: 1 / -1;
+  justify-self: start;
+  padding: 11px 15px;
+  border-radius: 10px;
+  background: #2563eb;
+  font-weight: 700;
+}
+
+.admin-billing-list-title {
+  margin: 30px 0 12px;
+}
+
+.admin-billing-list {
+  color: #94a3b8;
+}
+
+.admin-invoice-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.admin-invoice-number {
+  color: #e2e8f0;
+}
+
+.admin-invoice-plan {
+  margin-left: 9px;
+  color: #94a3b8;
+}
+
+.admin-invoice-status {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+}
+
+.admin-invoice-actions {
+  display: flex;
+  gap: 7px;
+}
+
+.admin-invoice-action {
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+
+.admin-invoice-action--download {
+  border: 1px solid #334155;
+  background: #020617;
+  color: #cbd5e1;
+}
+
+.admin-invoice-action--send {
+  background: #1d4ed8;
+}
+
+.admin-invoice-action--paid {
+  background: #166534;
+}
+
 @media (max-width: 600px) {
   .admin-dashboard-layout {
     padding: 18px;
@@ -242,5 +462,9 @@
   .admin-stats {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
+  }
+
+  .admin-billing-form {
+    grid-template-columns: 1fr;
   }
 }
