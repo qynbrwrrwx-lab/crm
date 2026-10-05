@@ -13,7 +13,7 @@ function updateInvoiceListMetrics({ quotes, acceptedQuotes, orders, visibleInvoi
   document.getElementById("paidInvoicesTotal")?.classList.toggle("is-active", status === "paid");
   document.getElementById("pendingInvoicesTotal")?.classList.toggle("is-active", status === "pending");
   const resetButton = document.getElementById("resetInvoiceFilters");
-  if (resetButton) resetButton.style.display = search || status !== "all" || electronicStatus !== "all" || sort !== "recent" ? "inline-flex" : "none";
+  if (resetButton) resetButton.hidden = !(search || status !== "all" || electronicStatus !== "all" || sort !== "recent");
   const quotesCount = document.getElementById("quotesCount");
   if (quotesCount) quotesCount.textContent = `${quotes.length} devis`;
   const acceptedQuotesCount = document.getElementById("acceptedQuotesCount");

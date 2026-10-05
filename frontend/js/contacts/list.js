@@ -36,7 +36,7 @@ function filterContacts() {
   const contacts = selectContacts(allContacts, { query, sort, followUpFilter, tagFilter, today });
   const count = document.getElementById("contactFilteredCount"), reset = document.getElementById("resetContactFilters");
   if (count) count.textContent = `${contacts.length} client${contacts.length > 1 ? "s" : ""} affiché${contacts.length > 1 ? "s" : ""}`;
-  if (reset) reset.style.display = query.trim() || sort !== "recent" || followUpFilter !== "all" || tagFilter !== "all" ? "inline-flex" : "none";
+  if (reset) reset.hidden = !(query.trim() || sort !== "recent" || followUpFilter !== "all" || tagFilter !== "all");
   renderContacts(contacts);
 }
 

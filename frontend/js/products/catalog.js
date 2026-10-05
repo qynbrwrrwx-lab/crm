@@ -37,7 +37,7 @@ function filterProducts() {
   const filteredProducts = selectProducts(allProducts, { query, stockFilter, categoryFilter, sort });
 
   if (filteredCount) filteredCount.textContent = `${filteredProducts.length} produit${filteredProducts.length > 1 ? "s" : ""} affiché${filteredProducts.length > 1 ? "s" : ""}`;
-  if (resetButton) resetButton.style.display = query || stockFilter !== "all" || categoryFilter !== "all" || sort !== "recent" ? "inline-flex" : "none";
+  if (resetButton) resetButton.hidden = !(query || stockFilter !== "all" || categoryFilter !== "all" || sort !== "recent");
   renderProducts(filteredProducts);
 }
 
