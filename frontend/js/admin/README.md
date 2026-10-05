@@ -9,6 +9,8 @@
 | `users.js` | Chargement des statistiques et comptes, filtres et export. |
 | `actions.js` | Suspension, vérification et abonnement. |
 | `summary.js` | Synthèse du compte. |
+| `billing-modal.js` | Gabarit de la fenêtre de facturation d’abonnement. |
+| `billing-presentation.js` | Lignes et actions affichées pour les factures d’abonnement. |
 | `billing.js` | Factures d’abonnement, téléchargement et actions. |
 | `bootstrap.js` | Chargement lorsque le conteneur adminUsers est présent. |
 

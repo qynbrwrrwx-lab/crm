@@ -12,8 +12,9 @@ function browser(admin=false){
 }
 test('app and admin modules load once on their respective pages with distinct API functions',()=>{
  const b=browser();assert.equal(new Set(b.modules).size,b.modules.length);assert.equal(b.events.length,1);assert.equal(b.calls.length,0);assert.equal(typeof b.ctx.apiFetch,'function');assert.equal(typeof b.ctx.adminApiFetch,'function');assert.notEqual(b.ctx.apiFetch,b.ctx.adminApiFetch);
- const a=browser(true);assert.equal(typeof a.ctx.apiFetch,'undefined');assert.equal(typeof a.ctx.adminApiFetch,'function');assert.equal(a.events.length,0);
+ const a=browser(true);assert.equal(typeof a.ctx.apiFetch,'undefined');assert.equal(typeof a.ctx.adminApiFetch,'function');assert.equal(a.events.length,0);assert.equal(typeof a.ctx.renderSubscriptionBillingModal,'function');assert.equal(typeof a.ctx.renderSubscriptionInvoiceRows,'function');
  for(const domain of ['app','admin'])assert.deepEqual(b.modules.filter(s=>s.startsWith(`/js/${domain}/`)).map(s=>path.basename(s)).sort(),fs.readdirSync(path.join(frontend,`js/${domain}`)).filter(s=>s.endsWith('.js')).sort());
+ assert.deepEqual(a.modules.filter(s=>s.startsWith('/js/admin/')).map(s=>path.basename(s)).sort(),fs.readdirSync(path.join(frontend,'js/admin')).filter(s=>s.endsWith('.js')).sort());
 });
 test('main API preserves bearer authorization and logs out on expired sessions',async()=>{
  const b=browser();b.storage.set('token','fixture');await b.ctx.apiFetch('/api/tasks',{method:'GET'});assert.equal(b.calls[0][0],'https://app.example.test/api/tasks');assert.equal(b.calls[0][1].headers.Authorization,'Bearer fixture');b.ctx.fetch=async()=>({status:401});await assert.rejects(b.ctx.apiFetch('/api/tasks'),/Session expirée/);assert.equal(b.storage.has('token'),false);
