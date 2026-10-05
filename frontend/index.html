@@ -40,7 +40,6 @@
 <div
   id="loader"
   class="loader"
-  style="display:none;"
   role="status"
   aria-live="polite"
 >
@@ -238,7 +237,6 @@
 
 <div
   id="app"
-  style="display:none;"
 >
 
   <div class="app-layout">
@@ -1406,7 +1404,6 @@
       <div
         id="companyForm"
         class="contact-grid"
-        style="display:none;"
       >
 
       <input
@@ -1732,7 +1729,6 @@
   <div
   id="companyLogoSection"
   class="company-section"
-  style="display:none;"
 >
 
   <h3 class="section-title">
@@ -1767,7 +1763,6 @@
     id="saveCompanyBtn"
     class="primary-btn"
     onclick="saveCompany()"
-    style="display:none;"
   >
     Enregistrer
   </button>
@@ -2009,7 +2004,6 @@
 <div
   id="invoiceDetailsModal"
   class="invoice-details-modal"
-  style="display:none;"
 >
 
   <div class="invoice-details-content">
@@ -2043,12 +2037,10 @@
 <div
     id="addProductModal"
     class="invoice-details-modal"
-    style="display:none;"
 >
 
     <div
-        class="invoice-details-content"
-        style="max-width:600px;"
+        class="invoice-details-content add-product-modal-content"
     >
 
         <div class="invoice-details-header">
@@ -2074,7 +2066,7 @@
 
 <!-- ================= REASSORT STOCK ================= -->
 
-<div id="restockModal" class="invoice-details-modal" style="display:none;">
+<div id="restockModal" class="invoice-details-modal">
   <div class="invoice-details-content restock-modal-content">
     <div class="invoice-details-header">
       <div>
@@ -2148,7 +2140,7 @@
 
 <!-- ================= RECHERCHE RAPIDE ================= -->
 
-<div id="globalSearchModal" class="global-search-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="globalSearchTitle">
+<div id="globalSearchModal" class="global-search-modal" role="dialog" aria-modal="true" aria-labelledby="globalSearchTitle">
   <div class="global-search-panel">
     <div class="global-search-input-wrap">
       <i data-lucide="search"></i>
@@ -2168,7 +2160,7 @@
 
 <!-- ================= CONFIRMATION ================= -->
 
-<div id="appConfirmModal" class="app-confirm-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="appConfirmTitle">
+<div id="appConfirmModal" class="app-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="appConfirmTitle">
   <div class="app-confirm-panel">
     <span id="appConfirmTone" class="app-confirm-tone">!</span>
     <div>
@@ -2176,7 +2168,7 @@
       <h2 id="appConfirmTitle">Confirmer l’action</h2>
       <p id="appConfirmMessage">Êtes-vous sûr de vouloir continuer ?</p>
     </div>
-    <label id="appConfirmPasswordField" class="app-confirm-password" style="display:none;">
+    <label id="appConfirmPasswordField" class="app-confirm-password">
       <span>Votre mot de passe</span>
       <input id="appConfirmPassword" type="password" autocomplete="current-password" placeholder="Saisissez votre mot de passe" />
     </label>
@@ -2189,7 +2181,7 @@
 
 <!-- ================= MOT DE PASSE ================= -->
 
-<div id="passwordChangeModal" class="app-confirm-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="passwordChangeTitle">
+<div id="passwordChangeModal" class="app-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="passwordChangeTitle">
   <form class="app-confirm-panel password-change-panel" onsubmit="submitPasswordChange(event)">
     <span class="app-confirm-tone">✓</span>
     <div>
@@ -2222,7 +2214,6 @@
 <div
   id="paymentModal"
   class="invoice-details-modal"
-  style="display:none;"
 >
 
   <div class="invoice-details-content payment-modal-content">
@@ -2243,7 +2234,7 @@
       <strong id="paymentInvoiceAmount">0,00 € TTC</strong>
     </div>
 
-    <label class="form-group" style="margin:14px 0;display:block;">
+    <label class="form-group payment-amount-field">
       <span>Montant du règlement</span>
       <input id="paymentAmountInput" type="number" min="0.01" step="0.01" required />
     </label>

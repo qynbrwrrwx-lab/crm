@@ -149,6 +149,9 @@
 .invoice-reset-filters:hover { border-color: rgba(96,165,250,.42); color: #dbeafe; background: rgba(30,58,138,.14); }
 #resetContactFilters, #resetProductFilters, .invoice-reset-filters { display: inline-flex; align-items: center; }
 #resetContactFilters[hidden], #resetProductFilters[hidden], .invoice-reset-filters[hidden] { display: none; }
+#loader, #app, #companyForm, #companyLogoSection, #saveCompanyBtn, #invoiceDetailsModal, #addProductModal, #restockModal, #globalSearchModal, #appConfirmModal, #passwordChangeModal, #paymentModal, #appConfirmPasswordField { display: none; }
+.add-product-modal-content { max-width: 600px; }
+.payment-amount-field { display: block; margin: 14px 0; }
 
 /* ================= ANALYSE & CARTE ================= */
 
