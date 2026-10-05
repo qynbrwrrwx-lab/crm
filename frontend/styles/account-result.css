@@ -1,0 +1,107 @@
+.account-result-page {
+  display: flex;
+  min-height: 100vh;
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.account-result-page--success {
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+}
+
+.account-result-page--error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.account-result-card {
+  width: min(100%, 400px);
+  padding: 45px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  backdrop-filter: blur(20px);
+}
+
+.account-result-brand {
+  margin-bottom: 10px;
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.account-result-icon {
+  display: inline-block;
+  font-size: 60px;
+}
+
+.account-result-page--success .account-result-icon {
+  font-size: 65px;
+  animation: account-result-pop 0.5s ease;
+}
+
+.account-result-page--error .account-result-icon {
+  animation: account-result-shake 0.4s ease;
+}
+
+@keyframes account-result-pop {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes account-result-shake {
+  0%, 100% { transform: translateX(0); }
+  25%, 75% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+}
+
+.account-result-title {
+  margin: 20px 0 10px;
+  font-size: 26px;
+}
+
+.account-result-copy {
+  font-size: 15px;
+  opacity: 0.85;
+}
+
+.account-result-action {
+  display: inline-block;
+  margin-top: 25px;
+  padding: 14px 28px;
+  border-radius: 10px;
+  background: #fff;
+  color: #2563eb;
+  font-weight: 700;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.account-result-page--error .account-result-action {
+  color: #dc2626;
+}
+
+.account-result-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.account-result-progress,
+.account-result-support {
+  margin-top: 15px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.account-result-support {
+  margin-top: 20px;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+@media (max-width: 480px) {
+  .account-result-card { padding: 34px 24px; }
+}
