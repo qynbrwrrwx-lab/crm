@@ -24,6 +24,12 @@ test('admin dashboard uses its dedicated stylesheet instead of inline presentati
  assert.doesNotMatch(html,/\sstyle=/);
  assert.ok(fs.existsSync(path.join(frontend,'styles','admin-dashboard.css')));
 });
+test('password reset keeps its guidance styles in the shared assistance stylesheet',()=>{
+ const html=fs.readFileSync(path.join(frontend,'reset-password.html'),'utf8'),css=fs.readFileSync(path.join(frontend,'account-assistance.css'),'utf8');
+ assert.doesNotMatch(html,/<style[\s>]/);
+ assert.match(css,/\.password-guidance/);
+ assert.match(css,/\.password-match\.success/);
+});
 test('main page loads every domain module once after its shared state',()=>{
  const html=fs.readFileSync(path.join(frontend,'index.html'),'utf8');
  const scripts=[...html.matchAll(/<script\s+src="([^"]+)"[^>]*>/g)].map(([,src])=>src);
