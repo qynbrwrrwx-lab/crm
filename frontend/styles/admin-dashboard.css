@@ -1,0 +1,147 @@
+.admin-dashboard-page {
+  margin: 0;
+  font-family: Outfit, Inter, sans-serif;
+}
+
+.admin-dashboard-page button,
+.admin-dashboard-page input,
+.admin-dashboard-page select {
+  font: inherit;
+}
+
+.admin-dashboard-layout {
+  min-height: 100vh;
+  padding: 30px;
+  background: linear-gradient(135deg, #2563eb 0%, #0f172a 45%, #020617 100%);
+  font-family: Inter, sans-serif;
+}
+
+.admin-dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+.admin-dashboard-title {
+  margin: 0;
+  color: white;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.admin-dashboard-subtitle {
+  margin-top: 8px;
+  color: #94a3b8;
+}
+
+.admin-logout-button {
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 14px;
+  background: #ef4444;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  margin-bottom: 30px;
+}
+
+.admin-stat-card,
+.admin-panel {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.78);
+}
+
+.admin-stat-card {
+  padding: 24px;
+  border-radius: 22px;
+}
+
+.admin-stat-label {
+  margin-bottom: 8px;
+  color: #94a3b8;
+}
+
+.admin-stat-value {
+  color: white;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.admin-panel {
+  padding: 24px;
+  border-radius: 24px;
+}
+
+.admin-panel-title {
+  margin: 0 0 24px;
+  color: white;
+}
+
+.admin-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: -8px 0 20px;
+}
+
+.admin-filter-control {
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: #0f172a;
+  color: white;
+}
+
+.admin-filter-search {
+  min-width: 240px;
+  flex: 1;
+}
+
+.admin-export-button {
+  padding: 12px 14px;
+  border: 1px solid rgba(96, 165, 250, 0.35);
+  border-radius: 12px;
+  background: #172554;
+  color: #bfdbfe;
+  cursor: pointer;
+}
+
+#adminUsers > div {
+  transition: transform 0.18s, border-color 0.18s;
+}
+
+#adminUsers > div:hover {
+  transform: translateY(-2px);
+  border-color: rgba(96, 165, 250, 0.35) !important;
+}
+
+.admin-audit-title {
+  margin: 32px 0 14px;
+  color: white;
+}
+
+.admin-audit {
+  color: #94a3b8;
+}
+
+@media (max-width: 600px) {
+  .admin-dashboard-layout {
+    padding: 18px;
+  }
+
+  .admin-dashboard-title {
+    font-size: 25px;
+  }
+
+  .admin-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}

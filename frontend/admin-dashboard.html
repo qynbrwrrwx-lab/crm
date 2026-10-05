@@ -1,167 +1,69 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Admin Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>body{margin:0;font-family:Outfit,Inter,sans-serif}button,input,select{font:inherit}#adminUsers>div{transition:transform .18s,border-color .18s}#adminUsers>div:hover{transform:translateY(-2px);border-color:rgba(96,165,250,.35)!important}@media(max-width:600px){body>div{padding:18px!important}h1{font-size:25px!important}#adminStats{grid-template-columns:1fr 1fr!important;gap:10px!important}}</style>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles/admin-dashboard.css">
 </head>
+<body class="admin-dashboard-page">
+  <main class="admin-dashboard-layout">
+    <header class="admin-dashboard-header">
+      <div>
+        <h1 class="admin-dashboard-title">👑 Admin Dashboard</h1>
+        <p class="admin-dashboard-subtitle">Gestion plateforme My Prospect</p>
+      </div>
 
-<body>
+      <button class="admin-logout-button" onclick="logoutAdmin()">Déconnexion</button>
+    </header>
 
-<div style="
-min-height:100vh;
-background:linear-gradient(
-135deg,
-#2563eb 0%,
-#0f172a 45%,
-#020617 100%
-);
-font-family:Inter,sans-serif;
-padding:30px;
-">
+    <div id="adminStats" class="admin-stats">
+      <div class="admin-stat-card">
+        <div class="admin-stat-label">Utilisateurs</div>
+        <div id="totalUsers" class="admin-stat-value">...</div>
+      </div>
+    </div>
 
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:30px;
-">
+    <section class="admin-panel">
+      <h2 class="admin-panel-title">Utilisateurs inscrits</h2>
 
-<div>
+      <div class="admin-filter-bar">
+        <input id="adminUserSearch" class="admin-filter-control admin-filter-search" type="search" placeholder="Rechercher une adresse e-mail" oninput="filterAdminUsers()">
+        <select id="adminVerificationFilter" class="admin-filter-control" onchange="filterAdminUsers()">
+          <option value="all">Tous les comptes</option>
+          <option value="verified">Comptes vérifiés</option>
+          <option value="pending">À vérifier</option>
+          <option value="suspended">Comptes suspendus</option>
+        </select>
+        <select id="adminSubscriptionFilter" class="admin-filter-control" onchange="filterAdminUsers()">
+          <option value="all">Tous les abonnements</option>
+          <option value="trial">Essais</option>
+          <option value="active">Actifs</option>
+          <option value="suspended">Suspendus</option>
+          <option value="cancelled">Résiliés</option>
+        </select>
+        <button class="admin-export-button" type="button" onclick="exportAdminUsersCsv()">Exporter CSV</button>
+      </div>
 
-<h1 style="
-color:white;
-font-size:32px;
-margin:0;
-font-weight:800;
-">
-👑 Admin Dashboard
-</h1>
+      <div id="adminUsers">Chargement...</div>
 
-<p style="
-color:#94a3b8;
-margin-top:8px;
-">
-Gestion plateforme My Prospect
-</p>
+      <h2 class="admin-audit-title">Journal administrateur</h2>
+      <div id="adminAudit" class="admin-audit">Chargement…</div>
+    </section>
+  </main>
 
-</div>
-
-<button
-onclick="logoutAdmin()"
-style="
-padding:12px 18px;
-border:none;
-border-radius:14px;
-background:#ef4444;
-color:white;
-font-weight:700;
-cursor:pointer;
-"
->
-Déconnexion
-</button>
-
-</div>
-
-<div
-id="adminStats"
-
-style="
-display:grid;
-grid-template-columns:
-repeat(auto-fit,minmax(220px,1fr));
-gap:18px;
-margin-bottom:30px;
-"
->
-
-<div style="
-background:rgba(15,23,42,0.78);
-border-radius:22px;
-padding:24px;
-border:1px solid rgba(255,255,255,0.08);
-">
-
-<div style="
-color:#94a3b8;
-margin-bottom:8px;
-">
-Utilisateurs
-</div>
-
-<div
-id="totalUsers"
-style="
-color:white;
-font-size:32px;
-font-weight:800;
-"
->
-...
-</div>
-
-</div>
-
-</div>
-
-<div style="
-background:rgba(15,23,42,0.78);
-border-radius:24px;
-padding:24px;
-border:1px solid rgba(255,255,255,0.08);
-">
-
-<h2 style="
-color:white;
-margin-top:0;
-margin-bottom:24px;
-">
-Utilisateurs inscrits
-</h2>
-
-<div style="display:flex;gap:12px;flex-wrap:wrap;margin:-8px 0 20px;">
-  <input id="adminUserSearch" type="search" placeholder="Rechercher une adresse e-mail" oninput="filterAdminUsers()" style="min-width:240px;flex:1;padding:12px 14px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0f172a;color:white;">
-  <select id="adminVerificationFilter" onchange="filterAdminUsers()" style="padding:12px 14px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0f172a;color:white;">
-    <option value="all">Tous les comptes</option>
-    <option value="verified">Comptes vérifiés</option>
-    <option value="pending">À vérifier</option>
-    <option value="suspended">Comptes suspendus</option>
-  </select>
-  <select id="adminSubscriptionFilter" onchange="filterAdminUsers()" style="padding:12px 14px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0f172a;color:white;">
-    <option value="all">Tous les abonnements</option><option value="trial">Essais</option><option value="active">Actifs</option><option value="suspended">Suspendus</option><option value="cancelled">Résiliés</option>
-  </select>
-  <button type="button" onclick="exportAdminUsersCsv()" style="padding:12px 14px;border:1px solid rgba(96,165,250,.35);border-radius:12px;background:#172554;color:#bfdbfe;cursor:pointer;">Exporter CSV</button>
-</div>
-
-<div id="adminUsers">
-
-Chargement...
-
-</div>
-
-<h2 style="color:white;margin:32px 0 14px;">Journal administrateur</h2>
-<div id="adminAudit" style="color:#94a3b8;">Chargement…</div>
-
-</div>
-
-</div>
-
-<script src="/js/admin.js"></script>
-<script src="/js/admin/api.js"></script>
-<script src="/js/admin/shared.js"></script>
-<script src="/js/admin/users.js"></script>
-<script src="/js/admin/actions.js"></script>
-<script src="/js/admin/summary.js"></script>
-<script src="/js/admin/billing-modal.js"></script>
-<script src="/js/admin/billing-presentation.js"></script>
-<script src="/js/admin/billing.js"></script>
-<script src="/js/admin/bootstrap.js"></script>
-
+  <script src="/js/admin.js"></script>
+  <script src="/js/admin/api.js"></script>
+  <script src="/js/admin/shared.js"></script>
+  <script src="/js/admin/users.js"></script>
+  <script src="/js/admin/actions.js"></script>
+  <script src="/js/admin/summary.js"></script>
+  <script src="/js/admin/billing-modal.js"></script>
+  <script src="/js/admin/billing-presentation.js"></script>
+  <script src="/js/admin/billing.js"></script>
+  <script src="/js/admin/bootstrap.js"></script>
 </body>
 </html>

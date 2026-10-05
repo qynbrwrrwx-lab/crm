@@ -17,6 +17,13 @@ test('admin login uses its dedicated stylesheet instead of inline presentation',
  assert.doesNotMatch(html,/\sstyle=/);
  assert.ok(fs.existsSync(path.join(frontend,'styles','admin-login.css')));
 });
+test('admin dashboard uses its dedicated stylesheet instead of inline presentation',()=>{
+ const html=fs.readFileSync(path.join(frontend,'admin-dashboard.html'),'utf8');
+ assert.match(html,/<link rel="stylesheet" href="\/styles\/admin-dashboard\.css">/);
+ assert.doesNotMatch(html,/<style[\s>]/);
+ assert.doesNotMatch(html,/\sstyle=/);
+ assert.ok(fs.existsSync(path.join(frontend,'styles','admin-dashboard.css')));
+});
 test('main page loads every domain module once after its shared state',()=>{
  const html=fs.readFileSync(path.join(frontend,'index.html'),'utf8');
  const scripts=[...html.matchAll(/<script\s+src="([^"]+)"[^>]*>/g)].map(([,src])=>src);
