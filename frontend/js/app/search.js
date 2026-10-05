@@ -1,18 +1,24 @@
 // app : search.
 
+let globalSearchOpener = null;
+
 function openGlobalSearch() {
   const modal = document.getElementById("globalSearchModal");
   const input = document.getElementById("globalSearchInput");
   if (!modal || !input) return;
+  const activeElement = document.activeElement;
+  if (activeElement?.focus && !modal.contains?.(activeElement)) globalSearchOpener = activeElement;
   modal.style.display = "flex";
   input.value = "";
   renderGlobalSearchResults();
   window.setTimeout(() => input.focus(), 40);
 }
 
-function closeGlobalSearch() {
+function closeGlobalSearch(restoreFocus = true) {
   const modal = document.getElementById("globalSearchModal");
   if (modal) modal.style.display = "none";
+  if (restoreFocus) globalSearchOpener?.focus?.();
+  globalSearchOpener = null;
 }
 
 function renderGlobalSearchResults() {
@@ -45,13 +51,16 @@ function renderGlobalSearchResults() {
   }
 
   const labels = { contact: "Client", product: "Produit", document: "Document", opportunity: "Opportunité", task: "Agenda" };
-  list.innerHTML = globalSearchResults.map((result, index) => `<button type="button" class="global-search-result" onclick="openGlobalSearchResult(${index})"><span class="global-search-result-type">${labels[result.kind]}</span><span class="global-search-result-main"><strong>${escapeHtml(result.title)}</strong><small>${escapeHtml(result.detail)}</small></span><span class="global-search-result-arrow">↗</span></button>`).join("");
+  list.innerHTML = globalSearchResults.map((result, index) => `<button type="button" class="global-search-result" data-global-search-result="${index}"><span class="global-search-result-type">${labels[result.kind]}</span><span class="global-search-result-main"><strong>${escapeHtml(result.title)}</strong><small>${escapeHtml(result.detail)}</small></span><span class="global-search-result-arrow">↗</span></button>`).join("");
+  document.querySelectorAll("[data-global-search-result]").forEach(button => {
+    button.addEventListener("click", () => openGlobalSearchResult(Number(button.dataset.globalSearchResult)));
+  });
 }
 
 function openGlobalSearchResult(index) {
   const result = globalSearchResults[index];
   if (!result) return;
-  closeGlobalSearch();
+  closeGlobalSearch(false);
   if (result.kind === "contact") openClientProfile(result.id);
   if (result.kind === "product") openRestockModal(result.id);
   if (result.kind === "document") openInvoice(result.id);
