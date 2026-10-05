@@ -34,6 +34,12 @@ test('account result pages share their extracted presentation stylesheet',()=>{
  for(const page of ['success.html','error.html']){const html=fs.readFileSync(path.join(frontend,page),'utf8');assert.match(html,/<link rel="stylesheet" href="\/styles\/account-result\.css">/);assert.doesNotMatch(html,/<style[\s>]/);}
  assert.ok(fs.existsSync(path.join(frontend,'styles','account-result.css')));
 });
+test('public quote page keeps its presentation in a dedicated stylesheet',()=>{
+ const html=fs.readFileSync(path.join(frontend,'quote-client.html'),'utf8');
+ assert.match(html,/<link rel="stylesheet" href="\/styles\/quote-client\.css">/);
+ assert.doesNotMatch(html,/<style[\s>]/);
+ assert.ok(fs.existsSync(path.join(frontend,'styles','quote-client.css')));
+});
 test('main page loads every domain module once after its shared state',()=>{
  const html=fs.readFileSync(path.join(frontend,'index.html'),'utf8');
  const scripts=[...html.matchAll(/<script\s+src="([^"]+)"[^>]*>/g)].map(([,src])=>src);
