@@ -12,6 +12,16 @@ function toggleAuthPassword() {
   window.lucide?.createIcons();
 }
 
+function setAuthBusy(isBusy) {
+  ["loginSubmitButton", "registerButton"].forEach(id => {
+    const button = document.getElementById(id);
+    if (button) {
+      button.disabled = isBusy;
+      button.setAttribute?.("aria-busy", String(isBusy));
+    }
+  });
+}
+
 async function register() {
 
   const email =
@@ -25,6 +35,7 @@ async function register() {
     return;
   }
 
+  setAuthBusy(true);
   showLoader();
 
   try {
@@ -44,9 +55,10 @@ async function register() {
   } catch (err) {
 
     showToast(err.message);
+  } finally {
+    hideLoader();
+    setAuthBusy(false);
   }
-
-  hideLoader();
 }
 
 async function login() {
@@ -57,6 +69,7 @@ async function login() {
   const password =
     document.getElementById("password").value;
 
+  setAuthBusy(true);
   showLoader();
 
   try {
@@ -81,9 +94,26 @@ async function login() {
   } catch (err) {
 
     showToast(err.message);
+  } finally {
+    hideLoader();
+    setAuthBusy(false);
   }
+}
 
-  hideLoader();
+function initializeAuthAccess() {
+  const form = document.getElementById("authForm");
+  form?.addEventListener?.("submit", event => {
+    event.preventDefault();
+    return login();
+  });
+  document.getElementById("registerButton")?.addEventListener?.("click", register);
+  document.getElementById("authPasswordToggle")?.addEventListener?.("click", toggleAuthPassword);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener?.("DOMContentLoaded", initializeAuthAccess, { once: true });
+} else {
+  initializeAuthAccess();
 }
 
 async function adminLogin() {

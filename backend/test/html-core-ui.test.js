@@ -17,6 +17,13 @@ test('admin login uses its dedicated stylesheet instead of inline presentation',
  assert.doesNotMatch(html,/\sstyle=/);
  assert.ok(fs.existsSync(path.join(frontend,'styles','admin-login.css')));
 });
+test('main login remains an accessible submit form',()=>{
+ const html=fs.readFileSync(path.join(frontend,'index.html'),'utf8');
+ assert.match(html,/<form id="authForm" class="auth-form">/);
+ assert.match(html,/<label class="auth-visually-hidden" for="email">Adresse e-mail<\/label>/);
+ assert.match(html,/id="loginSubmitButton"\s+type="submit"/);
+ assert.doesNotMatch(html,/onclick="login\(\)"/);
+});
 test('admin dashboard uses its dedicated stylesheet instead of inline presentation',()=>{
  const html=fs.readFileSync(path.join(frontend,'admin-dashboard.html'),'utf8');
  assert.match(html,/<link rel="stylesheet" href="\/styles\/admin-dashboard\.css">/);

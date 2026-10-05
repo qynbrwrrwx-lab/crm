@@ -204,6 +204,27 @@
   gap: 14px;
 }
 
+.auth-visually-hidden {
+
+  position: absolute;
+
+  width: 1px;
+
+  height: 1px;
+
+  padding: 0;
+
+  margin: -1px;
+
+  overflow: hidden;
+
+  clip: rect(0, 0, 0, 0);
+
+  white-space: nowrap;
+
+  border: 0;
+}
+
 /* ================= INPUT ================= */
 
 .auth-form input {
@@ -255,6 +276,15 @@
 .auth-btn:hover {
 
   transform: translateY(-2px);
+}
+
+.auth-btn:disabled {
+
+  cursor: wait;
+
+  opacity: 0.72;
+
+  transform: none;
 }
 
 /* ================= SECONDARY ================= */

@@ -66,6 +66,8 @@ test("login stores its session and opens the application", async () => {
   assert.equal(b.storage.get("token"), "test-session");
   assert.equal(b.shown(), 1);
   assert.equal(b.loading(), false);
+  assert.equal(b.elements.get("loginSubmitButton").disabled, false);
+  assert.equal(b.elements.get("registerButton").disabled, false);
 });
 
 test("failed login leaves the application closed and clears its loader", async () => {

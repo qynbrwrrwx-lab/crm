@@ -148,28 +148,32 @@
           Accédez à votre espace My-Prospect
         </p>
 
-        <form class="auth-form">
+        <form id="authForm" class="auth-form">
 
           <div class="auth-input-wrap">
             <i data-lucide="mail"></i>
+            <label class="auth-visually-hidden" for="email">Adresse e-mail</label>
             <input
               id="email"
               type="email"
-              autocomplete="email"
+              autocomplete="username"
               placeholder="Adresse e-mail"
+              required
             >
           </div>
 
           <div class="auth-input-wrap auth-password-wrap">
             <i data-lucide="lock-keyhole"></i>
+            <label class="auth-visually-hidden" for="password">Mot de passe</label>
             <input
               id="password"
               type="password"
               minlength="12"
               autocomplete="current-password"
               placeholder="Mot de passe"
+              required
             >
-            <button type="button" class="auth-password-toggle" onclick="toggleAuthPassword()" aria-label="Afficher le mot de passe" title="Afficher le mot de passe">
+            <button id="authPasswordToggle" type="button" class="auth-password-toggle" aria-label="Afficher le mot de passe" title="Afficher le mot de passe">
               <i data-lucide="eye"></i>
             </button>
           </div>
@@ -191,17 +195,17 @@
 </div>
 
           <button
-           type="button"
+            id="loginSubmitButton"
+            type="submit"
             class="auth-btn"
-            onclick="login()"
           >
              Se connecter
           </button>
 
           <button
-  type="button"
-  class="auth-btn secondary"
-  onclick="register()"
+            id="registerButton"
+            type="button"
+            class="auth-btn secondary"
 >
   Créer un compte
 </button>
