@@ -59,6 +59,11 @@ test('admin login keeps the session contract on its standalone page',async()=>{
  const context=run('pages/admin-login.js',{document:{getElementById:id=>nodes.get(id)},fetch:async(...args)=>{calls.push(args);return {ok:true,json:async()=>({token:'fixture'})};},localStorage:{setItem:(key,value)=>storage.set(key,value)},location:{},alert:message=>messages.push(message),console:{error(){}}});
  await context.adminLogin();assert.equal(calls[0][0],'/api/auth/login');assert.equal(calls[0][1].method,'POST');assert.deepEqual(JSON.parse(calls[0][1].body),{email:'admin@example.test',password:'secret'});assert.equal(storage.get('token'),'fixture');assert.equal(context.location.href,'/admin');assert.deepEqual(messages,[]);
 });
+test('admin login submits its accessible form and displays authentication errors inline',async()=>{
+ const calls=[],listeners={},nodes=new Map([['adminEmail',{value:'admin@example.test'}],['adminPassword',{value:'bad-secret'}],['adminLoginSubmit',{disabled:false}],['adminLoginStatus',{textContent:'',classList:{toggle(){}}}],['adminLoginForm',{checkValidity:()=>true,addEventListener:(event,listener)=>{listeners[event]=listener;}}]]);
+ const context=run('pages/admin-login.js',{document:{getElementById:id=>nodes.get(id)},fetch:async(...args)=>{calls.push(args);return {ok:false,json:async()=>({error:'Identifiants invalides'})};},localStorage:{setItem(){}},location:{},alert(){},console:{error(){}}});
+ let prevented=false;await listeners.submit({preventDefault(){prevented=true;}});assert.equal(prevented,true);assert.equal(calls.length,1);assert.equal(nodes.get('adminLoginStatus').textContent,'Identifiants invalides');assert.equal(nodes.get('adminLoginSubmit').disabled,false);assert.equal(context.location.href,undefined);
+});
 test('success page keeps its delayed redirect',()=>{
  let callback,delay;const location={href:'/success'};run('pages/success.js',{location,setTimeout:(fn,ms)=>{callback=fn;delay=ms;}});assert.equal(delay,3500);assert.equal(location.href,'/success');callback();assert.equal(location.href,'/');
 });

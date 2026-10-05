@@ -13,10 +13,16 @@
 
       <p class="admin-login-intro">Accès réservé administrateur</p>
 
-      <input id="adminEmail" class="admin-login-input" type="email" placeholder="Email admin">
-      <input id="adminPassword" class="admin-login-input" type="password" placeholder="Mot de passe">
+      <form id="adminLoginForm" class="admin-login-form">
+        <label class="admin-login-visually-hidden" for="adminEmail">Adresse e-mail administrateur</label>
+        <input id="adminEmail" class="admin-login-input" type="email" placeholder="Email admin" autocomplete="username" required aria-describedby="adminLoginStatus">
 
-      <button class="admin-login-submit" onclick="adminLogin()">Se connecter</button>
+        <label class="admin-login-visually-hidden" for="adminPassword">Mot de passe</label>
+        <input id="adminPassword" class="admin-login-input" type="password" placeholder="Mot de passe" autocomplete="current-password" required aria-describedby="adminLoginStatus">
+
+        <button id="adminLoginSubmit" class="admin-login-submit" type="submit">Se connecter</button>
+        <p id="adminLoginStatus" class="admin-login-status" role="status" aria-live="polite"></p>
+      </form>
     </section>
   </main>
 
