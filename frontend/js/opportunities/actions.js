@@ -1,9 +1,70 @@
-// opportunities : actions.
+// Opportunités : actions entre le pipeline, l'agenda et les devis.
 
-function createOpportunityFollowUp(item){showSection("tasksSection");resetTaskForm();const select=document.getElementById("taskContact");if(select)select.value=item.contactId._id||item.contactId;document.getElementById("taskTitle").value=`Relancer : ${item.title}`;document.getElementById("taskPriority").value=item.stage==="proposal"?"high":"normal";document.getElementById("taskDueDate").value=new Date().toISOString().slice(0,10);document.getElementById("taskForm").scrollIntoView({behavior:"smooth",block:"start"});showToast("Relance préparée dans l’Agenda.");}
+function getOpportunityContactId(contact) {
+  return contact?._id || contact || "";
+}
 
-async function moveOpportunity(id,stage){if(!stage)return;try{await apiFetch(`/api/opportunities/${id}/stage`,{method:"PUT",body:JSON.stringify({stage})});showToast("Étape mise à jour");loadOpportunities();}catch(error){showToast(error.message);}}
+function createOpportunityFollowUp(opportunity) {
+  showSection("tasksSection");
+  resetTaskForm();
 
-async function createQuoteFromOpportunity(id){const item=allOpportunities.find(entry=>entry._id===id);if(!item?.contactId){showToast("Associez d’abord un client à cette opportunité.");return;}showSection("quotesSection");const modal=document.getElementById("quoteModal");if(modal?.hidden||modal?.style.display==="none")await toggleQuoteForm();const select=document.getElementById("quoteContact");if(select){select.value=item.contactId._id||item.contactId;if(typeof updateQuoteClientContext==="function")updateQuoteClientContext();}showToast("Client repris dans le nouveau devis.");}
+  const contact = document.getElementById("taskContact");
+  if (contact) contact.value = getOpportunityContactId(opportunity.contactId);
 
-async function deleteOpportunity(id){if(!await confirmAppAction({title:"Supprimer l’opportunité",message:"Cette action est définitive.",actionLabel:"Supprimer",danger:true}))return;try{await apiFetch(`/api/opportunities/${id}`,{method:"DELETE"});loadOpportunities();}catch(error){showToast(error.message);}}
+  document.getElementById("taskTitle").value = `Relancer : ${opportunity.title}`;
+  document.getElementById("taskPriority").value = opportunity.stage === "proposal" ? "high" : "normal";
+  document.getElementById("taskDueDate").value = new Date().toISOString().slice(0, 10);
+  document.getElementById("taskForm").scrollIntoView({ behavior: "smooth", block: "start" });
+  showToast("Relance préparée dans l’Agenda.");
+}
+
+async function moveOpportunity(id, stage) {
+  if (!stage) return;
+
+  try {
+    await apiFetch(`/api/opportunities/${id}/stage`, {
+      method: "PUT",
+      body: JSON.stringify({ stage })
+    });
+    showToast("Étape mise à jour");
+    await loadOpportunities();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+async function createQuoteFromOpportunity(id) {
+  const opportunity = allOpportunities.find(item => item._id === id);
+  if (!opportunity?.contactId) {
+    showToast("Associez d’abord un client à cette opportunité.");
+    return;
+  }
+
+  showSection("quotesSection");
+  const modal = document.getElementById("quoteModal");
+  if (modal?.hidden || modal?.style.display === "none") await toggleQuoteForm();
+
+  const contact = document.getElementById("quoteContact");
+  if (contact) {
+    contact.value = getOpportunityContactId(opportunity.contactId);
+    if (typeof updateQuoteClientContext === "function") updateQuoteClientContext();
+  }
+  showToast("Client repris dans le nouveau devis.");
+}
+
+async function deleteOpportunity(id) {
+  const confirmed = await confirmAppAction({
+    title: "Supprimer l’opportunité",
+    message: "Cette action est définitive.",
+    actionLabel: "Supprimer",
+    danger: true
+  });
+  if (!confirmed) return;
+
+  try {
+    await apiFetch(`/api/opportunities/${id}`, { method: "DELETE" });
+    await loadOpportunities();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
