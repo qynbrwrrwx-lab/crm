@@ -9,6 +9,10 @@ const Product = require("../models/product");
 const Invoice = require("../models/invoice");
 const StockMovement = require("../models/stockMovement");
 const AuditLog = require("../models/auditLog");
+const Task = require("../models/task");
+const Opportunity = require("../models/opportunity");
+const Supplier = require("../models/supplier");
+const PurchaseOrder = require("../models/purchaseOrder");
 
 process.env.JWT_SECRET = "test-secret-only";
 
@@ -64,6 +68,53 @@ test("les données métier exigent un propriétaire", async () => {
   await assert.rejects(new Contact({ firstname: "Alice" }).validate(), /userId/);
   await assert.rejects(new Product({ name: "Service" }).validate(), /userId/);
   await assert.rejects(new Invoice({ type: "invoice" }).validate(), /userId/);
+  await assert.rejects(new Task({ title: "Relancer" }).validate(), /userId/);
+  await assert.rejects(new Opportunity({ title: "Nouveau prospect" }).validate(), /userId/);
+});
+
+test("un rendez-vous utilise un rappel contrôlé", async () => {
+  await assert.rejects(
+    new Task({ userId: objectId(), title: "Rendez-vous", type: "appointment", reminderMinutes: 42 }).validate(),
+    /reminderMinutes/
+  );
+});
+
+test("un rendez-vous récurrent conserve un groupe de série valide", async () => {
+  const task = new Task({ userId: objectId(), title: "Point hebdomadaire", type: "appointment", startDate: new Date(), recurrenceGroup: "serie-hebdo-1" });
+  await task.validate();
+  assert.equal(task.recurrenceGroup, "serie-hebdo-1");
+});
+
+test("une opportunité encadre sa probabilité de réussite", async () => {
+  await assert.rejects(
+    new Opportunity({ userId: objectId(), title: "Projet", probability: 120 }).validate(),
+    /probability/
+  );
+});
+
+test("une opportunité limite la taille de son origine commerciale", async () => {
+  await assert.rejects(
+    new Opportunity({ userId: objectId(), title: "Projet", source: "x".repeat(81) }).validate(),
+    /source/
+  );
+});
+
+test("une opportunité limite la taille de son motif de perte", async () => {
+  await assert.rejects(
+    new Opportunity({ userId: objectId(), title: "Projet", stage: "lost", lostReason: "x".repeat(101) }).validate(),
+    /lostReason/
+  );
+});
+
+test("un fournisseur conserve la date de sa dernière demande de réassort", async () => {
+  const date = new Date();
+  const supplier = new Supplier({ userId: objectId(), name: "Fournisseur test", lastRestockRequestAt: date });
+  await supplier.validate();
+  assert.equal(supplier.lastRestockRequestAt.getTime(), date.getTime());
+});
+
+test("un bon de commande impose un fournisseur et une ligne produit", async () => {
+  await assert.rejects(new PurchaseOrder({ userId: objectId(), number: "BCF-00001" }).validate(), /supplierId|lines/);
 });
 
 test("un produit ne peut pas avoir de TVA ou stock négatif", async () => {
@@ -161,6 +212,17 @@ test("le statut d'envoi e-mail est contrôlé", async () => {
     new Invoice({ userId: objectId(), emailStatus: "inconnu" }).validate(),
     /emailStatus/
   );
+});
+
+test("un document conserve le destinataire utilisé pour son envoi", async () => {
+  const invoice = new Invoice({
+    userId: objectId(),
+    emailStatus: "sent",
+    emailRecipient: "CLIENT@EXEMPLE.FR"
+  });
+
+  await invoice.validate();
+  assert.equal(invoice.emailRecipient, "client@exemple.fr");
 });
 
 test("un événement métier exige le compte concerné", async () => {

@@ -43,6 +43,12 @@ const productSchema = new mongoose.Schema({
     min: 0
   },
 
+  purchasePriceHT: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+
   tva: {
     type: Number,
     default: 20,

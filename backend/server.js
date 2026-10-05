@@ -1,249 +1,27 @@
-// ================= ENV =================
+const { loadEnvironment, validateRuntimeConfig } = require("./config/runtime");
 
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
-}
+loadEnvironment();
 
-// ================= IMPORTS =================
-const express = require("express");
+const { createApp } = require("./app/create-app");
+const { connectDatabase } = require("./config/database");
 
-const cors = require("cors");
+const app = createApp();
 
-const mongoose = require("mongoose");
+async function startServer(port = process.env.PORT || 3000) {
+  validateRuntimeConfig();
+  await connectDatabase();
 
-const helmet = require("helmet");
-
-const rateLimit =
-  require("express-rate-limit");
-
-const path = require("path");
-
-// ================= ROUTES =================
-
-const authRoutes =
-  require("./routes/authRoutes");
-
-const contactRoutes =
-  require("./routes/contactRoutes");
-
-const productRoutes =
-  require("./routes/productRoutes");
-
-const invoiceRoutes =
-  require("./routes/invoiceRoutes");
-
-  const adminRoutes =
-  require("./routes/adminRoutes");
-
-  const companyRoutes =
-  require("./routes/companyRoutes");
-
-// ================= APP =================
-
-const app = express();
-
-app.disable("x-powered-by");
-app.set("json escape", true);
-
-app.use(
-  express.static(
-    path.join(__dirname, "../frontend/public")
-  )
-);
-
-app.use(cors({
-  origin: [
-    "https://www.my-prospect.com",
-    "https://my-prospect.com",
-    "https://crm-2-15ox.onrender.com"
-  ],
-  credentials: true
-}));
-
-// ================= CONFIG =================
-
-app.set("trust proxy", 1);
-
-app.use(
-  express.json({
-    limit:"20mb"
-  })
-);
-
-app.use(
-  express.urlencoded({
-    extended: true,
-    limit: "20mb"
-  })
-);
-
-app.use(
-  helmet({
-    contentSecurityPolicy: false
-  })
-);
-
-// ================= RATE LIMIT =================
-
-app.use(
-  "/api/auth/login",
-
-  rateLimit({
-
-    windowMs:
-      10 * 60 * 1000,
-
-    max: 5
-  })
-);
-
-app.use(
-  "/api/auth/register",
-
-  rateLimit({
-
-    windowMs:
-      10 * 60 * 1000,
-
-    max: 10
-  })
-);
-
-app.use(
-  "/api/auth/request-reset",
-  rateLimit({
-    windowMs: 10 * 60 * 1000,
-    max: 5
-  })
-);
-
-app.use(
-  "/api/auth/resend-verification",
-  rateLimit({
-    windowMs: 10 * 60 * 1000,
-    max: 5
-  })
-);
-
-// ================= DATABASE =================
-
-async function connectDatabase(uri = process.env.MONGO_URI) {
-  if (!uri) throw new Error("MONGO_URI manquant");
-  await mongoose.connect(uri);
-}
-
-function validateRuntimeConfig() {
-  const missing = ["MONGO_URI", "JWT_SECRET"].filter(name => !process.env[name]);
-  if (missing.length) {
-    throw new Error(`Configuration manquante : ${missing.join(", ")}`);
-  }
-}
-
-app.get("/api/health", (req, res) => {
-  const databaseConnected = mongoose.connection.readyState === 1;
-  res.status(databaseConnected ? 200 : 503).json({
-    status: databaseConnected ? "ok" : "degraded",
-    database: databaseConnected ? "connected" : "disconnected"
+  console.log("✅ MongoDB connecté");
+  return app.listen(port, () => {
+    console.log(`🚀 Serveur lancé sur port ${port}`);
   });
-});
-
-// ================= API ROUTES =================
-
-app.use(
-  "/api/auth",
-  authRoutes
-);
-
-app.use(
-  "/api/contacts",
-  contactRoutes
-);
-
-app.use(
-  "/api/products",
-  productRoutes
-);
-
-app.use(
-  "/api/invoices",
-  invoiceRoutes
-);
-
-app.use(
-  "/api/admin",
-  adminRoutes
-);
-
-app.use(
-  "/api/company",
-  companyRoutes
-);
-
-// ================= FRONTEND =================
-
-app.use(
-  express.static(
-    path.join(
-      __dirname,
-      "../frontend"
-    )
-  )
-);
-
-app.get(
-  "/admin-login",
-  (req, res) => {
-
-    res.sendFile(
-      path.join(
-        __dirname,
-        "../frontend/admin-login.html"
-      )
-    );
-  }
-);
-
-app.get(
-  "/admin",
-  (req, res) => {
-
-    res.sendFile(
-      path.join(
-        __dirname,
-        "../frontend/admin-dashboard.html"
-      )
-    );
-  }
-);
-
-app.get("*", (req, res) => {
-
-  res.sendFile(
-    path.join(
-      __dirname,
-      "../frontend/index.html"
-    )
-  );
-});
-
-// ================= SERVER =================
+}
 
 if (require.main === module) {
-  const PORT = process.env.PORT || 3000;
-
-  Promise.resolve()
-    .then(validateRuntimeConfig)
-    .then(connectDatabase)
-    .then(() => {
-      console.log("✅ MongoDB connecté");
-      app.listen(PORT, () => {
-        console.log(`🚀 Serveur lancé sur port ${PORT}`);
-      });
-    })
-    .catch(err => {
-      console.error("❌ MongoDB error:", err);
-      process.exit(1);
-    });
+  startServer().catch(err => {
+    console.error("❌ MongoDB error:", err);
+    process.exit(1);
+  });
 }
 
-module.exports = { app, connectDatabase, validateRuntimeConfig };
+module.exports = { app, connectDatabase, startServer, validateRuntimeConfig };

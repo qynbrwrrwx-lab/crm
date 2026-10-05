@@ -2,6 +2,14 @@
 
 Application de gestion commerciale : contacts, produits, stock, devis, commandes, factures, avoirs et paiements.
 
+## Documentation technique
+
+Le projet est documenté pour permettre une reprise rapide par une équipe technique ou un acquéreur :
+
+- [Architecture et conventions](docs/ARCHITECTURE.md)
+- [Guide de développement et vérification](docs/DEVELOPMENT.md)
+- [Règles de contribution](CONTRIBUTING.md)
+
 ## Lancer le projet
 
 1. Copier `backend/.env.example` vers `backend/.env` et renseigner les valeurs reelles (ne jamais versionner ce fichier).
@@ -25,14 +33,14 @@ L'endpoint de supervision est `GET /api/health`. Il renvoie `200` lorsque MongoD
 
 - `MONGO_URI` : chaine de connexion MongoDB.
 - `JWT_SECRET` : secret long et aleatoire, propre a l'environnement.
-- `SENDGRID_API_KEY` et `EMAIL_FROM` : requis pour l'envoi reel de documents par e-mail.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD` et `EMAIL_FROM` : configuration de l'envoi e-mail SMTP.
 - `BASE_URL` : URL publique de l'application.
 
 ## Mise en production : actions hors code
 
 Ces actions necessitent les acces de l'administrateur et ne sont pas executables depuis le depot :
 
-1. Dans SendGrid, verifier le domaine ou l'expediteur `EMAIL_FROM`, la cle API et l'etat du compte avant de tester un envoi reel.
+1. Dans le fournisseur e-mail, verifier le domaine ou l'expediteur `EMAIL_FROM`, les identifiants SMTP et l'etat du compte avant de tester un envoi reel.
 2. Dans l'hebergeur, renseigner les variables d'environnement, definir `/api/health` comme controle de sante et consulter les journaux en cas d'erreur.
 3. Dans MongoDB Atlas, activer les sauvegardes automatiques et tester une restauration sur une base de test avant l'ouverture au public.
 4. Faire valider les CGU/CGV, la politique de confidentialite, les mentions legales et la duree de conservation des donnees par un professionnel competent.
@@ -57,7 +65,7 @@ Utiliser deux navigateurs distincts, avec un compte A et un compte B. Chaque lig
 | Paiement | Le moyen et la date de paiement sont enregistres et le statut devient paye. |
 | Avoir | Une facture peut generer un seul avoir, rattache a la facture d'origine. |
 | PDF | Verifier logo, coordonnees, client, lignes, TVA, totaux, IBAN/BIC et mentions. |
-| E-mail | Apres validation SendGrid, un devis, une facture et un avoir arrivent a une adresse de test. |
+| E-mail | Apres validation SMTP, un devis, une facture et un avoir arrivent a une adresse de test. |
 | Export | Le compte A telecharge uniquement ses propres donnees. |
 | Protection inter-comptes | Avec le compte B, toute URL ou identifiant du compte A est refuse. |
 | Mot de passe | Le changement exige le mot de passe actuel et invalide le scenario de connexion avec l'ancien. |

@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>body{margin:0;font-family:Outfit,Inter,sans-serif}button,input,select{font:inherit}#adminUsers>div{transition:transform .18s,border-color .18s}#adminUsers>div:hover{transform:translateY(-2px);border-color:rgba(96,165,250,.35)!important}@media(max-width:600px){body>div{padding:18px!important}h1{font-size:25px!important}#adminStats{grid-template-columns:1fr 1fr!important;gap:10px!important}}</style>
 
 </head>
 
@@ -123,17 +125,41 @@ margin-bottom:24px;
 Utilisateurs inscrits
 </h2>
 
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin:-8px 0 20px;">
+  <input id="adminUserSearch" type="search" placeholder="Rechercher une adresse e-mail" oninput="filterAdminUsers()" style="min-width:240px;flex:1;padding:12px 14px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0f172a;color:white;">
+  <select id="adminVerificationFilter" onchange="filterAdminUsers()" style="padding:12px 14px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0f172a;color:white;">
+    <option value="all">Tous les comptes</option>
+    <option value="verified">Comptes vérifiés</option>
+    <option value="pending">À vérifier</option>
+    <option value="suspended">Comptes suspendus</option>
+  </select>
+  <select id="adminSubscriptionFilter" onchange="filterAdminUsers()" style="padding:12px 14px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0f172a;color:white;">
+    <option value="all">Tous les abonnements</option><option value="trial">Essais</option><option value="active">Actifs</option><option value="suspended">Suspendus</option><option value="cancelled">Résiliés</option>
+  </select>
+  <button type="button" onclick="exportAdminUsersCsv()" style="padding:12px 14px;border:1px solid rgba(96,165,250,.35);border-radius:12px;background:#172554;color:#bfdbfe;cursor:pointer;">Exporter CSV</button>
+</div>
+
 <div id="adminUsers">
 
 Chargement...
 
 </div>
 
-</div>
+<h2 style="color:white;margin:32px 0 14px;">Journal administrateur</h2>
+<div id="adminAudit" style="color:#94a3b8;">Chargement…</div>
 
 </div>
 
-<script src="/admin.js"></script>
+</div>
+
+<script src="/js/admin.js"></script>
+<script src="/js/admin/api.js"></script>
+<script src="/js/admin/shared.js"></script>
+<script src="/js/admin/users.js"></script>
+<script src="/js/admin/actions.js"></script>
+<script src="/js/admin/summary.js"></script>
+<script src="/js/admin/billing.js"></script>
+<script src="/js/admin/bootstrap.js"></script>
 
 </body>
 </html>

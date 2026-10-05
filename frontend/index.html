@@ -12,6 +12,8 @@
 
 <title>My Prospect - Gestion commerciale</title>
 
+<script src="/js/core/session-preview.js"></script>
+
 <link
   href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
   rel="stylesheet"
@@ -39,8 +41,14 @@
   id="loader"
   class="loader"
   style="display:none;"
+  role="status"
+  aria-live="polite"
 >
-  <div class="spinner"></div>
+  <div class="loader-panel">
+    <div class="spinner"></div>
+    <strong>Synchronisation en cours</strong>
+    <span>Nous mettons vos informations à jour.</span>
+  </div>
 </div>
 
 <!-- ================= TOAST ================= -->
@@ -48,6 +56,8 @@
 <div
   id="toast"
   class="toast"
+  role="status"
+  aria-live="polite"
 ></div>
 
 <!-- ================= AUTH ================= -->
@@ -141,19 +151,29 @@
 
         <form class="auth-form">
 
-          <input
-            id="email"
-            type="email"
-            placeholder="Adresse email"
-          >
+          <div class="auth-input-wrap">
+            <i data-lucide="mail"></i>
+            <input
+              id="email"
+              type="email"
+              autocomplete="email"
+              placeholder="Adresse e-mail"
+            >
+          </div>
 
-          <input
-            id="password"
-            type="password"
-            minlength="12"
-            autocomplete="current-password"
-            placeholder="Mot de passe"
-          >
+          <div class="auth-input-wrap auth-password-wrap">
+            <i data-lucide="lock-keyhole"></i>
+            <input
+              id="password"
+              type="password"
+              minlength="12"
+              autocomplete="current-password"
+              placeholder="Mot de passe"
+            >
+            <button type="button" class="auth-password-toggle" onclick="toggleAuthPassword()" aria-label="Afficher le mot de passe" title="Afficher le mot de passe">
+              <i data-lucide="eye"></i>
+            </button>
+          </div>
 
           <div class="auth-options">
 
@@ -163,9 +183,8 @@
   </label>
 
         <a
-  href="#"
+  href="/forgot-password.html"
   class="forgot-link"
-  onclick="requestReset()"
 >
   Mot de passe oublié ?
 </a>
@@ -199,8 +218,7 @@
   </span>
 
   <a
-    href="#"
-    onclick="resendEmail()"
+    href="/resend-verification.html"
   >
     Renvoyer le lien de validation
   </a>
@@ -231,7 +249,7 @@
 
   <div class="logo">
     <img
-      src="./logo.png"
+      src="assets/logo.png"
       class="logo-big"
       alt="logo"
     />
@@ -254,11 +272,40 @@
     <span>Contacts</span>
   </button>
 
+  <button onclick="showSection('opportunitiesSection', event)">
+    <i data-lucide="target"></i><span>Opportunités</span>
+  </button>
+
+  <button onclick="showSection('tasksSection', event)">
+    <i data-lucide="list-checks"></i><span>Agenda &amp; tâches</span>
+  </button>
+
   <button
     onclick="showSection('products', event)"
   >
     <i data-lucide="package"></i>
     <span>Produits</span>
+  </button>
+
+  <button
+    onclick="showSection('suppliersSection', event)"
+  >
+    <i data-lucide="truck"></i>
+    <span>Fournisseurs</span>
+  </button>
+
+  <button
+    onclick="showSection('expensesSection', event)"
+  >
+    <i data-lucide="receipt-text"></i>
+    <span>Achats &amp; dépenses</span>
+  </button>
+
+  <button
+    onclick="showSection('treasurySection', event)"
+  >
+    <i data-lucide="landmark"></i>
+    <span>Trésorerie</span>
   </button>
 
     <button
@@ -316,6 +363,23 @@
 
       <div class="container">
 
+        <header class="app-topbar" aria-label="Contexte de navigation">
+          <div class="app-context">
+            <span class="app-context-label">Espace de travail</span>
+            <strong id="appContextTitle">Tableau de bord</strong>
+            <small id="appContextDetail">Pilotage de votre activité</small>
+          </div>
+          <div class="app-topbar-actions">
+            <span id="appToday" class="app-today"></span>
+            <button type="button" class="global-search-trigger" onclick="openGlobalSearch()" aria-label="Ouvrir la recherche rapide">
+              <i data-lucide="search"></i><span>Rechercher</span><kbd>Ctrl K</kbd>
+            </button>
+            <button type="button" class="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Réduire ou agrandir le menu">
+              <i data-lucide="panel-left-close"></i><span>Menu</span>
+            </button>
+          </div>
+        </header>
+
         <!-- DASHBOARD -->
 
         <div
@@ -323,59 +387,140 @@
           class="section active"
         >
 
-          <div class="kpi-grid">
+          <header class="dashboard-hero">
+            <div><p class="form-eyebrow">Pilotage commercial</p><h1>Vue d’ensemble de votre activité</h1><p>Suivez les priorités, vos encaissements et l’état de votre inventaire en temps réel.</p></div>
+            <button type="button" class="primary-btn dashboard-quick-action" onclick="startQuoteFromDashboard()">Créer un devis</button>
+          </header>
+
+          <section class="dashboard-workspace">
+            <article class="dashboard-actions-panel">
+              <div class="dashboard-section-heading"><h2>Actions rapides</h2><span>Gagner du temps</span></div>
+              <div class="dashboard-action-grid">
+                <button type="button" onclick="startContactFromDashboard()"><b>01</b><span>Ajouter un client</span></button>
+                <button type="button" onclick="startProductFromDashboard()"><b>02</b><span>Ajouter un produit</span></button>
+                <button type="button" onclick="startQuoteFromDashboard()"><b>03</b><span>Créer un devis</span></button>
+                <button type="button" onclick="showSection('invoicesSection')"><b>04</b><span>Voir les factures</span></button>
+              </div>
+            </article>
+
+            <article class="dashboard-alerts-panel">
+              <div class="dashboard-section-heading"><h2>À surveiller</h2><span>Priorités</span></div>
+              <div class="dashboard-alert-row"><span id="dashboardPaymentAlertDot" class="alert-dot warning"></span><div><strong id="dashboardPaymentAlertLabel"><span id="dashboardPendingInvoicesAlert">0</span> facture(s) à encaisser</strong><small id="dashboardPaymentAlertDetail">Suivez vos règlements en attente.</small></div><button id="dashboardPaymentAlertButton" type="button" onclick="showSection('invoicesSection')">Voir</button></div>
+              <div class="dashboard-alert-row expense-alert-row"><span id="dashboardExpenseAlertDot" class="alert-dot warning"></span><div><strong id="dashboardExpenseAlertLabel">Aucune échéance fournisseur en retard</strong><small id="dashboardExpenseAlertDetail">Les dépenses à payer seront suivies ici.</small></div><button id="dashboardExpenseAlertButton" type="button" onclick="showSection('expensesSection')">Voir</button></div>
+              <div class="dashboard-alert-row treasury-alert-row"><span id="dashboardTreasuryAlertDot" class="alert-dot warning"></span><div><strong id="dashboardTreasuryAlertLabel">Trésorerie prévisionnelle à calculer</strong><small id="dashboardTreasuryAlertDetail">Renseignez un solde de référence pour activer cette alerte.</small></div><button id="dashboardTreasuryAlertButton" type="button" onclick="showSection('treasurySection')">Voir</button></div>
+              <div class="dashboard-alert-row"><span class="alert-dot stock"></span><div><strong><span id="dashboardLowStockAlert">0</span> alerte(s) de stock</strong><small>Réassort à prévoir selon vos seuils.</small></div><button type="button" onclick="showSection('products')">Gérer</button></div>
+              <div class="dashboard-alert-row electronic-alert-row"><span id="dashboardElectronicAlertDot" class="alert-dot electronic"></span><div><strong id="dashboardElectronicAlertLabel">Facturation électronique à préparer</strong><small id="dashboardElectronicAlertDetail">Complétez votre profil entreprise pour anticiper la réforme.</small></div><button id="dashboardElectronicAlertButton" type="button" onclick="showSection('company')">Préparer</button></div>
+              <div class="dashboard-alert-row followup-alert-row"><span id="dashboardFollowUpAlertDot" class="alert-dot followup"></span><div><strong id="dashboardFollowUpAlertLabel">Aucune relance client à prévoir</strong><small id="dashboardFollowUpAlertDetail">Planifiez une prochaine relance depuis une fiche client.</small></div><button id="dashboardFollowUpAlertButton" type="button" onclick="showSection('contacts')">Clients</button></div>
+              <div class="dashboard-alert-row"><span id="dashboardTaskAlertDot" class="alert-dot warning"></span><div><strong id="dashboardTaskAlertLabel">Aucune tâche prioritaire</strong><small id="dashboardTaskAlertDetail">Vos prochaines actions apparaîtront ici.</small></div><button id="dashboardTaskAlertButton" type="button" onclick="showSection('tasksSection')">Voir</button></div>
+            </article>
+          </section>
+
+          <section class="dashboard-kpi-section">
+            <div class="dashboard-section-heading"><h2>Activité commerciale</h2><span>Suivi en temps réel</span></div>
+          <div class="kpi-grid dashboard-commercial-grid">
 
             <div class="kpi">
               <h3>Total contacts</h3>
               <span id="total">0</span>
+              <small>Base clients active</small>
             </div>
 
             <div class="kpi">
               <h3>Devis en cours</h3>
               <span id="dashboardQuotes">0</span>
+              <small>En attente de décision</small>
+            </div>
+
+            <div class="kpi kpi-pipeline">
+              <h3>Pipeline commercial</h3>
+              <span id="dashboardPipelineTotal">0,00 €</span>
+              <small id="dashboardPipelineDetail">Valeur des opportunités actives</small>
+            </div>
+
+            <div class="kpi kpi-pipeline-closing">
+              <h3>À conclure sous 30 jours</h3>
+              <span id="dashboardClosingOpportunities">0</span>
+              <small>Opportunités à suivre</small>
             </div>
 
             <div class="kpi">
               <h3>Commandes</h3>
               <span id="dashboardOrders">0</span>
+              <small>Issues de devis acceptés</small>
             </div>
 
             <div class="kpi">
               <h3>Factures impayées</h3>
               <span id="dashboardPendingInvoices">0</span>
+              <small>À suivre en priorité</small>
             </div>
 
             <div class="kpi">
               <h3>À encaisser</h3>
               <span id="dashboardPendingTotal">0,00 €</span>
+              <small>Montant restant dû</small>
             </div>
 
             <div class="kpi">
               <h3>Chiffre d'affaires encaissé</h3>
               <span id="dashboardPaidTotal">0,00 €</span>
+              <small>Règlements confirmés</small>
             </div>
+
+          </div>
+          </section>
+
+          <section class="dashboard-kpi-section dashboard-treasury-section">
+            <div class="dashboard-section-heading"><h2>Trésorerie</h2><span>Encaissements et charges</span></div>
+            <div class="kpi-grid dashboard-treasury-grid">
+              <div class="kpi kpi-expense-paid">
+                <h3>Charges réglées</h3>
+                <span id="dashboardExpensesPaid">0,00 €</span>
+                <small>Achats et frais clôturés</small>
+              </div>
+              <div class="kpi kpi-expense-pending">
+                <h3>Charges à payer</h3>
+                <span id="dashboardExpensesPending">0,00 €</span>
+                <small>Échéances fournisseurs en attente</small>
+              </div>
+              <div class="kpi kpi-margin">
+                <h3>Marge encaissée estimée</h3>
+                <span id="dashboardEstimatedMargin">0,00 €</span>
+                <small>Encaissements moins charges réglées</small>
+              </div>
+            </div>
+          </section>
+
+          <section class="dashboard-kpi-section dashboard-stock-section">
+            <div class="dashboard-section-heading"><h2>Inventaire</h2><span>État du stock</span></div>
+          <div class="kpi-grid dashboard-stock-grid">
 
             <div class="kpi">
               <h3>Stock faible</h3>
               <span id="dashboardLowStock">0</span>
+              <small>Au seuil d’alerte</small>
             </div>
 
             <div class="kpi">
               <h3>Ruptures de stock</h3>
               <span id="dashboardOutOfStock">0</span>
+              <small>Réassort immédiat requis</small>
             </div>
 
             <div class="kpi">
               <h3>Valeur du stock HT</h3>
               <span id="dashboardStockValue">0,00 €</span>
+              <small>Valorisation catalogue</small>
             </div>
 
             <div class="kpi">
               <h3>Produits catalogués</h3>
               <span id="dashboardProductCount">0</span>
+              <small>Références disponibles</small>
             </div>
 
           </div>
+          </section>
 
           <section class="dashboard-insights">
             <article class="dashboard-insight-card monthly-revenue-card">
@@ -383,12 +528,43 @@
               <h3>Chiffre d’affaires du mois</h3>
               <strong id="dashboardMonthlyRevenue">0,00 €</strong>
               <p id="dashboardMonthlyRevenueDetail">Aucune facture réglée ce mois-ci.</p>
+              <span id="dashboardRevenueComparison" class="revenue-comparison neutral">Pas de comparaison disponible.</span>
+            </article>
+
+            <article class="dashboard-insight-card cash-forecast-card">
+              <span class="insight-eyebrow">Projection</span>
+              <h3>Trésorerie à 30 jours</h3>
+              <strong id="dashboardCashForecast">0,00 €</strong>
+              <p id="dashboardCashForecastDetail">Les encaissements et échéances à venir apparaîtront ici.</p>
+              <button type="button" class="cash-forecast-link" onclick="showSection('expensesSection')">Voir les échéances</button>
             </article>
 
             <article class="dashboard-insight-card best-sellers-card">
               <div class="insight-heading"><div><span class="insight-eyebrow">Ventes</span><h3>Produits les plus vendus</h3></div><span class="insight-period">Commandes</span></div>
               <div id="dashboardBestSellers" class="best-sellers-list"><p class="empty-state">Pas encore de vente enregistrée.</p></div>
             </article>
+          </section>
+
+          <section class="dashboard-recent-activity" aria-labelledby="dashboardRecentActivityTitle">
+            <div class="dashboard-section-heading">
+              <div><h2 id="dashboardRecentActivityTitle">Activité récente</h2><p>Les derniers mouvements de votre cycle commercial.</p></div>
+              <button type="button" class="secondary-btn" onclick="showSection('invoicesSection')">Voir les documents</button>
+            </div>
+            <div id="dashboardRecentActivityList" class="dashboard-recent-activity-list">
+              <p class="empty-state">Aucune activité commerciale pour le moment.</p>
+            </div>
+          </section>
+
+          <section class="dashboard-performance-card">
+            <div class="performance-heading">
+              <div><span class="insight-eyebrow">Performance commerciale</span><h2>Évolution des encaissements</h2><p>Montants réellement réglés par vos clients.</p></div>
+              <select id="dashboardPeriod" onchange="refreshDashboardPerformance()" aria-label="Période d’analyse">
+                <option value="week">7 derniers jours</option>
+                <option value="month" selected>6 derniers mois</option>
+                <option value="year">12 derniers mois</option>
+              </select>
+            </div>
+            <div class="revenue-chart-wrap"><canvas id="revenueChart"></canvas></div>
           </section>
 
           <div id="companySetupNotice" class="setup-notice" hidden>
@@ -413,14 +589,6 @@
             <div id="onboardingSteps" class="onboarding-steps"></div>
           </section>
 
-          <div class="card">
-
-            <h2>📊 Évolution</h2>
-
-            <canvas id="chart"></canvas>
-
-          </div>
-
         </div>
 
         <!-- CONTACTS -->
@@ -430,11 +598,25 @@
           class="section"
         >
 
-          <div class="card">
+          <div class="section-page-intro">
+            <div>
+              <span class="insight-eyebrow">Relation client</span>
+              <h2>Vos clients, au même endroit</h2>
+              <p>Créez vos fiches, retrouvez rapidement les informations utiles et préparez vos prochains documents commerciaux.</p>
+            </div>
+            <span class="section-page-status">Répertoire client</span>
+          </div>
+
+          <div class="card list-toolbar-card">
+            <div class="list-toolbar-heading">
+              <strong>Rechercher et organiser</strong>
+              <small>Accédez rapidement à la bonne fiche client.</small>
+            </div>
+            <div class="list-toolbar-controls">
 
             <input
               id="search"
-              placeholder="🔎 Rechercher..."
+              placeholder="Rechercher un client..."
               oninput="filterContacts()"
             />
 
@@ -443,7 +625,21 @@
               <option value="name">Nom</option>
               <option value="company">Entreprise</option>
               <option value="favorite">Favoris</option>
+              <option value="follow-up">Relances les plus proches</option>
             </select>
+
+            <select id="contactFollowUpFilter" onchange="filterContacts()" aria-label="Filtrer les relances clients">
+              <option value="all">Toutes les relances</option>
+              <option value="due">Relances à faire</option>
+              <option value="planned">Relances planifiées</option>
+              <option value="none">Sans relance</option>
+            </select>
+
+            </div>
+            <div class="contact-filter-summary" aria-live="polite">
+              <span id="contactFilteredCount">0 client</span>
+              <button type="button" id="resetContactFilters" onclick="resetContactFilters()" style="display:none;">Réinitialiser les filtres</button>
+            </div>
 
           </div>
 
@@ -547,6 +743,16 @@
               <details class="form-section form-section-last form-details-section">
                 <summary>Informations internes <small>Optionnel</small></summary>
                 <label class="form-field">
+                  <span>Étiquettes client <small>Optionnel</small></span>
+                  <input id="contactTags" maxlength="330" placeholder="Ex. Prospect, VIP, Relance" />
+                  <small class="field-help">Séparez les étiquettes par des virgules. Elles restent visibles uniquement dans votre espace.</small>
+                </label>
+                <label class="form-field">
+                  <span>Prochaine relance <small>Optionnel</small></span>
+                  <input id="contactFollowUpAt" type="date" />
+                  <small class="field-help">Une priorité apparaîtra dans votre tableau de bord le jour venu.</small>
+                </label>
+                <label class="form-field">
                   <span>Note interne <small>Optionnel</small></span>
                   <textarea id="notes" placeholder="Informations utiles pour votre équipe..."></textarea>
                 </label>
@@ -562,7 +768,7 @@
             <div class="card">
 
               <div class="list-card-header">
-                <h2>📋 Liste contacts</h2>
+                <h2>Clients enregistrés</h2>
                 <div class="list-card-actions">
                   <button type="button" class="secondary-btn compact-export-btn" onclick="document.getElementById('contactsCsvInput').click()">Importer CSV</button>
                   <button type="button" class="secondary-btn compact-export-btn" onclick="exportContactsCsv()">Exporter CSV</button>
@@ -584,6 +790,15 @@
           id="products"
           class="section"
         >
+
+          <div class="section-page-intro">
+            <div>
+              <span class="insight-eyebrow">Catalogue & inventaire</span>
+              <h2>Produits, tarifs et disponibilités</h2>
+              <p>Gérez votre catalogue, surveillez les niveaux de stock et gardez vos tarifs prêts pour vos devis.</p>
+            </div>
+            <span class="section-page-status section-page-status-stock">Inventaire actif</span>
+          </div>
 
           <div class="grid">
 
@@ -635,7 +850,8 @@
 
                   <label class="form-field">
                     <span>Fournisseur <small>Optionnel</small></span>
-                    <input id="productSupplierName" placeholder="Ex. Fournitures Pro" />
+                    <input id="productSupplierName" list="productSupplierSuggestions" placeholder="Ex. Fournitures Pro" />
+                    <datalist id="productSupplierSuggestions"></datalist>
                   </label>
 
                   <label class="form-field">
@@ -690,7 +906,7 @@
             <div class="card">
 
               <div class="list-card-header">
-                <h2>📋 Liste produits</h2>
+                <h2>Catalogue produits</h2>
                 <div class="list-card-actions">
                   <button type="button" class="secondary-btn compact-export-btn" onclick="document.getElementById('productsCsvInput').click()">Importer CSV</button>
                   <button type="button" class="secondary-btn compact-export-btn" onclick="exportProductsCsv()">Exporter CSV</button>
@@ -698,22 +914,43 @@
               </div>
               <input id="productsCsvInput" type="file" accept=".csv,text/csv" hidden onchange="handleProductsCsvImport(event)" />
 
-              <input
-                id="productsFilter"
-                class="search-input"
-                placeholder="🔎 Rechercher un produit ou une référence..."
-                oninput="filterProducts()"
-              />
+              <div class="list-toolbar product-list-toolbar">
+                <div class="list-toolbar-heading">
+                  <strong>Explorer le catalogue</strong>
+                  <small>Filtrez par nom, référence, catégorie ou niveau de stock.</small>
+                </div>
+                <div class="list-toolbar-controls">
+                  <input
+                    id="productsFilter"
+                    class="search-input"
+                    placeholder="Rechercher un produit ou une référence..."
+                    oninput="filterProducts()"
+                  />
 
-              <select id="productStockFilter" onchange="filterProducts()" aria-label="Filtrer les stocks">
-                <option value="all">Tous les stocks</option>
-                <option value="low">Stock faible (5 ou moins)</option>
-                <option value="available">Stock disponible</option>
-              </select>
+                  <select id="productStockFilter" onchange="filterProducts()" aria-label="Filtrer les stocks">
+                    <option value="all">Tous les stocks</option>
+                    <option value="low">Stock faible (5 ou moins)</option>
+                    <option value="available">Stock disponible</option>
+                  </select>
 
-              <select id="productCategoryFilter" onchange="filterProducts()" aria-label="Filtrer les catégories">
-                <option value="all">Toutes les catégories</option>
-              </select>
+                  <select id="productCategoryFilter" onchange="filterProducts()" aria-label="Filtrer les catégories">
+                    <option value="all">Toutes les catégories</option>
+                  </select>
+
+                  <select id="productSort" onchange="filterProducts()" aria-label="Trier les produits">
+                    <option value="recent">Plus récents</option>
+                    <option value="name">Nom A à Z</option>
+                    <option value="stock-asc">Stock croissant</option>
+                    <option value="stock-desc">Stock décroissant</option>
+                    <option value="price-asc">Prix croissant</option>
+                    <option value="price-desc">Prix décroissant</option>
+                  </select>
+                </div>
+                <div class="product-filter-summary" aria-live="polite">
+                  <span id="productFilteredCount">0 produit</span>
+                  <button type="button" id="resetProductFilters" onclick="resetProductFilters()" style="display:none;">Réinitialiser les filtres</button>
+                </div>
+              </div>
 
               <div id="productsList"></div>
 
@@ -733,11 +970,12 @@
   class="section"
   >
 
-  <div class="card">
+  <div class="card document-page-card orders-page-card">
 
     <div class="section-header">
 
       <div>
+        <span class="document-eyebrow">Suivi commercial</span>
         <h2>Commandes</h2>
 
         <p class="company-subtitle">
@@ -772,11 +1010,15 @@
   class="section"
 >
 
-  <div class="card">
+  <div class="card document-page-card quotes-page-card">
 
   <div class="section-header">
 
-  <h2>Gestion des devis</h2>
+  <div>
+    <span class="document-eyebrow">Propositions commerciales</span>
+    <h2>Gestion des devis</h2>
+    <p class="document-header-copy">Préparez, envoyez et transformez vos opportunités en commandes.</p>
+  </div>
 
   <button
     class="primary-btn"
@@ -792,15 +1034,26 @@
   style="display:none;"
 >
 
-  <div class="card">
+  <div class="card quote-creation-card">
 
-    <h2>Nouveau devis</h2>
+    <div class="quote-creation-heading">
+      <div><span class="insight-eyebrow">Nouveau document</span><h2>Nouveau devis</h2><p>Choisissez votre client puis ajoutez les produits à proposer.</p></div>
+      <button type="button" class="quote-close-btn" onclick="closeQuoteModal()" aria-label="Fermer la création de devis">×</button>
+    </div>
 
+    <label class="quote-field-label" for="quoteContact">Client destinataire</label>
     <select id="quoteContact">
       <option value="">
         Selectionner un contact
       </option>
     </select>
+
+    <div id="quoteClientContext" class="quote-client-context" aria-live="polite">
+      <span>Client destinataire</span>
+      <strong>Sélectionnez un client pour afficher ses coordonnées.</strong>
+    </div>
+
+    <div class="quote-lines-heading"><span>Articles du devis</span><small>Quantité et tarifs sont modifiables avant la création.</small></div>
 
     <div id="quoteLines">
 
@@ -823,35 +1076,23 @@
 
 </div>
 
-<button
-  type="button"
-  class="secondary-btn"
-  onclick="addQuoteLine()"
->
-  + Ajouter un article
-</button>
+    <button type="button" class="secondary-btn quote-add-line-btn" onclick="addQuoteLine()">+ Ajouter un article</button>
 
+    <div class="quote-draft-summary" aria-live="polite">
+      <div><span>Préparation du devis</span><strong id="quoteDraftCount">0 article</strong></div>
+      <div><span>Estimation TTC</span><strong id="quoteDraftTotal">0,00 €</strong><small id="quoteDraftAvailability">Disponibilité à vérifier</small></div>
+    </div>
 
-    <button
-      class="primary-btn"
-      onclick="createQuote()"
-    >
-      Créer le devis
-    </button>
-
-    <button
-    class="secondary-btn"
-    onclick="closeQuoteModal()"
-    style="margin-top:10px;"
-   >
-     Annuler
-   </button>
+    <div class="quote-creation-actions">
+      <button class="secondary-btn" onclick="closeQuoteModal()">Annuler</button>
+      <button class="primary-btn" onclick="createQuote()">Créer le devis</button>
+    </div>
 
   </div>
 
 </div>
 
-  <div class="card">
+  <div class="card document-list-card">
 
   <div class="section-header">
 
@@ -872,7 +1113,7 @@
 
 </div>
 
-<div class="card">
+<div class="card document-list-card accepted-quotes-card">
 
   <div class="section-header">
 
@@ -892,6 +1133,135 @@
 </div>
 </div>
 
+<!-- OPPORTUNITÉS -->
+<div id="opportunitiesSection" class="section"><div class="card document-page-card opportunities-page-card">
+  <div class="section-header"><div><p class="form-eyebrow">Pipeline commercial</p><h2>Opportunités</h2><p class="company-subtitle">Suivez vos prospects et la valeur potentielle de votre activité avant l’émission d’un devis.</p></div><span id="opportunitiesCount">0 opportunité</span></div>
+  <div class="opportunity-summary"><div><span>Pipeline actif</span><strong id="opportunitiesPipelineTotal">0,00 €</strong></div><div><span>Prévision pondérée</span><strong id="opportunitiesForecastTotal">0,00 €</strong></div><div><span>À proposer</span><strong id="opportunitiesProposalTotal">0,00 €</strong></div><div><span>Gagnées</span><strong id="opportunitiesWonTotal">0,00 €</strong></div></div>
+  <div id="opportunitySourceInsights" class="opportunity-source-insights"></div>
+  <form id="opportunityForm" class="opportunity-form" onsubmit="saveOpportunity(event)"><input id="opportunityEditId" type="hidden" /><div class="agenda-form-heading"><div><strong id="opportunityFormTitle">Ajouter une opportunité</strong><small>Chaque opportunité est privée et rattachée à votre compte.</small></div><button id="opportunityCancelEdit" type="button" class="expense-text-action" onclick="resetOpportunityForm()" hidden>Annuler</button></div><label class="form-field required-field"><span>Opportunité <small>Obligatoire</small></span><input id="opportunityTitle" maxlength="180" placeholder="Ex. Refonte du site internet" required /></label><label class="form-field"><span>Client / prospect</span><select id="opportunityContact"><option value="">Non rattaché</option></select></label><label class="form-field"><span>Montant potentiel HT</span><input id="opportunityAmount" type="number" min="0" step="0.01" placeholder="0,00" /></label><label class="form-field"><span>Probabilité de réussite</span><input id="opportunityProbability" type="number" min="0" max="100" step="5" value="20" /><small>Estimation personnelle, de 0 à 100 %.</small></label><label class="form-field"><span>Étape</span><select id="opportunityStage"><option value="lead">Nouveau prospect</option><option value="qualified">Qualifié</option><option value="proposal">Proposition envoyée</option><option value="won">Gagnée</option><option value="lost">Perdue</option></select></label><label class="form-field"><span>Clôture estimée</span><input id="opportunityCloseDate" type="date" /></label><label class="form-field opportunity-notes"><span>Notes</span><textarea id="opportunityNotes" maxlength="1200" rows="2" placeholder="Besoin exprimé, prochaine action, contexte…"></textarea></label><button id="opportunitySubmitButton" type="submit" class="primary-btn">Ajouter au pipeline</button></form>
+  <div class="opportunity-board-heading"><div><h3>Vue du pipeline</h3><p>Déplacez chaque affaire au fil de votre relation commerciale.</p></div><button type="button" class="secondary-btn compact-export-btn" onclick="exportOpportunitiesCsv()">Exporter CSV</button></div>
+  <div id="opportunityBoard" class="opportunity-board"></div>
+</div></div>
+
+<!-- AGENDA ET TACHES -->
+<div id="tasksSection" class="section"><div class="card document-page-card tasks-page-card">
+  <div class="section-header"><div><p class="form-eyebrow">Organisation commerciale</p><h2>Agenda &amp; tâches</h2><p class="company-subtitle">Centralisez vos rendez-vous, actions et relances clients dans un seul planning.</p></div><span id="tasksCount">0 élément</span></div>
+  <div class="tasks-summary"><div><span>À faire</span><strong id="tasksOpenCount">0</strong></div><div><span>Rendez-vous à venir</span><strong id="appointmentsUpcomingCount">0</strong></div><div><span>Prioritaires</span><strong id="tasksHighCount">0</strong></div><div><span>En retard</span><strong id="tasksOverdueCount">0</strong></div></div>
+  <form id="taskForm" class="task-form appointment-form" onsubmit="saveTask(event)"><input id="taskEditId" type="hidden" /><div class="agenda-form-heading"><div><strong id="taskFormTitle">Créer une action</strong><small>Choisissez une tâche ou un rendez-vous avec un client.</small></div><button id="taskCancelEdit" type="button" class="expense-text-action" onclick="resetTaskForm()" hidden>Annuler</button></div><label class="form-field"><span>Type</span><select id="taskType" onchange="toggleTaskType()"><option value="task">Tâche / relance</option><option value="appointment">Rendez-vous</option></select></label><label class="form-field required-field"><span id="taskTitleLabel">Tâche <small>Obligatoire</small></span><input id="taskTitle" maxlength="180" placeholder="Ex. Relancer le client" required /></label><label class="form-field"><span>Client existant</span><select id="taskContact"><option value="">Aucun client</option></select></label><label class="form-field"><span>Priorité</span><select id="taskPriority"><option value="low">Basse</option><option value="normal" selected>Normale</option><option value="high">Haute</option></select></label><label class="form-field task-date-field"><span>Échéance</span><input id="taskDueDate" type="date" /></label><label class="form-field appointment-field" hidden><span>Début <small>Obligatoire</small></span><input id="taskStartDate" type="datetime-local" /></label><label class="form-field appointment-field" hidden><span>Fin</span><input id="taskEndDate" type="datetime-local" /></label><label class="form-field appointment-field" hidden><span>Rappel</span><select id="taskReminderMinutes"><option value="0">Aucun rappel</option><option value="15">15 min avant</option><option value="30">30 min avant</option><option value="60">1 h avant</option><option value="1440">1 jour avant</option></select></label><label class="form-field appointment-field" hidden><span>Lieu ou lien visio</span><input id="taskLocation" maxlength="180" placeholder="Adresse, téléphone ou lien de visioconférence" /></label><details class="appointment-free-contact appointment-field" hidden><summary>Ou saisir un contact libre</summary><div><label class="form-field"><span>Nom</span><input id="taskFreeContactName" maxlength="140" placeholder="Nom du contact" /></label><label class="form-field"><span>E-mail</span><input id="taskFreeContactEmail" type="email" maxlength="180" placeholder="contact@entreprise.fr" /></label><label class="form-field"><span>Téléphone</span><input id="taskFreeContactPhone" maxlength="40" placeholder="06 00 00 00 00" /></label></div></details><label class="form-field appointment-notes-field"><span>Notes</span><textarea id="taskNotes" maxlength="1200" rows="2" placeholder="Objectif, préparation ou compte-rendu…"></textarea></label><button id="taskSubmitButton" type="submit" class="primary-btn">Ajouter la tâche</button></form>
+  <div class="agenda-toolbar"><div class="agenda-view-switcher"><button type="button" class="active" data-agenda-view="month" onclick="setAgendaView('month')">Mois</button><button type="button" data-agenda-view="week" onclick="setAgendaView('week')">Semaine</button><button type="button" data-agenda-view="day" onclick="setAgendaView('day')">Jour</button><button type="button" data-agenda-view="year" onclick="setAgendaView('year')">Année</button><button type="button" data-agenda-view="list" onclick="setAgendaView('list')">Liste</button></div><div class="agenda-period-controls"><button type="button" onclick="shiftAgendaPeriod(-1)" aria-label="Période précédente">‹</button><strong id="agendaPeriodLabel"></strong><button type="button" onclick="shiftAgendaPeriod(1)" aria-label="Période suivante">›</button><button type="button" class="secondary-btn" onclick="goToAgendaToday()">Aujourd’hui</button><button type="button" id="agendaNotificationButton" class="secondary-btn" onclick="requestAgendaNotifications()">Activer les rappels</button></div></div>
+  <div id="agendaCalendar" class="agenda-calendar"></div>
+  <div id="agendaDayDetails" class="agenda-day-details"></div>
+  <div class="expense-list-header"><div><h3>Mes actions</h3><p>Les tâches terminées restent disponibles dans l’historique.</p></div><div class="expense-filters"><input id="tasksFilter" class="search-input" placeholder="Rechercher..." oninput="renderTasks()" /><select id="tasksStatusFilter" onchange="renderTasks()"><option value="open">À faire</option><option value="all">Toutes</option><option value="done">Terminées</option></select></div></div><div id="tasksList" class="tasks-list"></div>
+</div></div>
+
+<!-- FOURNISSEURS -->
+
+<div id="suppliersSection" class="section">
+  <div class="card document-page-card suppliers-page-card">
+    <div class="section-header">
+      <div>
+        <p class="form-eyebrow">Répertoire achats</p>
+        <h2>Fournisseurs</h2>
+        <p class="company-subtitle">Regroupez les coordonnées de vos fournisseurs et prestataires pour gagner du temps au quotidien.</p>
+      </div>
+      <span id="suppliersCount">0 fournisseur</span>
+    </div>
+
+    <form id="supplierForm" class="supplier-form" onsubmit="saveSupplier(event)">
+      <div class="expense-form-heading"><div><strong id="supplierFormTitle">Ajouter un fournisseur</strong><small>Les coordonnées restent privées et rattachées à votre compte.</small></div></div>
+      <label class="form-field required-field"><span>Entreprise <small>Obligatoire</small></span><input id="supplierName" maxlength="140" placeholder="Ex. Papeterie Martin" required /></label>
+      <label class="form-field"><span>Interlocuteur</span><input id="supplierContactName" maxlength="120" placeholder="Nom du contact" /></label>
+      <label class="form-field"><span>E-mail</span><input id="supplierEmail" type="email" maxlength="180" placeholder="contact@fournisseur.fr" /></label>
+      <label class="form-field"><span>Téléphone</span><input id="supplierPhone" maxlength="40" placeholder="06 00 00 00 00" /></label>
+      <label class="form-field supplier-notes-field"><span>Notes internes</span><textarea id="supplierNotes" maxlength="1000" placeholder="Conditions, délai habituel, référence commerciale..."></textarea></label>
+      <div class="supplier-form-actions"><button id="supplierSubmitButton" type="submit" class="primary-btn">Ajouter le fournisseur</button><button id="cancelSupplierEditButton" type="button" class="secondary-btn" onclick="cancelSupplierEdit()" hidden>Annuler</button></div>
+    </form>
+
+    <div class="expense-list-header"><div><h3>Répertoire fournisseurs</h3><p>Retrouvez rapidement le bon interlocuteur.</p></div><div class="expense-filters"><input id="suppliersFilter" class="search-input" placeholder="Rechercher un fournisseur..." oninput="renderSuppliers()" /></div></div>
+    <div id="suppliersList" class="suppliers-list"></div>
+  </div>
+</div>
+
+<!-- ACHATS & DEPENSES -->
+
+<div id="expensesSection" class="section">
+  <div class="card document-page-card expenses-page-card">
+    <div class="section-header">
+      <div>
+        <p class="form-eyebrow">Pilotage fournisseurs</p>
+        <h2>Achats &amp; dépenses</h2>
+        <p class="company-subtitle">Centralisez les frais à régler et gardez une vision claire de vos sorties de trésorerie.</p>
+      </div>
+      <div class="expense-header-actions"><span id="expensesCount">0 dépense</span><button type="button" class="secondary-btn compact-export-btn" onclick="exportExpensesCsv()">Exporter CSV</button></div>
+    </div>
+
+    <div class="expense-summary-grid">
+      <div class="expense-summary-card pending"><span>À payer</span><strong id="expensesPendingTotal">0,00 €</strong><small>Dépenses en attente</small></div>
+      <div class="expense-summary-card paid"><span>Déjà réglé</span><strong id="expensesPaidTotal">0,00 €</strong><small>Dépenses clôturées</small></div>
+    </div>
+
+    <section class="expense-analysis-card" aria-labelledby="expenseAnalysisTitle">
+      <div class="expense-analysis-heading"><div><span>Analyse des charges</span><h3 id="expenseAnalysisTitle">Répartition des dépenses réglées</h3></div><small>Depuis le début de votre activité</small></div>
+      <div id="expenseCategoryBreakdown" class="expense-category-breakdown"><p class="empty-state">Les catégories apparaîtront après l’enregistrement de vos dépenses.</p></div>
+    </section>
+
+    <section class="expense-budget-card" aria-labelledby="expenseBudgetTitle">
+      <div class="expense-analysis-heading"><div><span>Budgets mensuels</span><h3 id="expenseBudgetTitle">Maîtrise des dépenses par catégorie</h3></div><small>Calculé sur les dépenses réglées ce mois</small></div>
+      <form class="expense-budget-form" onsubmit="saveExpenseBudget(event)">
+        <select id="expenseBudgetCategory" aria-label="Catégorie de budget"><option>Fournisseurs</option><option>Logiciels &amp; abonnements</option><option>Loyer &amp; locaux</option><option>Transport</option><option>Marketing &amp; publicité</option><option>Assurances</option><option>Banque &amp; frais</option><option selected>Autres</option></select>
+        <div class="input-suffix-wrap"><input id="expenseBudgetAmount" type="number" min="0" step="0.01" placeholder="Budget mensuel" required /><span>€ TTC</span></div>
+        <button type="submit" class="secondary-btn">Enregistrer le budget</button>
+      </form>
+      <div id="expenseBudgetsList" class="expense-budgets-list"><p class="empty-state">Ajoutez un budget mensuel pour suivre une catégorie.</p></div>
+    </section>
+
+    <form id="expenseForm" class="expense-form" onsubmit="saveExpense(event)">
+      <div class="expense-form-heading"><div><strong>Ajouter une dépense</strong><small>Enregistrez un achat, abonnement ou frais fournisseur.</small></div></div>
+      <label class="form-field required-field"><span>Fournisseur <small>Obligatoire</small></span><input id="expenseSupplier" list="expenseSupplierSuggestions" maxlength="140" placeholder="Ex. OVH, fournisseur, prestataire" oninput="showExpenseSupplierDetails()" required /><datalist id="expenseSupplierSuggestions"></datalist><small id="expenseSupplierDetails" class="expense-supplier-details" hidden></small></label>
+      <label class="form-field required-field"><span>Intitulé <small>Obligatoire</small></span><input id="expenseLabel" maxlength="200" placeholder="Ex. Hébergement mensuel" required /></label>
+      <label class="form-field"><span>Catégorie</span><select id="expenseCategory"><option>Fournisseurs</option><option>Logiciels &amp; abonnements</option><option>Loyer &amp; locaux</option><option>Transport</option><option>Marketing &amp; publicité</option><option>Assurances</option><option>Banque &amp; frais</option><option selected>Autres</option></select></label>
+      <label class="form-field"><span>Récurrence</span><select id="expenseRecurrence"><option value="none" selected>Unique</option><option value="monthly">Mensuelle</option></select></label>
+      <label class="form-field required-field"><span>Montant TTC <small>Obligatoire</small></span><div class="input-suffix-wrap"><input id="expenseAmount" type="number" min="0" step="0.01" placeholder="0,00" required /><span>€ TTC</span></div></label>
+      <label class="form-field"><span>Échéance</span><input id="expenseDueDate" type="date" /></label>
+      <div class="expense-form-actions"><button id="expenseSubmitButton" type="submit" class="primary-btn">Ajouter la dépense</button><button id="cancelExpenseEditButton" type="button" class="secondary-btn" onclick="cancelExpenseEdit()" hidden>Annuler</button></div>
+    </form>
+
+    <div class="expense-list-header"><div><h3>Suivi des dépenses</h3><p>Les dépenses réglées restent conservées pour votre suivi.</p></div>
+      <div class="expense-filters"><input id="expensesFilter" class="search-input" placeholder="Rechercher une dépense..." oninput="renderExpenses()" /><select id="expensesCategoryFilter" onchange="renderExpenses()" aria-label="Filtrer les catégories"><option value="all">Toutes catégories</option><option>Fournisseurs</option><option>Logiciels &amp; abonnements</option><option>Loyer &amp; locaux</option><option>Transport</option><option>Marketing &amp; publicité</option><option>Assurances</option><option>Banque &amp; frais</option><option>Autres</option></select><select id="expensesStatusFilter" onchange="renderExpenses()" aria-label="Filtrer les dépenses"><option value="all">Tous les statuts</option><option value="overdue">Échéances en retard</option><option value="pending">À payer</option><option value="paid">Réglées</option></select></div>
+    </div>
+    <div id="expensesList" class="expense-list"></div>
+  </div>
+</div>
+
+<!-- TRESORERIE -->
+
+<div id="treasurySection" class="section">
+  <div class="card document-page-card treasury-page-card">
+    <div class="section-header"><div><p class="form-eyebrow">Pilotage financier</p><h2>Trésorerie</h2><p class="company-subtitle">Suivez votre solde bancaire manuellement. La connexion bancaire sera proposée ultérieurement via un partenaire agréé, uniquement avec votre accord.</p></div><span class="treasury-security-badge">Mode manuel sécurisé</span></div>
+    <div class="treasury-balance-grid">
+      <article class="treasury-balance-card"><span>Solde disponible</span><strong id="treasuryCurrentBalance">0,00 €</strong><small id="treasuryBalanceDetail">Solde de départ + mouvements manuels</small></article>
+      <article class="treasury-balance-card income"><span>Entrées enregistrées</span><strong id="treasuryIncomeTotal">0,00 €</strong><small>Depuis le solde de référence</small></article>
+      <article class="treasury-balance-card expense"><span>Sorties enregistrées</span><strong id="treasuryExpenseTotal">0,00 €</strong><small>Depuis le solde de référence</small></article>
+    </div>
+
+    <section class="treasury-forecast-card" aria-labelledby="treasuryForecastTitle">
+      <div class="expense-analysis-heading"><div><span>À venir</span><h3 id="treasuryForecastTitle">Prévision des 30 prochains jours</h3></div><small>Documents et dépenses déjà enregistrés</small></div>
+      <div class="treasury-forecast-summary"><div><span>Encaissements prévus</span><strong id="treasuryForecastIncome">0,00 €</strong></div><div><span>Décaissements prévus</span><strong id="treasuryForecastExpense">0,00 €</strong></div><div><span>Solde prévisionnel</span><strong id="treasuryForecastBalance">0,00 €</strong></div></div>
+      <div id="treasuryForecastList" class="treasury-forecast-list"><p class="empty-state">Aucune échéance prévue dans les 30 jours.</p></div>
+    </section>
+
+    <section class="treasury-reconciliation-card" aria-labelledby="treasuryReconciliationTitle"><div class="expense-analysis-heading"><div><span>Rapprochement assisté</span><h3 id="treasuryReconciliationTitle">Correspondances à vérifier</h3></div><small>Aucune validation automatique</small></div><div id="treasuryReconciliationList" class="treasury-reconciliation-list"><p class="empty-state">Importez un relevé CSV pour obtenir des suggestions.</p></div></section>
+
+    <section class="treasury-chart-card" aria-labelledby="treasuryChartTitle"><div class="expense-analysis-heading"><div><span>Historique</span><h3 id="treasuryChartTitle">Flux de trésorerie mensuels</h3></div><small>Entrées et sorties manuelles sur 6 mois</small></div><div class="treasury-chart-wrap"><canvas id="treasuryChart"></canvas></div></section>
+
+    <section class="treasury-settings-card"><div><strong>Solde de référence</strong><small>Utilisez le solde réellement visible sur votre compte bancaire à une date donnée.</small></div><form onsubmit="saveTreasurySettings(event)"><label><span>Solde</span><div class="input-suffix-wrap"><input id="treasuryOpeningBalance" type="number" step="0.01" placeholder="0,00" required /><span>€</span></div></label><label><span>Réserve minimale</span><div class="input-suffix-wrap"><input id="treasuryMinimumBalance" type="number" min="0" step="0.01" placeholder="0,00" /><span>€</span></div></label><label><span>À la date du</span><input id="treasuryOpeningBalanceDate" type="date" required /></label><button type="submit" class="secondary-btn">Mettre à jour</button></form></section>
+
+    <section class="treasury-entry-card"><div class="expense-analysis-heading"><div><span>Mouvement manuel</span><h3 id="treasuryEntryTitle">Ajouter une entrée ou sortie</h3></div><small>Ex. apport, retrait, frais exceptionnel</small></div><form id="treasuryEntryForm" class="treasury-entry-form" onsubmit="saveTreasuryEntry(event)"><label class="form-field required-field"><span>Libellé <small>Obligatoire</small></span><input id="treasuryEntryLabel" maxlength="200" placeholder="Ex. Apport personnel" required /></label><label class="form-field"><span>Type</span><select id="treasuryEntryType"><option value="income">Entrée</option><option value="expense">Sortie</option></select></label><label class="form-field required-field"><span>Montant <small>Obligatoire</small></span><div class="input-suffix-wrap"><input id="treasuryEntryAmount" type="number" min="0.01" step="0.01" placeholder="0,00" required /><span>€</span></div></label><label class="form-field"><span>Date</span><input id="treasuryEntryDate" type="date" required /></label><div class="treasury-entry-actions"><button id="treasuryEntrySubmitButton" type="submit" class="primary-btn">Ajouter le mouvement</button><button id="cancelTreasuryEntryEditButton" type="button" class="secondary-btn" onclick="cancelTreasuryEntryEdit()" hidden>Annuler</button></div></form></section>
+
+    <div class="expense-list-header"><div><h3>Mouvements de trésorerie</h3><p>Les entrées et sorties ajoutées manuellement ou importées depuis un relevé bancaire.</p></div><div class="treasury-list-actions"><input id="treasuryCsvImport" type="file" accept=".csv,text/csv" hidden onchange="importTreasuryCsv(event)" /><button type="button" class="secondary-btn compact-export-btn" onclick="document.getElementById('treasuryCsvImport').click()">Importer CSV</button><button type="button" class="secondary-btn compact-export-btn" onclick="exportTreasuryCsv()">Exporter CSV</button></div></div><div class="treasury-filters"><input id="treasuryEntriesFilter" class="search-input" placeholder="Rechercher un mouvement..." oninput="renderTreasury()" /><select id="treasuryEntriesTypeFilter" onchange="renderTreasury()" aria-label="Filtrer les mouvements"><option value="all">Tous les mouvements</option><option value="income">Entrées</option><option value="expense">Sorties</option><option value="imported">Importés</option></select></div><div id="treasuryEntriesList" class="treasury-entries-list"></div>
+  </div>
+</div>
+
 <!-- FACTURES -->
 
 <div
@@ -899,16 +1269,18 @@
   class="section"
 >
 
-  <div class="card">
+  <div class="card document-page-card invoices-page-card">
 
     <div class="section-header">
       <div>
+        <span class="document-eyebrow">Facturation & encaissements</span>
         <h2>Liste des factures</h2>
         <p class="company-subtitle" id="invoiceSummary">0 facture</p>
       </div>
       <div class="invoice-counters">
-        <span id="paidInvoicesTotal">0,00 € encaissé</span>
-        <span id="pendingInvoicesTotal">0,00 € à encaisser</span>
+        <button type="button" id="paidInvoicesTotal" onclick="setInvoiceQuickFilter('paid')">0,00 € encaissé</button>
+        <button type="button" id="pendingInvoicesTotal" onclick="setInvoiceQuickFilter('pending')">0,00 € à encaisser</button>
+        <button type="button" id="electronicInvoicesTotal" class="electronic-counter" onclick="setElectronicInvoiceQuickFilter('ready')">0 prête à transmettre</button>
       </div>
     </div>
 
@@ -916,9 +1288,26 @@
       <input id="invoiceSearch" type="search" placeholder="Rechercher un numéro ou un client" oninput="filterInvoices()" />
       <select id="invoiceStatusFilter" onchange="filterInvoices()">
         <option value="all">Toutes les factures</option>
+        <option value="overdue">En retard</option>
         <option value="pending">En attente</option>
         <option value="paid">Payées</option>
       </select>
+      <select id="electronicInvoiceStatusFilter" onchange="filterInvoices()" aria-label="Filtrer la facturation électronique">
+        <option value="all">Tous statuts électroniques</option>
+        <option value="ready">Prêtes à transmettre</option>
+        <option value="queued">Transmission programmée</option>
+        <option value="sent">Transmises à la plateforme</option>
+        <option value="delivered">Reçues par le client</option>
+        <option value="rejected">Rejetées</option>
+        <option value="error">En erreur</option>
+      </select>
+      <select id="invoiceSort" onchange="filterInvoices()" aria-label="Trier les documents">
+        <option value="recent">Plus récentes</option>
+        <option value="oldest">Plus anciennes</option>
+        <option value="amount-desc">Montant décroissant</option>
+        <option value="amount-asc">Montant croissant</option>
+      </select>
+      <button type="button" id="resetInvoiceFilters" class="invoice-reset-filters" onclick="resetInvoiceFilters()" style="display:none;">Réinitialiser</button>
     </div>
 
     <div id="invoiceList"></div>
@@ -934,11 +1323,18 @@
           class="section"
         >
 
-          <div class="card">
+          <div class="card analysis-page-card">
 
-            <h2>📈 Analytics</h2>
+            <div class="analysis-page-header">
+              <div>
+                <span class="insight-eyebrow">Analyse commerciale</span>
+                <h2>Performance de votre activité</h2>
+                <p>Visualisez l’évolution de vos documents commerciaux et suivez votre rythme d’activité.</p>
+              </div>
+              <span class="analysis-status">Données en direct</span>
+            </div>
 
-            <canvas id="analyticsChart"></canvas>
+            <div class="analysis-chart-wrap"><canvas id="analyticsChart"></canvas></div>
 
           </div>
 
@@ -951,11 +1347,18 @@
           class="section"
         >
 
-          <div class="card">
+          <div class="card map-page-card">
 
-            <h2>🗺️ Carte</h2>
+            <div class="analysis-page-header">
+              <div>
+                <span class="insight-eyebrow">Couverture client</span>
+                <h2>Carte de vos clients</h2>
+                <p>Repérez en un coup d’œil la répartition géographique de votre portefeuille.</p>
+              </div>
+              <span class="analysis-status map-status">Vue géographique</span>
+            </div>
 
-            <div id="map"></div>
+            <div class="map-wrap"><div id="map"></div></div>
 
           </div>
 
@@ -968,7 +1371,7 @@
     <div class="company-header">
 
       <div>
-
+        <span class="insight-eyebrow">Identité de l’entreprise</span>
         <h2>Profil de l'entreprise</h2>
 
         <p class="company-subtitle">
@@ -985,6 +1388,11 @@
 
     </div>
 
+    <aside class="company-document-note">
+      <div class="company-document-note-icon">✓</div>
+      <div><strong>Profil de facturation</strong><span>Ces informations sont reprises sur vos devis, commandes et factures PDF.</span></div>
+    </aside>
+
     <!-- SOCIETE -->
 
     <div class="company-section">
@@ -992,6 +1400,8 @@
       <h3 class="section-title">
         Informations société
       </h3>
+
+      <p class="company-section-intro">Identité légale et coordonnées visibles par vos clients.</p>
 
       <div
         id="companyForm"
@@ -1079,11 +1489,77 @@
       </div>
       </div>
 
+      <div class="company-section email-sending-section">
+        <h3 class="section-title">Envoi des documents</h3>
+        <p class="company-section-intro">Vos devis et factures sont envoyés par l’infrastructure sécurisée My Prospect. Les réponses de vos clients arrivent directement dans votre boîte professionnelle.</p>
+        <div class="company-email-preview" aria-live="polite">
+          <div><span>Expéditeur affiché</span><strong id="emailSenderPreview">My Prospect — votre entreprise</strong></div>
+          <div><span>Répondre à</span><strong id="emailReplyPreview">Adresse de votre compte</strong></div>
+        </div>
+        <label class="company-email-field" for="companyReplyToEmail">
+          <span>Adresse e-mail de réponse</span>
+          <input id="companyReplyToEmail" class="company-field" type="email" autocomplete="email" placeholder="contact@votre-entreprise.fr" readonly>
+          <small>Optionnel : si elle est vide, l’e-mail de votre entreprise, puis celui de votre compte, sera utilisé.</small>
+        </label>
+        <div class="contact-grid company-email-templates">
+          <label class="company-email-field contact-grid-full">
+            <span>Message d’accompagnement</span>
+            <textarea id="documentEmailIntro" class="company-field" maxlength="800" placeholder="Bonjour {{client}},&#10;&#10;Veuillez trouver ci-joint votre {{document}} {{numero}}."></textarea>
+            <small>Variables disponibles : {{client}}, {{document}}, {{numero}}, {{total}}.</small>
+          </label>
+          <label class="company-email-field contact-grid-full">
+            <span>Formule de fin</span>
+            <textarea id="documentEmailClosing" class="company-field" maxlength="500" placeholder="Merci pour votre confiance."></textarea>
+          </label>
+        </div>
+      </div>
+
+      <div class="company-section electronic-invoicing-section">
+        <div class="electronic-invoicing-heading">
+          <div>
+            <span class="insight-eyebrow">Conformité à préparer</span>
+            <h3 class="section-title">Facturation électronique</h3>
+          </div>
+          <span id="eInvoiceReadiness" class="electronic-status">À configurer</span>
+        </div>
+        <p class="company-section-intro">My Prospect préparera vos factures pour leur transmission via la plateforme agréée de votre choix. La connexion sera activée dès qu'un connecteur officiel sera disponible.</p>
+        <div class="electronic-readiness-list" aria-live="polite">
+          <span id="eInvoiceIdentityStatus">Identité entreprise à compléter</span>
+          <span>Format cible : Factur-X</span>
+          <span id="eInvoiceProviderStatus">Plateforme non sélectionnée</span>
+          <span id="eInvoiceDocumentsStatus">Aucun document préparé</span>
+        </div>
+        <div class="contact-grid electronic-invoicing-controls">
+          <label class="company-email-field">
+            <span>Préparer la facturation électronique</span>
+            <select id="eInvoiceEnabled" class="company-field company-editable-control" disabled>
+              <option value="false">Pas encore</option>
+              <option value="true">Oui, préparer mon entreprise</option>
+            </select>
+          </label>
+          <label class="company-email-field">
+            <span>Plateforme agréée envisagée</span>
+            <input id="eInvoiceProviderName" class="company-field company-editable-control" maxlength="100" placeholder="Ex. nom de votre plateforme" readonly>
+            <small>Vous garderez le choix de votre plateforme. Aucun accès n'est demandé à ce stade.</small>
+          </label>
+          <label class="company-email-field">
+            <span>Format préféré</span>
+            <select id="eInvoiceFormat" class="company-field company-editable-control" disabled>
+              <option value="factur-x">Factur-X (recommandé)</option>
+              <option value="ubl">UBL</option>
+              <option value="cii">CII</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
       <div class="company-section">
 
       <h3 class="section-title">
        Activité
       </h3>
+
+      <p class="company-section-intro">Préférences utilisées lors de la création de vos documents commerciaux.</p>
 
         <div class="contact-grid">
 
@@ -1139,6 +1615,23 @@
         placeholder="Validité devis (jours)"
         readonly
 />
+      <input
+        id="companyPaymentTerms"
+        class="company-field"
+        type="text"
+        maxlength="90"
+        placeholder="Délai de règlement (ex. Paiement à 30 jours)"
+        readonly
+      />
+      <input
+        id="companyPaymentDueDays"
+        class="company-field"
+        type="number"
+        min="0"
+        max="365"
+        placeholder="Échéance de paiement (jours)"
+        readonly
+      />
       <select 
         id="quantityUnit"
         class="company-field"
@@ -1201,6 +1694,8 @@
     Facturation
   </h3>
 
+  <p class="company-section-intro">Coordonnées bancaires pouvant apparaître sur vos factures.</p>
+
   <div class="contact-grid">
 
 <input
@@ -1243,6 +1738,8 @@
   <h3 class="section-title">
     Logo entreprise
   </h3>
+
+  <p class="company-section-intro">Votre logo est utilisé pour personnaliser les documents envoyés à vos clients.</p>
 
   <div class="contact-grid">
 
@@ -1290,49 +1787,40 @@
 
             <div class="settings-header">
               <div><p class="form-eyebrow">Compte & sécurité</p><h2>Paramètres</h2><p>Gérez vos données, votre sécurité et l’activité de votre compte.</p></div>
-              <span class="settings-stat"><b id="userStats">0</b> contacts</span>
+              <div class="settings-header-stats"><span class="settings-stat"><b id="userStats">0</b> contacts</span><span class="settings-secure-status">Espace sécurisé</span></div>
             </div>
 
             <div class="settings-action-grid">
 
             <button
-              class="primary-btn"
-              onclick="logout()"
-            >
-              Déconnexion
-            </button>
-
-            <button
-              class="secondary-btn"
+              class="secondary-btn settings-action-card"
               onclick="exportAccountData()"
             >
-              Télécharger mes données
+              <strong>Télécharger mes données</strong><small>Archive complète de votre compte</small>
             </button>
 
             <button
-              class="secondary-btn"
+              class="secondary-btn settings-action-card"
               onclick="exportSalesCsv()"
             >
-              Exporter les ventes CSV
+              <strong>Exporter les ventes CSV</strong><small>Vos données commerciales exploitables</small>
             </button>
 
             <button
-              class="secondary-btn"
+              class="secondary-btn settings-action-card"
               onclick="changePassword()"
             >
-              Modifier mon mot de passe
+              <strong>Modifier mon mot de passe</strong><small>Renforcez la sécurité de votre accès</small>
             </button>
             </div>
 
             <h3 class="settings-subtitle">Activité récente</h3>
             <div id="accountActivity" class="account-activity"></div>
 
-            <button
-              class="delete-account-btn"
-              onclick="deleteAccount()"
-            >
-              Supprimer mon compte
-            </button>
+            <section class="danger-zone">
+              <div><strong>Zone sensible</strong><small>La suppression du compte est définitive et efface vos données.</small></div>
+              <button class="delete-account-btn" onclick="deleteAccount()">Supprimer mon compte</button>
+            </section>
 
           </div>
 
@@ -1350,202 +1838,171 @@
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-
+<script src="/js/core/text.js"></script>
+<script src="/js/core/formatters.js"></script>
+<script src="/js/core/csv.js"></script>
 
 <script src="/js/ui.js"></script>
+<script src="/js/ui/feedback.js"></script>
+<script src="/js/ui/application.js"></script>
+<script src="/js/ui/navigation.js"></script>
+<script src="/js/ui/shortcuts.js"></script>
+<script src="/js/ui/favorites.js"></script>
 <script src="/js/admin.js"></script>
+<script src="/js/admin/api.js"></script>
+<script src="/js/admin/shared.js"></script>
+<script src="/js/admin/users.js"></script>
+<script src="/js/admin/actions.js"></script>
+<script src="/js/admin/summary.js"></script>
+<script src="/js/admin/billing-modal.js"></script>
+<script src="/js/admin/billing-presentation.js"></script>
+<script src="/js/admin/billing.js"></script>
+<script src="/js/admin/bootstrap.js"></script>
 
 <script src="/js/map.js"></script>
 <script src="/js/dashboard.js"></script>
+<script src="/js/dashboard/metrics.js"></script>
+<script src="/js/dashboard/indicators.js"></script>
+<script src="/js/dashboard/expenses.js"></script>
+<script src="/js/dashboard/alerts.js"></script>
+<script src="/js/dashboard/activity.js"></script>
+<script src="/js/dashboard/charts.js"></script>
+<script src="/js/dashboard/onboarding.js"></script>
 <script src="/js/contacts.js"></script>
+<script src="/js/contacts/form-data.js"></script>
+<script src="/js/contacts/form-presentation.js"></script>
+<script src="/js/contacts/form.js"></script>
+<script src="/js/contacts/filtering.js"></script>
+<script src="/js/contacts/list.js"></script>
+<script src="/js/contacts/profile-data.js"></script>
+<script src="/js/contacts/profile-actions.js"></script>
+<script src="/js/contacts/profile-overview.js"></script>
+<script src="/js/contacts/profile-history.js"></script>
+<script src="/js/contacts/profile.js"></script>
+<script src="/js/contacts/profile-navigation.js"></script>
+<script src="/js/contacts/csv.js"></script>
+<script src="/js/contacts/actions.js"></script>
+<script src="/js/opportunities.js"></script>
+<script src="/js/opportunities/shared.js"></script>
+<script src="/js/opportunities/board-render.js"></script>
+<script src="/js/opportunities/board-enhancements.js"></script>
+<script src="/js/opportunities/board.js"></script>
+<script src="/js/opportunities/insights.js"></script>
+<script src="/js/opportunities/form-data.js"></script>
+<script src="/js/opportunities/form.js"></script>
+<script src="/js/opportunities/actions.js"></script>
+<script src="/js/opportunities/csv.js"></script>
+<script src="/js/tasks.js"></script>
+<script src="/js/tasks/shared.js"></script>
+<script src="/js/tasks/agenda-render.js"></script>
+<script src="/js/tasks/agenda.js"></script>
+<script src="/js/tasks/calendar-data.js"></script>
+<script src="/js/tasks/calendar.js"></script>
+<script src="/js/tasks/appointment-data.js"></script>
+<script src="/js/tasks/appointments.js"></script>
+<script src="/js/tasks/list-data.js"></script>
+<script src="/js/tasks/list.js"></script>
+<script src="/js/tasks/reminders.js"></script>
+<script src="/js/tasks/form-data.js"></script>
+<script src="/js/tasks/form.js"></script>
 <script src="/js/products.js"></script>
+<script src="/js/products/selection.js"></script>
+<script src="/js/products/cards.js"></script>
+<script src="/js/products/catalog.js"></script>
+<script src="/js/products/form-data.js"></script>
+<script src="/js/products/form.js"></script>
+<script src="/js/products/stock-calculations.js"></script>
+<script src="/js/products/stock.js"></script>
+<script src="/js/products/activity.js"></script>
+<script src="/js/products/csv.js"></script>
+<script src="/js/products/replenishment.js"></script>
+<script src="/js/suppliers.js"></script>
+<script src="/js/suppliers/list.js"></script>
+<script src="/js/suppliers/form.js"></script>
+<script src="/js/suppliers/actions.js"></script>
+<script src="/js/suppliers/purchase-order-data.js"></script>
+<script src="/js/suppliers/purchase-orders.js"></script>
+<script src="/js/expenses.js"></script>
+<script src="/js/expenses/shared.js"></script>
+<script src="/js/expenses/list.js"></script>
+<script src="/js/expenses/form-data.js"></script>
+<script src="/js/expenses/form.js"></script>
+<script src="/js/expenses/actions.js"></script>
+<script src="/js/expenses/budgets.js"></script>
+<script src="/js/expenses/csv.js"></script>
+<script src="/js/treasury.js"></script>
+<script src="/js/treasury/shared.js"></script>
+<script src="/js/treasury/csv-parsing.js"></script>
+<script src="/js/treasury/csv.js"></script>
+<script src="/js/treasury/list.js"></script>
+<script src="/js/treasury/reconciliation-data.js"></script>
+<script src="/js/treasury/reconciliation.js"></script>
+<script src="/js/treasury/chart-data.js"></script>
+<script src="/js/treasury/chart.js"></script>
+<script src="/js/treasury/forecast-data.js"></script>
+<script src="/js/treasury/forecast.js"></script>
+<script src="/js/treasury/form-data.js"></script>
+<script src="/js/treasury/form.js"></script>
 <script src="/js/invoices.js"></script>
+<script src="/js/invoices/shared.js"></script>
+<script src="/js/invoices/list-selection.js"></script>
+<script src="/js/invoices/list-row.js"></script>
+<script src="/js/invoices/list-filters.js"></script>
+<script src="/js/invoices/list-metrics.js"></script>
+<script src="/js/invoices/list.js"></script>
+<script src="/js/invoices/quote-draft-calculations.js"></script>
+<script src="/js/invoices/form-data.js"></script>
+<script src="/js/invoices/quote-form.js"></script>
+<script src="/js/invoices/forms.js"></script>
+<script src="/js/invoices/payment-calculations.js"></script>
+<script src="/js/invoices/payments.js"></script>
+<script src="/js/invoices/workflow-conversions.js"></script>
+<script src="/js/invoices/workflow.js"></script>
+<script src="/js/invoices/delivery.js"></script>
+<script src="/js/invoices/detail-status.js"></script>
+<script src="/js/invoices/detail-timeline.js"></script>
+<script src="/js/invoices/detail-presentation.js"></script>
+<script src="/js/invoices/detail-sections.js"></script>
+<script src="/js/invoices/detail-products.js"></script>
+<script src="/js/invoices/detail-financials.js"></script>
+<script src="/js/invoices/detail-header.js"></script>
+<script src="/js/invoices/detail-actions.js"></script>
+<script src="/js/invoices/detail-template.js"></script>
+<script src="/js/invoices/details.js"></script>
+<script src="/js/invoices/editor-calculations.js"></script>
+<script src="/js/invoices/editor-product-picker.js"></script>
+<script src="/js/invoices/editor.js"></script>
+<script src="/js/invoices/export.js"></script>
 <script src="/js/company.js"></script>
+<script src="/js/company/profile-fields.js"></script>
+<script src="/js/company/profile.js"></script>
+<script src="/js/company/form-data.js"></script>
+<script src="/js/company/form.js"></script>
+<script src="/js/company/email.js"></script>
+<script src="/js/company/electronic.js"></script>
+<script src="/js/company/logo.js"></script>
 
 
 <script src="/js/app.js"></script>
-
-<script>
-// ================= LOGIN =================
-
-async function login() {
-
-  const email =
-    document.getElementById("email").value;
-
-  const password =
-    document.getElementById("password").value;
-
-  if (!email || !password) {
-
-    return showToast(
-      "Remplis tous les champs"
-    );
-  }
-
-  try {
-
-    const res = await fetch("/api/auth/login", {
-
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json"
-      },
-
-      body: JSON.stringify({
-        email,
-        password
-      })
-    });
-
-    const data = await res.json();
-
-    if (data.token) {
-
-      localStorage.setItem(
-        "token",
-        data.token
-      );
-
-      showToast("Connexion réussie ✅");
-
-      document.getElementById("auth").style.display = "none";
-
-      document.getElementById("app").style.display = "block";
-
-      if (typeof showApp === "function") {
-        showApp();
-      }
-
-    } else {
-
-      showToast(
-        data.message || "Erreur connexion"
-      );
-    }
-
-  } catch (err) {
-
-    console.error(err);
-
-    showToast("Serveur indisponible");
-  }
-}
+<script src="/js/app/navigation.js"></script>
+<script src="/js/app/confirmation.js"></script>
+<script src="/js/app/search-data.js"></script>
+<script src="/js/app/search.js"></script>
+<script src="/js/app/api.js"></script>
+<script src="/js/app/bootstrap.js"></script>
 
 
-// ================= REGISTER =================
-
-async function register() {
-
-  const email =
-    document.getElementById("email").value;
-
-  const password =
-    document.getElementById("password").value;
-
-  if (!email || !password) {
-
-    return showToast(
-      "Remplis tous les champs"
-    );
-  }
-
-  try {
-
-    const res = await fetch("/api/auth/register", {
-
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json"
-      },
-
-      body: JSON.stringify({
-        email,
-        password
-      })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-
-      showToast(
-        "Compte créé 📩 Vérifie tes emails"
-      );
-
-    } else {
-
-      showToast(
-        data.message || "Erreur inscription"
-      );
-    }
-
-  } catch (err) {
-
-    console.error(err);
-
-    showToast("Serveur indisponible");
-  }
-}
-// ================= RESEND EMAIL =================
-
-async function resendEmail() {
-
-  const email =
-    document.getElementById("email").value;
-
-  if (!email) {
-    return showToast("Entre ton email 📧");
-  }
-
-  await fetch(
-  "https://crm-2-15ox.onrender.com/api/auth/resend-verification",
-{
-
-    method: "POST",
-
-    headers: {
-      "Content-Type": "application/json"
-    },
-
-    body: JSON.stringify({ email })
-  });
-
-  showToast("Email renvoyé 📩");
-}
-
-// ================= RESET PASSWORD =================
-
-async function requestReset() {
-
-  const email =
-    document.getElementById("email").value;
-
-  if (!email) {
-    return showToast("Entre ton email 📧");
-  }
-
-  await fetch(
-  "https://crm-2-15ox.onrender.com/api/auth/request-reset",
-{
-
-    method: "POST",
-
-    headers: {
-      "Content-Type": "application/json"
-    },
-
-    body: JSON.stringify({ email })
-  });
-
-  showToast("Email reset envoyé 🔐");
-}
-
-</script>
 
 <script src="/js/auth.js"></script>
+<script src="/js/auth/access.js"></script>
+<script src="/js/auth/assistance.js"></script>
+<script src="/js/auth/password.js"></script>
+<script src="/js/auth/account.js"></script>
+<script src="/js/auth/reset-page.js"></script>
+<script src="/js/auth/verification-pending-page.js"></script>
+<script src="/js/auth/verification-page-template.js"></script>
+<script src="/js/auth/verification-result-pages.js"></script>
+<script src="/js/auth-pages.js"></script>
 
 <!-- POPUP DETAILS DEVIS / FACTURE -->
 
@@ -1559,7 +2016,13 @@ async function requestReset() {
 
     <div class="invoice-details-header">
 
-      <h2 id="detailNumber"></h2>
+      <div>
+        <span id="detailDocumentType" class="document-detail-eyebrow">Document commercial</span>
+        <div class="document-number-row">
+          <h2 id="detailNumber"></h2>
+          <button type="button" class="document-number-copy" onclick="copyDocumentNumber(document.getElementById('detailNumber').textContent)" title="Copier le numéro">Copier</button>
+        </div>
+      </div>
 
       <button
         onclick="closeInvoiceDetails()"
@@ -1627,6 +2090,37 @@ async function requestReset() {
       <div><span>Stock actuel</span><b id="restockCurrentStock">0</b><small>unités</small></div>
     </div>
 
+    <section class="product-commercial-summary" aria-label="Performance commerciale du produit">
+      <div>
+        <span>Quantité vendue</span>
+        <strong id="productSoldQuantity">—</strong>
+        <small>sur factures encaissées</small>
+      </div>
+      <div>
+        <span>Chiffre d’affaires encaissé</span>
+        <strong id="productRevenue">—</strong>
+        <small>TVA incluse</small>
+      </div>
+      <div class="product-last-document">
+        <span>Dernier document associé</span>
+        <strong id="productLastDocument">—</strong>
+        <small id="productLastDocumentDate">Aucune activité</small>
+      </div>
+    </section>
+
+    <section class="product-document-history" aria-labelledby="productDocumentHistoryTitle">
+      <div class="product-document-history-header">
+        <div>
+          <p class="form-eyebrow">Traçabilité commerciale</p>
+          <h3 id="productDocumentHistoryTitle">Documents associés</h3>
+        </div>
+        <span id="productDocumentCount" class="product-document-count">—</span>
+      </div>
+      <div id="productDocumentHistory" class="product-document-list">
+        <p class="empty-state">Chargement des documents…</p>
+      </div>
+    </section>
+
     <label class="form-field restock-quantity-field">
       <span>Quantité à ajouter</span>
       <div class="input-suffix-wrap"><input id="restockQuantity" type="number" min="1" step="1" placeholder="Ex. 10" /><span>unités</span></div>
@@ -1650,6 +2144,77 @@ async function requestReset() {
       <button type="button" class="primary-btn" onclick="confirmRestock()">Confirmer le réassort</button>
     </div>
   </div>
+</div>
+
+<!-- ================= RECHERCHE RAPIDE ================= -->
+
+<div id="globalSearchModal" class="global-search-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="globalSearchTitle">
+  <div class="global-search-panel">
+    <div class="global-search-input-wrap">
+      <i data-lucide="search"></i>
+      <input id="globalSearchInput" type="search" placeholder="Rechercher un client, produit ou document…" autocomplete="off" oninput="renderGlobalSearchResults()" />
+      <button type="button" onclick="closeGlobalSearch()" aria-label="Fermer la recherche">✕</button>
+    </div>
+    <div class="global-search-heading">
+      <div><p class="form-eyebrow">Accès rapide</p><h2 id="globalSearchTitle">Rechercher dans My Prospect</h2></div>
+      <span id="globalSearchCount">Saisissez au moins 2 caractères</span>
+    </div>
+    <div id="globalSearchResults" class="global-search-results">
+      <p class="global-search-empty">Retrouvez vos clients, produits, devis, commandes et factures sans quitter votre page.</p>
+    </div>
+    <div class="global-search-footer"><span><kbd>↑</kbd><kbd>↓</kbd> naviguer</span><span><kbd>Entrée</kbd> ouvrir</span><span><kbd>Échap</kbd> fermer</span></div>
+  </div>
+</div>
+
+<!-- ================= CONFIRMATION ================= -->
+
+<div id="appConfirmModal" class="app-confirm-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="appConfirmTitle">
+  <div class="app-confirm-panel">
+    <span id="appConfirmTone" class="app-confirm-tone">!</span>
+    <div>
+      <p class="form-eyebrow">Confirmation requise</p>
+      <h2 id="appConfirmTitle">Confirmer l’action</h2>
+      <p id="appConfirmMessage">Êtes-vous sûr de vouloir continuer ?</p>
+    </div>
+    <label id="appConfirmPasswordField" class="app-confirm-password" style="display:none;">
+      <span>Votre mot de passe</span>
+      <input id="appConfirmPassword" type="password" autocomplete="current-password" placeholder="Saisissez votre mot de passe" />
+    </label>
+    <div class="app-confirm-actions">
+      <button type="button" class="secondary-btn" onclick="closeAppConfirmation(false)">Annuler</button>
+      <button type="button" id="appConfirmSubmit" class="primary-btn" onclick="closeAppConfirmation(true)">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MOT DE PASSE ================= -->
+
+<div id="passwordChangeModal" class="app-confirm-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="passwordChangeTitle">
+  <form class="app-confirm-panel password-change-panel" onsubmit="submitPasswordChange(event)">
+    <span class="app-confirm-tone">✓</span>
+    <div>
+      <p class="form-eyebrow">Sécurité du compte</p>
+      <h2 id="passwordChangeTitle">Modifier votre mot de passe</h2>
+      <p>Utilisez un mot de passe d’au moins 12 caractères, différent de votre mot de passe actuel.</p>
+    </div>
+    <label class="app-confirm-password">
+      <span>Mot de passe actuel</span>
+      <div class="password-input-wrap"><input id="currentPasswordInput" type="password" autocomplete="current-password" required /><button type="button" onclick="togglePasswordField('currentPasswordInput', this)">Afficher</button></div>
+    </label>
+    <label class="app-confirm-password">
+      <span>Nouveau mot de passe</span>
+      <div class="password-input-wrap"><input id="newPasswordInput" type="password" autocomplete="new-password" minlength="12" required oninput="updatePasswordStrength()" /><button type="button" onclick="togglePasswordField('newPasswordInput', this)">Afficher</button></div>
+      <span id="passwordStrength" class="password-strength neutral"><i></i><b>Utilisez au moins 12 caractères</b></span>
+    </label>
+    <label class="app-confirm-password">
+      <span>Confirmer le nouveau mot de passe</span>
+      <div class="password-input-wrap"><input id="confirmNewPasswordInput" type="password" autocomplete="new-password" minlength="12" required /><button type="button" onclick="togglePasswordField('confirmNewPasswordInput', this)">Afficher</button></div>
+    </label>
+    <div class="app-confirm-actions">
+      <button type="button" class="secondary-btn" onclick="closePasswordChangeModal()">Annuler</button>
+      <button type="submit" class="primary-btn">Enregistrer le mot de passe</button>
+    </div>
+  </form>
 </div>
 
 <!-- ================= PAIEMENT FACTURE ================= -->
@@ -1678,6 +2243,11 @@ async function requestReset() {
       <strong id="paymentInvoiceAmount">0,00 € TTC</strong>
     </div>
 
+    <label class="form-group" style="margin:14px 0;display:block;">
+      <span>Montant du règlement</span>
+      <input id="paymentAmountInput" type="number" min="0.01" step="0.01" required />
+    </label>
+
     <div class="payment-method-section">
       <h3>Moyen de paiement</h3>
 
@@ -1691,16 +2261,14 @@ async function requestReset() {
 
     <div class="payment-modal-actions">
       <button type="button" class="secondary-btn" onclick="closePaymentModal()">Annuler</button>
-      <button type="button" class="primary-btn" onclick="confirmInvoicePayment()">Confirmer le paiement</button>
+      <button id="confirmPaymentButton" type="button" class="primary-btn" onclick="confirmInvoicePayment()">Confirmer le paiement</button>
     </div>
 
   </div>
 
 </div>
 
-<script>
-  lucide.createIcons();
-</script>
+<script src="/js/core/icons.js"></script>
 
 </body>
 </html>

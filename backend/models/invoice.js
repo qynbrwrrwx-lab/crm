@@ -89,10 +89,49 @@ const invoiceSchema = new mongoose.Schema({
 
   paymentMethod: String,
 
+  paymentTerms: {
+    type: String,
+    trim: true,
+    default: ""
+  },
+
+  // Facture d'acompte distincte. Elle reste une facture au sens comptable,
+  // mais est rattachée au devis sans interférer avec sa conversion en commande.
+  isDepositInvoice: { type: Boolean, default: false },
+  depositForQuoteId: { type: mongoose.Schema.Types.ObjectId, ref: "Invoice", default: null, index: true },
+  depositRate: { type: Number, min: 0, max: 100, default: null },
+
+  paymentDueDays: {
+    type: Number,
+    min: 0,
+    max: 365,
+    default: 30
+  },
+
+  paymentDueDate: {
+    type: Date,
+    default: null
+  },
+
+  quoteValidityDays: {
+    type: Number,
+    min: 1,
+    default: null
+  },
+
   paymentStatus: {
     type: String,
     default: "pending"
   },
+
+  fulfillmentStatus: {
+    type: String,
+    enum: ["to_prepare", "prepared", "shipped", "delivered"],
+    default: "to_prepare"
+  },
+  preparedAt: { type: Date, default: null },
+  shippedAt: { type: Date, default: null },
+  deliveredAt: { type: Date, default: null },
 
   creditNoteId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -116,6 +155,13 @@ const invoiceSchema = new mongoose.Schema({
     default: null
   },
 
+  emailRecipient: {
+    type: String,
+    trim: true,
+    lowercase: true,
+    default: ""
+  },
+
   emailStatus: {
     type: String,
     enum: ["pending", "sent", "failed"],
@@ -125,6 +171,33 @@ const invoiceSchema = new mongoose.Schema({
   emailFailedAt: {
     type: Date,
     default: null
+  },
+
+  paymentReminderSentAt: {
+    type: Date,
+    default: null
+  },
+
+  // Lien public de consultation/acceptation, réservé aux devis. Seul le hash
+  // est conservé : le jeton envoyé au client ne peut pas être relu en base.
+  clientAccessTokenHash: { type: String, default: "", index: true },
+  clientAccessTokenExpiresAt: { type: Date, default: null },
+  clientAcceptedAt: { type: Date, default: null },
+  clientDeclinedAt: { type: Date, default: null },
+  clientDeclineReason: { type: String, trim: true, maxlength: 500, default: "" },
+
+  // Réservé aux échanges avec une plateforme agréée. Aucun envoi n'est
+  // déclenché tant qu'un connecteur partenaire n'est pas configuré.
+  electronicTransmission: {
+    status: {
+      type: String,
+      enum: ["not_applicable", "ready", "queued", "sent", "delivered", "rejected", "error"],
+      default: "not_applicable"
+    },
+    providerKey: { type: String, default: "" },
+    externalId: { type: String, default: "" },
+    lastAttemptAt: { type: Date, default: null },
+    lastError: { type: String, default: "" }
   }
 
 }, {

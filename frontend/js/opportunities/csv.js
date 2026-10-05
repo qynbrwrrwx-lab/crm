@@ -1,0 +1,3 @@
+// opportunities : csv.
+
+function exportOpportunitiesCsv(){const rows=[["Opportunité","Client / prospect","Origine","Étape","Montant potentiel HT","Probabilité","Prévision pondérée HT","Clôture estimée","Notes"],...allOpportunities.map(item=>[item.title,opportunityContactName(item),item.source||"manual",opportunityStages[item.stage]||item.stage,Number(item.amount||0),`${Number(item.probability||0)} %`,Number(item.amount||0)*Number(item.probability||0)/100,item.expectedCloseDate?new Date(item.expectedCloseDate).toLocaleDateString("fr-FR"):"",item.notes||""])];downloadCsvFile(rows,"pipeline-commercial");}

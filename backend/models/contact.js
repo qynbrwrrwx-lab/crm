@@ -32,6 +32,16 @@ const contactSchema = new mongoose.Schema({
 
   notes: String,
 
+  tags: {
+    type: [String],
+    default: []
+  },
+
+  nextFollowUpAt: {
+    type: Date,
+    default: null
+  },
+
   favorite: {
     type: Boolean,
     default: false

@@ -1,6 +1,6 @@
 const express = require("express");
 
-const User = require("../models/user");
+const adminController = require("../controllers/adminController");
 
 const authMiddleware =
   require("../middleware/authMiddleware");
@@ -10,33 +10,28 @@ const adminMiddleware =
 
 const router = express.Router();
 
-// GET ALL USERS
-router.get(
-  "/users",
+router.get("/stats", authMiddleware, adminMiddleware, adminController.getAdminStats);
+router.get("/audit", authMiddleware, adminMiddleware, adminController.getAdminAudit);
 
-  authMiddleware,
+router.post("/users/:id/resend-verification", authMiddleware, adminMiddleware, adminController.resendUserVerification);
 
-  adminMiddleware,
+router.get("/users/:id/summary", authMiddleware, adminMiddleware, adminController.getUserSummary);
 
-  async (req, res) => {
+router.put("/users/:id/suspension", authMiddleware, adminMiddleware, adminController.updateUserSuspension);
+router.put("/users/:id/subscription", authMiddleware, adminMiddleware, adminController.updateUserSubscription);
 
-    try {
+// ================= FACTURES D'ABONNEMENT MY PROSPECT =================
 
-      const users =
-        await User.find()
-        .select("-password");
+router.get("/subscription-invoices", authMiddleware, adminMiddleware, adminController.listSubscriptionInvoices);
 
-      res.json(users);
+router.post("/users/:id/subscription-invoices", authMiddleware, adminMiddleware, adminController.createSubscriptionInvoice);
 
-    } catch (err) {
+router.get("/subscription-invoices/:id/pdf", authMiddleware, adminMiddleware, adminController.renderSubscriptionInvoicePdf);
 
-      console.error(err);
+router.post("/subscription-invoices/:id/send", authMiddleware, adminMiddleware, adminController.sendSubscriptionInvoice);
 
-      res.status(500).json({
-        error: "Erreur serveur"
-      });
-    }
-  }
-);
+router.put("/subscription-invoices/:id/status", authMiddleware, adminMiddleware, adminController.updateSubscriptionInvoiceStatus);
+
+router.get("/users", authMiddleware, adminMiddleware, adminController.listUsers);
 
 module.exports = router;

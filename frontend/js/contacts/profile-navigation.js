@@ -1,0 +1,9 @@
+// Clients : navigation depuis la fiche profil.
+function handleClientNextAction(contactId, action) { if (action === "create-quote") return createQuoteForContact(contactId); closeInvoiceDetails(); if (action === "invoices") { showSection("invoicesSection"); return setInvoiceQuickFilter("pending"); } showSection("quotesSection"); }
+function createAppointmentForContact(contactId) { closeInvoiceDetails(); showSection("tasksSection"); prepareAppointment(); const select = document.getElementById("taskContact"); if (select) select.value = contactId; }
+function createOpportunityForContact(contactId) { closeInvoiceDetails(); showSection("opportunitiesSection"); resetOpportunityForm(); const select = document.getElementById("opportunityContact"); if (select) select.value = contactId; document.getElementById("opportunityTitle")?.focus(); }
+function openAgendaItem(taskId) { closeInvoiceDetails(); showSection("tasksSection"); editTask(taskId); }
+function openOpportunityFromProfile(opportunityId) { closeInvoiceDetails(); showSection("opportunitiesSection"); editOpportunity(opportunityId); }
+async function createQuoteForContact(contactId) { closeInvoiceDetails(); showSection("quotesSection"); await toggleQuoteForm(); const select = document.getElementById("quoteContact"); if (select) { select.value = contactId; if (typeof updateQuoteClientContext === "function") updateQuoteClientContext(); } }
+function editContactFromProfile(contactId) { closeInvoiceDetails(); showSection("contacts"); editContact(contactId); }
+async function editContactFromDocument(contactId) { closeInvoiceDetails(); showSection("contacts"); if (!allContacts.some(contact => contact._id === contactId)) await loadContacts(); editContact(contactId); document.getElementById("contactFormTitle")?.scrollIntoView({ behavior: "smooth", block: "start" }); }

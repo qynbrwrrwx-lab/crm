@@ -1,0 +1,43 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const frontend=path.resolve(__dirname,'../../frontend'),html=fs.readFileSync(path.join(frontend,'index.html'),'utf8');
+const scripts=[...html.matchAll(/<script\s+src="([^"]+)"[^>]*>/g)].map(m=>m[1]),modules=scripts.filter(s=>s==='/js/treasury.js'||s.startsWith('/js/treasury/'));
+function browser(){
+ const elements=new Map(),events=[],calls=[],toasts=[],charts=[];for(const [,id] of html.matchAll(/\bid="([^"]+)"/g)){const classes=new Set();elements.set(id,{value:'',textContent:'',innerHTML:'',hidden:false,reset(){},scrollIntoView(){},classList:{add:c=>classes.add(c),remove:c=>classes.delete(c),contains:c=>classes.has(c)}});}
+ class FixedDate extends Date{constructor(...args){super(...(args.length?args:['2026-10-03T12:00:00Z']));}}
+ const ctx=vm.createContext({Date:FixedDate,document:{getElementById:id=>elements.get(id)||null,addEventListener:(event,callback)=>events.push({event,callback})},console:{error(){}},allInvoices:[],allExpenses:[],apiFetch:async(...args)=>{calls.push(args);return {};},showToast:m=>toasts.push(m),confirmAppAction:async()=>true,loadInvoices:async()=>{},loadExpenses:async()=>{},showSection(){},Chart:function(canvas,options){this.options=options;this.destroy=()=>{this.destroyed=true;};charts.push(this);}});
+ for(const s of ['/js/core/formatters.js','/js/core/text.js',...modules])vm.runInContext(fs.readFileSync(path.join(frontend,s),'utf8'),ctx,{filename:s});
+ return {ctx,calls,events,toasts,charts,node:id=>elements.get(id),read:s=>vm.runInContext(s,ctx),set:(name,value)=>{ctx.fixture=value;vm.runInContext(`${name}=fixture`,ctx);}};
+}
+test('treasury modules load once and initialize the date without overwriting an existing value',()=>{
+ const b=browser();assert.equal(modules.length,13);assert.equal(new Set(modules).size,13);assert.equal(modules[0],'/js/treasury.js');assert.deepEqual(modules.slice(1).map(s=>path.basename(s)).sort(),fs.readdirSync(path.join(frontend,'js/treasury')).filter(s=>s.endsWith('.js')).sort());
+ assert.equal(b.events.length,1);assert.equal(b.events[0].event,'DOMContentLoaded');b.events[0].callback();assert.equal(b.node('treasuryEntryDate').value,'2026-10-03');b.node('treasuryEntryDate').value='2026-10-01';b.events[0].callback();assert.equal(b.node('treasuryEntryDate').value,'2026-10-01');assert.equal(b.calls.length,0);
+});
+test('balance uses all movements while imported and text filters only affect the list',()=>{
+ const b=browser();b.set('treasurySettings',{openingBalance:100,minimumBalance:0});b.set('treasuryEntries',[{_id:'a',label:'<Virement>',amount:80,type:'income',date:'2026-10-01',importFingerprint:'x'},{_id:'b',label:'Achat',amount:30,type:'expense',date:'2026-10-02'}]);b.node('treasuryEntriesTypeFilter').value='imported';b.node('treasuryEntriesFilter').value='virement';b.ctx.renderTreasury();
+ assert.equal(b.node('treasuryCurrentBalance').textContent,b.ctx.treasuryMoney(150));assert.equal((b.node('treasuryEntriesList').innerHTML.match(/<article/g)||[]).length,1);assert.match(b.node('treasuryEntriesList').innerHTML,/&lt;Virement&gt;/);assert.match(b.node('treasuryEntriesList').innerHTML,/Importé/);
+});
+test('forecast deducts partial payments and ignores paid and out-of-period items',()=>{
+ const b=browser();b.ctx.allInvoices=[{type:'invoice',totalTTC:100,payments:[{amount:30}],paymentDueDate:'2026-10-10',invoiceNumber:'<F>'},{type:'invoice',totalTTC:999,paymentStatus:'paid',paymentDueDate:'2026-10-10'},{type:'invoice',totalTTC:999,paymentDueDate:'2026-12-01'}];b.ctx.allExpenses=[{amountTTC:90,dueDate:'2026-10-11',label:'<Charge>'}];b.ctx.renderTreasuryForecast(10);
+ assert.equal(b.node('treasuryForecastIncome').textContent,b.ctx.treasuryMoney(70));assert.equal(b.node('treasuryForecastBalance').textContent,b.ctx.treasuryMoney(-10));assert.equal(b.node('treasuryForecastBalance').className,'negative');assert.match(b.node('treasuryForecastList').innerHTML,/&lt;Charge&gt;/);
+});
+test('minimum balance alert distinguishes missing setup and insufficient reserves',()=>{
+ const b=browser();b.ctx.updateTreasuryForecastAlert(10,20,30);assert.match(b.node('dashboardTreasuryAlertLabel').textContent,/à calculer/);b.set('treasurySettings',{_id:'s',minimumBalance:50});b.ctx.updateTreasuryForecastAlert(10,20,30);assert.match(b.node('dashboardTreasuryAlertLabel').textContent,/insuffisante/);assert.equal(b.node('dashboardTreasuryAlertDot').classList.contains('overdue'),true);b.ctx.updateTreasuryForecastAlert(80,20,30);assert.equal(b.node('dashboardTreasuryAlertDot').classList.contains('overdue'),false);
+});
+test('reconciliation matches remaining invoice amounts and unpaid expenses and escapes labels',()=>{
+ const b=browser();b.set('treasuryEntries',[{label:'<Bank>',type:'income',amount:60,importFingerprint:'a'},{label:'Charge',type:'expense',amount:25,importFingerprint:'b'}]);b.ctx.allInvoices=[{_id:'i',type:'invoice',totalTTC:100,payments:[{amount:40}],invoiceNumber:'F'}];b.ctx.allExpenses=[{_id:'e',label:'<Achat>',amountTTC:25,status:'pending'}];b.ctx.renderTreasuryReconciliationSuggestions();const body=b.node('treasuryReconciliationList').innerHTML;assert.match(body,/&lt;Bank&gt;/);assert.match(body,/&lt;Achat&gt;/);assert.ok(body.includes("confirmTreasurySuggestion('invoice', 'i', 60)"));assert.ok(body.includes("confirmTreasurySuggestion('expense', 'e', 25)"));
+});
+test('reconciliation cancellation sends nothing and confirmed invoice uses the payment contract',async()=>{
+ const b=browser();b.ctx.loadTreasury=async()=>{};b.ctx.confirmAppAction=async()=>false;await b.ctx.confirmTreasurySuggestion('invoice','i',60);assert.equal(b.calls.length,0);b.ctx.confirmAppAction=async()=>true;await b.ctx.confirmTreasurySuggestion('invoice','i',60);assert.equal(b.calls[0][0],'/api/invoices/pay/i');assert.equal(b.calls[0][1].method,'PUT');assert.deepEqual(JSON.parse(b.calls[0][1].body),{paymentMethod:'Virement bancaire',amount:60});
+});
+test('entry editing preserves PUT payload and failed saves retain the editing state',async()=>{
+ const b=browser();b.set('treasuryEntries',[{_id:'e',label:'Achat',type:'expense',amount:25,date:'2026-10-01'}]);b.ctx.editTreasuryEntry('e');b.ctx.loadTreasury=async()=>{};b.ctx.apiFetch=async()=>{throw new Error('offline');};await b.ctx.saveTreasuryEntry({preventDefault(){}});assert.equal(b.read('editingTreasuryEntryId'),'e');assert.equal(b.toasts.at(-1),'offline');b.ctx.apiFetch=async(...args)=>{b.calls.push(args);};await b.ctx.saveTreasuryEntry({preventDefault(){}});assert.equal(b.calls[0][0],'/api/treasury/entries/e');assert.equal(b.calls[0][1].method,'PUT');assert.deepEqual(JSON.parse(b.calls[0][1].body),{label:'Achat',amount:25,type:'expense',date:'2026-10-01'});assert.equal(b.read('editingTreasuryEntryId'),null);
+});
+test('settings allow negative opening balance but reject negative reserves',async()=>{
+ const b=browser();b.ctx.loadTreasury=async()=>{};b.node('treasuryOpeningBalance').value='-20';b.node('treasuryMinimumBalance').value='-1';b.node('treasuryOpeningBalanceDate').value='2026-10-01';await b.ctx.saveTreasurySettings({preventDefault(){}});assert.equal(b.calls.length,0);b.node('treasuryMinimumBalance').value='0';await b.ctx.saveTreasurySettings({preventDefault(){}});assert.deepEqual(JSON.parse(b.calls[0][1].body),{openingBalance:-20,minimumBalance:0,openingBalanceDate:'2026-10-01'});
+});
+test('CSV import understands debit and credit columns and preserves confirmation',async()=>{
+ const b=browser();b.ctx.loadTreasury=async()=>{};const event=()=>({target:{value:'file',files:[{text:async()=> 'Date;Libellé;Débit;Crédit\n03/10/2026;"Achat; matériel";12,50;\n04/10/2026;Virement;;100,00'}]}});b.ctx.confirmAppAction=async()=>false;await b.ctx.importTreasuryCsv(event());assert.equal(b.calls.length,0);b.ctx.confirmAppAction=async()=>true;await b.ctx.importTreasuryCsv(event());assert.equal(b.calls[0][0],'/api/treasury/entries/import');assert.deepEqual(JSON.parse(b.calls[0][1].body),{entries:[{date:'2026-10-03',label:'Achat; matériel',type:'expense',amount:12.5},{date:'2026-10-04',label:'Virement',type:'income',amount:100}]});
+});
+test('chart separates monthly income and expense and destroys the previous instance',()=>{
+ const b=browser();b.set('treasuryEntries',[{type:'income',amount:70,date:'2026-10-01'},{type:'expense',amount:20,date:'2026-09-01'}]);b.ctx.renderTreasuryChart();assert.deepEqual(Array.from(b.charts[0].options.data.datasets[0].data),[0,0,0,0,0,70]);assert.deepEqual(Array.from(b.charts[0].options.data.datasets[1].data),[0,0,0,0,20,0]);b.ctx.renderTreasuryChart();assert.equal(b.charts[0].destroyed,true);
+});

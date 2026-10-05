@@ -25,6 +25,13 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  isSuspended: { type: Boolean, default: false },
+  subscriptionStatus: {
+    type: String,
+    enum: ["trial", "active", "suspended", "cancelled"],
+    default: "trial"
+  },
+  trialEndsAt: { type: Date, default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) },
 
   role: {
     type: String,

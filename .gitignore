@@ -8,5 +8,8 @@ node_modules/
 # Logs
 *.log 
 
+# Fichiers générés localement
+tmp/
+
 # OS
 .DS_Store

@@ -1,0 +1,14 @@
+const express = require("express");
+const rateLimit = require("express-rate-limit");
+const auth = require("../middleware/auth");
+const taskController = require("../controllers/taskController");
+const router = express.Router();
+const appointmentEmailLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 10, keyGenerator: req => String(req.userId), standardHeaders: true, legacyHeaders: false, message: { error: "Trop de confirmations envoyées. Réessayez dans quelques minutes." } });
+router.get("/", auth, taskController.listTasks);
+router.post("/", auth, taskController.createTask);
+router.put("/:id", auth, taskController.updateTask);
+router.put("/:id/done", auth, taskController.markTaskDone);
+router.post("/:id/send-confirmation", auth, appointmentEmailLimiter, taskController.sendAppointmentConfirmation);
+router.delete("/:id/future-recurrences", auth, taskController.deleteFutureRecurrences);
+router.delete("/:id", auth, taskController.deleteTask);
+module.exports = router;
