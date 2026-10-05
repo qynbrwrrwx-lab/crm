@@ -72,4 +72,8 @@ async function login(req, res) {
   }
 }
 
-module.exports = { register, login };
+function validateSession(req, res) {
+  return res.json({ success: true });
+}
+
+module.exports = { register, login, validateSession };

@@ -4,11 +4,17 @@ function adminToken() {
   return localStorage.getItem("token");
 }
 
+function adminSessionError(message) {
+  const error = new Error(message);
+  error.sessionExpired = true;
+  return error;
+}
+
 async function adminApiFetch(url, options = {}) {
   const token = adminToken();
   if (!token) {
     window.location.href = "/admin-login";
-    throw new Error("Session expirée");
+    throw adminSessionError("Session expirée");
   }
   const response = await fetch(window.location.origin + url, {
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, ...(options.headers || {}) },
@@ -17,7 +23,7 @@ async function adminApiFetch(url, options = {}) {
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
     window.location.href = "/admin-login";
-    throw new Error("Accès administrateur requis");
+    throw adminSessionError("Accès administrateur requis");
   }
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));

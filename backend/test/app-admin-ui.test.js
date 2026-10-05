@@ -16,14 +16,18 @@ test('app and admin modules load once on their respective pages with distinct AP
  for(const domain of ['app','admin'])assert.deepEqual(b.modules.filter(s=>s.startsWith(`/js/${domain}/`)).map(s=>path.basename(s)).sort(),fs.readdirSync(path.join(frontend,`js/${domain}`)).filter(s=>s.endsWith('.js')).sort());
  assert.deepEqual(a.modules.filter(s=>s.startsWith('/js/admin/')).map(s=>path.basename(s)).sort(),fs.readdirSync(path.join(frontend,'js/admin')).filter(s=>s.endsWith('.js')).sort());
 });
-test('main API preserves bearer authorization and logs out on expired sessions',async()=>{
- const b=browser();b.storage.set('token','fixture');await b.ctx.apiFetch('/api/tasks',{method:'GET'});assert.equal(b.calls[0][0],'https://app.example.test/api/tasks');assert.equal(b.calls[0][1].headers.Authorization,'Bearer fixture');b.ctx.fetch=async()=>({status:401});await assert.rejects(b.ctx.apiFetch('/api/tasks'),/Session expirée/);assert.equal(b.storage.has('token'),false);
+test('main API preserves bearer authorization, omits local options and logs out on expired sessions',async()=>{
+ const b=browser();b.storage.set('token','fixture');await b.ctx.apiFetch('/api/tasks',{method:'GET',silent:true});assert.equal(b.calls[0][0],'https://app.example.test/api/tasks');assert.equal(b.calls[0][1].headers.Authorization,'Bearer fixture');assert.equal('silent' in b.calls[0][1],false);b.ctx.fetch=async()=>({status:401});await assert.rejects(b.ctx.apiFetch('/api/tasks'),/Session expirée/);assert.equal(b.storage.has('token'),false);
 });
 test('admin API refuses missing token and clears forbidden sessions',async()=>{
- const b=browser(true);await assert.rejects(b.ctx.adminApiFetch('/api/admin/users'),/Session expirée/);assert.equal(b.calls.length,0);assert.equal(b.ctx.location.href,'/admin-login');b.storage.set('token','fixture');b.ctx.fetch=async()=>({status:403});await assert.rejects(b.ctx.adminApiFetch('/api/admin/users'),/Accès administrateur requis/);assert.equal(b.storage.has('token'),false);
+ const b=browser(true);await assert.rejects(b.ctx.adminApiFetch('/api/admin/users'),/Session expirée/);assert.equal(b.calls.length,0);assert.equal(b.ctx.location.href,'/admin-login');assert.equal(b.ctx.adminSessionError('fixture').sessionExpired,true);b.storage.set('token','fixture');b.ctx.fetch=async()=>({status:403});await assert.rejects(b.ctx.adminApiFetch('/api/admin/users'),/Accès administrateur requis/);assert.equal(b.storage.has('token'),false);
 });
-test('startup restores only an existing saved section and tolerates unavailable storage',()=>{
- const b=browser();b.ctx.onload();assert.equal(b.navigation.length,0);b.storage.set('token','fixture');b.storage.set('my-prospect-active-section','tasksSection');b.ctx.onload();assert.deepEqual(b.navigation,['app','tasksSection']);b.ctx.localStorage.getItem=()=>{throw new Error('blocked');};b.ctx.onload();assert.equal(b.navigation.at(-1),'app');
+test('admin bootstrap starts the loader once and expired sessions redirect without an alert',async()=>{
+ const users=fs.readFileSync(path.join(frontend,'js/admin/users.js'),'utf8'),bootstrap=fs.readFileSync(path.join(frontend,'js/admin/bootstrap.js'),'utf8');assert.doesNotMatch(users,/loadAdminUsers\(\);/);assert.match(bootstrap,/loadAdminUsers\(\);/);
+ const b=browser(true);await b.ctx.loadAdminUsers();assert.equal(b.ctx.location.href,'/admin-login');assert.deepEqual(b.toasts,[]);
+});
+test('startup validates a session before restoring an existing saved section',async()=>{
+ const b=browser();await b.ctx.onload();assert.equal(b.navigation.length,0);b.storage.set('token','fixture');b.storage.set('my-prospect-active-section','tasksSection');await b.ctx.onload();assert.deepEqual(b.navigation,['app','tasksSection']);b.ctx.apiFetch=async()=>{throw new Error('expired');};await b.ctx.onload();assert.deepEqual(b.navigation,['app','tasksSection']);b.ctx.apiFetch=async()=>({success:true});b.ctx.localStorage.getItem=()=>{throw new Error('blocked');};await b.ctx.onload();assert.equal(b.navigation.at(-1),'app');
 });
 test('confirmation requires a password before resolving and cancellation returns false',async()=>{
  const b=browser();const pending=b.ctx.confirmAppAction({passwordRequired:true});b.ctx.closeAppConfirmation(true);assert.equal(b.node('appConfirmModal').style.display,'flex');assert.equal(b.toasts.length,1);b.node('appConfirmPassword').value='fixture';b.ctx.closeAppConfirmation(true);assert.equal(await pending,'fixture');const cancel=b.ctx.confirmAppAction();b.ctx.closeAppConfirmation(false);assert.equal(await cancel,false);

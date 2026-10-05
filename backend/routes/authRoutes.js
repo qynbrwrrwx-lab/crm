@@ -17,6 +17,8 @@ const sensitiveAccountLimiter = rateLimit({
   message: { error: "Trop de tentatives. Réessayez dans quelques minutes." }
 });
 
+router.get("/session", auth, authenticationController.validateSession);
+
 router.get("/export-data", auth, accountController.exportAccountData);
 
 router.get("/activity", auth, accountController.getAccountActivity);

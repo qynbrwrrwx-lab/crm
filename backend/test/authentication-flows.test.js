@@ -139,6 +139,14 @@ test("login issues a seven-day user session and records the audit event", async 
   assert.equal(s.audit[0].action, "user.login");
 });
 
+test("session validation is authenticated and returns a minimal success payload", async () => {
+  const route = router.stack.find(layer => layer.route?.path === "/session").route;
+  const res = { json(body) { this.body = body; return this; } };
+  await route.stack.at(-1).handle({}, res);
+  assert.equal(route.stack[0].handle, require("../middleware/auth"));
+  assert.deepEqual(res.body, { success: true });
+});
+
 for (const [path, linkField, hashField, expiryField] of [
   ["/request-reset", "resetLink", "resetTokenHash", "resetTokenExpiresAt"],
   ["/resend-verification", "verificationLink", "verifyTokenHash", "verifyTokenExpiresAt"]

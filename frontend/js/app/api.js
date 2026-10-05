@@ -4,6 +4,8 @@ async function apiFetch(url, options = {}) {
 
   const token = getToken();
 
+  const { silent = false, ...requestOptions } = options;
+
   const config = {
 
     headers: {
@@ -15,7 +17,7 @@ async function apiFetch(url, options = {}) {
       })
     },
 
-    ...options
+    ...requestOptions
   };
 
   try {
@@ -63,10 +65,12 @@ async function apiFetch(url, options = {}) {
 
   } catch (err) {
 
-    console.error(
-      "❌ FETCH ERROR :",
-      err
-    );
+    if (!silent) {
+      console.error(
+        "❌ FETCH ERROR :",
+        err
+      );
+    }
 
     throw err;
   }

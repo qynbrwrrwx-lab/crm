@@ -1,6 +1,17 @@
 // Restauration de la session et de la section active.
-window.onload = () => {
+async function restoreSession() {
   if (!getToken()) return;
+
+  try {
+    await apiFetch("/api/auth/session", { silent: true });
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+window.onload = async () => {
+  if (!await restoreSession()) return;
 
   showApp();
 

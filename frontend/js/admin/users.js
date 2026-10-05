@@ -54,6 +54,8 @@ async function loadAdminUsers() {
 
   } catch (err) {
 
+    if (err.sessionExpired) return;
+
     console.error(err);
 
     alert("Erreur admin");
