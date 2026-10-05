@@ -152,6 +152,7 @@
 #loader, #app, #companyForm, #companyLogoSection, #saveCompanyBtn, #invoiceDetailsModal, #addProductModal, #restockModal, #globalSearchModal, #appConfirmModal, #passwordChangeModal, #paymentModal, #appConfirmPasswordField { display: none; }
 .add-product-modal-content { max-width: 600px; }
 .payment-amount-field { display: block; margin: 14px 0; }
+.quote-modal[hidden] { display: none; }
 
 /* ================= ANALYSE & CARTE ================= */
 

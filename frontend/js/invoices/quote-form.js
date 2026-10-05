@@ -7,11 +7,10 @@ window.toggleQuoteForm = async function() {
 
   if (!form) return;
 
-  const opening =
-    form.style.display === "none";
+  const opening = form.hidden || form.style.display === "none";
 
-  form.style.display =
-    opening ? "block" : "none";
+  form.hidden = !opening;
+  form.style.display = opening ? "block" : "none";
 
   if (opening) {
 
@@ -27,6 +26,7 @@ function closeQuoteModal() {
 
   if (!modal) return;
 
+  modal.hidden = true;
   modal.style.display = "none";
 }
 
@@ -61,8 +61,9 @@ async function editQuote(id) {
     quote.products[0].quantity;
 }
 
-  document.getElementById("quoteModal").style.display =
-    "block";
+  const modal = document.getElementById("quoteModal");
+  modal.hidden = false;
+  modal.style.display = "block";
 
 }
 
