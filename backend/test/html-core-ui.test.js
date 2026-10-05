@@ -40,6 +40,13 @@ test('public quote page keeps its presentation in a dedicated stylesheet',()=>{
  assert.doesNotMatch(html,/<style[\s>]/);
  assert.ok(fs.existsSync(path.join(frontend,'styles','quote-client.css')));
 });
+test('public quote page binds its response controls without inline handlers',()=>{
+ const html=fs.readFileSync(path.join(frontend,'quote-client.html'),'utf8'),script=fs.readFileSync(path.join(frontend,'js','pages','quote-client.js'),'utf8');
+ assert.match(html,/aria-live="polite"/);
+ assert.doesNotMatch(script,/onclick=/);
+ assert.match(script,/data-quote-response/);
+ assert.match(script,/addEventListener\("click"/);
+});
 test('main page loads every domain module once after its shared state',()=>{
  const html=fs.readFileSync(path.join(frontend,'index.html'),'utf8');
  const scripts=[...html.matchAll(/<script\s+src="([^"]+)"[^>]*>/g)].map(([,src])=>src);
