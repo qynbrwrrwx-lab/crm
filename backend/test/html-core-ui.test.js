@@ -4,6 +4,13 @@ function run(file,globals){const ctx=vm.createContext(globals);ctx.window=ctx;vm
 test('HTML pages load existing external scripts and retain no inline script blocks',()=>{
  for(const page of fs.readdirSync(frontend).filter(p=>p.endsWith('.html'))){const html=fs.readFileSync(path.join(frontend,page),'utf8');assert.doesNotMatch(html,/<script>[\s\S]*?<\/script>/,page);for(const [,src]of html.matchAll(/<script src="(\/js\/[^"]+)"/g))assert.ok(fs.existsSync(path.join(frontend,src)),`${page}: ${src}`);}
 });
+test('shared stylesheet imports each visual module in cascade order',()=>{
+ const expected=['base.css','orders.css','auth.css','business.css','commerce.css','app-shell.css'];
+ const css=fs.readFileSync(path.join(frontend,'style.css'),'utf8');
+ const imports=[...css.matchAll(/@import url\("\/styles\/([^"]+)"\);/g)].map(([,name])=>name);
+ assert.deepEqual(imports,expected);
+ for(const name of expected)assert.ok(fs.existsSync(path.join(frontend,'styles',name)),name);
+});
 test('early session preview tolerates blocked storage and adds restoring class only with a token',()=>{
  const classes=[];const globals={document:{documentElement:{classList:{add:c=>classes.push(c)}}},localStorage:{getItem:()=>null}};run('core/session-preview.js',globals);assert.equal(classes.length,0);globals.localStorage.getItem=()=> 'fixture';run('core/session-preview.js',globals);assert.deepEqual(classes,['session-restoring']);globals.localStorage.getItem=()=>{throw new Error('blocked');};assert.doesNotThrow(()=>run('core/session-preview.js',globals));
 });
