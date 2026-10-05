@@ -2,7 +2,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const frontend=path.resolve(__dirname,'../../frontend');
 function run(file,globals){const ctx=vm.createContext(globals);ctx.window=ctx;vm.runInContext(fs.readFileSync(path.join(frontend,'js',file),'utf8'),ctx);return ctx;}
 test('HTML pages load existing external scripts and retain no inline script blocks',()=>{
- for(const page of fs.readdirSync(frontend).filter(p=>p.endsWith('.html'))){const html=fs.readFileSync(path.join(frontend,page),'utf8');assert.doesNotMatch(html,/<script>[\s\S]*?<\/script>/,page);for(const [,src]of html.matchAll(/<script src="(\/js\/[^"]+)"/g))assert.ok(fs.existsSync(path.join(frontend,src)),`${page}: ${src}`);}
+ for(const page of fs.readdirSync(frontend).filter(p=>p.endsWith('.html'))){const html=fs.readFileSync(path.join(frontend,page),'utf8');assert.doesNotMatch(html,/<script>[\s\S]*?<\/script>/,page);for(const [,src]of html.matchAll(/<script src="(\/js\/[^"]+)"/g))assert.ok(fs.existsSync(path.join(frontend,src)),`${page}: ${src}`);for(const [,href]of html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="(\/[^"]+)"/g))assert.ok(fs.existsSync(path.join(frontend,href)),`${page}: ${href}`);}
 });
 test('shared stylesheet imports each visual module in cascade order',()=>{
  const expected=['base.css','orders.css','auth.css','business.css','commerce.css','app-shell.css'];
