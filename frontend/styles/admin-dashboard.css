@@ -131,6 +131,105 @@
   color: #94a3b8;
 }
 
+.admin-stat-label--compact {
+  font-size: 13px;
+  margin-bottom: 9px;
+}
+
+.admin-stat-live-value {
+  color: white;
+  font-size: 29px;
+}
+
+.admin-user-card {
+  padding: 18px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  background: #0f172a;
+}
+
+.admin-user-email {
+  margin-bottom: 8px;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.admin-user-role,
+.admin-user-status {
+  font-size: 14px;
+}
+
+.admin-user-role {
+  margin-bottom: 6px;
+  color: #94a3b8;
+}
+
+.admin-user-status--verified {
+  color: #86efac;
+}
+
+.admin-user-status--pending {
+  color: #fbbf24;
+}
+
+.admin-user-status--suspended {
+  color: #fbbf24;
+}
+
+.admin-user-action {
+  padding: 8px 11px;
+  border-radius: 9px;
+  color: white;
+  cursor: pointer;
+}
+
+.admin-user-action--summary {
+  margin-top: 12px;
+  border: 1px solid #2563eb;
+  background: #172554;
+  color: #bfdbfe;
+}
+
+.admin-user-action--suspend,
+.admin-user-action--restore {
+  margin: 12px 0 0 8px;
+  border: 0;
+}
+
+.admin-user-action--suspend {
+  background: #991b1b;
+}
+
+.admin-user-action--restore {
+  background: #166534;
+}
+
+.admin-empty-state {
+  color: #94a3b8;
+}
+
+.admin-audit-entry {
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-audit-action {
+  color: #e2e8f0;
+}
+
+.admin-audit-target {
+  margin-left: 8px;
+  color: #94a3b8;
+}
+
+.admin-audit-time {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+}
+
 @media (max-width: 600px) {
   .admin-dashboard-layout {
     padding: 18px;

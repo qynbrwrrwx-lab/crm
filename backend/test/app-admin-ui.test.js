@@ -39,7 +39,10 @@ test('keyboard shortcut opens search and Escape closes it',()=>{
  const b=browser();const key=b.events[0].fn;key({ctrlKey:true,key:'k',preventDefault(){}});assert.equal(b.node('globalSearchModal').style.display,'flex');key({key:'Escape'});assert.equal(b.node('globalSearchModal').style.display,'none');
 });
 test('admin user filters combine verification and subscription and escape email',()=>{
- const b=browser(true);b.set('adminUsers',[{_id:'a',email:'<acme>@example.test',role:'user',isVerified:true,subscriptionStatus:'active'},{_id:'b',email:'other@example.test',role:'user',isVerified:true,subscriptionStatus:'trial'}]);b.node('adminVerificationFilter').value='verified';b.node('adminSubscriptionFilter').value='active';b.ctx.filterAdminUsers();assert.match(b.node('adminUsers').innerHTML,/&lt;acme&gt;/);assert.doesNotMatch(b.node('adminUsers').innerHTML,/other@example/);
+ const b=browser(true);b.set('adminUsers',[{_id:'a',email:'<acme>@example.test',role:'user',isVerified:true,subscriptionStatus:'active'},{_id:'b',email:'other@example.test',role:'user',isVerified:true,subscriptionStatus:'trial'}]);b.node('adminVerificationFilter').value='verified';b.node('adminSubscriptionFilter').value='active';b.ctx.filterAdminUsers();assert.match(b.node('adminUsers').innerHTML,/&lt;acme&gt;/);assert.match(b.node('adminUsers').innerHTML,/admin-user-status--verified/);assert.doesNotMatch(b.node('adminUsers').innerHTML,/other@example/);
+});
+test('admin statistics keep the total counter after rendering their cards',()=>{
+ const b=browser(true);const markup=b.ctx.renderAdminStats({totalUsers:2,verifiedUsers:1,pendingVerification:1,trials:1,trialsEndingSoon:0,activeSubscriptions:0,revenue:0});assert.match(markup,/id="totalUsers"/);assert.match(markup,/admin-stat-live-value/);
 });
 test('suspension confirmation describes the requested action and cancellation prevents writes',async()=>{
  const b=browser(true);const messages=[];b.ctx.confirm=m=>{messages.push(m);return false;};await b.ctx.toggleAdminSuspension('u',true);await b.ctx.toggleAdminSuspension('u',false);assert.deepEqual(messages,['Suspendre ce compte ?','Réactiver ce compte ?']);assert.equal(b.calls.length,0);
