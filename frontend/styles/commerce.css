@@ -630,6 +630,7 @@
 .edit-qty, .edit-discount { text-align:center; }
 .edit-qty { width:60px; }
 .edit-discount { width:65px; }
+.product-picker-search { width:100%; margin-bottom:20px; padding:12px; border-radius:10px; }
 .payment-modal-actions .primary-btn.is-loading { cursor:wait; opacity:.76; }
 
 @media (max-width:560px) {

@@ -281,6 +281,17 @@ test("editable document lines delegate field sizing to the commerce stylesheet",
   assert.match(commerceStyles, /\.edit-discount \{ width:65px/);
 });
 
+test("product picker delegates search field styling to the commerce stylesheet", () => {
+  const b = browser();
+  b.context.renderInvoiceProductPicker([{ _id: "product", name: "Produit <test>", priceHT: 12 }]);
+  const result = b.elements.get("addProductBody").innerHTML;
+  assert.match(result, /class="product-picker-search"/);
+  assert.match(result, /Produit &lt;test&gt;/);
+  assert.doesNotMatch(result, /style=/);
+  const commerceStyles = fs.readFileSync(path.join(frontend, "styles/commerce.css"), "utf8");
+  assert.match(commerceStyles, /\.product-picker-search \{ width:100%/);
+});
+
 for (const [type, expected] of [["quote", "Devis"], ["order", "Commande"], ["invoice", "Facture"], ["credit_note", "Avoir"]]) {
   test(`the ${type} detail view remains available after splitting scripts`, async () => {
     const b = browser();

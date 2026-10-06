@@ -1,7 +1,7 @@
 // Documents commerciaux : rendu et sélection des produits dans l’éditeur.
 function renderInvoiceProductPicker(products) {
   document.getElementById("addProductBody").innerHTML = `
-    <input id="productSearch" type="text" placeholder="Rechercher un produit..." style="width:100%; padding:12px; margin-bottom:20px; border-radius:10px;">
+    <input id="productSearch" class="product-picker-search" type="text" placeholder="Rechercher un produit...">
     <div id="productList">
       ${products.map(product => `
         <div class="product-picker-row" onclick="addProductToInvoice('${product._id}')">
