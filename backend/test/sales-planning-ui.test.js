@@ -19,6 +19,10 @@ test('agenda month week and year views retain their calendar dimensions',()=>{
  b.set('agendaView','week');b.ctx.renderAgenda();assert.equal((b.node('agendaCalendar').innerHTML.match(/class="agenda-week-day /g)||[]).length,7);
  b.set('agendaView','year');b.ctx.renderAgenda();assert.equal((b.node('agendaCalendar').innerHTML.match(/<button/g)||[]).length,12);
 });
+test('agenda day view retains appointment actions and list view clears the day detail',()=>{
+ const b=browser();b.set('allTasks',[{_id:'a',type:'appointment',title:'RDV',status:'open',startDate:'2026-10-03T12:30:00Z'},{_id:'t',type:'task',title:'Relance',status:'open',dueDate:'2026-10-03'}]);b.set('agendaView','day');b.ctx.renderAgenda();assert.match(b.node('agendaCalendar').innerHTML,/agenda-duplicate-btn/);assert.match(b.node('agendaCalendar').innerHTML,/Relance/);assert.match(b.node('agendaDayDetails').innerHTML,/2 actions planifiées/);
+ b.set('agendaView','list');b.ctx.renderAgenda();assert.equal(b.node('agendaCalendar').innerHTML,'');assert.equal(b.node('agendaDayDetails').innerHTML,'');assert.equal(b.node('agendaPeriodLabel').textContent,'Toutes les actions');
+});
 test('task list escapes text and distinguishes overdue tasks from appointments',()=>{
  const b=browser();b.set('allTasks',[{_id:'t',type:'task',title:'<Relance>',status:'open',priority:'high',dueDate:'2026-10-01'},{_id:'a',type:'appointment',title:'RDV',status:'open',priority:'normal',startDate:'2026-10-04T12:00:00Z'}]);b.ctx.renderTasks();assert.equal(b.node('tasksOverdueCount').textContent,1);assert.equal(b.node('appointmentsUpcomingCount').textContent,1);assert.match(b.node('tasksList').innerHTML,/&lt;Relance&gt;/);
  b.node('tasksFilter').value='rdv';b.ctx.renderTasks();assert.equal((b.node('tasksList').innerHTML.match(/<article/g)||[]).length,1);
