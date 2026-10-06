@@ -24,27 +24,18 @@ async function duplicateQuote(id) {
 
 async function deleteInvoice(id) {
   if (!await confirmAppAction({ title: "Supprimer ce devis ?", message: "Cette suppression est définitive. Les devis déjà convertis restent protégés.", actionLabel: "Supprimer le devis", danger: true })) return;
-
+  const lockKey = `delete:${id}`;
+  if (documentActionLocks.has(lockKey)) return;
+  documentActionLocks.add(lockKey);
   try {
-
-    await apiFetch(
-  `/api/invoices/${id}`,
-      {
-        method: "DELETE"
-      }
-    );
-
+    await apiFetch(`/api/invoices/${id}`, { method: "DELETE" });
     await loadInvoices();
-
-    showToast(
-      "Document supprimé 🗑️"
-    );
-
+    showToast("Document supprimé 🗑️");
   } catch (err) {
-
     console.error(err);
-
-    showToast(err.message);
+    showToast(err.message || "Impossible de supprimer le document");
+  } finally {
+    documentActionLocks.delete(lockKey);
   }
 }
 
@@ -90,9 +81,16 @@ async function acceptQuote(id) {
 async function updateOrderFulfillment(id, status) {
   const labels = { prepared: "marquer comme préparée", shipped: "marquer comme expédiée", delivered: "marquer comme livrée" };
   if (!await confirmAppAction({ title: "Mettre à jour la commande", message: `Voulez-vous ${labels[status] || "mettre à jour cette commande"} ?`, actionLabel: "Confirmer" })) return;
+  const lockKey = `fulfillment:${id}`;
+  if (documentActionLocks.has(lockKey)) return;
+  documentActionLocks.add(lockKey);
   try {
     await apiFetch(`/api/invoices/${id}/fulfillment-status`, { method: "PUT", body: JSON.stringify({ status }) });
     await loadInvoiceData();
     showToast("Suivi de commande mis à jour ✅");
-  } catch (err) { showToast(err.message || "Impossible de mettre à jour la commande"); }
+  } catch (err) {
+    showToast(err.message || "Impossible de mettre à jour la commande");
+  } finally {
+    documentActionLocks.delete(lockKey);
+  }
 }

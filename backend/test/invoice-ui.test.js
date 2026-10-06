@@ -169,6 +169,32 @@ for (const [action, endpoint] of [["convertQuoteToOrder", "convert-to-order"], [
   });
 }
 
+for (const [action, endpoint, method, status] of [
+  ["deleteInvoice", "/api/invoices/source", "DELETE"],
+  ["updateOrderFulfillment", "/api/invoices/source/fulfillment-status", "PUT", "prepared"]
+]) {
+  test(`${action} prevents duplicate clicks and releases its lock`, async () => {
+    const b = browser();
+    const calls = [];
+    let resolveRequest;
+    b.context.apiFetch = (url, options) => {
+      calls.push([url, options.method, options.body]);
+      return new Promise(resolve => { resolveRequest = resolve; });
+    };
+    b.context.loadInvoices = async () => {};
+    b.context.loadInvoiceData = async () => {};
+    const first = b.context[action]("source", status);
+    const second = b.context[action]("source", status);
+    await new Promise(setImmediate);
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0][0], endpoint);
+    assert.equal(calls[0][1], method);
+    resolveRequest({});
+    await Promise.all([first, second]);
+    assert.equal(b.read("documentActionLocks.size"), 0);
+  });
+}
+
 test("failed commercial action restores the button and permits retry", async () => {
   const b = browser();
   const button = element();
