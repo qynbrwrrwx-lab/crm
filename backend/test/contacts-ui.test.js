@@ -161,6 +161,19 @@ test("CSV import skips invalid rows and reports partial failures", async () => {
   assert.match(b.toasts.at(-1), /1 clients importés, 1 ligne/);
 });
 
+test("contact CSV helpers preserve exports and accept unaccented import aliases", () => {
+  const b = browser();
+  const lines = b.context.getContactCsvLines([contact({ companyName: "Acme", notes: "Suivi" })]);
+  assert.equal(lines[0][0], "Type");
+  assert.equal(lines[1][1], "Acme");
+  const imported = b.context.getContactFromCsvRow({ entreprise: "Acme", prenom: "Alice", nom: "Martin", email: "alice@example.test", telephone: "0102030405", "adresse facturation": "1 rue Test" });
+  assert.equal(imported.firstname, "Alice");
+  assert.equal(imported.email, "alice@example.test");
+  assert.equal(imported.phone, "0102030405");
+  assert.equal(b.context.isValidContactCsvRow({ entreprise: "Acme", "adresse facturation": "1 rue Test" }), true);
+  assert.equal(b.context.getContactImportMessage(3, [2]), "2 clients importés, 1 ligne(s) ignorée(s)");
+});
+
 test("client profile renders outstanding invoices and excludes other clients", async () => {
   const b = browser();
   b.context.fixtures = [contact()];
