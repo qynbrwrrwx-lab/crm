@@ -270,6 +270,17 @@ test("historical invoice totals remain independent of current catalog prices", (
   assert.equal(invoice.products[0].productName, "Historical <article>");
 });
 
+test("editable document lines delegate field sizing to the commerce stylesheet", () => {
+  const b = browser();
+  const result = b.context.renderInvoiceDetailProducts(documentFixture(), true);
+  assert.match(result, /class="edit-qty"/);
+  assert.match(result, /class="edit-discount"/);
+  assert.doesNotMatch(result, /style=/);
+  const commerceStyles = fs.readFileSync(path.join(frontend, "styles/commerce.css"), "utf8");
+  assert.match(commerceStyles, /\.edit-qty \{ width:60px/);
+  assert.match(commerceStyles, /\.edit-discount \{ width:65px/);
+});
+
 for (const [type, expected] of [["quote", "Devis"], ["order", "Commande"], ["invoice", "Facture"], ["credit_note", "Avoir"]]) {
   test(`the ${type} detail view remains available after splitting scripts`, async () => {
     const b = browser();

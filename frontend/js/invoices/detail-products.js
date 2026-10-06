@@ -4,12 +4,12 @@ function renderInvoiceDetailProducts(currentInvoice, isEditingQuote) {
     <div class="quote-product-row">
       <div class="quote-product-name">${escapeHtml(item.productName || item.productId?.name)}</div>
       <div class="quote-product-qty">${isEditingQuote
-        ? `<input type="number" min="1" value="${item.quantity}" class="edit-qty" oninput="recalculateInvoice()" style="width:60px;text-align:center;">`
+        ? `<input type="number" min="1" value="${item.quantity}" class="edit-qty" oninput="recalculateInvoice()">`
         : item.quantity}</div>
       <div class="quote-product-price">${formatDocumentCurrency(item.unitHT)}</div>
       <div class="quote-product-price-ttc">${formatDocumentCurrency(item.unitTTC)}</div>
       <div class="quote-product-discount">${isEditingQuote
-        ? `<input type="number" min="0" max="100" value="${item.discount || 0}" class="edit-discount" oninput="recalculateInvoice()" style="width:65px;text-align:center;">`
+        ? `<input type="number" min="0" max="100" value="${item.discount || 0}" class="edit-discount" oninput="recalculateInvoice()">`
         : `${item.discount || 0} %`}</div>
       <div class="quote-product-total line-total-ht">${formatDocumentCurrency(item.lineHT)}</div>
       <div class="quote-product-total-ttc line-total-ttc">${formatDocumentCurrency(item.lineTTC)}</div>
