@@ -1,1 +1,68 @@
-const form=document.getElementById("passwordForm"),password=document.getElementById("password"),confirmation=document.getElementById("confirmation"),match=document.getElementById("matchStatus"),status=document.getElementById("status"),button=document.getElementById("submitButton"),token=window.location.pathname.split("/").pop();function checkMatch(){match.textContent="";match.className="password-match";if(!confirmation.value)return;if(password.value===confirmation.value){match.textContent="Les deux mots de passe correspondent.";match.classList.add("success")}else match.textContent="Les deux mots de passe ne correspondent pas."}password.addEventListener("input",checkMatch);confirmation.addEventListener("input",checkMatch);form.addEventListener("submit",async e=>{e.preventDefault();if(!password.checkValidity()||!confirmation.checkValidity())return form.reportValidity();if(password.value!==confirmation.value){checkMatch();confirmation.focus();return}status.textContent="";status.className="status";button.disabled=true;button.querySelector("span").textContent="Enregistrement en cours…";try{const r=await fetch(`/api/auth/reset-password/${encodeURIComponent(token)}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:password.value})}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Impossible de modifier le mot de passe.");status.textContent="Mot de passe modifié. Redirection vers la connexion…";status.classList.add("success");setTimeout(()=>window.location.assign("/"),1200)}catch(e){status.textContent=e.message}finally{button.disabled=false;button.querySelector("span").textContent="Enregistrer le mot de passe"}});
+const passwordForm = document.getElementById("passwordForm");
+const passwordInput = document.getElementById("password");
+const confirmationInput = document.getElementById("confirmation");
+const matchStatus = document.getElementById("matchStatus");
+const resetStatus = document.getElementById("status");
+const resetSubmitButton = document.getElementById("submitButton");
+const resetToken = window.location.pathname.split("/").pop();
+
+function updatePasswordMatch() {
+  matchStatus.textContent = "";
+  matchStatus.className = "password-match";
+  if (!confirmationInput.value) return;
+
+  if (passwordInput.value === confirmationInput.value) {
+    matchStatus.textContent = "Les deux mots de passe correspondent.";
+    matchStatus.classList.add("success");
+    return;
+  }
+
+  matchStatus.textContent = "Les deux mots de passe ne correspondent pas.";
+}
+
+function setResetSubmitState(isSubmitting) {
+  resetSubmitButton.disabled = isSubmitting;
+  resetSubmitButton.querySelector("span").textContent = isSubmitting
+    ? "Enregistrement en cours…"
+    : "Enregistrer le mot de passe";
+}
+
+async function submitPasswordReset(event) {
+  event.preventDefault();
+  if (!passwordInput.checkValidity() || !confirmationInput.checkValidity()) {
+    passwordForm.reportValidity();
+    return;
+  }
+
+  if (passwordInput.value !== confirmationInput.value) {
+    updatePasswordMatch();
+    confirmationInput.focus();
+    return;
+  }
+
+  resetStatus.textContent = "";
+  resetStatus.className = "status";
+  setResetSubmitState(true);
+
+  try {
+    const response = await fetch(`/api/auth/reset-password/${encodeURIComponent(resetToken)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: passwordInput.value })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Impossible de modifier le mot de passe.");
+
+    resetStatus.textContent = "Mot de passe modifié. Redirection vers la connexion…";
+    resetStatus.classList.add("success");
+    setTimeout(() => window.location.assign("/"), 1200);
+  } catch (error) {
+    resetStatus.textContent = error.message;
+  } finally {
+    setResetSubmitState(false);
+  }
+}
+
+passwordInput.addEventListener("input", updatePasswordMatch);
+confirmationInput.addEventListener("input", updatePasswordMatch);
+passwordForm.addEventListener("submit", submitPasswordReset);
