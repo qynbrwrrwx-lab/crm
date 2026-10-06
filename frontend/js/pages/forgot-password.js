@@ -1,1 +1,5 @@
-const form=document.getElementById("resetForm"),status=document.getElementById("status"),button=document.getElementById("submitButton"),email=document.getElementById("email");form.addEventListener("submit",async e=>{e.preventDefault();if(!email.checkValidity())return email.reportValidity();status.textContent="";status.className="status";button.disabled=true;button.querySelector("span").textContent="Envoi en cours…";try{const r=await fetch("/api/auth/request-reset",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:email.value})}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Impossible d'envoyer le lien.");status.textContent="Lien envoyé. Vérifiez votre boîte de réception et vos indésirables.";status.classList.add("success")}catch(e){status.textContent=e.message}finally{button.disabled=false;button.querySelector("span").textContent="Envoyer le lien sécurisé"}});
+initializeAccountRequest({
+  formId: "resetForm",
+  endpoint: "/api/auth/request-reset",
+  idleLabel: "Envoyer le lien sécurisé"
+});
