@@ -133,6 +133,23 @@ test("loading documents updates the shared state, treasury and dashboard", async
   assert.equal(dashboardDocuments, documents);
 });
 
+test("sales export includes invoices and credit notes while excluding quotes", async () => {
+  const b = browser();
+  const documents = [
+    documentFixture({ invoiceNumber: "FAC-001", type: "invoice", paymentStatus: "paid", paymentMethod: "card" }),
+    documentFixture({ invoiceNumber: "AV-001", type: "credit_note" }),
+    documentFixture({ invoiceNumber: "DEV-001", type: "quote" }),
+    documentFixture({ invoiceNumber: "CMD-001", type: "order" })
+  ];
+  b.context.apiFetch = async url => { assert.equal(url, "/api/invoices"); return documents; };
+  let exported;
+  b.context.downloadCsvFile = (lines, label) => { exported = { lines, label }; };
+  await b.context.exportSalesCsv();
+  assert.equal(exported.label, "ventes");
+  assert.equal(exported.lines.length, 3);
+  assert.deepEqual(plain(exported.lines.map(row => row.slice(1, 3))), [["Type", "Numero"], ["Facture", "FAC-001"], ["Avoir", "AV-001"]]);
+});
+
 for (const [action, endpoint] of [["convertQuoteToOrder", "convert-to-order"], ["convertOrderToInvoice", "convert-to-invoice"]]) {
   test(`${action} prevents duplicate clicks and unlocks after completion`, async () => {
     const b = browser();
