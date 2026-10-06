@@ -287,6 +287,18 @@ test("PDF opening retains authenticated download and temporary URL cleanup", asy
   assert.equal(revoked, "blob:test-pdf");
 });
 
+test("delivery note opening uses the shared authenticated PDF download", async () => {
+  const b = browser();
+  b.context.fetch = async (url, options) => {
+    assert.equal(url, "https://test.invalid/api/invoices/document/delivery-note");
+    assert.equal(options.headers.Authorization, "Bearer test-session");
+    return { ok: true, blob: async () => ({}) };
+  };
+  await b.context.openDeliveryNote("document");
+  assert.deepEqual(b.windows, [["blob:test-pdf", "_blank", "noopener"]]);
+  assert.equal(b.timers[0].delay, 60000);
+});
+
 for (const [overrides, label, status] of [
   [{ type: "quote", status: "draft" }, "Devis", "En attente de décision"],
   [{ type: "quote", status: "accepted" }, "Devis", "Devis accepté"],
