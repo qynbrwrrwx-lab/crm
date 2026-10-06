@@ -176,6 +176,24 @@ test("client profile renders outstanding invoices and excludes other clients", a
   assert.match(b.elements.get("invoiceDetailsBody").innerHTML, /Suivre le règlement/);
 });
 
+test("client profile data keeps only active related opportunities and suggests the right action", () => {
+  const b = browser();
+  const data = b.context.getClientProfileDataFromResources(contact(), {
+    documents: [
+      { _id: "paid", contactId: "client", type: "invoice", paymentStatus: "paid", totalTTC: 80, createdAt: "2026-01-01" },
+      { _id: "pending", contactId: { _id: "client" }, type: "invoice", paymentStatus: "pending", totalTTC: 120, createdAt: "2026-02-01" },
+      { _id: "other", contactId: "other", type: "invoice", paymentStatus: "pending", totalTTC: 900 }
+    ],
+    agendaItems: [{ _id: "task", contactId: "client", status: "open", dueDate: "2026-10-05" }, { _id: "done", contactId: "client", status: "done" }],
+    opportunities: [{ _id: "active", contactId: "client", stage: "proposal" }, { _id: "won", contactId: "client", stage: "won" }]
+  });
+  assert.equal(data.total, 80);
+  assert.equal(data.pending, 120);
+  assert.deepEqual(plain(data.relatedAgenda.map(item => item._id)), ["task"]);
+  assert.deepEqual(plain(data.relatedOpportunities.map(item => item._id)), ["active"]);
+  assert.equal(data.nextAction.target, "invoices");
+});
+
 test("map popups escape contact names when loading shared contacts", async () => {
   const b = browser();
   b.context.map = { removeLayer() {} };
