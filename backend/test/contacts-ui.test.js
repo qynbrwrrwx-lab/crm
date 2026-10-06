@@ -109,6 +109,21 @@ test("contact save still works when geocoding fails and uses PUT for an edit", a
   assert.equal(b.read("editingContactId"), null);
 });
 
+test("contact save keeps geocoding coordinates for a new client", async () => {
+  const b = browser();
+  b.elements.get("billingAddress").value = "1 rue Test";
+  b.elements.get("lastname").value = "Martin";
+  b.context.fetch = async () => ({ ok: true, json: async () => [{ lat: "48.8566", lon: "2.3522" }] });
+  let request;
+  b.context.apiFetch = async (url, options) => { request = { url, method: options.method, data: JSON.parse(options.body) }; };
+  b.context.loadContacts = async () => {};
+  await b.context.addContact();
+  assert.equal(request.url, "/api/contacts");
+  assert.equal(request.method, "POST");
+  assert.equal(request.data.lat, 48.8566);
+  assert.equal(request.data.lng, 2.3522);
+});
+
 test("failed contact save preserves the edited values for retry", async () => {
   const b = browser();
   b.read('editingContactId = "client"');
