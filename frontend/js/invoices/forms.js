@@ -70,36 +70,19 @@ async function createInvoice() {
   }
 }
 
-async function createQuote() {
-
-  const contactId =
-    document.getElementById("quoteContact").value;
-
+function readQuoteProducts() {
   const products = [];
-
-document
-  .querySelectorAll(".quote-line")
-  .forEach(line => {
-
-    const productId =
-      line.querySelector(".quote-product").value;
-
-    const quantity =
-      parseInt(
-        line.querySelector(".quote-quantity").value
-      );
-
-    if (productId && quantity > 0) {
-
-      products.push({
-        productId,
-        quantity,
-        discount: 0
-      });
-
-    }
-
+  document.querySelectorAll(".quote-line").forEach(line => {
+    const productId = line.querySelector(".quote-product").value;
+    const quantity = parseInt(line.querySelector(".quote-quantity").value);
+    if (productId && quantity > 0) products.push({ productId, quantity, discount: 0 });
   });
+  return products;
+}
+
+async function createQuote() {
+  const contactId = document.getElementById("quoteContact").value;
+  const products = readQuoteProducts();
 
   if (!contactId) {
     return showToast("Sélectionnez un contact");
@@ -111,17 +94,14 @@ document
   );
 }
 
+  const quoteId = editingQuoteId;
+  const lockKey = `quote:${quoteId || "new"}`;
+  if (documentActionLocks.has(lockKey)) return;
+  documentActionLocks.add(lockKey);
   try {
-
-  const isEditingExistingQuote = Boolean(editingQuoteId);
-
-  const method =
-  isEditingExistingQuote ? "PUT" : "POST";
-
-    const url =
-  isEditingExistingQuote
-    ? `/api/invoices/${editingQuoteId}`
-    : "/api/invoices";
+  const isEditingExistingQuote = Boolean(quoteId);
+  const method = isEditingExistingQuote ? "PUT" : "POST";
+    const url = isEditingExistingQuote ? `/api/invoices/${quoteId}` : "/api/invoices";
 
     await apiFetch(url, {
 
@@ -143,19 +123,12 @@ document
     await loadInvoices();
 
     editingQuoteId = null;
-
     showToast(isEditingExistingQuote ? "Devis modifié ✅" : "Devis créé ✅");
-
-    editingQuoteId = null;
-
     closeQuoteModal();
-
   } catch (err) {
-
     console.error(err);
-
     showToast(err.message);
-
+  } finally {
+    documentActionLocks.delete(lockKey);
   }
-
 }

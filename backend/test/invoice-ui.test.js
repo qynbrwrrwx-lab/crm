@@ -285,6 +285,25 @@ test("quote creation preserves the request format and resets its form", async ()
   assert.equal(b.elements.get("quoteModal").style.display, "none");
 });
 
+test("quote creation prevents duplicate submissions and releases its lock", async () => {
+  const b = browser();
+  b.elements.get("quoteContact").value = "client";
+  b.selectors.set(".quote-line", [{ querySelector: selector => ({ value: selector === ".quote-product" ? "product" : "2" }) }]);
+  let calls = 0, resolveRequest;
+  b.context.apiFetch = () => {
+    calls++;
+    return new Promise(resolve => { resolveRequest = resolve; });
+  };
+  b.context.loadInvoices = async () => {};
+  const first = b.context.createQuote();
+  const second = b.context.createQuote();
+  await new Promise(setImmediate);
+  assert.equal(calls, 1);
+  resolveRequest({});
+  await Promise.all([first, second]);
+  assert.equal(b.read("documentActionLocks.size"), 0);
+});
+
 test("historical invoice totals remain independent of current catalog prices", () => {
   const b = browser();
   b.context.fixture = documentFixture();
