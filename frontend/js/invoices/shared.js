@@ -74,3 +74,8 @@ function getElectronicTransmissionPresentation(invoice) {
 function orderFulfillmentLabel(invoice) {
   return ({ to_prepare: "À préparer", prepared: "Préparée", shipped: "Expédiée", delivered: "Livrée" })[invoice.fulfillmentStatus] || "À préparer";
 }
+
+async function refreshInvoiceListAndCurrentDetail(id) {
+  await loadInvoices();
+  if (currentInvoiceId === id) await openInvoice(id);
+}

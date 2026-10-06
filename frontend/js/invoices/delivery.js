@@ -1,10 +1,5 @@
 // Documents commerciaux : delivery. Voir README.md pour les responsabilités.
 
-async function refreshDeliveredDocument(id) {
-  await loadInvoices();
-  if (currentInvoiceId === id) await openInvoice(id);
-}
-
 async function openDocumentPdf(url, unavailableMessage, shouldLogError = false) {
   try {
     const response = await fetch(url, { headers: { Authorization: `Bearer ${getToken()}` } });
@@ -27,7 +22,7 @@ async function sendDocumentEmail(id) {
 
   try {
     await apiFetch(`/api/invoices/${id}/send-email`, { method: "POST" });
-    await refreshDeliveredDocument(id);
+    await refreshInvoiceListAndCurrentDetail(id);
     showToast("E-mail remis au serveur d’envoi ✅");
   } catch (err) {
     console.error(err);
@@ -48,8 +43,7 @@ async function openPaymentReminder(id) {
   documentActionLocks.add(lockKey);
   try {
     await apiFetch(`/api/invoices/${id}/send-reminder`, { method: "POST" });
-    await loadInvoices();
-    if (currentInvoiceId === id) await openInvoice(id);
+    await refreshInvoiceListAndCurrentDetail(id);
     showToast("Relance envoyée ✅");
   } catch (err) { showToast(err.message || "Impossible d’envoyer la relance"); }
   finally { documentActionLocks.delete(lockKey); }

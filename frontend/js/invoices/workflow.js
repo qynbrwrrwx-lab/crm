@@ -70,9 +70,7 @@ async function acceptQuote(id) {
       }
     );
 
-    await loadInvoices();
-
-    if (currentInvoiceId === id) await openInvoice(id);
+    await refreshInvoiceListAndCurrentDetail(id);
 
     showToast("Devis accepté et verrouillé ✅");
 

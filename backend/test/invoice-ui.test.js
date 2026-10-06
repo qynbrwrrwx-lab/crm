@@ -186,6 +186,22 @@ test("failed commercial action restores the button and permits retry", async () 
   assert.equal(b.read("documentActionLocks.size"), 0);
 });
 
+test("accepted quote refreshes the list and its active detail", async () => {
+  const b = browser();
+  b.read('currentInvoiceId = "source"');
+  let refreshes = 0;
+  const reopened = [];
+  b.context.apiFetch = async (url, options) => {
+    assert.equal(url, "/api/invoices/accept/source");
+    assert.equal(options.method, "PUT");
+  };
+  b.context.loadInvoices = async () => { refreshes++; };
+  b.context.openInvoice = async id => reopened.push(id);
+  await b.context.acceptQuote("source");
+  assert.equal(refreshes, 1);
+  assert.deepEqual(reopened, ["source"]);
+});
+
 test("cancelled conversion makes no request", async () => {
   const b = browser();
   b.context.confirmAppAction = async () => false;
