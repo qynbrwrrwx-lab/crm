@@ -1,17 +1,70 @@
 // Clients : activités, opportunités et historique commercial.
 
+const clientProfileDocumentTypes = { quote: "Devis", order: "Commande", invoice: "Facture", credit_note: "Avoir" };
+const clientProfileOpportunityStages = { lead: "Prospect", qualified: "Qualifié", proposal: "Proposition" };
+
+function renderClientProfileHistoryHeading(eyebrow, title, countLabel) {
+  return `<div class="client-profile-documents-heading"><div><p class="form-eyebrow">${eyebrow}</p><h4>${title}</h4></div><span>${countLabel}</span></div>`;
+}
+
+function renderClientAgendaDate(item) {
+  if (item.startDate) return new Date(item.startDate).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  if (item.dueDate) return new Date(item.dueDate).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
+  return "Sans date";
+}
+
+function renderClientAgendaItem(item) {
+  return `<button type="button" class="client-profile-document" onclick="openAgendaItem('${item._id}')"><span class="client-profile-document-type">${item.type === "appointment" ? "Rendez-vous" : "Tâche"}</span><span class="client-profile-document-main"><strong>${escapeHtml(item.title)}</strong><small>${renderClientAgendaDate(item)}</small></span><strong class="client-profile-document-total">${item.priority === "high" ? "Prioritaire" : "À suivre"}</strong></button>`;
+}
+
+function renderClientOpportunityItem(item) {
+  const stage = clientProfileOpportunityStages[item.stage] || "Opportunité";
+  const date = item.expectedCloseDate ? `Prévu le ${new Date(item.expectedCloseDate).toLocaleDateString("fr-FR")}` : "Date à préciser";
+  return `<button type="button" class="client-profile-document" onclick="openOpportunityFromProfile('${item._id}')"><span class="client-profile-document-type">${escapeHtml(stage)}</span><span class="client-profile-document-main"><strong>${escapeHtml(item.title)}</strong><small>${date}</small></span><strong class="client-profile-document-total">${formatCurrency(item.amount)}</strong></button>`;
+}
+
+function renderClientDocumentItem(document) {
+  const type = clientProfileDocumentTypes[document.type] || "Document";
+  const date = new Date(document.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
+  return `<button type="button" class="client-profile-document" onclick="openInvoice('${document._id}')"><span class="client-profile-document-type">${escapeHtml(type)}</span><span class="client-profile-document-main"><strong>${escapeHtml(document.invoiceNumber || "Sans numéro")}</strong><small>${date}</small></span><strong class="client-profile-document-total">${formatCurrency(document.totalTTC)}</strong></button>`;
+}
+
+function renderClientProfileHistorySection({ className = "", eyebrow, title, countLabel, items, renderItem, limit, emptyMessage }) {
+  const content = items.length
+    ? `<div class="client-profile-document-list">${items.slice(0, limit).map(renderItem).join("")}</div>`
+    : `<p class="empty-state">${emptyMessage}</p>`;
+  return `<section class="client-profile-documents ${className}">${renderClientProfileHistoryHeading(eyebrow, title, countLabel)}${content}</section>`;
+}
+
 function renderClientProfileHistory({ relatedAgenda, relatedOpportunities, related }) {
-  const documentTypes = { quote: "Devis", order: "Commande", invoice: "Facture", credit_note: "Avoir" };
-  return `    <section class="client-profile-documents client-profile-agenda">
-      <div class="client-profile-documents-heading"><div><p class="form-eyebrow">Suivi relationnel</p><h4>Prochaines actions</h4></div><span>${relatedAgenda.length} à venir</span></div>
-      ${relatedAgenda.length ? `<div class="client-profile-document-list">${relatedAgenda.slice(0, 4).map(item => `<button type="button" class="client-profile-document" onclick="openAgendaItem('${item._id}')"><span class="client-profile-document-type">${item.type === "appointment" ? "Rendez-vous" : "Tâche"}</span><span class="client-profile-document-main"><strong>${escapeHtml(item.title)}</strong><small>${item.startDate ? new Date(item.startDate).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : item.dueDate ? new Date(item.dueDate).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "Sans date"}</small></span><strong class="client-profile-document-total">${item.priority === "high" ? "Prioritaire" : "À suivre"}</strong></button>`).join("")}</div>` : '<p class="empty-state">Aucun rendez-vous ou tâche à venir pour ce client.</p>'}
-    </section>
-    <section class="client-profile-documents client-profile-opportunities">
-      <div class="client-profile-documents-heading"><div><p class="form-eyebrow">Pipeline commercial</p><h4>Opportunités en cours</h4></div><span>${relatedOpportunities.length} active${relatedOpportunities.length > 1 ? "s" : ""}</span></div>
-      ${relatedOpportunities.length ? `<div class="client-profile-document-list">${relatedOpportunities.slice(0, 4).map(item => `<button type="button" class="client-profile-document" onclick="openOpportunityFromProfile('${item._id}')"><span class="client-profile-document-type">${escapeHtml(({lead:"Prospect",qualified:"Qualifié",proposal:"Proposition"})[item.stage] || "Opportunité")}</span><span class="client-profile-document-main"><strong>${escapeHtml(item.title)}</strong><small>${item.expectedCloseDate ? `Prévu le ${new Date(item.expectedCloseDate).toLocaleDateString("fr-FR")}` : "Date à préciser"}</small></span><strong class="client-profile-document-total">${formatCurrency(item.amount)}</strong></button>`).join("")}</div>` : '<p class="empty-state">Aucune opportunité commerciale en cours.</p>'}
-    </section>
-    <section class="client-profile-documents">
-      <div class="client-profile-documents-heading"><div><p class="form-eyebrow">Relation commerciale</p><h4>Historique des documents</h4></div><span>${related.length} au total</span></div>
-      ${related.length ? `<div class="client-profile-document-list">${related.slice(0, 8).map(document => `<button type="button" class="client-profile-document" onclick="openInvoice('${document._id}')"><span class="client-profile-document-type">${escapeHtml(documentTypes[document.type] || "Document")}</span><span class="client-profile-document-main"><strong>${escapeHtml(document.invoiceNumber || "Sans numéro")}</strong><small>${new Date(document.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}</small></span><strong class="client-profile-document-total">${formatCurrency(document.totalTTC)}</strong></button>`).join("")}</div>` : '<p class="empty-state">Aucun événement commercial pour ce client.</p>'}
-    </section>`;
+  const agenda = renderClientProfileHistorySection({
+    className: "client-profile-agenda",
+    eyebrow: "Suivi relationnel",
+    title: "Prochaines actions",
+    countLabel: `${relatedAgenda.length} à venir`,
+    items: relatedAgenda,
+    renderItem: renderClientAgendaItem,
+    limit: 4,
+    emptyMessage: "Aucun rendez-vous ou tâche à venir pour ce client."
+  });
+  const opportunities = renderClientProfileHistorySection({
+    className: "client-profile-opportunities",
+    eyebrow: "Pipeline commercial",
+    title: "Opportunités en cours",
+    countLabel: `${relatedOpportunities.length} active${relatedOpportunities.length > 1 ? "s" : ""}`,
+    items: relatedOpportunities,
+    renderItem: renderClientOpportunityItem,
+    limit: 4,
+    emptyMessage: "Aucune opportunité commerciale en cours."
+  });
+  const documents = renderClientProfileHistorySection({
+    eyebrow: "Relation commerciale",
+    title: "Historique des documents",
+    countLabel: `${related.length} au total`,
+    items: related,
+    renderItem: renderClientDocumentItem,
+    limit: 8,
+    emptyMessage: "Aucun événement commercial pour ce client."
+  });
+  return `${agenda}${opportunities}${documents}`;
 }

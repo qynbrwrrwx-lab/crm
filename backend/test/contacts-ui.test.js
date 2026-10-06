@@ -194,6 +194,19 @@ test("client profile data keeps only active related opportunities and suggests t
   assert.equal(data.nextAction.target, "invoices");
 });
 
+test("client profile history escapes titles and retains its empty sections", () => {
+  const b = browser();
+  const history = b.context.renderClientProfileHistory({
+    relatedAgenda: [{ _id: "task", type: "appointment", title: "<Relance>", startDate: "2026-10-05T10:00:00Z", priority: "high" }],
+    relatedOpportunities: [],
+    related: []
+  });
+  assert.match(history, /&lt;Relance&gt;/);
+  assert.match(history, /Prioritaire/);
+  assert.match(history, /Aucune opportunité commerciale/);
+  assert.match(history, /Aucun événement commercial/);
+});
+
 test("map popups escape contact names when loading shared contacts", async () => {
   const b = browser();
   b.context.map = { removeLayer() {} };
