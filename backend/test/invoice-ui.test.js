@@ -270,6 +270,35 @@ test("historical invoice totals remain independent of current catalog prices", (
   assert.equal(invoice.products[0].productName, "Historical <article>");
 });
 
+test("invoice editor applies inputs and refreshes line and summary totals", () => {
+  const b = browser();
+  const invoice = documentFixture({
+    products: [{ productId: { _id: "product", name: "Service", priceHT: 10, tva: 20 }, quantity: 1, discount: 0 }]
+  });
+  b.context.invoice = invoice;
+  b.read("currentInvoice = structuredClone(invoice)");
+  b.read("isEditingQuote = true");
+  b.selectors.set(".edit-qty", [{ value: "2" }]);
+  b.selectors.set(".edit-discount", [{ value: "10" }]);
+  const lineHT = element(), lineTTC = element();
+  b.selectors.set(".line-total-ht", [lineHT]);
+  b.selectors.set(".line-total-ttc", [lineTTC]);
+  const totalHT = b.addElement("summaryTotalHT");
+  const totalTVA = b.addElement("summaryTVA");
+  const totalTTC = b.addElement("summaryTotalTTC");
+  b.context.recalculateInvoice();
+  const updated = plain(b.read("currentInvoice"));
+  assert.equal(updated.products[0].quantity, 2);
+  assert.equal(updated.products[0].discount, 10);
+  assert.equal(updated.totalHT, 18);
+  assert.equal(updated.totalTTC, 21.6);
+  assert.equal(lineHT.textContent, "18.00 €");
+  assert.equal(lineTTC.textContent, "21.60 €");
+  assert.equal(totalHT.textContent, "18.00 €");
+  assert.equal(totalTVA.textContent, "3.60 €");
+  assert.equal(totalTTC.textContent, "21.60 €");
+});
+
 test("editable document lines delegate field sizing to the commerce stylesheet", () => {
   const b = browser();
   const result = b.context.renderInvoiceDetailProducts(documentFixture(), true);
