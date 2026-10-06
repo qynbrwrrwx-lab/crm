@@ -1,7 +1,50 @@
 // Opportunités : enrichissements visuels des cartes.
 
-function addOpportunityFollowUpButtons(){const rendered=Object.keys(opportunityStages).flatMap(stage=>allOpportunities.filter(item=>item.stage===stage));document.querySelectorAll(".opportunity-card-actions").forEach((actions,index)=>{const item=rendered[index];if(!item||item.stage==="won"||item.stage==="lost"||!item.contactId)return;const button=document.createElement("button");button.type="button";button.className="opportunity-followup-btn";button.textContent="Planifier une relance";button.onclick=()=>createOpportunityFollowUp(item);actions.prepend(button);});}
+function getOpportunityCardContent(card) {
+  return card.querySelector(".opportunity-card>div");
+}
 
-function addOpportunityLossReasonLabels(){const rendered=Object.keys(opportunityStages).flatMap(stage=>allOpportunities.filter(item=>item.stage===stage));document.querySelectorAll(".opportunity-card").forEach((card,index)=>{const item=rendered[index];if(item?.stage!=="lost"||!item.lostReason)return;const label=document.createElement("small");label.className="opportunity-stale-indicator opportunity-loss-reason";label.textContent=`Motif : ${opportunityLostReasons[item.lostReason]||item.lostReason}`;card.querySelector(".opportunity-card>div")?.appendChild(label);});}
+function appendOpportunityCardLabel(card, className, text) {
+  const label = document.createElement("small");
+  label.className = className;
+  label.textContent = text;
+  getOpportunityCardContent(card)?.appendChild(label);
+}
 
-function markStaleOpportunities(){const rendered=Object.keys(opportunityStages).flatMap(stage=>allOpportunities.filter(item=>item.stage===stage)),threshold=Date.now()-14*86400000;document.querySelectorAll(".opportunity-card").forEach((card,index)=>{const item=rendered[index];if(!item||["won","lost"].includes(item.stage)||new Date(item.updatedAt||item.createdAt).getTime()>=threshold)return;card.classList.add("is-stale");const indicator=document.createElement("small");indicator.className="opportunity-stale-indicator";indicator.textContent="À relancer : aucune mise à jour depuis 14 jours";card.querySelector(".opportunity-card>div")?.appendChild(indicator);});}
+function addOpportunityFollowUpButtons() {
+  const opportunities = getRenderedOpportunities();
+  document.querySelectorAll(".opportunity-card-actions").forEach((actions, index) => {
+    const item = opportunities[index];
+    if (!item || ["won", "lost"].includes(item.stage) || !item.contactId) return;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "opportunity-followup-btn";
+    button.textContent = "Planifier une relance";
+    button.onclick = () => createOpportunityFollowUp(item);
+    actions.prepend(button);
+  });
+}
+
+function addOpportunityLossReasonLabels() {
+  const opportunities = getRenderedOpportunities();
+  document.querySelectorAll(".opportunity-card").forEach((card, index) => {
+    const item = opportunities[index];
+    if (item?.stage !== "lost" || !item.lostReason) return;
+
+    appendOpportunityCardLabel(card, "opportunity-stale-indicator opportunity-loss-reason", `Motif : ${opportunityLostReasons[item.lostReason] || item.lostReason}`);
+  });
+}
+
+function markStaleOpportunities() {
+  const opportunities = getRenderedOpportunities();
+  const threshold = Date.now() - 14 * 86400000;
+  document.querySelectorAll(".opportunity-card").forEach((card, index) => {
+    const item = opportunities[index];
+    const updatedAt = new Date(item?.updatedAt || item?.createdAt).getTime();
+    if (!item || ["won", "lost"].includes(item.stage) || updatedAt >= threshold) return;
+
+    card.classList.add("is-stale");
+    appendOpportunityCardLabel(card, "opportunity-stale-indicator", "À relancer : aucune mise à jour depuis 14 jours");
+  });
+}
