@@ -34,6 +34,10 @@ test('task edit preserves recurrence and contact fields through PUT',async()=>{
  const b=browser();b.ctx.loadTasks=async()=>{};b.node('taskEditId').value='t';b.node('taskTitle').value=' RDV ';b.node('taskType').value='appointment';b.node('taskRecurrenceFrequency').value='weekly';b.node('taskRecurrenceCount').value='3';b.node('taskReminderMinutes').value='15';b.node('taskFreeContactEmail').value=' client@example.test ';await b.ctx.saveTask({preventDefault(){}});
  assert.equal(b.calls[0][0],'/api/tasks/t');assert.equal(b.calls[0][1].method,'PUT');const payload=JSON.parse(b.calls[0][1].body);assert.equal(payload.title,'RDV');assert.equal(payload.recurrenceFrequency,'weekly');assert.equal(payload.recurrenceCount,3);assert.equal(payload.reminderMinutes,15);assert.equal(payload.freeContactEmail,'client@example.test');
 });
+test('task completion refreshes after success and retains the failure feedback',async()=>{
+ const b=browser(),refreshes=[];b.ctx.loadTasks=async()=>refreshes.push('tasks');await b.ctx.completeTask('t');assert.equal(b.calls[0][0],'/api/tasks/t/done');assert.equal(b.calls[0][1].method,'PUT');assert.deepEqual(refreshes,['tasks']);assert.equal(b.toasts.at(-1),'Action marquée comme réalisée');
+ b.ctx.apiFetch=async()=>{throw new Error('offline');};await b.ctx.completeTask('t');assert.deepEqual(refreshes,['tasks']);assert.equal(b.toasts.at(-1),'offline');
+});
 test('reminders emit only once per appointment trigger',()=>{
  const b=browser();b.set('allTasks',[{_id:'a',title:'RDV',type:'appointment',status:'open',startDate:'2026-10-03T12:10:00Z',reminderMinutes:15}]);b.ctx.checkAgendaReminders();b.ctx.checkAgendaReminders();assert.equal(b.toasts.filter(m=>m.startsWith('Rappel')).length,1);
 });

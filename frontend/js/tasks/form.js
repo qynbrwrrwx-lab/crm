@@ -1,9 +1,14 @@
 // Interactions et appels API du formulaire de tâches.
+
 function taskContacts() {
   const select = document.getElementById("taskContact");
   if (!select || typeof allContacts === "undefined") return;
+
   const value = select.value;
-  select.innerHTML = '<option value="">Aucun client</option>' + allContacts.map(contact => `<option value="${contact._id}">${escapeHtml(contact.companyName || `${contact.firstname || ""} ${contact.lastname || ""}`.trim() || "Client")}</option>`).join("");
+  const options = allContacts
+    .map(contact => `<option value="${contact._id}">${escapeHtml(contact.companyName || `${contact.firstname || ""} ${contact.lastname || ""}`.trim() || "Client")}</option>`)
+    .join("");
+  select.innerHTML = '<option value="">Aucun client</option>' + options;
   select.value = value;
 }
 
@@ -19,19 +24,26 @@ function toggleTaskType() {
   const isAppointment = document.getElementById("taskType")?.value === "appointment";
   document.querySelectorAll(".appointment-field").forEach(element => { element.hidden = !isAppointment; });
   document.querySelectorAll(".task-date-field").forEach(element => { element.hidden = isAppointment; });
+
   const label = document.getElementById("taskTitleLabel");
   const button = document.getElementById("taskSubmitButton");
   if (label) label.innerHTML = isAppointment ? 'Objet du rendez-vous <small>Obligatoire</small>' : 'Tâche <small>Obligatoire</small>';
   if (button) button.textContent = document.getElementById("taskEditId")?.value ? "Enregistrer les modifications" : isAppointment ? "Planifier le rendez-vous" : "Ajouter la tâche";
 }
+
+function scrollToTaskForm() {
+  document.getElementById("taskForm").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function editTask(id) {
   const task = allTasks.find(item => item._id === id);
   if (!task) return;
+
   populateTaskForm(task);
   document.getElementById("taskFormTitle").textContent = task.type === "appointment" ? "Modifier le rendez-vous" : "Modifier la tâche";
   document.getElementById("taskCancelEdit").hidden = false;
   toggleTaskType();
-  document.getElementById("taskForm").scrollIntoView({ behavior: "smooth", block: "start" });
+  scrollToTaskForm();
 }
 
 function resetTaskForm() {
@@ -44,17 +56,24 @@ function resetTaskForm() {
   toggleTaskType();
 }
 
+function taskSaveMessage({ id, type, payload }) {
+  if (id) return "Action modifiée";
+  if (type === "appointment" && payload.recurrenceFrequency !== "none") return `${payload.recurrenceCount} rendez-vous planifiés`;
+  return "Action ajoutée";
+}
+
 async function saveTask(event) {
   event.preventDefault();
   const { id, title, type, payload } = readTaskFormSubmission();
   if (!title) return;
+
   try {
     await apiFetch(`/api/tasks${id ? `/${id}` : ""}`, { method: id ? "PUT" : "POST", body: JSON.stringify(payload) });
     resetTaskForm();
-    showToast(id ? "Action modifiée" : type === "appointment" && payload.recurrenceFrequency !== "none" ? `${payload.recurrenceCount} rendez-vous planifiés` : "Action ajoutée");
-    loadTasks();
-  } catch (err) {
-    showToast(err.message);
+    showToast(taskSaveMessage({ id, type, payload }));
+    await loadTasks();
+  } catch (error) {
+    showToast(error.message);
   }
 }
 
@@ -62,17 +81,24 @@ async function completeTask(id) {
   try {
     await apiFetch(`/api/tasks/${id}/done`, { method: "PUT" });
     showToast("Action marquée comme réalisée");
-    loadTasks();
+    await loadTasks();
   } catch (error) {
     showToast(error.message);
   }
 }
 
 async function deleteTask(id) {
-  if (!await confirmAppAction({ title: "Supprimer l’action", message: "Cette suppression est définitive.", actionLabel: "Supprimer", danger: true })) return;
+  const confirmed = await confirmAppAction({
+    title: "Supprimer l’action",
+    message: "Cette suppression est définitive.",
+    actionLabel: "Supprimer",
+    danger: true
+  });
+  if (!confirmed) return;
+
   try {
     await apiFetch(`/api/tasks/${id}`, { method: "DELETE" });
-    loadTasks();
+    await loadTasks();
   } catch (error) {
     showToast(error.message);
   }
