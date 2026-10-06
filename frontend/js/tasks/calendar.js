@@ -1,4 +1,4 @@
-// tasks : calendar.
+// Tâches : export et actions contextuelles de l'agenda.
 
 function exportAppointmentToCalendar(item) {
   const data = getAppointmentCalendarData(item);
@@ -14,4 +14,45 @@ function exportAppointmentToCalendar(item) {
   showToast("Rendez-vous exporté vers votre calendrier.");
 }
 
-function addAgendaExportButtons(){if(agendaView!=="day")return;const appointments=eventsForDate(agendaSelectedDate).filter(item=>item.type==="appointment");document.querySelectorAll(".agenda-day-event.appointment").forEach((card,index)=>{if(card.querySelector(".agenda-export-btn"))return;const item=appointments[index];if(!item)return;const button=document.createElement("button");button.type="button";button.className="secondary-btn agenda-export-btn";button.textContent="Ajouter au calendrier";button.onclick=()=>exportAppointmentToCalendar(item);card.appendChild(button);if(item.contactId?.email||item.freeContactEmail){const confirmation=document.createElement("button");confirmation.type="button";confirmation.className="secondary-btn agenda-confirmation-btn";confirmation.textContent="Envoyer la confirmation";confirmation.onclick=()=>sendAppointmentConfirmation(item);card.appendChild(confirmation);}if(item.recurrenceGroup){const removeSeries=document.createElement("button");removeSeries.type="button";removeSeries.className="expense-text-action danger agenda-series-delete-btn";removeSeries.textContent="Supprimer cette série";removeSeries.onclick=()=>deleteFutureRecurringAppointments(item);card.appendChild(removeSeries);}});}
+function createAgendaActionButton({ className, label, onClick }) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = className;
+  button.textContent = label;
+  button.onclick = onClick;
+  return button;
+}
+
+function addAgendaExportButtons() {
+  if (agendaView !== "day") return;
+
+  const appointments = eventsForDate(agendaSelectedDate).filter(item => item.type === "appointment");
+  document.querySelectorAll(".agenda-day-event.appointment").forEach((card, index) => {
+    if (card.querySelector(".agenda-export-btn")) return;
+
+    const item = appointments[index];
+    if (!item) return;
+
+    card.appendChild(createAgendaActionButton({
+      className: "secondary-btn agenda-export-btn",
+      label: "Ajouter au calendrier",
+      onClick: () => exportAppointmentToCalendar(item)
+    }));
+
+    if (item.contactId?.email || item.freeContactEmail) {
+      card.appendChild(createAgendaActionButton({
+        className: "secondary-btn agenda-confirmation-btn",
+        label: "Envoyer la confirmation",
+        onClick: () => sendAppointmentConfirmation(item)
+      }));
+    }
+
+    if (item.recurrenceGroup) {
+      card.appendChild(createAgendaActionButton({
+        className: "expense-text-action danger agenda-series-delete-btn",
+        label: "Supprimer cette série",
+        onClick: () => deleteFutureRecurringAppointments(item)
+      }));
+    }
+  });
+}
