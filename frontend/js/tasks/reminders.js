@@ -1,11 +1,99 @@
-// tasks : reminders.
+// Tâches : alertes du tableau de bord et rappels de rendez-vous.
 
-function updateTaskDashboardAlert(overdue,high){const l=document.getElementById("dashboardTaskAlertLabel"),d=document.getElementById("dashboardTaskAlertDetail"),b=document.getElementById("dashboardTaskAlertButton"),dot=document.getElementById("dashboardTaskAlertDot");if(!l||!d)return;if(overdue.length){l.textContent=`${overdue.length} tâche${overdue.length>1?"s":""} en retard`;d.textContent="À traiter en priorité.";dot?.classList.add("overdue");}else if(high.length){l.textContent=`${high.length} action${high.length>1?"s":""} prioritaire${high.length>1?"s":""}`;d.textContent="Actions importantes à planifier.";dot?.classList.remove("overdue");}else{l.textContent="Aucune action prioritaire";d.textContent="Vos prochaines actions apparaîtront ici.";dot?.classList.remove("overdue");}if(b)b.onclick=()=>showSection("tasksSection");}
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+const REMINDER_GRACE_PERIOD_IN_MS = 35 * 60 * 1000;
 
-function updateUpcomingAppointmentAlert(){const now=Date.now(),next=allTasks.filter(task=>task.status==="open"&&task.type==="appointment"&&task.startDate&&new Date(task.startDate).getTime()>=now&&new Date(task.startDate).getTime()-now<=86400000).sort((a,b)=>new Date(a.startDate)-new Date(b.startDate))[0];if(!next)return;const label=document.getElementById("dashboardTaskAlertLabel"),detail=document.getElementById("dashboardTaskAlertDetail"),button=document.getElementById("dashboardTaskAlertButton"),dot=document.getElementById("dashboardTaskAlertDot");if(!label||!detail)return;label.textContent=`Rendez-vous imminent : ${next.title}`;detail.textContent=`Prévu ${taskDateTime(next.startDate)} avec ${taskContactLabel(next)}.`;dot?.classList.remove("overdue");if(button)button.onclick=()=>{showSection("tasksSection");editTask(next._id);};}
+function getOpenAppointments(tasks) {
+  return tasks.filter(task => task.status === "open" && task.type === "appointment" && task.startDate);
+}
 
-function updateAgendaNotificationButton(){const b=document.getElementById("agendaNotificationButton");if(!b||!("Notification" in window))return;if(Notification.permission==="granted")b.textContent="Rappels activés";else if(Notification.permission==="denied")b.textContent="Rappels bloqués";}
+function getUpcomingAppointment(tasks, now = Date.now()) {
+  return getOpenAppointments(tasks)
+    .filter(task => {
+      const start = new Date(task.startDate).getTime();
+      return start >= now && start - now <= DAY_IN_MS;
+    })
+    .sort((first, second) => new Date(first.startDate) - new Date(second.startDate))[0];
+}
 
-async function requestAgendaNotifications(){if(!("Notification" in window)){showToast("Les notifications ne sont pas disponibles dans ce navigateur.");return;}const permission=await Notification.requestPermission();updateAgendaNotificationButton();showToast(permission==="granted"?"Rappels navigateur activés.":"Autorisation de rappel non accordée.");}
+function updateTaskDashboardAlert(overdue, high) {
+  const label = document.getElementById("dashboardTaskAlertLabel");
+  const detail = document.getElementById("dashboardTaskAlertDetail");
+  const button = document.getElementById("dashboardTaskAlertButton");
+  const dot = document.getElementById("dashboardTaskAlertDot");
+  if (!label || !detail) return;
 
-function checkAgendaReminders(){const now=Date.now();allTasks.filter(t=>t.status==="open"&&t.type==="appointment"&&t.startDate&&Number(t.reminderMinutes)>0).forEach(t=>{const trigger=new Date(t.startDate).getTime()-Number(t.reminderMinutes)*60000,key=`agenda-reminder-${t._id}-${trigger}`;if(trigger<=now&&now-trigger<35*60000&&!sessionStorage.getItem(key)){sessionStorage.setItem(key,"1");const message=`${t.title} commence ${taskDateTime(t.startDate)}.`;showToast(`Rappel : ${message}`);if("Notification" in window&&Notification.permission==="granted")new Notification("My Prospect — Rendez-vous",{body:message});}});updateAgendaNotificationButton();}
+  if (overdue.length) {
+    label.textContent = `${overdue.length} tâche${overdue.length > 1 ? "s" : ""} en retard`;
+    detail.textContent = "À traiter en priorité.";
+    dot?.classList.add("overdue");
+  } else if (high.length) {
+    label.textContent = `${high.length} action${high.length > 1 ? "s" : ""} prioritaire${high.length > 1 ? "s" : ""}`;
+    detail.textContent = "Actions importantes à planifier.";
+    dot?.classList.remove("overdue");
+  } else {
+    label.textContent = "Aucune action prioritaire";
+    detail.textContent = "Vos prochaines actions apparaîtront ici.";
+    dot?.classList.remove("overdue");
+  }
+  if (button) button.onclick = () => showSection("tasksSection");
+}
+
+function updateUpcomingAppointmentAlert() {
+  const next = getUpcomingAppointment(allTasks);
+  if (!next) return;
+
+  const label = document.getElementById("dashboardTaskAlertLabel");
+  const detail = document.getElementById("dashboardTaskAlertDetail");
+  const button = document.getElementById("dashboardTaskAlertButton");
+  const dot = document.getElementById("dashboardTaskAlertDot");
+  if (!label || !detail) return;
+
+  label.textContent = `Rendez-vous imminent : ${next.title}`;
+  detail.textContent = `Prévu ${taskDateTime(next.startDate)} avec ${taskContactLabel(next)}.`;
+  dot?.classList.remove("overdue");
+  if (button) {
+    button.onclick = () => {
+      showSection("tasksSection");
+      editTask(next._id);
+    };
+  }
+}
+
+function updateAgendaNotificationButton() {
+  const button = document.getElementById("agendaNotificationButton");
+  if (!button || !("Notification" in window)) return;
+  if (Notification.permission === "granted") button.textContent = "Rappels activés";
+  else if (Notification.permission === "denied") button.textContent = "Rappels bloqués";
+}
+
+async function requestAgendaNotifications() {
+  if (!("Notification" in window)) {
+    showToast("Les notifications ne sont pas disponibles dans ce navigateur.");
+    return;
+  }
+
+  const permission = await Notification.requestPermission();
+  updateAgendaNotificationButton();
+  showToast(permission === "granted" ? "Rappels navigateur activés." : "Autorisation de rappel non accordée.");
+}
+
+function checkAgendaReminders() {
+  const now = Date.now();
+  getOpenAppointments(allTasks)
+    .filter(task => Number(task.reminderMinutes) > 0)
+    .forEach(task => {
+      const trigger = new Date(task.startDate).getTime() - Number(task.reminderMinutes) * 60000;
+      const key = `agenda-reminder-${task._id}-${trigger}`;
+      const isDue = trigger <= now && now - trigger < REMINDER_GRACE_PERIOD_IN_MS;
+      if (!isDue || sessionStorage.getItem(key)) return;
+
+      sessionStorage.setItem(key, "1");
+      const message = `${task.title} commence ${taskDateTime(task.startDate)}.`;
+      showToast(`Rappel : ${message}`);
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("My Prospect — Rendez-vous", { body: message });
+      }
+    });
+  updateAgendaNotificationButton();
+}

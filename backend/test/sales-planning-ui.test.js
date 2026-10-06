@@ -33,6 +33,10 @@ test('task edit preserves recurrence and contact fields through PUT',async()=>{
 test('reminders emit only once per appointment trigger',()=>{
  const b=browser();b.set('allTasks',[{_id:'a',title:'RDV',type:'appointment',status:'open',startDate:'2026-10-03T12:10:00Z',reminderMinutes:15}]);b.ctx.checkAgendaReminders();b.ctx.checkAgendaReminders();assert.equal(b.toasts.filter(m=>m.startsWith('Rappel')).length,1);
 });
+test('upcoming appointment alert chooses the closest open appointment and opens it',()=>{
+ const b=browser(),appointments=[{_id:'later',title:'Plus tard',type:'appointment',status:'open',startDate:'2026-10-03T14:00:00Z'},{_id:'next',title:'Le plus proche',type:'appointment',status:'open',startDate:'2026-10-03T12:10:00Z'},{_id:'done',title:'Terminé',type:'appointment',status:'done',startDate:'2026-10-03T12:05:00Z'}];let edited;
+ b.set('allTasks',appointments);b.ctx.editTask=id=>{edited=id;};b.ctx.updateUpcomingAppointmentAlert();assert.equal(b.node('dashboardTaskAlertLabel').textContent,'Rendez-vous imminent : Le plus proche');b.node('dashboardTaskAlertButton').onclick();assert.deepEqual(b.navigation,['tasksSection']);assert.equal(edited,'next');
+});
 test('cancelled task, recurring series and opportunity deletions make no request',async()=>{
  const b=browser();b.ctx.confirmAppAction=async()=>false;await b.ctx.deleteTask('t');await b.ctx.deleteFutureRecurringAppointments({_id:'a'});await b.ctx.deleteOpportunity('o');assert.equal(b.calls.length,0);
 });
