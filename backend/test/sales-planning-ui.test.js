@@ -23,6 +23,10 @@ test('task list escapes text and distinguishes overdue tasks from appointments',
  const b=browser();b.set('allTasks',[{_id:'t',type:'task',title:'<Relance>',status:'open',priority:'high',dueDate:'2026-10-01'},{_id:'a',type:'appointment',title:'RDV',status:'open',priority:'normal',startDate:'2026-10-04T12:00:00Z'}]);b.ctx.renderTasks();assert.equal(b.node('tasksOverdueCount').textContent,1);assert.equal(b.node('appointmentsUpcomingCount').textContent,1);assert.match(b.node('tasksList').innerHTML,/&lt;Relance&gt;/);
  b.node('tasksFilter').value='rdv';b.ctx.renderTasks();assert.equal((b.node('tasksList').innerHTML.match(/<article/g)||[]).length,1);
 });
+test('task loading refreshes agenda data and starts only one reminder timer',async()=>{
+ const b=browser(),steps=[];b.ctx.apiFetch=async(...args)=>{b.calls.push(args);return [];};b.ctx.taskContacts=()=>steps.push('contacts');b.ctx.renderTasks=()=>steps.push('render');b.ctx.showAppointmentConfirmationStatus=()=>steps.push('confirmation');b.ctx.updateUpcomingAppointmentAlert=()=>steps.push('alert');b.ctx.checkAgendaReminders=()=>steps.push('reminder');
+ await b.ctx.loadTasks();await b.ctx.loadTasks();assert.deepEqual(b.calls.map(([url])=>url),['/api/tasks','/api/tasks']);assert.deepEqual(steps,['contacts','render','confirmation','alert','reminder','contacts','render','confirmation','alert','reminder']);assert.equal(b.timers(),1);assert.equal(b.read('allTasks.length'),0);
+});
 test('appointment duplication prepares a week later without writing to the API',()=>{
  const b=browser();b.set('allTasks',[{_id:'a',type:'appointment',title:'RDV',startDate:'2026-10-03T12:00:00Z',endDate:'2026-10-03T13:00:00Z',contactId:{_id:'c'}}]);b.ctx.duplicateAppointment('a');assert.equal(b.node('taskEditId').value,'');assert.equal(b.node('taskContact').value,'c');assert.equal(b.node('taskStartDate').value,b.read('localDateTime("2026-10-10T12:00:00Z")'));assert.equal(b.calls.length,0);
 });
