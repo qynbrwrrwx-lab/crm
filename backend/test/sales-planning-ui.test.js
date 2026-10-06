@@ -36,6 +36,11 @@ test('reminders emit only once per appointment trigger',()=>{
 test('cancelled task, recurring series and opportunity deletions make no request',async()=>{
  const b=browser();b.ctx.confirmAppAction=async()=>false;await b.ctx.deleteTask('t');await b.ctx.deleteFutureRecurringAppointments({_id:'a'});await b.ctx.deleteOpportunity('o');assert.equal(b.calls.length,0);
 });
+test('appointment confirmations and recurring deletions use their endpoints then refresh the agenda',async()=>{
+ const b=browser(),refreshes=[];b.ctx.loadTasks=async()=>refreshes.push('tasks');b.ctx.apiFetch=async(...args)=>{b.calls.push(args);return {deletedCount:2};};
+ await b.ctx.sendAppointmentConfirmation({_id:'a',type:'appointment'});await b.ctx.deleteFutureRecurringAppointments({_id:'a'});
+ assert.deepEqual(b.calls.map(([url,options])=>[url,options.method]),[['/api/tasks/a/send-confirmation','POST'],['/api/tasks/a/future-recurrences','DELETE']]);assert.deepEqual(refreshes,['tasks','tasks']);assert.deepEqual(b.toasts,['Confirmation de rendez-vous envoyée.','2 rendez-vous à venir supprimé(s).']);
+});
 test('pipeline totals exclude closed opportunities from weighted forecasts and escape names',()=>{
  const b=browser();b.set('allOpportunities',[{_id:'a',title:'<Projet>',stage:'lead',amount:100,probability:20,contactId:{companyName:'<Client>'}},{_id:'b',title:'Proposition',stage:'proposal',amount:200,probability:70},{_id:'c',stage:'won',amount:500,probability:100}]);b.ctx.renderOpportunities();assert.equal(b.node('opportunitiesPipelineTotal').textContent,b.read('opportunityCurrency(300)'));assert.equal(b.node('opportunitiesForecastTotal').textContent,b.read('opportunityCurrency(160)'));assert.equal(b.node('opportunitiesWonTotal').textContent,b.read('opportunityCurrency(500)'));assert.match(b.node('opportunityBoard').innerHTML,/&lt;Projet&gt;/);assert.match(b.node('opportunityBoard').innerHTML,/&lt;Client&gt;/);
 });
