@@ -379,6 +379,18 @@ test("detail actions preserve the accepted quote conversion boundary", () => {
   }
 });
 
+test("detail action markup delegates layout styles to the commerce stylesheet", () => {
+  const b = browser();
+  const paidInvoice = documentFixture({ paymentStatus: "paid", paymentMethod: "Virement" });
+  const result = b.context.renderInvoiceDetailActions(paidInvoice, false, null);
+  assert.match(result, /class="invoice-detail-actions"/);
+  assert.match(result, /class="invoice-paid-badge"/);
+  assert.doesNotMatch(result, /style=/);
+  const commerceStyles = fs.readFileSync(path.join(frontend, "styles/commerce.css"), "utf8");
+  assert.match(commerceStyles, /\.invoice-detail-actions \{[^}]*display:flex/);
+  assert.match(commerceStyles, /\.invoice-paid-badge \{[^}]*display:inline-flex/);
+});
+
 for (const [sort, expected] of [
   ["recent", ["new", "old"]], ["oldest", ["old", "new"]],
   ["amount-desc", ["old", "new"]], ["amount-asc", ["new", "old"]]

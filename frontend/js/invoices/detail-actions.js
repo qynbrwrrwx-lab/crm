@@ -1,14 +1,7 @@
 // Documents commerciaux : actions de la fiche de détail.
 
 function renderInvoiceDetailActions(invoice, isEditingQuote, linkedDocument) {
-  return `    <div
-      class="invoice-detail-actions"
-       style="
-        display:flex;
-        gap:10px;
-        align-items:flex-end;
-      "
-    >
+  return `    <div class="invoice-detail-actions">
 
     <button
       type="button"
@@ -195,16 +188,7 @@ ${
   invoice.type === "invoice" &&
   invoice.paymentStatus === "paid"
   ? `
-    <span
-      class="invoice-paid-badge"
-      style="
-        display:inline-flex;
-        align-items:center;
-        padding:10px 16px;
-        border-radius:10px;
-        font-weight:600;
-      "
-    >
+    <span class="invoice-paid-badge">
       Payée${
         invoice.paymentMethod
           ? ` · ${escapeHtml(invoice.paymentMethod)}`
