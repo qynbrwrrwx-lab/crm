@@ -1,9 +1,5 @@
 // Opportunités : actions entre le pipeline, l'agenda et les devis.
 
-function getOpportunityContactId(contact) {
-  return contact?._id || contact || "";
-}
-
 function createOpportunityFollowUp(opportunity) {
   showSection("tasksSection");
   resetTaskForm();
