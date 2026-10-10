@@ -102,6 +102,103 @@
   opacity: 0.6;
 }
 
+.account-assistance-page {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: radial-gradient(circle at bottom, #2563eb 0%, #0f172a 45%, #020617 100%);
+  font-family: Inter, sans-serif;
+}
+
+.account-assistance-card {
+  width: min(100%, 420px);
+  padding: 34px 34px 30px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 28px;
+  background: rgba(15, 23, 42, .78);
+  box-shadow: 0 0 60px rgba(37, 99, 235, .35), 0 0 120px rgba(37, 99, 235, .18);
+  text-align: center;
+  backdrop-filter: blur(18px);
+}
+
+.account-assistance-logo {
+  display: block;
+  width: min(450px, 100%);
+  margin: -118px auto -82px;
+  object-fit: contain;
+}
+
+.account-assistance-title {
+  margin: 0 0 12px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+  line-height: 1.1;
+}
+
+.account-assistance-copy {
+  margin: 8px 0 24px;
+  color: #e2e8f0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.account-assistance-field { margin-bottom: 18px; }
+.account-assistance-password-field { position: relative; }
+.account-assistance-input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 18px;
+  border: 0;
+  border-radius: 16px;
+  outline: 0;
+  background: #0f172a;
+  color: #fff;
+  font-size: 16px;
+}
+.account-assistance-password-field .account-assistance-input { padding-right: 55px; }
+.account-assistance-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+.account-assistance-action {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(90deg, #22d3ee, #2563eb);
+  box-shadow: 0 10px 30px rgba(37, 99, 235, .35);
+  color: #fff;
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: .3s;
+}
+
+@media (max-width: 480px) {
+  .account-assistance-card { padding: 28px 20px; }
+  .account-assistance-logo { margin-top: -92px; margin-bottom: -64px; }
+}
+
 @media (max-width: 480px) {
   .account-result-card { padding: 34px 24px; }
 }

@@ -112,6 +112,22 @@ for (const pathname of ["/reset-password/private-token", "/verify-email/private-
   });
 }
 
+test("assistance templates delegate their presentation to shared classes", () => {
+  const b = browser("/reset-password/private-token");
+  const templates = [
+    b.context.renderPasswordResetPage(),
+    b.context.renderEmailVerificationPendingPage(),
+    b.context.renderEmailVerificationResult({ title: "Titre", message: "Message", actionLabel: "Continuer" })
+  ];
+  for (const template of templates) {
+    assert.match(template, /account-assistance-page/);
+    assert.match(template, /account-assistance-card/);
+    assert.doesNotMatch(template, /style=/);
+  }
+  const sharedStyles = fs.readFileSync(path.join(frontend, "style.css"), "utf8");
+  assert.match(sharedStyles, /account-result\.css/);
+});
+
 test("password reset validates confirmation then posts to the token route", async () => {
   const b = browser("/reset-password/private-token");
   b.elements.get("newPassword").value = "new-password-123";
