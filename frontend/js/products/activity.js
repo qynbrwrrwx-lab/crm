@@ -75,16 +75,25 @@ function renderProductDocumentHistory(documents) {
     return;
   }
 
-  list.innerHTML = documents.slice(0, 5).map(item => {
-    const label = productDocumentLabels[item.type] || "Document";
-    const payment = item.type === "invoice"
-      ? (item.paymentStatus === "paid" ? "Encaissée" : "À encaisser")
-      : "Voir le détail";
-    const date = new Date(item.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
-    return `<button type="button" class="product-document-row" onclick="closeRestockModal(); openInvoice('${item._id}')">
-      <span class="product-document-type">${label}</span>
-      <span class="product-document-main"><strong>${escapeHtml(item.invoiceNumber || "Sans numéro")}</strong><small>${date} · ${payment}</small></span>
-      <span class="product-document-total">${formatProductCurrency(item.totalTTC)}</span>
+  list.innerHTML = documents.slice(0, 5).map(document => {
+    const item = getProductDocumentPresentation(document);
+    return `<button type="button" class="product-document-row" onclick="closeRestockModal(); openInvoice('${item.id}')">
+      <span class="product-document-type">${item.typeLabel}</span>
+      <span class="product-document-main"><strong>${escapeHtml(item.number)}</strong><small>${item.dateLabel} · ${item.paymentLabel}</small></span>
+      <span class="product-document-total">${item.totalLabel}</span>
     </button>`;
   }).join("");
+}
+
+function getProductDocumentPresentation(document) {
+  return {
+    id: document._id,
+    typeLabel: productDocumentLabels[document.type] || "Document",
+    number: document.invoiceNumber || "Sans numéro",
+    paymentLabel: document.type === "invoice"
+      ? (document.paymentStatus === "paid" ? "Encaissée" : "À encaisser")
+      : "Voir le détail",
+    dateLabel: new Date(document.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }),
+    totalLabel: formatProductCurrency(document.totalTTC)
+  };
 }

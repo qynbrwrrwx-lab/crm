@@ -158,6 +158,19 @@ test("commercial summary renders the latest document without shadowing the brows
   assert.equal(b.elements.get("productLastDocument").textContent, "Aucun document");
 });
 
+test("product document presentation centralizes document details and payment state", () => {
+  const b = browser();
+  const presentation = b.context.getProductDocumentPresentation({
+    _id: "invoice", type: "invoice", invoiceNumber: "FAC-1", paymentStatus: "paid", createdAt: "2026-01-01", totalTTC: 120
+  });
+  assert.deepEqual(plain(presentation), {
+    id: "invoice", typeLabel: "Facture", number: "FAC-1", paymentLabel: "Encaissée",
+    dateLabel: b.read("new Date('2026-01-01').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })"),
+    totalLabel: b.context.formatProductCurrency(120)
+  });
+  assert.equal(b.context.getProductDocumentPresentation({ type: "order", createdAt: "2026-01-01" }).paymentLabel, "Voir le détail");
+});
+
 test("restock rejects non-positive and fractional quantities", async () => {
   const b = browser();
   b.read('restockingProductId = "product"');
