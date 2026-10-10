@@ -16,7 +16,7 @@ function browser(){
 const expense=(overrides={})=>({_id:'e',supplier:'Acme',label:'Achat',category:'Autres',amountTTC:40,status:'pending',dueDate:'2026-09-01',...overrides});
 const supplier={_id:'s',name:'Acme',email:'contact@example.test'};
 test('purchasing scripts load once with all extracted modules and no network activity',()=>{
- const b=browser();assert.equal(modules.length,14);assert.equal(new Set(modules).size,14);assert.equal(b.calls.length,0);
+ const b=browser();assert.equal(modules.length,15);assert.equal(new Set(modules).size,15);assert.equal(b.calls.length,0);
  for(const domain of ['expenses','suppliers']){
   const entries=modules.filter(s=>s.startsWith(`/js/${domain}/`));
   assert.deepEqual(entries.map(s=>path.basename(s)).sort(),fs.readdirSync(path.join(frontend,`js/${domain}`)).filter(s=>s.endsWith('.js')).sort());
@@ -28,6 +28,11 @@ test('expense filters combine text, category and overdue state while keeping glo
  b.node('expensesFilter').value='acme';b.node('expensesStatusFilter').value='overdue';b.node('expensesCategoryFilter').value='Autres';b.context.renderExpenses();
  assert.equal((b.node('expensesList').innerHTML.match(/<article/g)||[]).length,1);assert.match(b.node('expensesList').innerHTML,/&lt;achat&gt;/);
  assert.equal(b.node('expensesPendingTotal').textContent,b.context.formatCurrency(80));assert.equal(b.node('expensesPaidTotal').textContent,b.context.formatCurrency(60));
+});
+test('expense selection keeps totals global while returning only matching rows',()=>{
+ const b=browser();const expenses=[expense({_id:'late',label:'Hébergement',amountTTC:80}),expense({_id:'paid',status:'paid',amountTTC:60}),expense({_id:'future',dueDate:'2026-12-01'})];
+ const selected=b.context.selectExpenses(expenses,{query:'hébergement',status:'overdue',category:'Autres'});
+ assert.deepEqual(JSON.parse(JSON.stringify(selected.visibleExpenses.map(item=>item._id))),['late']);assert.equal(selected.pendingTotal,120);assert.equal(selected.paidTotal,60);assert.deepEqual(expenses.map(item=>item._id),['late','paid','future']);
 });
 test('monthly expense requires a due date and invalid amounts make no request',async()=>{
  const b=browser();b.node('expenseSupplier').value='Acme';b.node('expenseLabel').value='Abonnement';b.node('expenseAmount').value='10';b.node('expenseRecurrence').value='monthly';await b.context.saveExpense();
