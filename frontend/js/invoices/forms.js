@@ -18,6 +18,25 @@ function buildInvoiceCreationPayload({ contactId, productId, quantity, paymentMe
   };
 }
 
+function buildQuotePayload({ contactId, products }) {
+  return {
+    type: "quote",
+    contactId,
+    paymentMethod: "pending",
+    products
+  };
+}
+
+function getQuoteSaveRequest(quoteId, contactId, products) {
+  const isEditingExistingQuote = Boolean(quoteId);
+  return {
+    url: isEditingExistingQuote ? `/api/invoices/${quoteId}` : "/api/invoices",
+    method: isEditingExistingQuote ? "PUT" : "POST",
+    body: buildQuotePayload({ contactId, products }),
+    successMessage: isEditingExistingQuote ? "Devis modifié ✅" : "Devis créé ✅"
+  };
+}
+
 async function createInvoice() {
   const form = readInvoiceCreationForm();
   if (!form.contactId || !form.productId) {
@@ -72,31 +91,13 @@ async function createQuote() {
   if (documentActionLocks.has(lockKey)) return;
   documentActionLocks.add(lockKey);
   try {
-  const isEditingExistingQuote = Boolean(quoteId);
-  const method = isEditingExistingQuote ? "PUT" : "POST";
-    const url = isEditingExistingQuote ? `/api/invoices/${quoteId}` : "/api/invoices";
-
-    await apiFetch(url, {
-
-     method,
-
-      body: JSON.stringify({
-
-        type: "quote",
-
-        contactId,
-
-        paymentMethod: "pending",
-
-        products
-})
-
-    });
+    const request = getQuoteSaveRequest(quoteId, contactId, products);
+    await apiFetch(request.url, { method: request.method, body: JSON.stringify(request.body) });
 
     await loadInvoices();
 
     editingQuoteId = null;
-    showToast(isEditingExistingQuote ? "Devis modifié ✅" : "Devis créé ✅");
+    showToast(request.successMessage);
     closeQuoteModal();
   } catch (err) {
     console.error(err);

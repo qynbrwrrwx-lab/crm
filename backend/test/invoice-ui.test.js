@@ -293,6 +293,17 @@ test("partial payment sends the amount and displays the remaining balance", asyn
   assert.equal(b.read("documentActionLocks.size"), 0);
 });
 
+test("quote request helper keeps creation and edit API contracts distinct", () => {
+  const b = browser();
+  const products = [{ productId: "product", quantity: 2, discount: 0 }];
+  assert.deepEqual(plain(b.context.getQuoteSaveRequest(null, "client", products)), {
+    url: "/api/invoices", method: "POST", body: { type: "quote", contactId: "client", paymentMethod: "pending", products }, successMessage: "Devis créé ✅"
+  });
+  assert.deepEqual(plain(b.context.getQuoteSaveRequest("quote", "client", products)), {
+    url: "/api/invoices/quote", method: "PUT", body: { type: "quote", contactId: "client", paymentMethod: "pending", products }, successMessage: "Devis modifié ✅"
+  });
+});
+
 test("quote creation preserves the request format and resets its form", async () => {
   const b = browser();
   b.elements.get("quoteContact").value = "client";
