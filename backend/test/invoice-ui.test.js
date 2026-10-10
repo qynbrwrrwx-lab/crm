@@ -516,6 +516,23 @@ test("detail actions preserve the accepted quote conversion boundary", () => {
   }
 });
 
+test("detail actions keep each document workflow in its own action group", () => {
+  const b = browser();
+  const draftQuote = b.context.renderInvoiceDetailActions(documentFixture({ type: "quote", status: "draft" }), false, null);
+  assert.match(draftQuote, /acceptQuote\('document'\)/);
+  assert.match(draftQuote, /duplicateQuote\('document'\)/);
+  assert.match(draftQuote, /enableInvoiceEdition\(\)/);
+  assert.doesNotMatch(draftQuote, /createDepositInvoice/);
+  const order = b.context.renderInvoiceDetailActions(documentFixture({ type: "order", fulfillmentStatus: "prepared" }), false, null);
+  assert.match(order, /openDeliveryNote\('document'\)/);
+  assert.match(order, /updateOrderFulfillment\('document','shipped'\)/);
+  assert.match(order, /convertOrderToInvoice\('document'\)/);
+  const overdueInvoice = b.context.renderInvoiceDetailActions(documentFixture({ paymentDueDate: "2000-01-01" }), false, null);
+  assert.match(overdueInvoice, /markInvoicePaid\('document'\)/);
+  assert.match(overdueInvoice, /createCreditNote\('document'\)/);
+  assert.match(overdueInvoice, /openPaymentReminder\('document'\)/);
+});
+
 test("detail action markup delegates layout styles to the commerce stylesheet", () => {
   const b = browser();
   const paidInvoice = documentFixture({ paymentStatus: "paid", paymentMethod: "Virement" });
