@@ -11,11 +11,26 @@ function appendOpportunityCardLabel(card, className, text) {
   getOpportunityCardContent(card)?.appendChild(label);
 }
 
+function canCreateOpportunityFollowUp(item) {
+  return Boolean(item && !closedOpportunityStages.includes(item.stage) && item.contactId);
+}
+
+function getOpportunityLossReasonLabel(item) {
+  if (item?.stage !== "lost" || !item.lostReason) return "";
+  return `Motif : ${opportunityLostReasons[item.lostReason] || item.lostReason}`;
+}
+
+function isOpportunityStale(item, now = Date.now()) {
+  if (!item || closedOpportunityStages.includes(item.stage)) return false;
+  const updatedAt = new Date(item.updatedAt || item.createdAt).getTime();
+  return updatedAt < now - 14 * 86400000;
+}
+
 function addOpportunityFollowUpButtons() {
   const opportunities = getRenderedOpportunities();
   document.querySelectorAll(".opportunity-card-actions").forEach((actions, index) => {
     const item = opportunities[index];
-    if (!item || ["won", "lost"].includes(item.stage) || !item.contactId) return;
+    if (!canCreateOpportunityFollowUp(item)) return;
 
     const button = document.createElement("button");
     button.type = "button";
@@ -30,19 +45,16 @@ function addOpportunityLossReasonLabels() {
   const opportunities = getRenderedOpportunities();
   document.querySelectorAll(".opportunity-card").forEach((card, index) => {
     const item = opportunities[index];
-    if (item?.stage !== "lost" || !item.lostReason) return;
-
-    appendOpportunityCardLabel(card, "opportunity-stale-indicator opportunity-loss-reason", `Motif : ${opportunityLostReasons[item.lostReason] || item.lostReason}`);
+    const label = getOpportunityLossReasonLabel(item);
+    if (label) appendOpportunityCardLabel(card, "opportunity-stale-indicator opportunity-loss-reason", label);
   });
 }
 
 function markStaleOpportunities() {
   const opportunities = getRenderedOpportunities();
-  const threshold = Date.now() - 14 * 86400000;
   document.querySelectorAll(".opportunity-card").forEach((card, index) => {
     const item = opportunities[index];
-    const updatedAt = new Date(item?.updatedAt || item?.createdAt).getTime();
-    if (!item || ["won", "lost"].includes(item.stage) || updatedAt >= threshold) return;
+    if (!isOpportunityStale(item)) return;
 
     card.classList.add("is-stale");
     appendOpportunityCardLabel(card, "opportunity-stale-indicator", "À relancer : aucune mise à jour depuis 14 jours");
