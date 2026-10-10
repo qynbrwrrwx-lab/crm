@@ -17,9 +17,24 @@ function renderPurchaseOrderStatusOptions(order) {
     .join("");
 }
 
+function getPurchaseOrderPresentation(order) {
+  return {
+    id: order._id,
+    number: order.number,
+    supplierName: order.supplierId?.name || "Fournisseur",
+    lineCount: order.lines?.length || 0,
+    dateLabel: getPurchaseOrderDatesMarkup(order),
+    canSend: order.status === "draft"
+  };
+}
+
 function renderPurchaseOrderList(orders) {
   if (!orders.length) return '<article><strong>Aucun bon de commande</strong><small>Créez-en depuis un fournisseur avec des produits à réassortir.</small></article>';
-  return orders.map(order => `<article><strong>${escapeHtml(order.number)}</strong><small>${escapeHtml(order.supplierId?.name || "Fournisseur")} · ${order.lines?.length || 0} ligne(s)${getPurchaseOrderDatesMarkup(order)}</small><button type="button" class="secondary-btn" onclick="printPurchaseOrder('${order._id}')">PDF</button>${order.status === "draft" ? `<button type="button" class="secondary-btn" onclick="sendPurchaseOrder('${order._id}')">Envoyer</button>` : ""}<select onchange="updatePurchaseOrderStatus('${order._id}',this.value)">${renderPurchaseOrderStatusOptions(order)}</select></article>`).join("");
+  return orders.map(order => {
+    const item = getPurchaseOrderPresentation(order);
+    const sendAction = item.canSend ? `<button type="button" class="secondary-btn" onclick="sendPurchaseOrder('${item.id}')">Envoyer</button>` : "";
+    return `<article><strong>${escapeHtml(item.number)}</strong><small>${escapeHtml(item.supplierName)} · ${item.lineCount} ligne(s)${item.dateLabel}</small><button type="button" class="secondary-btn" onclick="printPurchaseOrder('${item.id}')">PDF</button>${sendAction}<select onchange="updatePurchaseOrderStatus('${item.id}',this.value)">${renderPurchaseOrderStatusOptions(order)}</select></article>`;
+  }).join("");
 }
 
 async function renderPurchaseOrders() {
