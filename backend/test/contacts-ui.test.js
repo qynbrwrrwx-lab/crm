@@ -64,6 +64,15 @@ test("contact cards escape customer text and render an empty state", () => {
   assert.match(b.elements.get("list").innerHTML, /Aucun contact/);
 });
 
+test("contact card presentation centralizes defaults and follow-up data", () => {
+  const b = browser();
+  const presentation = b.context.getContactCardPresentation(contact({ firstname: "", lastname: "", nextFollowUpAt: "2000-01-01", favorite: true }));
+  assert.equal(presentation.fullName, "");
+  assert.equal(presentation.companyName, "Client particulier");
+  assert.equal(presentation.favorite, true);
+  assert.equal(presentation.followUp.overdue, true);
+});
+
 test("contact search combines text and due follow-ups without changing the shared list", () => {
   const b = browser();
   b.context.fixtures = [contact({ _id: "due", tags: ["VIP"], nextFollowUpAt: "2000-01-01" }), contact({ _id: "future", tags: ["VIP"], nextFollowUpAt: "2099-01-01" }), contact({ _id: "other", lastname: "Durand" })];

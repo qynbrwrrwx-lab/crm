@@ -19,11 +19,24 @@ function renderContactFollowUp(followUp) {
   return `<small class="client-follow-up ${followUp.overdue ? "is-overdue" : ""}">Relance : ${followUp.date.toLocaleDateString("fr-FR")}</small>`;
 }
 
+function getContactCardPresentation(contact) {
+  return {
+    fullName: `${contact.firstname || ""} ${contact.lastname || ""}`.trim(),
+    companyName: contact.companyName || "Client particulier",
+    email: contact.email || "E-mail non renseigne",
+    phone: contact.phone || "Telephone non renseigne",
+    billingAddress: contact.billingAddress || "Adresse non renseignee",
+    followUp: getContactFollowUp(contact),
+    favorite: Boolean(contact.favorite),
+    tags: contact.tags || []
+  };
+}
+
 function renderContactCard(contact) {
-  const followUp = getContactFollowUp(contact);
-  const favorite = contact.favorite ? '<span class="client-favorite">Favori</span>' : "";
-  const tags = renderContactTags(contact.tags);
-  return `<article class="client client-card"><div class="client-info"><div class="client-name-row"><strong>${escapeHtml(contact.firstname)} ${escapeHtml(contact.lastname)}</strong>${favorite}</div><div class="client-meta"><span>${escapeHtml(contact.companyName || "Client particulier")}</span><span>${escapeHtml(contact.email || "E-mail non renseigne")}</span><span>${escapeHtml(contact.phone || "Telephone non renseigne")}</span><span>${escapeHtml(contact.billingAddress || "Adresse non renseignee")}</span></div>${tags}${renderContactFollowUp(followUp)}</div><div class="client-actions"><button class="client-action-btn client-view-btn" onclick="openClientProfile('${contact._id}')">Voir la fiche</button><button class="client-action-btn client-favorite-btn ${contact.favorite ? "is-favorite" : ""}" onclick="toggleFavorite('${contact._id}')">Favori</button><button class="client-action-btn" onclick="editContact('${contact._id}')">Modifier</button><button class="client-action-btn client-delete-btn" onclick="deleteContact('${contact._id}')">Supprimer</button></div></article>`;
+  const presentation = getContactCardPresentation(contact);
+  const favorite = presentation.favorite ? '<span class="client-favorite">Favori</span>' : "";
+  const tags = renderContactTags(presentation.tags);
+  return `<article class="client client-card"><div class="client-info"><div class="client-name-row"><strong>${escapeHtml(presentation.fullName)}</strong>${favorite}</div><div class="client-meta"><span>${escapeHtml(presentation.companyName)}</span><span>${escapeHtml(presentation.email)}</span><span>${escapeHtml(presentation.phone)}</span><span>${escapeHtml(presentation.billingAddress)}</span></div>${tags}${renderContactFollowUp(presentation.followUp)}</div><div class="client-actions"><button class="client-action-btn client-view-btn" onclick="openClientProfile('${contact._id}')">Voir la fiche</button><button class="client-action-btn client-favorite-btn ${presentation.favorite ? "is-favorite" : ""}" onclick="toggleFavorite('${contact._id}')">Favori</button><button class="client-action-btn" onclick="editContact('${contact._id}')">Modifier</button><button class="client-action-btn client-delete-btn" onclick="deleteContact('${contact._id}')">Supprimer</button></div></article>`;
 }
 
 function renderContacts(contacts) {
