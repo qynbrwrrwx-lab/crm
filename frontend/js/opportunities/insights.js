@@ -48,6 +48,23 @@ function getStaleOpportunityCount(opportunities, now = Date.now()) {
   return opportunities.filter(item => !["won", "lost"].includes(item.stage) && new Date(item.updatedAt || item.createdAt).getTime() < threshold).length;
 }
 
+function getOpportunitySourcePresentation(opportunities) {
+  return getOpportunitySourceInsights(opportunities).map(([source, data]) => ({
+    label: opportunitySourceLabels[source] || source,
+    countLabel: opportunityCountLabel(data.count),
+    amountLabel: opportunityCurrency(data.amount)
+  }));
+}
+
+function getOpportunityLossPresentation(opportunities) {
+  const { total, entries } = getOpportunityLossInsights(opportunities);
+  return entries.map(([reason, count]) => ({
+    label: reason === "unreported" ? "Non renseigné" : opportunityLostReasons[reason] || reason,
+    countLabel: opportunityCountLabel(count),
+    rate: Math.round(count / Math.max(1, total) * 100)
+  }));
+}
+
 function ensureOpportunityPerformanceElements() {
   const summary = document.querySelector(".opportunity-summary");
   if (!summary) return {};
@@ -75,9 +92,9 @@ function renderOpportunitySourceInsights() {
   const root = document.getElementById("opportunitySourceInsights");
   if (!root) return;
 
-  const sources = getOpportunitySourceInsights(allOpportunities);
+  const sources = getOpportunitySourcePresentation(allOpportunities);
   root.innerHTML = sources.length
-    ? `<span>Origine des opportunités</span><div>${sources.map(([source, data]) => `<article><strong>${escapeHtml(opportunitySourceLabels[source] || source)}</strong><small>${opportunityCountLabel(data.count)}</small><b>${opportunityCurrency(data.amount)}</b></article>`).join("")}</div>`
+    ? `<span>Origine des opportunités</span><div>${sources.map(source => `<article><strong>${escapeHtml(source.label)}</strong><small>${source.countLabel}</small><b>${source.amountLabel}</b></article>`).join("")}</div>`
     : "";
 }
 
@@ -100,15 +117,15 @@ function renderOpportunityLossInsights() {
   if (!sourceRoot) return;
 
   const existingRoot = document.getElementById("opportunityLossInsights");
-  const { total, entries } = getOpportunityLossInsights(allOpportunities);
-  if (!entries.length) {
+  const losses = getOpportunityLossPresentation(allOpportunities);
+  if (!losses.length) {
     existingRoot?.remove();
     return;
   }
 
   const root = existingRoot || getOpportunityLossInsightsRoot();
   if (!root) return;
-  root.innerHTML = `<span>Pourquoi les opportunités sont perdues</span><div>${entries.map(([reason, count]) => `<article><strong>${escapeHtml(reason === "unreported" ? "Non renseigné" : opportunityLostReasons[reason] || reason)}</strong><small>${opportunityCountLabel(count)}</small><b>${Math.round(count / Math.max(1, total) * 100)} %</b></article>`).join("")}</div>`;
+  root.innerHTML = `<span>Pourquoi les opportunités sont perdues</span><div>${losses.map(loss => `<article><strong>${escapeHtml(loss.label)}</strong><small>${loss.countLabel}</small><b>${loss.rate} %</b></article>`).join("")}</div>`;
 }
 
 function updatePipelineDashboardDetails() {
