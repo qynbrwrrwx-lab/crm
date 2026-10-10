@@ -4,6 +4,44 @@ const { recordAuditEvent } = require("../../services/auditService");
 const { nextDocumentNumber } = require("../../services/documentNumberService");
 const { getElectronicTransmissionDraft, getPaymentDueDate } = require("../../services/commercialDocumentService");
 
+function roundCurrency(amount) {
+  return Math.round(Number(amount || 0) * 100) / 100;
+}
+
+function getDepositSummary(depositInvoices) {
+  const deposits = depositInvoices.map(deposit => {
+    const paidTTC = (deposit.payments || []).reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+    const paidHT = Number(deposit.totalTTC || 0) > 0
+      ? roundCurrency(paidTTC * Number(deposit.totalHT || 0) / Number(deposit.totalTTC || 0))
+      : 0;
+    return { number: deposit.invoiceNumber, paidHT, paidTTC };
+  }).filter(deposit => deposit.paidTTC > 0);
+  return {
+    deposits,
+    depositsHT: deposits.reduce((sum, deposit) => sum + deposit.paidHT, 0),
+    depositsTTC: deposits.reduce((sum, deposit) => sum + deposit.paidTTC, 0)
+  };
+}
+
+function buildInvoiceData({ order, userId, invoiceNumber, paymentDueDate, electronicTransmission, deposits, depositsHT, depositsTTC }) {
+  const products = order.products.map(item => ({
+    productId: item.productId, quantity: item.quantity, discount: item.discount || 0, productName: item.productName,
+    unitHT: item.unitHT, unitTTC: item.unitTTC, tva: item.tva, lineHT: item.lineHT, lineTTC: item.lineTTC
+  }));
+  if (depositsTTC > 0) products.push({
+    productName: `Déduction acompte${deposits.length > 1 ? "s" : ""} ${deposits.map(deposit => deposit.number).join(", ")}`,
+    quantity: 1, unitHT: -depositsHT, unitTTC: -depositsTTC, tva: 0, lineHT: -depositsHT, lineTTC: -depositsTTC, discount: 0
+  });
+  const totalHT = Math.max(0, roundCurrency(Number(order.totalHT || 0) - depositsHT));
+  const totalTTC = Math.max(0, roundCurrency(Number(order.totalTTC || 0) - depositsTTC));
+  return {
+    invoiceNumber, userId, type: "invoice", status: "draft", contactId: order.contactId, sourceOrderId: order._id,
+    products, totalHT, totalTTC, paymentMethod: "pending", paymentTerms: order.paymentTerms || "",
+    paymentDueDays: Number(order.paymentDueDays ?? 30), paymentDueDate, quoteValidityDays: order.quoteValidityDays || null,
+    paymentStatus: totalTTC === 0 ? "paid" : "pending", ...(electronicTransmission ? { electronicTransmission } : {})
+  };
+}
+
 async function convertOrderToInvoice(req, res) {
 
     try {
@@ -69,60 +107,15 @@ if (existingInvoice) {
       const depositInvoices = order.sourceQuoteId
         ? await Invoice.find({ userId: req.userId, isDepositInvoice: true, depositForQuoteId: order.sourceQuoteId })
         : [];
-      const deposits = depositInvoices.map(deposit => {
-        const paidTTC = deposit.payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
-        const paidHT = Number(deposit.totalTTC || 0) > 0 ? Math.round((paidTTC * Number(deposit.totalHT || 0) / Number(deposit.totalTTC || 0)) * 100) / 100 : 0;
-        return { number: deposit.invoiceNumber, paidHT, paidTTC };
-      }).filter(deposit => deposit.paidTTC > 0);
-      const depositsHT = deposits.reduce((sum, deposit) => sum + deposit.paidHT, 0);
-      const depositsTTC = deposits.reduce((sum, deposit) => sum + deposit.paidTTC, 0);
-      const finalProducts = order.products.map(item => ({
-        productId: item.productId, quantity: item.quantity, discount: item.discount || 0, productName: item.productName,
-        unitHT: item.unitHT, unitTTC: item.unitTTC, tva: item.tva, lineHT: item.lineHT, lineTTC: item.lineTTC
+      const depositSummary = getDepositSummary(depositInvoices);
+      const invoice = await Invoice.create(buildInvoiceData({
+        order,
+        userId: req.userId,
+        invoiceNumber,
+        paymentDueDate: getPaymentDueDate(order.paymentDueDays ?? 30),
+        electronicTransmission,
+        ...depositSummary
       }));
-      if (depositsTTC > 0) finalProducts.push({
-        productName: `Déduction acompte${deposits.length > 1 ? "s" : ""} ${deposits.map(deposit => deposit.number).join(", ")}`,
-        quantity: 1, unitHT: -depositsHT, unitTTC: -depositsTTC, tva: 0, lineHT: -depositsHT, lineTTC: -depositsTTC, discount: 0
-      });
-      const finalTotalHT = Math.max(0, Math.round((Number(order.totalHT || 0) - depositsHT) * 100) / 100);
-      const finalTotalTTC = Math.max(0, Math.round((Number(order.totalTTC || 0) - depositsTTC) * 100) / 100);
-
-      const invoice =
-        await Invoice.create({
-
-          invoiceNumber,
-
-          userId: req.userId,
-
-          type: "invoice",
-
-          status: "draft",
-
-          contactId: order.contactId,
-
-          sourceOrderId: order._id,
-
-          products: finalProducts,
-
-          totalHT: finalTotalHT,
-
-          totalTTC: finalTotalTTC,
-
-          paymentMethod: "pending",
-
-          paymentTerms: order.paymentTerms || "",
-
-          paymentDueDays: Number(order.paymentDueDays ?? 30),
-
-          paymentDueDate: getPaymentDueDate(order.paymentDueDays ?? 30),
-
-          quoteValidityDays: order.quoteValidityDays || null,
-
-          paymentStatus: finalTotalTTC === 0 ? "paid" : "pending",
-
-          ...(electronicTransmission ? { electronicTransmission } : {})
-
-        });
 
     order.convertedToInvoiceId =
   invoice._id;
@@ -160,4 +153,4 @@ await order.save();
 
 }
 
-module.exports = { convertOrderToInvoice };
+module.exports = { convertOrderToInvoice, getDepositSummary, buildInvoiceData };

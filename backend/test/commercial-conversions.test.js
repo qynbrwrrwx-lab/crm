@@ -8,6 +8,7 @@ const DocumentCounter = require("../models/documentCounter");
 const AuditLog = require("../models/auditLog");
 const routes = require("../routes/invoiceRoutes");
 const { getQuoteConversionError, buildOrderData } = require("../controllers/quote-conversion/convert");
+const { getDepositSummary, buildInvoiceData } = require("../controllers/order-conversion/convert");
 
 function handler(path, method = "post") {
   const route = routes.stack.find(layer => layer.route?.path === path && layer.route.methods[method]);
@@ -75,6 +76,19 @@ test("quote conversion helpers preserve eligibility and the order data contract"
   assert.equal(order.products[0].unitHT, 100);
   assert.equal(order.paymentDueDays, 15);
   assert.equal(getQuoteConversionError(quote), null);
+});
+
+test("invoice conversion helpers deduct only paid deposits from the final invoice", () => {
+  const deposits = getDepositSummary([
+    { invoiceNumber: "AC-1", totalHT: 100, totalTTC: 120, payments: [{ amount: 30 }, { amount: 30 }] },
+    { invoiceNumber: "AC-2", totalHT: 50, totalTTC: 60, payments: [] }
+  ]);
+  assert.deepEqual(deposits, { deposits: [{ number: "AC-1", paidHT: 50, paidTTC: 60 }], depositsHT: 50, depositsTTC: 60 });
+  const invoice = buildInvoiceData({ order: source("order"), userId: "owner", invoiceNumber: "FAC-1", paymentDueDate: new Date("2026-01-16"), electronicTransmission: null, ...deposits });
+  assert.equal(invoice.totalHT, 150);
+  assert.equal(invoice.totalTTC, 180);
+  assert.equal(invoice.products.at(-1).lineTTC, -60);
+  assert.equal(invoice.paymentStatus, "pending");
 });
 
 for (const path of ["/convert-to-order/:id", "/convert-to-invoice/:id"]) {
