@@ -120,6 +120,16 @@ test("invoice search, status and electronic filters combine and reset", () => {
   assert.equal(b.elements.get("invoiceSearch").value, "");
 });
 
+test("invoice form option helpers keep invoice and quote labels distinct and escaped", () => {
+  const b = browser();
+  const contacts = [{ _id: "contact", firstname: "Ada", lastname: "<Lovelace>", companyName: "<Company>" }];
+  const products = [{ _id: "product", name: "<Service>", stock: 0 }];
+  assert.match(b.context.renderInvoiceContactOptions(contacts), /&lt;Company&gt;/);
+  assert.match(b.context.renderInvoiceProductOptions(products), /\(0 stock\)/);
+  assert.doesNotMatch(b.context.renderQuoteContactOptions(contacts), /Company/);
+  assert.match(b.context.renderQuoteProductOptions(products), /&lt;Service&gt; — stock : 0/);
+});
+
 test("loading documents updates the shared state, treasury and dashboard", async () => {
   const b = browser();
   const documents = [documentFixture()];

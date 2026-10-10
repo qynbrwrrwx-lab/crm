@@ -1,5 +1,33 @@
 // Formulaires commerciaux : voir README.md.
 
+function renderInvoiceContactOptions(contacts) {
+  return ['<option value="">Sélectionner un contact</option>', ...contacts.map(contact => `<option value="${contact._id}">
+    ${escapeHtml(contact.firstname)}
+    ${escapeHtml(contact.lastname)}
+    ${escapeHtml(contact.companyName)}
+  </option>`)].join("");
+}
+
+function renderInvoiceProductOptions(products) {
+  return ['<option value="">Sélectionner un produit</option>', ...products.map(product => `<option value="${product._id}">
+    ${escapeHtml(product.name)}
+    (${product.stock} stock)
+  </option>`)].join("");
+}
+
+function renderQuoteContactOptions(contacts) {
+  return ['<option value="">Sélectionner un contact</option>', ...contacts.map(contact => `<option value="${contact._id}">
+    ${escapeHtml(contact.firstname)}
+    ${escapeHtml(contact.lastname)}
+  </option>`)].join("");
+}
+
+function renderQuoteProductOptions(products) {
+  return ['<option value="">Sélectionner un produit</option>', ...products.map(product => `<option value="${product._id}">
+    ${escapeHtml(product.name)} — stock : ${Number(product.stock || 0)}
+  </option>`)].join("");
+}
+
 async function loadInvoiceData() {
 
   const contacts =
@@ -16,34 +44,8 @@ async function loadInvoiceData() {
 
   if (!contactSelect || !productSelect) return;
 
-  // CONTACTS
-  contactSelect.innerHTML =
-    `<option value="">Sélectionner un contact</option>`;
-
-  contacts.forEach(contact => {
-
-    contactSelect.innerHTML += `
-      <option value="${contact._id}">
-        ${escapeHtml(contact.firstname)}
-        ${escapeHtml(contact.lastname)}
-        ${escapeHtml(contact.companyName)}
-      </option>
-    `;
-  });
-
-  // PRODUCTS
-  productSelect.innerHTML =
-    `<option value="">Sélectionner un produit</option>`;
-
-  products.forEach(product => {
-
-    productSelect.innerHTML += `
-      <option value="${product._id}">
-        ${escapeHtml(product.name)}
-        (${product.stock} stock)
-      </option>
-    `;
-  });
+  contactSelect.innerHTML = renderInvoiceContactOptions(contacts);
+  productSelect.innerHTML = renderInvoiceProductOptions(products);
 }
 
 function updateQuoteClientContext() {
@@ -97,33 +99,10 @@ async function loadQuoteData() {
 
     if (!contactSelect) return;
 
-  contactSelect.innerHTML =
-    '<option value="">Sélectionner un contact</option>';
-
- contacts.forEach(contact => {
-
-    contactSelect.innerHTML += `
-      <option value="${contact._id}">
-        ${escapeHtml(contact.firstname)}
-        ${escapeHtml(contact.lastname)}
-      </option>
-    `;
-  });
+  contactSelect.innerHTML = renderQuoteContactOptions(contacts);
 
   productSelects.forEach(select => {
-
-  select.innerHTML =
-    '<option value="">Sélectionner un produit</option>';
-
-  products.forEach(product => {
-
-    select.innerHTML += `
-      <option value="${product._id}">
-        ${escapeHtml(product.name)} — stock : ${Number(product.stock || 0)}
-      </option>
-    `;
-
-  });
+    select.innerHTML = renderQuoteProductOptions(products);
 
 });
 
