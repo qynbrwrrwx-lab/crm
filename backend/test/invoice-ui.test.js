@@ -304,6 +304,47 @@ test("quote creation prevents duplicate submissions and releases its lock", asyn
   assert.equal(b.read("documentActionLocks.size"), 0);
 });
 
+test("invoice creation keeps its API payload and reloads the form data", async () => {
+  const b = browser();
+  b.addElement("invoiceContact").value = "client";
+  b.addElement("invoiceProduct").value = "product";
+  b.addElement("invoiceQuantity").value = "3";
+  b.addElement("paymentMethod").value = "Virement";
+  let request;
+  let invoiceLoads = 0, productLoads = 0, formLoads = 0;
+  b.context.apiFetch = async (url, options) => { request = { url, method: options.method, body: JSON.parse(options.body) }; };
+  b.context.loadInvoices = async () => { invoiceLoads++; };
+  b.context.loadProducts = async () => { productLoads++; };
+  b.context.loadInvoiceData = async () => { formLoads++; };
+  await b.context.createInvoice();
+  assert.deepEqual(request, { url: "/api/invoices", method: "POST", body: { type: "invoice", contactId: "client", paymentMethod: "Virement", products: [{ productId: "product", quantity: 3 }] } });
+  assert.deepEqual([invoiceLoads, productLoads, formLoads], [1, 1, 1]);
+  assert.equal(b.read("documentActionLocks.size"), 0);
+});
+
+test("invoice creation prevents duplicate submissions and releases its lock", async () => {
+  const b = browser();
+  b.addElement("invoiceContact").value = "client";
+  b.addElement("invoiceProduct").value = "product";
+  b.addElement("invoiceQuantity").value = "1";
+  b.addElement("paymentMethod").value = "Virement";
+  let calls = 0, resolveRequest;
+  b.context.apiFetch = () => {
+    calls++;
+    return new Promise(resolve => { resolveRequest = resolve; });
+  };
+  b.context.loadInvoices = async () => {};
+  b.context.loadProducts = async () => {};
+  b.context.loadInvoiceData = async () => {};
+  const first = b.context.createInvoice();
+  const second = b.context.createInvoice();
+  await new Promise(setImmediate);
+  assert.equal(calls, 1);
+  resolveRequest({});
+  await Promise.all([first, second]);
+  assert.equal(b.read("documentActionLocks.size"), 0);
+});
+
 test("historical invoice totals remain independent of current catalog prices", () => {
   const b = browser();
   b.context.fixture = documentFixture();

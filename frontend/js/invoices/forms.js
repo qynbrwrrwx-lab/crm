@@ -1,71 +1,44 @@
 // Formulaires commerciaux : voir README.md.
 
+function readInvoiceCreationForm() {
+  return {
+    contactId: document.getElementById("invoiceContact").value,
+    productId: document.getElementById("invoiceProduct").value,
+    quantity: Number(document.getElementById("invoiceQuantity").value),
+    paymentMethod: document.getElementById("paymentMethod").value
+  };
+}
+
+function buildInvoiceCreationPayload({ contactId, productId, quantity, paymentMethod }) {
+  return {
+    type: "invoice",
+    contactId,
+    paymentMethod,
+    products: [{ productId, quantity }]
+  };
+}
+
 async function createInvoice() {
-
-  const contactId =
-    document.getElementById("invoiceContact").value;
-
-  const productId =
-    document.getElementById("invoiceProduct").value;
-
-  const quantity =
-    document.getElementById("invoiceQuantity").value;
-
-  const type = "invoice";
-
-  const paymentMethod =
-    document.getElementById("paymentMethod").value;
-
-  if (!contactId || !productId) {
-
-    showToast(
-      "Contact et produit obligatoires ❗"
-    );
-
+  const form = readInvoiceCreationForm();
+  if (!form.contactId || !form.productId) {
+    showToast("Contact et produit obligatoires ❗");
     return;
   }
-
+  const lockKey = "invoice:create";
+  if (documentActionLocks.has(lockKey)) return;
+  documentActionLocks.add(lockKey);
   showLoader();
-
   try {
-
-    await apiFetch("/api/invoices", {
-
-      method: "POST",
-
-      body: JSON.stringify({
-
-        type,
-        contactId,
-        paymentMethod,
-
-        products: [
-          {
-            productId,
-            quantity: Number(quantity)
-          }
-        ]
-      })
-    });
-
+    await apiFetch("/api/invoices", { method: "POST", body: JSON.stringify(buildInvoiceCreationPayload(form)) });
     await loadInvoices();
-
     await loadProducts();
-
     await loadInvoiceData();
-
     showToast("Document créé ✅");
-
   } catch (err) {
-
     console.error(err);
-
-    showToast(
-      err.message || "Erreur API"
-    );
-
+    showToast(err.message || "Erreur API");
   } finally {
-
+    documentActionLocks.delete(lockKey);
     hideLoader();
   }
 }
