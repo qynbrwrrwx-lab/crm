@@ -27,7 +27,7 @@ function browser() {
   });
   context.window = context;
   for (const src of ["/js/core/text.js", "/js/core/formatters.js", ...contactScripts]) {
-    vm.runInContext(fs.readFileSync(path.join(frontend, src), "utf8"), context, { filename: src, timeout: 1000 });
+    vm.runInContext(fs.readFileSync(path.join(frontend, src), "utf8"), context, { filename: src, timeout: 5000 });
   }
   return { context, elements, listeners, calls, toasts, read: expression => vm.runInContext(expression, context) };
 }

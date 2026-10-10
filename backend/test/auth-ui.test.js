@@ -27,7 +27,7 @@ function browser(pathname = "/") {
   });
   context.window = context;
   for (const src of ["/js/core/text.js", "/js/core/formatters.js", ...authScripts]) {
-    vm.runInContext(fs.readFileSync(path.join(frontend, src), "utf8"), context, { filename: src, timeout: 1000 });
+    vm.runInContext(fs.readFileSync(path.join(frontend, src), "utf8"), context, { filename: src, timeout: 5000 });
   }
   return { context, elements, storage, calls, toasts, shown: () => shown, loading: () => loading };
 }

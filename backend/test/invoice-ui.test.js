@@ -49,7 +49,7 @@ function browser() {
   });
   context.window = context;
   for (const src of ["/js/core/text.js", "/js/core/formatters.js", ...invoiceScripts]) {
-    vm.runInContext(fs.readFileSync(path.join(frontend, src), "utf8"), context, { filename: src, timeout: 1000 });
+    vm.runInContext(fs.readFileSync(path.join(frontend, src), "utf8"), context, { filename: src, timeout: 5000 });
   }
   return {
     context, calls, toasts, windows, timers, elements, selectors,

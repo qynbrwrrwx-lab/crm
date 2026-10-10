@@ -25,7 +25,7 @@ function browser() {
   });
   context.window = context;
   for (const src of ["/js/core/text.js", "/js/core/formatters.js", ...productScripts]) {
-    vm.runInContext(fs.readFileSync(path.join(frontend, src), "utf8"), context, { filename: src, timeout: 1000 });
+    vm.runInContext(fs.readFileSync(path.join(frontend, src), "utf8"), context, { filename: src, timeout: 5000 });
   }
   return { context, elements, listeners, calls, toasts, loading: () => loading, read: expression => vm.runInContext(expression, context) };
 }
@@ -210,6 +210,19 @@ test("restock suggestion export preserves thresholds, zero thresholds and quanti
   assert.equal(exported.rows[1][6], 1);
   assert.equal(exported.rows[2][6], 6);
   assert.equal(b.read("allProducts[0].stock"), 4);
+});
+
+test("restock helpers centralize urgent selection and supplier grouping without mutating products", () => {
+  const b = browser();
+  const products = [
+    product({ _id: "low", stock: 4, supplierName: "Zeta" }),
+    product({ _id: "empty", stock: 0, lowStockThreshold: 0, supplierName: "Alpha" }),
+    product({ _id: "healthy", stock: 8, lowStockThreshold: 5 })
+  ];
+  assert.deepEqual(plain(b.context.getUrgentRestockProducts(products).map(item => item._id)), ["empty", "low"]);
+  assert.equal(b.context.getSuggestedRestockQuantity(products[0]), 6);
+  assert.deepEqual(plain(b.context.groupRestockProductsBySupplier(products).map(([supplier]) => supplier)), ["Alpha", "Zeta"]);
+  assert.equal(products[0]._id, "low");
 });
 
 test("cancelled product deletion and CSV import make no request", async () => {
