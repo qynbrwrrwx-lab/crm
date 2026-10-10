@@ -129,6 +129,20 @@ test("commercial summary counts paid product lines only and supports both refere
   assert.equal(summary.lastDocument.paymentStatus, "pending");
 });
 
+test("commercial summary calculation sorts related documents without changing its source", () => {
+  const b = browser();
+  const invoices = [
+    { _id: "older", type: "invoice", paymentStatus: "paid", createdAt: "2026-01-01", products: [{ productId: "product", quantity: 2, lineTTC: 120 }] },
+    { _id: "latest", type: "order", createdAt: "2026-02-01", products: [{ productId: { _id: "product" }, quantity: 3 }] },
+    { _id: "other", type: "invoice", paymentStatus: "paid", createdAt: "2026-03-01", products: [{ productId: "other", quantity: 99, lineTTC: 999 }] }
+  ];
+  const summary = b.context.getProductCommercialSummaryFromInvoices(invoices, "product");
+  assert.deepEqual(plain(summary.relatedDocuments.map(item => item._id)), ["latest", "older"]);
+  assert.equal(summary.quantitySold, 2);
+  assert.equal(summary.revenue, 120);
+  assert.equal(invoices[0]._id, "older");
+});
+
 test("commercial summary renders the latest document without shadowing the browser document", () => {
   const b = browser();
   b.context.renderProductCommercialSummary({ quantitySold: 2, revenue: 240, relatedDocuments: [], lastDocument: { type: "invoice", invoiceNumber: "FAC-1", createdAt: "2026-01-01" } });

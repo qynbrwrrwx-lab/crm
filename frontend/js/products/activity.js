@@ -1,23 +1,30 @@
 // Produits : activity. Voir README.md.
 
+const productDocumentLabels = { quote: "Devis", order: "Commande", invoice: "Facture", credit_note: "Avoir" };
+
+function matchesProductId(item, productId) {
+  return String(item.productId?._id || item.productId || "") === String(productId);
+}
+
+function getProductCommercialSummaryFromInvoices(invoices, productId) {
+  const relatedDocuments = invoices
+    .filter(document => Array.isArray(document.products) && document.products.some(item => matchesProductId(item, productId)))
+    .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt));
+  const paidLines = relatedDocuments
+    .filter(document => document.type === "invoice" && document.paymentStatus === "paid")
+    .flatMap(document => document.products.filter(item => matchesProductId(item, productId)));
+  return {
+    quantitySold: paidLines.reduce((total, item) => total + Number(item.quantity || 0), 0),
+    revenue: paidLines.reduce((total, item) => total + Number(item.lineTTC || 0), 0),
+    lastDocument: relatedDocuments[0] || null,
+    relatedDocuments
+  };
+}
+
 async function getProductCommercialSummary(productId) {
   try {
     const invoices = await apiFetch("/api/invoices");
-    const matchesProduct = item => String(item.productId?._id || item.productId || "") === String(productId);
-    const relatedDocuments = invoices
-      .filter(document => Array.isArray(document.products) && document.products.some(matchesProduct))
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    const paidLines = relatedDocuments
-      .filter(document => document.type === "invoice" && document.paymentStatus === "paid")
-      .flatMap(document => document.products.filter(matchesProduct));
-
-    return {
-      quantitySold: paidLines.reduce((total, item) => total + Number(item.quantity || 0), 0),
-      revenue: paidLines.reduce((total, item) => total + Number(item.lineTTC || 0), 0),
-      lastDocument: relatedDocuments[0] || null,
-      relatedDocuments
-    };
+    return getProductCommercialSummaryFromInvoices(invoices, productId);
   } catch (err) {
     console.error(err);
     return { quantitySold: 0, revenue: 0, lastDocument: null, relatedDocuments: [], unavailable: true };
@@ -51,8 +58,7 @@ function renderProductCommercialSummary(summary) {
     return;
   }
 
-  const types = { quote: "Devis", order: "Commande", invoice: "Facture", credit_note: "Avoir" };
-  lastDocument.textContent = `${types[latestDocument.type] || "Document"} · ${latestDocument.invoiceNumber || "Sans numéro"}`;
+  lastDocument.textContent = `${productDocumentLabels[latestDocument.type] || "Document"} · ${latestDocument.invoiceNumber || "Sans numéro"}`;
   lastDocumentDate.textContent = new Date(latestDocument.createdAt).toLocaleDateString("fr-FR", {
     day: "2-digit", month: "long", year: "numeric"
   });
@@ -69,9 +75,8 @@ function renderProductDocumentHistory(documents) {
     return;
   }
 
-  const labels = { quote: "Devis", order: "Commande", invoice: "Facture", credit_note: "Avoir" };
   list.innerHTML = documents.slice(0, 5).map(item => {
-    const label = labels[item.type] || "Document";
+    const label = productDocumentLabels[item.type] || "Document";
     const payment = item.type === "invoice"
       ? (item.paymentStatus === "paid" ? "Encaissée" : "À encaisser")
       : "Voir le détail";
