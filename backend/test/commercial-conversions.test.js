@@ -7,6 +7,7 @@ const StockMovement = require("../models/stockMovement");
 const DocumentCounter = require("../models/documentCounter");
 const AuditLog = require("../models/auditLog");
 const routes = require("../routes/invoiceRoutes");
+const { getQuoteConversionError, buildOrderData } = require("../controllers/quote-conversion/convert");
 
 function handler(path, method = "post") {
   const route = routes.stack.find(layer => layer.route?.path === path && layer.route.methods[method]);
@@ -63,6 +64,18 @@ function source(type = "quote") {
     async save() {}
   };
 }
+
+test("quote conversion helpers preserve eligibility and the order data contract", () => {
+  assert.deepEqual(getQuoteConversionError(null), { status: 404, error: "Devis introuvable" });
+  assert.match(getQuoteConversionError({ type: "quote", status: "draft" }).error, /doit être accepté/);
+  const quote = source();
+  const order = buildOrderData(quote, "owner", "CMD-1");
+  assert.equal(order.invoiceNumber, "CMD-1");
+  assert.equal(order.sourceQuoteId, "source");
+  assert.equal(order.products[0].unitHT, 100);
+  assert.equal(order.paymentDueDays, 15);
+  assert.equal(getQuoteConversionError(quote), null);
+});
 
 for (const path of ["/convert-to-order/:id", "/convert-to-invoice/:id"]) {
   test(`${path} refuses a document unavailable to the current account`, async t => {

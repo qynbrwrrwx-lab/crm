@@ -4,6 +4,43 @@ const StockMovement = require("../../models/stockMovement");
 const { recordAuditEvent } = require("../../services/auditService");
 const { nextDocumentNumber } = require("../../services/documentNumberService");
 
+function getQuoteConversionError(quote) {
+  if (!quote) return { status: 404, error: "Devis introuvable" };
+  if (quote.type !== "quote") return { status: 400, error: "Ce document n'est pas un devis" };
+  if (quote.status !== "accepted") return { status: 400, error: "Le devis doit être accepté avant de pouvoir être transformé en commande" };
+  if (quote.convertedToOrderId) return { status: 400, error: "Ce devis a déjà été transformé en commande" };
+  return null;
+}
+
+function buildOrderData(quote, userId, invoiceNumber) {
+  return {
+    invoiceNumber,
+    userId,
+    type: "order",
+    status: "draft",
+    contactId: quote.contactId,
+    sourceQuoteId: quote._id,
+    products: quote.products.map(item => ({
+      productId: item.productId,
+      quantity: item.quantity,
+      discount: item.discount || 0,
+      productName: item.productName,
+      unitHT: item.unitHT,
+      unitTTC: item.unitTTC,
+      tva: item.tva,
+      lineHT: item.lineHT,
+      lineTTC: item.lineTTC
+    })),
+    totalHT: quote.totalHT,
+    totalTTC: quote.totalTTC,
+    paymentMethod: "pending",
+    paymentTerms: quote.paymentTerms || "",
+    paymentDueDays: Number(quote.paymentDueDays ?? 30),
+    quoteValidityDays: quote.quoteValidityDays || null,
+    paymentStatus: "pending"
+  };
+}
+
 async function convertQuoteToOrder(req, res) {
 
     try {
@@ -15,40 +52,8 @@ async function convertQuoteToOrder(req, res) {
           userId: req.userId
         });
 
-      if (!quote) {
-
-        return res.status(404).json({
-          error: "Devis introuvable"
-        });
-
-      }
-
-      // Vérifier que c'est bien un devis
-      if (quote.type !== "quote") {
-
-        return res.status(400).json({
-          error: "Ce document n'est pas un devis"
-        });
-
-      }
-
-      // Vérifier que le devis est accepté
-      if (quote.status !== "accepted") {
-
-        return res.status(400).json({
-          error: "Le devis doit être accepté avant de pouvoir être transformé en commande"
-        });
-
-      }
-
-      // Empêcher une deuxième conversion
-      if (quote.convertedToOrderId) {
-
-        return res.status(400).json({
-          error: "Ce devis a déjà été transformé en commande"
-        });
-
-      }
+      const conversionError = getQuoteConversionError(quote);
+      if (conversionError) return res.status(conversionError.status).json({ error: conversionError.error });
 
       // ================= STOCK =================
 
@@ -88,48 +93,7 @@ async function convertQuoteToOrder(req, res) {
 
       // ================= CRÉATION COMMANDE =================
 
-      const order =
-        await Invoice.create({
-
-          invoiceNumber: orderNumber,
-
-          userId: req.userId,
-
-          type: "order",
-
-          status: "draft",
-
-          contactId: quote.contactId,
-
-          sourceQuoteId: quote._id,
-
-          products: quote.products.map(item => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            discount: item.discount || 0,
-            productName: item.productName,
-            unitHT: item.unitHT,
-            unitTTC: item.unitTTC,
-            tva: item.tva,
-            lineHT: item.lineHT,
-            lineTTC: item.lineTTC
-          })),
-
-          totalHT: quote.totalHT,
-
-          totalTTC: quote.totalTTC,
-
-          paymentMethod: "pending",
-
-          paymentTerms: quote.paymentTerms || "",
-
-          paymentDueDays: Number(quote.paymentDueDays ?? 30),
-
-          quoteValidityDays: quote.quoteValidityDays || null,
-
-          paymentStatus: "pending"
-
-        });
+      const order = await Invoice.create(buildOrderData(quote, req.userId, orderNumber));
 
       // ================= MISE À JOUR STOCK =================
 
@@ -220,4 +184,4 @@ async function convertQuoteToOrder(req, res) {
 
 }
 
-module.exports = { convertQuoteToOrder };
+module.exports = { convertQuoteToOrder, getQuoteConversionError, buildOrderData };
