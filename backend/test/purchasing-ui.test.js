@@ -69,6 +69,11 @@ test('supplier cards link products and expenses case-insensitively and escape no
  b.context.syncSupplierSuggestions();assert.match(b.node('expenseSupplierSuggestions').innerHTML,/Acme/);
  b.context.startExpenseForSupplier('s');assert.deepEqual(b.navigation,['expensesSection']);assert.equal(b.node('expenseSupplier').value,'Acme');
 });
+test('supplier helpers select matching suppliers and summarize related purchases',()=>{
+ const b=browser(),suppliers=[supplier,{_id:'other',name:'Beta',notes:'Matériel'}],products=[{supplierName:'ACME',stock:0,lowStockThreshold:0},{supplierName:'acme',stock:8,lowStockThreshold:5}],expenses=[expense({supplier:'Acme'}),expense({supplier:'Other'})];
+ assert.deepEqual(JSON.parse(JSON.stringify(b.context.selectSuppliers(suppliers,'matériel').map(item=>item._id))),['other']);
+ const usage=b.context.getSupplierUsage(suppliers[0],products,expenses);assert.equal(usage.products.length,2);assert.equal(usage.urgentProducts.length,1);assert.equal(usage.expenses.length,1);assert.equal(products[0].supplierName,'ACME');
+});
 test('supplier editing saves trimmed contact fields through PUT',async()=>{
  const b=browser();b.set('allSuppliers',[supplier]);b.context.editSupplier('s');b.node('supplierName').value=' Acme ';b.context.loadSuppliers=async()=>{};await b.context.saveSupplier({preventDefault(){}});
  assert.equal(b.calls[0][0],'/api/suppliers/s');assert.equal(b.calls[0][1].method,'PUT');assert.equal(JSON.parse(b.calls[0][1].body).name,'Acme');assert.equal(b.read('editingSupplierId'),null);
