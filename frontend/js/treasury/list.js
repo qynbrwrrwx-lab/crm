@@ -1,5 +1,16 @@
 // Trésorerie : list.
 
+function getTreasuryEntryPresentation(entry) {
+  return {
+    id: entry._id,
+    className: `treasury-entry-row ${entry.type}`,
+    label: entry.label,
+    dateLabel: treasuryDate(entry.date),
+    amountLabel: `${entry.type === "income" ? "+" : "−"}${treasuryMoney(entry.amount)}`,
+    isImported: Boolean(entry.importFingerprint)
+  };
+}
+
 function renderTreasury() {
   const income = treasuryEntries.filter(entry => entry.type === "income").reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
   const expense = treasuryEntries.filter(entry => entry.type === "expense").reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
@@ -20,7 +31,11 @@ function renderTreasury() {
     const matchesType = typeFilter === "all" || entry.type === typeFilter || (typeFilter === "imported" && Boolean(entry.importFingerprint));
     return matchesText && matchesType;
   });
-  list.innerHTML = visibleEntries.length ? visibleEntries.map(entry => `<article class="treasury-entry-row ${entry.type}"><div><strong>${escapeHtml(entry.label)}${entry.importFingerprint ? '<span class="treasury-imported-badge">Importé</span>' : ""}</strong><small>${treasuryDate(entry.date)}</small></div><b>${entry.type === "income" ? "+" : "−"}${treasuryMoney(entry.amount)}</b><div class="expense-actions"><button type="button" class="expense-text-action" onclick="editTreasuryEntry('${entry._id}')">Modifier</button><button type="button" class="expense-text-action danger" onclick="deleteTreasuryEntry('${entry._id}')">Supprimer</button></div></article>`).join("") : `<p class="empty-state">${treasuryEntries.length ? "Aucun mouvement ne correspond aux filtres." : "Aucun mouvement manuel pour le moment."}</p>`;
+  list.innerHTML = visibleEntries.length ? visibleEntries.map(entry => {
+    const item = getTreasuryEntryPresentation(entry);
+    const badge = item.isImported ? '<span class="treasury-imported-badge">Importé</span>' : "";
+    return `<article class="${item.className}"><div><strong>${escapeHtml(item.label)}${badge}</strong><small>${item.dateLabel}</small></div><b>${item.amountLabel}</b><div class="expense-actions"><button type="button" class="expense-text-action" onclick="editTreasuryEntry('${item.id}')">Modifier</button><button type="button" class="expense-text-action danger" onclick="deleteTreasuryEntry('${item.id}')">Supprimer</button></div></article>`;
+  }).join("") : `<p class="empty-state">${treasuryEntries.length ? "Aucun mouvement ne correspond aux filtres." : "Aucun mouvement manuel pour le moment."}</p>`;
   renderTreasuryForecast(balance);
   renderTreasuryChart();
   renderTreasuryReconciliationSuggestions();
