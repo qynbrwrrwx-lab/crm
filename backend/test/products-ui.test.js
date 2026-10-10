@@ -204,6 +204,12 @@ test("stock history escapes document references and error messages", async () =>
   assert.doesNotMatch(await b.context.getStockHistoryMarkup("product"), /<script>/);
 });
 
+test("stock history presentation centralizes movement direction and document reference", () => {
+  const b = browser(); const restock = b.context.getStockHistoryPresentation({ quantity: 3, type: "restock", createdAt: "2026-01-01", documentId: { invoiceNumber: "F-1" } });
+  assert.deepEqual(plain(restock), { className: "stock-history-row in", label: "Réassort", documentNumber: " · F-1", quantityLabel: "+3", dateLabel: b.read("new Date('2026-01-01').toLocaleDateString('fr-FR')") });
+  assert.equal(b.context.getStockHistoryPresentation({ quantity: -2, type: "sale", createdAt: "2026-01-01" }).className, "stock-history-row out");
+});
+
 test("restock suggestion export preserves thresholds, zero thresholds and quantity ordering", () => {
   const b = browser();
   b.context.fixtures = [product(), product({ _id: "zero", stock: 0, lowStockThreshold: 0 }), product({ _id: "healthy", stock: 20 })];

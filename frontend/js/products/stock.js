@@ -1,18 +1,25 @@
 // Produits : stock. Voir README.md.
 
+function getStockHistoryPresentation(movement) {
+  const quantity = Number(movement.quantity);
+  const documentNumber = movement.documentId?.invoiceNumber ? ` · ${movement.documentId.invoiceNumber}` : "";
+  return {
+    className: `stock-history-row ${quantity > 0 ? "in" : "out"}`,
+    label: movement.type === "restock" ? "Réassort" : "Vente",
+    documentNumber,
+    quantityLabel: `${quantity > 0 ? "+" : ""}${quantity}`,
+    dateLabel: new Date(movement.createdAt).toLocaleDateString("fr-FR")
+  };
+}
+
 function renderStockHistory(movements) {
   if (!movements.length) return '<p class="empty-state">Aucun mouvement de stock pour le moment.</p>';
   return movements.map(movement => {
-    const quantity = Number(movement.quantity);
-    const sign = quantity > 0 ? "+" : "";
-    const label = movement.type === "restock" ? "Réassort" : "Vente";
-    const documentNumber = movement.documentId?.invoiceNumber
-      ? ` · ${movement.documentId.invoiceNumber}`
-      : "";
-    return `<div class="stock-history-row ${quantity > 0 ? "in" : "out"}">
-      <span>${escapeHtml(label)}${escapeHtml(documentNumber)}</span>
-      <strong>${sign}${quantity}</strong>
-      <small>${new Date(movement.createdAt).toLocaleDateString("fr-FR")}</small>
+    const item = getStockHistoryPresentation(movement);
+    return `<div class="${item.className}">
+      <span>${escapeHtml(item.label)}${escapeHtml(item.documentNumber)}</span>
+      <strong>${item.quantityLabel}</strong>
+      <small>${item.dateLabel}</small>
     </div>`;
   }).join("");
 }
