@@ -60,6 +60,12 @@ test("catalog preserves stock states and escapes product text", () => {
   assert.doesNotMatch(body, /<img src=x>/);
 });
 
+test("product card presentation centralizes prices, stock state and supplier data", () => {
+  const b = browser(); const item = product({ supplierName: "Acme", supplierReference: "REF", description: "Description" });
+  assert.deepEqual(plain(b.context.getProductCardPresentation(item)), { id: "product", stockState: "low", stockLabel: "Stock faible", category: "Matériel", reference: "Sans référence", name: "Article", description: "Description", supplierName: "Acme", supplierReference: "REF", priceHTLabel: b.context.formatProductCurrency(100), tvaLabel: "20 %", priceTTCLabel: b.context.formatProductCurrency(120), marginHTLabel: b.context.formatProductCurrency(40), stock: 4, threshold: 5, stockMeterWidth: 35 });
+  assert.equal(b.context.getProductCardPresentation(product({ stock: 6 })).stockMeterWidth, 100);
+});
+
 test("catalog filters and priority sort retain only matching products without mutating shared state", () => {
   const b = browser();
   b.context.fixtures = [product({ _id: "low" }), product({ _id: "empty", stock: 0 }), product({ _id: "other", category: "Autre" }), product({ _id: "healthy", stock: 20 })];
