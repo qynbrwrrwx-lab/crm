@@ -94,6 +94,14 @@ function getBestSellers(documents) {
     .slice(0, 3);
 }
 
+function getBestSellerPresentations(documents) {
+  return getBestSellers(documents).map(([name, quantity], index) => ({
+    rank: index + 1,
+    name,
+    quantityLabel: `${quantity} unité${quantity > 1 ? "s" : ""}`
+  }));
+}
+
 function updateCommercialInsights(documents, paidInvoices) {
   const { monthlyRevenue, invoiceCount, previousRevenue } = getMonthlyRevenueInsight(paidInvoices);
   const revenue = document.getElementById("dashboardMonthlyRevenue");
@@ -111,15 +119,15 @@ function updateCommercialInsights(documents, paidInvoices) {
   dashboardPaidInvoices = paidInvoices;
   refreshDashboardPerformance();
 
-  const bestSellers = getBestSellers(documents);
+  const bestSellers = getBestSellerPresentations(documents);
   const container = document.getElementById("dashboardBestSellers");
   if (!container) return;
   container.innerHTML = bestSellers.length
-    ? bestSellers.map(([name, quantity], index) => `
+    ? bestSellers.map(item => `
         <div class="best-seller-row">
-          <span class="best-seller-rank">${index + 1}</span>
-          <strong>${escapeHtml(name)}</strong>
-          <span>${quantity} unité${quantity > 1 ? "s" : ""}</span>
+          <span class="best-seller-rank">${item.rank}</span>
+          <strong>${escapeHtml(item.name)}</strong>
+          <span>${item.quantityLabel}</span>
         </div>
       `).join("")
     : '<p class="empty-state">Pas encore de vente enregistrée.</p>';

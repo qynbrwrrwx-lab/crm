@@ -121,6 +121,17 @@ test('commercial insight helpers distinguish a first payment from a revenue decr
   assert.equal(b.context.getRevenueComparison(insight.monthlyRevenue, insight.previousRevenue).text, '-30 % vs le mois précédent');
   assert.match(b.context.getRevenueComparison(70, 0).text, /Premier encaissement/);
 });
+test('best seller presentation centralizes ranks and quantity labels', () => {
+  const b = browser();
+  const items = b.context.getBestSellerPresentations([
+    { type: 'order', products: [{ productName: 'Clavier', quantity: 3 }, { productName: 'Souris', quantity: 1 }] },
+    { type: 'order', products: [{ productName: 'Clavier', quantity: 2 }] }
+  ]);
+  assert.deepEqual(JSON.parse(JSON.stringify(items)), [
+    { rank: 1, name: 'Clavier', quantityLabel: '5 unités' },
+    { rank: 2, name: 'Souris', quantityLabel: '1 unité' }
+  ]);
+});
 test('onboarding hides completed setup and tolerates API failure', async () => {
   const b = browser(); const responses = { '/api/company': { companyName: 'A', siret: 'B', email: 'C', address: 'D', city: 'E' }, '/api/contacts': [{}], '/api/products': [{}], '/api/invoices': [{ type: 'quote' }] };
   b.context.apiFetch = async url => responses[url]; await b.context.loadOnboardingChecklist();
