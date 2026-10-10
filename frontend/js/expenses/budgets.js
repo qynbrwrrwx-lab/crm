@@ -68,9 +68,7 @@ async function deleteExpenseBudget(category) {
   try { await apiFetch(`/api/expense-budgets/${category}`, { method: "DELETE" }); showToast("Budget retiré"); await loadExpenseBudgets(); } catch (error) { showToast(error.message || "Impossible de retirer le budget"); }
 }
 
-function renderExpenseCategoryBreakdown(paidExpenses) {
-  const container = document.getElementById("expenseCategoryBreakdown");
-  if (!container) return;
+function getExpenseCategoryBreakdownPresentation(paidExpenses) {
   const totals = new Map();
   paidExpenses.forEach(expense => {
     const category = expense.category || "Autres";
@@ -78,12 +76,20 @@ function renderExpenseCategoryBreakdown(paidExpenses) {
   });
   const categories = [...totals.entries()].sort(([, left], [, right]) => right - left);
   const grandTotal = categories.reduce((sum, [, total]) => sum + total, 0);
+  return categories.slice(0, 5).map(([category, total]) => ({
+    category,
+    amountLabel: formatExpenseCurrency(total),
+    percentage: grandTotal ? Math.round((total / grandTotal) * 100) : 0
+  }));
+}
+
+function renderExpenseCategoryBreakdown(paidExpenses) {
+  const container = document.getElementById("expenseCategoryBreakdown");
+  if (!container) return;
+  const categories = getExpenseCategoryBreakdownPresentation(paidExpenses);
   if (!categories.length) {
     container.innerHTML = '<p class="empty-state">Les catégories apparaîtront lorsque vous aurez réglé vos premières dépenses.</p>';
     return;
   }
-  container.innerHTML = categories.slice(0, 5).map(([category, total]) => {
-    const percentage = grandTotal ? Math.round((total / grandTotal) * 100) : 0;
-    return `<div class="expense-category-row"><div><strong>${escapeHtml(category)}</strong><span><i style="width:${percentage}%"></i></span></div><b>${formatExpenseCurrency(total)}</b><small>${percentage} % des charges réglées</small></div>`;
-  }).join("");
+  container.innerHTML = categories.map(item => `<div class="expense-category-row"><div><strong>${escapeHtml(item.category)}</strong><span><i style="width:${item.percentage}%"></i></span></div><b>${item.amountLabel}</b><small>${item.percentage} % des charges réglées</small></div>`).join("");
 }

@@ -62,6 +62,9 @@ test('budget summary separates spending, progress and status from its rendered r
  assert.deepEqual(JSON.parse(JSON.stringify(summary)),{category:'Autres',monthlyAmount:100,spent:85,amount:100,percent:85,progress:85,status:'warning'});
  assert.match(b.context.renderExpenseBudgetRow({category:'Autres',monthlyAmount:100}),/expense-budget-row warning/);
 });
+test('expense category presentation ranks paid amounts and computes percentages',()=>{
+ const b=browser(),paid=[expense({category:'Marketing',amountTTC:60}),expense({category:'Autres',amountTTC:40}),expense({category:'Marketing',amountTTC:20})];assert.equal(JSON.stringify(b.context.getExpenseCategoryBreakdownPresentation(paid)),JSON.stringify([{category:'Marketing',amountLabel:b.context.formatExpenseCurrency(80),percentage:67},{category:'Autres',amountLabel:b.context.formatExpenseCurrency(40),percentage:33}]));
+});
 test('budget saving encodes category and preserves zero amount',async()=>{
  const b=browser();b.node('expenseBudgetCategory').value='Frais / divers';b.node('expenseBudgetAmount').value='0';b.context.loadExpenseBudgets=async()=>{};await b.context.saveExpenseBudget({preventDefault(){}});
  assert.equal(b.calls[0][0],'/api/expense-budgets/Frais%20%2F%20divers');assert.deepEqual(JSON.parse(b.calls[0][1].body),{monthlyAmount:0});
