@@ -1,5 +1,19 @@
 // Trésorerie : reconciliation.
 
+function getTreasuryReconciliationPresentation(suggestion) {
+  return {
+    kind: suggestion.kind,
+    id: suggestion.id,
+    entryTypeLabel: suggestion.entry.type === "income" ? "Encaissement importé" : "Débit importé",
+    entryLabel: suggestion.entry.label,
+    entryAmountLabel: treasuryMoney(suggestion.entry.amount),
+    entryDateLabel: treasuryDate(suggestion.entry.date),
+    amount: Number(suggestion.entry.amount),
+    target: suggestion.target,
+    detail: suggestion.detail
+  };
+}
+
 function renderTreasuryReconciliationSuggestions() {
   const container = document.getElementById("treasuryReconciliationList");
   if (!container) return;
@@ -10,7 +24,10 @@ function renderTreasuryReconciliationSuggestions() {
     container.innerHTML = imported.length ? '<p class="empty-state">Aucune correspondance exacte trouvée. Vérifiez vos montants ou saisissez les paiements manuellement.</p>' : '<p class="empty-state">Importez un relevé CSV pour obtenir des suggestions.</p>';
     return;
   }
-  container.innerHTML = suggestions.map(suggestion => `<article class="treasury-reconciliation-row"><div><span>${suggestion.entry.type === "income" ? "Encaissement importé" : "Débit importé"}</span><strong>${escapeHtml(suggestion.entry.label)}</strong><small>${treasuryMoney(suggestion.entry.amount)} · ${treasuryDate(suggestion.entry.date)}</small></div><div class="treasury-reconciliation-target"><small>Correspondance possible</small><strong>${escapeHtml(suggestion.target)}</strong><span>${escapeHtml(suggestion.detail)}</span></div><div class="treasury-reconciliation-actions"><button type="button" class="expense-text-action" onclick="openTreasurySuggestion('${suggestion.kind}', '${suggestion.id}')">Vérifier</button><button type="button" class="secondary-btn" onclick="confirmTreasurySuggestion('${suggestion.kind}', '${suggestion.id}', ${Number(suggestion.entry.amount)})">Valider</button></div></article>`).join("");
+  container.innerHTML = suggestions.map(suggestion => {
+    const item = getTreasuryReconciliationPresentation(suggestion);
+    return `<article class="treasury-reconciliation-row"><div><span>${item.entryTypeLabel}</span><strong>${escapeHtml(item.entryLabel)}</strong><small>${item.entryAmountLabel} · ${item.entryDateLabel}</small></div><div class="treasury-reconciliation-target"><small>Correspondance possible</small><strong>${escapeHtml(item.target)}</strong><span>${escapeHtml(item.detail)}</span></div><div class="treasury-reconciliation-actions"><button type="button" class="expense-text-action" onclick="openTreasurySuggestion('${item.kind}', '${item.id}')">Vérifier</button><button type="button" class="secondary-btn" onclick="confirmTreasurySuggestion('${item.kind}', '${item.id}', ${item.amount})">Valider</button></div></article>`;
+  }).join("");
 }
 
 function openTreasurySuggestion(kind, id) {
