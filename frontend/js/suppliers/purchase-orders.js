@@ -1,4 +1,27 @@
 // Bons de commande fournisseurs : affichage, impression, création et suivi.
+const purchaseOrderStatusLabels = { draft: "Brouillon", sent: "Envoyé", received: "Reçu", cancelled: "Annulé" };
+
+function getPendingPurchaseOrderCount(orders) {
+  return orders.filter(order => order.status === "sent").length;
+}
+
+function getPurchaseOrderDatesMarkup(order) {
+  const sentAt = order.sentAt ? ` · Envoyé le ${new Date(order.sentAt).toLocaleDateString("fr-FR")}` : "";
+  const receivedAt = order.stockReceivedAt ? ` · Stock réceptionné le ${new Date(order.stockReceivedAt).toLocaleDateString("fr-FR")}` : "";
+  return `${sentAt}${receivedAt}`;
+}
+
+function renderPurchaseOrderStatusOptions(order) {
+  return Object.entries(purchaseOrderStatusLabels)
+    .map(([status, label]) => `<option value="${status}" ${order.status === status ? "selected" : ""}>${label}</option>`)
+    .join("");
+}
+
+function renderPurchaseOrderList(orders) {
+  if (!orders.length) return '<article><strong>Aucun bon de commande</strong><small>Créez-en depuis un fournisseur avec des produits à réassortir.</small></article>';
+  return orders.map(order => `<article><strong>${escapeHtml(order.number)}</strong><small>${escapeHtml(order.supplierId?.name || "Fournisseur")} · ${order.lines?.length || 0} ligne(s)${getPurchaseOrderDatesMarkup(order)}</small><button type="button" class="secondary-btn" onclick="printPurchaseOrder('${order._id}')">PDF</button>${order.status === "draft" ? `<button type="button" class="secondary-btn" onclick="sendPurchaseOrder('${order._id}')">Envoyer</button>` : ""}<select onchange="updatePurchaseOrderStatus('${order._id}',this.value)">${renderPurchaseOrderStatusOptions(order)}</select></article>`).join("");
+}
+
 async function renderPurchaseOrders() {
   const list = document.getElementById("suppliersList");
   if (!list || document.getElementById("purchaseOrdersPanel")) return;
@@ -9,10 +32,10 @@ async function renderPurchaseOrders() {
   list.before(panel);
   try {
     const orders = await apiFetch("/api/purchase-orders");
-    const pending = orders.filter(order => order.status === "sent").length;
+    const pending = getPendingPurchaseOrderCount(orders);
     panel.querySelector("span").textContent = `Bons de commande fournisseurs · ${pending} en attente de réception`;
     window.purchaseOrders = orders;
-    document.getElementById("purchaseOrdersList").innerHTML = orders.length ? orders.map(order => `<article><strong>${escapeHtml(order.number)}</strong><small>${escapeHtml(order.supplierId?.name || "Fournisseur")} · ${order.lines?.length || 0} ligne(s)${order.sentAt ? ` · Envoyé le ${new Date(order.sentAt).toLocaleDateString("fr-FR")}` : ""}${order.stockReceivedAt ? ` · Stock réceptionné le ${new Date(order.stockReceivedAt).toLocaleDateString("fr-FR")}` : ""}</small><button type="button" class="secondary-btn" onclick="printPurchaseOrder('${order._id}')">PDF</button>${order.status === "draft" ? `<button type="button" class="secondary-btn" onclick="sendPurchaseOrder('${order._id}')">Envoyer</button>` : ""}<select onchange="updatePurchaseOrderStatus('${order._id}',this.value)">${["draft", "sent", "received", "cancelled"].map(status => `<option value="${status}" ${order.status === status ? "selected" : ""}>${({ draft: "Brouillon", sent: "Envoyé", received: "Reçu", cancelled: "Annulé" })[status]}</option>`).join("")}</select></article>`).join("") : '<article><strong>Aucun bon de commande</strong><small>Créez-en depuis un fournisseur avec des produits à réassortir.</small></article>';
+    document.getElementById("purchaseOrdersList").innerHTML = renderPurchaseOrderList(orders);
   } catch (error) {
     panel.remove();
   }

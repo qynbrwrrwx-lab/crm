@@ -82,6 +82,10 @@ test('purchase order creation selects supplier shortages and keeps zero threshol
  const b=browser();b.set('allSuppliers',[supplier]);b.context.allProducts=[{_id:'p',supplierName:'ACME',name:'Article',stock:0,lowStockThreshold:0},{_id:'healthy',supplierName:'Acme',stock:10,lowStockThreshold:5},{_id:'other',supplierName:'Other',stock:0}];b.context.loadSuppliers=async()=>{};
  await b.context.createPurchaseOrderForSupplier('s');assert.equal(b.calls[0][0],'/api/purchase-orders');assert.equal(b.calls[0][1].method,'POST');assert.deepEqual(JSON.parse(b.calls[0][1].body),{supplierId:'s',lines:[{productId:'p',name:'Article',reference:'',quantity:1}]});
 });
+test('purchase order helpers retain status labels, pending count and draft actions',()=>{
+ const b=browser(),orders=[{_id:'draft',number:'BC-1',supplierId:{name:'Acme'},lines:[{}],status:'draft'},{_id:'sent',number:'BC-2',supplierId:{name:'Beta'},lines:[{},{}],status:'sent',sentAt:'2026-09-01'}];
+ assert.equal(b.context.getPendingPurchaseOrderCount(orders),1);const markup=b.context.renderPurchaseOrderList(orders);assert.match(markup,/Envoyer/);assert.match(markup,/selected>Envoyé/);assert.match(b.context.renderPurchaseOrderList([]),/Aucun bon de commande/);
+});
 test('receiving a purchase order requires confirmation and refreshes stock only after successful update',async()=>{
  const b=browser();let stocks=0;b.context.loadSuppliers=async()=>{};b.context.loadProducts=async()=>stocks++;b.context.confirmAppAction=async()=>false;await b.context.updatePurchaseOrderStatus('o','received');assert.equal(b.calls.length,0);assert.equal(stocks,0);
  b.context.confirmAppAction=async()=>true;await b.context.updatePurchaseOrderStatus('o','received');assert.equal(b.calls[0][0],'/api/purchase-orders/o/status');assert.deepEqual(JSON.parse(b.calls[0][1].body),{status:'received'});assert.equal(stocks,1);
