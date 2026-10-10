@@ -1,18 +1,33 @@
 // expenses : list.
 
-function renderExpenseListRow(expense) {
+function getExpenseListRowPresentation(expense) {
   const isPaid = expense.status === "paid";
-  return `<article class="expense-item ${isPaid ? "is-paid" : "is-pending"}">
+  return {
+    id: expense._id,
+    className: `expense-item ${isPaid ? "is-paid" : "is-pending"}`,
+    contextLabel: `${expense.category || "Autres"} · ${expense.supplier}${expense.recurrence === "monthly" ? " · Mensuelle" : ""}`,
+    label: expense.label,
+    dateLabel: isPaid ? `Réglée le ${formatExpenseDate(expense.paidAt?.slice?.(0, 10))}` : `À régler le ${formatExpenseDate(expense.dueDate?.slice?.(0, 10))}`,
+    amountLabel: formatExpenseCurrency(expense.amountTTC),
+    statusLabel: isPaid ? "Réglée" : "À payer",
+    statusClass: isPaid ? "paid" : "pending",
+    canMarkPaid: !isPaid
+  };
+}
+
+function renderExpenseListRow(expense) {
+  const item = getExpenseListRowPresentation(expense);
+  return `<article class="${item.className}">
     <div class="expense-item-main">
-      <span class="expense-supplier">${escapeHtml(expense.category || "Autres")} · ${escapeHtml(expense.supplier)}${expense.recurrence === "monthly" ? " · Mensuelle" : ""}</span>
-      <h3>${escapeHtml(expense.label)}</h3>
-      <small>${isPaid ? `Réglée le ${formatExpenseDate(expense.paidAt?.slice?.(0, 10))}` : `À régler le ${formatExpenseDate(expense.dueDate?.slice?.(0, 10))}`}</small>
+      <span class="expense-supplier">${escapeHtml(item.contextLabel)}</span>
+      <h3>${escapeHtml(item.label)}</h3>
+      <small>${item.dateLabel}</small>
     </div>
-    <div class="expense-item-amount"><strong>${formatExpenseCurrency(expense.amountTTC)}</strong><span class="expense-status ${isPaid ? "paid" : "pending"}">${isPaid ? "Réglée" : "À payer"}</span></div>
+    <div class="expense-item-amount"><strong>${item.amountLabel}</strong><span class="expense-status ${item.statusClass}">${item.statusLabel}</span></div>
     <div class="expense-actions">
-      ${isPaid ? "" : `<button type="button" class="secondary-btn expense-pay-btn" onclick="markExpensePaid('${expense._id}')">Marquer réglée</button>`}
-      <button type="button" class="expense-text-action" onclick="editExpense('${expense._id}')">Modifier</button>
-      <button type="button" class="expense-text-action danger" onclick="deleteExpense('${expense._id}')">Supprimer</button>
+      ${item.canMarkPaid ? `<button type="button" class="secondary-btn expense-pay-btn" onclick="markExpensePaid('${item.id}')">Marquer réglée</button>` : ""}
+      <button type="button" class="expense-text-action" onclick="editExpense('${item.id}')">Modifier</button>
+      <button type="button" class="expense-text-action danger" onclick="deleteExpense('${item.id}')">Supprimer</button>
     </div>
   </article>`;
 }

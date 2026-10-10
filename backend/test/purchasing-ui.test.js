@@ -29,6 +29,9 @@ test('expense filters combine text, category and overdue state while keeping glo
  assert.equal((b.node('expensesList').innerHTML.match(/<article/g)||[]).length,1);assert.match(b.node('expensesList').innerHTML,/&lt;achat&gt;/);
  assert.equal(b.node('expensesPendingTotal').textContent,b.context.formatCurrency(80));assert.equal(b.node('expensesPaidTotal').textContent,b.context.formatCurrency(60));
 });
+test('expense row presentation centralizes status, due date and payment action',()=>{
+ const b=browser(),pending=expense({recurrence:'monthly'});assert.equal(JSON.stringify(b.context.getExpenseListRowPresentation(pending)),JSON.stringify({id:'e',className:'expense-item is-pending',contextLabel:'Autres · Acme · Mensuelle',label:'Achat',dateLabel:`À régler le ${b.context.formatExpenseDate('2026-09-01')}`,amountLabel:b.context.formatExpenseCurrency(40),statusLabel:'À payer',statusClass:'pending',canMarkPaid:true}));const paid=b.context.getExpenseListRowPresentation(expense({status:'paid',paidAt:'2026-09-02'}));assert.equal(paid.dateLabel,`Réglée le ${b.context.formatExpenseDate('2026-09-02')}`);assert.equal(paid.canMarkPaid,false);
+});
 test('expense selection keeps totals global while returning only matching rows',()=>{
  const b=browser();const expenses=[expense({_id:'late',label:'Hébergement',amountTTC:80}),expense({_id:'paid',status:'paid',amountTTC:60}),expense({_id:'future',dueDate:'2026-12-01'})];
  const selected=b.context.selectExpenses(expenses,{query:'hébergement',status:'overdue',category:'Autres'});
