@@ -70,6 +70,16 @@ test('client follow-up prioritizes the oldest date without mutating contacts', (
   assert.deepEqual(b.calls, ['contacts', 'old']); assert.equal(contacts[0]._id, 'new');
   assert.equal(b.node('dashboardFollowUpAlertDetail').textContent, 'Priorité : <Client>.');
 });
+test('client follow-up presentation centralizes the priority and empty states', () => {
+  const b = browser();
+  const now = new b.context.Date('2026-09-15T12:00:00Z');
+  const due = b.context.getClientFollowUpAlertPresentation([
+    { _id: 'later', companyName: 'B', nextFollowUpAt: '2026-09-10' },
+    { _id: 'first', firstname: 'A', lastname: 'Client', nextFollowUpAt: '2026-09-01' }
+  ], now);
+  assert.deepEqual(JSON.parse(JSON.stringify(due)), { label: '2 relances client à effectuer', detail: 'Priorité : A Client.', buttonLabel: 'Voir', contactId: 'first' });
+  assert.equal(b.context.getClientFollowUpAlertPresentation([], now).buttonLabel, 'Clients');
+});
 test('recent activity escapes names, sorts and limits to six without modifying input', () => {
   const b = browser(); const docs = Array.from({ length: 8 }, (_, i) => ({ _id: String(i), invoiceNumber: '<num>', contactId: { companyName: '<client>' }, createdAt: `2026-09-0${i + 1}`, totalTTC: 10, type: 'invoice' }));
   b.context.updateRecentActivity(docs); const body = b.node('dashboardRecentActivityList').innerHTML;

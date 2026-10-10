@@ -42,6 +42,30 @@ async function updateElectronicInvoicingAlert(invoices) {
   }
 }
 
+function getClientFollowUpAlertPresentation(contacts, now = new Date()) {
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const due = contacts
+    .filter(contact => contact.nextFollowUpAt && new Date(contact.nextFollowUpAt) <= today)
+    .sort((left, right) => new Date(left.nextFollowUpAt) - new Date(right.nextFollowUpAt));
+  if (!due.length) {
+    return {
+      label: "Aucune relance client à prévoir",
+      detail: "Planifiez une prochaine relance depuis une fiche client.",
+      buttonLabel: "Clients",
+      contactId: null
+    };
+  }
+  const first = due[0];
+  const name = first.companyName || `${first.firstname || ""} ${first.lastname || ""}`.trim() || "Client";
+  return {
+    label: `${due.length} relance${due.length > 1 ? "s" : ""} client à effectuer`,
+    detail: `Priorité : ${name}.`,
+    buttonLabel: "Voir",
+    contactId: first._id
+  };
+}
+
 function updateClientFollowUpAlert(contacts) {
   const label = document.getElementById("dashboardFollowUpAlertLabel");
   const detail = document.getElementById("dashboardFollowUpAlertDetail");
@@ -49,27 +73,18 @@ function updateClientFollowUpAlert(contacts) {
   const dot = document.getElementById("dashboardFollowUpAlertDot");
   if (!label || !detail || !button) return;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const due = contacts
-    .filter(contact => contact.nextFollowUpAt && new Date(contact.nextFollowUpAt) <= today)
-    .sort((left, right) => new Date(left.nextFollowUpAt) - new Date(right.nextFollowUpAt));
-  if (!due.length) {
-    label.textContent = "Aucune relance client à prévoir";
-    detail.textContent = "Planifiez une prochaine relance depuis une fiche client.";
-    button.textContent = "Clients";
+  const presentation = getClientFollowUpAlertPresentation(contacts);
+  label.textContent = presentation.label;
+  detail.textContent = presentation.detail;
+  button.textContent = presentation.buttonLabel;
+  if (!presentation.contactId) {
     button.onclick = () => showSection("contacts");
     dot?.classList.remove("is-due");
     return;
   }
-  const first = due[0];
-  const name = first.companyName || `${first.firstname || ""} ${first.lastname || ""}`.trim() || "Client";
-  label.textContent = `${due.length} relance${due.length > 1 ? "s" : ""} client à effectuer`;
-  detail.textContent = `Priorité : ${name}.`;
-  button.textContent = "Voir";
   button.onclick = () => {
     showSection("contacts");
-    openClientProfile(first._id);
+    openClientProfile(presentation.contactId);
   };
   dot?.classList.add("is-due");
 }
