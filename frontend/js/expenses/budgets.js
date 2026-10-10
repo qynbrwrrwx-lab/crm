@@ -11,6 +11,25 @@ function currentMonthPaidByCategory(category) {
     .reduce((total, expense) => total + Number(expense.amountTTC || 0), 0);
 }
 
+function getExpenseBudgetSummary(budget) {
+  const spent = currentMonthPaidByCategory(budget.category);
+  const amount = Number(budget.monthlyAmount || 0);
+  const percent = amount ? Math.round((spent / amount) * 100) : 0;
+  return {
+    ...budget,
+    spent,
+    amount,
+    percent,
+    progress: Math.min(percent, 100),
+    status: percent >= 100 ? "over" : percent >= 80 ? "warning" : "healthy"
+  };
+}
+
+function renderExpenseBudgetRow(budget) {
+  const { category, spent, amount, percent, progress, status } = getExpenseBudgetSummary(budget);
+  return `<article class="expense-budget-row ${status}"><div><strong>${escapeHtml(category)}</strong><span><i style="width:${progress}%"></i></span></div><div><b>${formatExpenseCurrency(spent)} <small>/ ${formatExpenseCurrency(amount)}</small></b><em>${percent} % utilisé</em></div><button type="button" class="expense-text-action danger" onclick="deleteExpenseBudget('${encodeURIComponent(category)}')">Retirer</button></article>`;
+}
+
 function renderExpenseBudgets() {
   const container = document.getElementById("expenseBudgetsList");
   if (!container) return;
@@ -18,13 +37,7 @@ function renderExpenseBudgets() {
     container.innerHTML = '<p class="empty-state">Ajoutez un budget mensuel pour suivre une catégorie.</p>';
     return;
   }
-  container.innerHTML = allExpenseBudgets.map(budget => {
-    const spent = currentMonthPaidByCategory(budget.category);
-    const amount = Number(budget.monthlyAmount || 0);
-    const percent = amount ? Math.round((spent / amount) * 100) : 0;
-    const status = percent >= 100 ? "over" : percent >= 80 ? "warning" : "healthy";
-    return `<article class="expense-budget-row ${status}"><div><strong>${escapeHtml(budget.category)}</strong><span><i style="width:${Math.min(percent, 100)}%"></i></span></div><div><b>${formatExpenseCurrency(spent)} <small>/ ${formatExpenseCurrency(amount)}</small></b><em>${percent} % utilisé</em></div><button type="button" class="expense-text-action danger" onclick="deleteExpenseBudget('${encodeURIComponent(budget.category)}')">Retirer</button></article>`;
-  }).join("");
+  container.innerHTML = allExpenseBudgets.map(renderExpenseBudgetRow).join("");
 }
 
 async function loadExpenseBudgets() {

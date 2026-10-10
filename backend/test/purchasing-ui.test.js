@@ -48,6 +48,12 @@ test('monthly budget counts only settled current-month expenses and marks oversp
  const b=browser();b.set('allExpenses',[expense({status:'paid',amountTTC:120,paidAt:'2026-09-05'}),expense({status:'paid',amountTTC:500,paidAt:'2026-08-05'}),expense({amountTTC:999})]);b.set('allExpenseBudgets',[{category:'Autres',monthlyAmount:100}]);
  assert.equal(b.context.currentMonthPaidByCategory('Autres'),120);b.context.renderExpenseBudgets();assert.match(b.node('expenseBudgetsList').innerHTML,/expense-budget-row over/);assert.match(b.node('expenseBudgetsList').innerHTML,/width:100%/);assert.match(b.node('expenseBudgetsList').innerHTML,/120 %/);
 });
+test('budget summary separates spending, progress and status from its rendered row',()=>{
+ const b=browser();b.set('allExpenses',[expense({status:'paid',amountTTC:85,paidAt:'2026-09-05'})]);
+ const summary=b.context.getExpenseBudgetSummary({category:'Autres',monthlyAmount:100});
+ assert.deepEqual(JSON.parse(JSON.stringify(summary)),{category:'Autres',monthlyAmount:100,spent:85,amount:100,percent:85,progress:85,status:'warning'});
+ assert.match(b.context.renderExpenseBudgetRow({category:'Autres',monthlyAmount:100}),/expense-budget-row warning/);
+});
 test('budget saving encodes category and preserves zero amount',async()=>{
  const b=browser();b.node('expenseBudgetCategory').value='Frais / divers';b.node('expenseBudgetAmount').value='0';b.context.loadExpenseBudgets=async()=>{};await b.context.saveExpenseBudget({preventDefault(){}});
  assert.equal(b.calls[0][0],'/api/expense-budgets/Frais%20%2F%20divers');assert.deepEqual(JSON.parse(b.calls[0][1].body),{monthlyAmount:0});
