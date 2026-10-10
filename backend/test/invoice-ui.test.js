@@ -102,6 +102,17 @@ test("document lists retain their categories and escape customer text", () => {
   assert.doesNotMatch(b.elements.get("invoiceList").innerHTML, /DEV-001|CMD-001/);
 });
 
+test("invoice row presentation distinguishes payment and document workflows", () => {
+  const b = browser();
+  const partial = b.context.getInvoiceListRowPresentation(documentFixture({ paymentStatus: "partial" }));
+  assert.deepEqual(plain(partial.payment), { className: "due-soon", label: "Partiellement réglée" });
+  assert.deepEqual(plain(partial.document), { className: "due-soon", label: "Partiellement réglée" });
+  const declined = b.context.getInvoiceListRowPresentation(documentFixture({ type: "quote", status: "declined" }));
+  assert.deepEqual(plain(declined.document), { className: "overdue", label: "Devis refusé" });
+  const convertedOrder = b.context.getInvoiceListRowPresentation(documentFixture({ type: "order", fulfillmentStatus: "shipped", convertedToInvoiceId: "invoice" }));
+  assert.match(convertedOrder.document.label, /Facturée/);
+});
+
 test("invoice search, status and electronic filters combine and reset", () => {
   const b = browser();
   b.context.fixtures = [

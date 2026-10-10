@@ -1,45 +1,55 @@
 // HTML d’une ligne de document commercial.
+function getInvoiceListRowDate(invoice) {
+  const date = new Date(invoice.createdAt);
+  return {
+    day: String(date.getDate()).padStart(2, "0"),
+    month: date.toLocaleString("fr-FR", { month: "short" })
+  };
+}
+
+function getInvoiceListCustomerName(invoice) {
+  return invoice.contactId?.companyName
+    || `${invoice.contactId?.firstname || ""} ${invoice.contactId?.lastname || ""}`.trim();
+}
+
+function getInvoicePaymentPresentation(invoice) {
+  const dueState = getInvoiceDueState(invoice);
+  if (invoice.paymentStatus === "paid") {
+    return { className: "paid", label: `Payée · ${escapeHtml(getPaymentMethodLabel(invoice.paymentMethod))}` };
+  }
+  if (invoice.paymentStatus === "partial") return { className: "due-soon", label: "Partiellement réglée" };
+  return { className: dueState?.kind || "pending", label: dueState?.label || "En attente" };
+}
+
+function getInvoiceDocumentPresentation(invoice, payment) {
+  if (invoice.type === "quote") {
+    return invoice.status === "accepted"
+      ? { className: "accepted", label: "Devis accepté" }
+      : invoice.status === "declined"
+        ? { className: "overdue", label: "Devis refusé" }
+        : { className: "draft", label: "Devis en attente" };
+  }
+  if (invoice.type === "order") {
+    return { className: invoice.convertedToInvoiceId ? "completed" : "pending", label: `${orderFulfillmentLabel(invoice)}${invoice.convertedToInvoiceId ? " · Facturée" : ""}` };
+  }
+  if (invoice.type === "credit_note") return { className: "completed", label: "Avoir émis" };
+  return payment;
+}
+
+function getInvoiceListRowPresentation(invoice) {
+  const payment = getInvoicePaymentPresentation(invoice);
+  return {
+    ...getInvoiceListRowDate(invoice),
+    customerName: getInvoiceListCustomerName(invoice),
+    articlesCount: invoice.products?.length || 0,
+    payment,
+    document: getInvoiceDocumentPresentation(invoice, payment),
+    electronicTransmission: getElectronicTransmissionPresentation(invoice)
+  };
+}
+
 function renderInvoiceListRow(invoice) {
-
-    const date =
-      new Date(invoice.createdAt);
-
-
-    const day =
-      String(
-        date.getDate()
-      ).padStart(2, "0");
-
-
-    const month =
-      date.toLocaleString(
-        "fr-FR",
-        {
-          month: "short"
-        }
-      );
-
-
-    const customerName =
-      invoice.contactId?.companyName ||
-      `${invoice.contactId?.firstname || ""}
-       ${invoice.contactId?.lastname || ""}`;
-
-    const articlesCount =
-      invoice.products?.length || 0;
-
-    const dueState = getInvoiceDueState(invoice);
-    const invoiceStatusClass = invoice.paymentStatus === "paid"
-      ? "paid"
-      : invoice.paymentStatus === "partial"
-      ? "due-soon"
-      : dueState?.kind || "pending";
-    const invoiceStatusLabel = invoice.paymentStatus === "paid"
-      ? `Payée · ${escapeHtml(getPaymentMethodLabel(invoice.paymentMethod))}`
-      : invoice.paymentStatus === "partial"
-      ? "Partiellement réglée"
-      : dueState?.label || "En attente";
-    const electronicTransmission = getElectronicTransmissionPresentation(invoice);
+    const presentation = getInvoiceListRowPresentation(invoice);
 
 
     const html = `
@@ -52,11 +62,11 @@ function renderInvoiceListRow(invoice) {
         <div class="erp-date">
 
           <div class="erp-day">
-            ${day}
+            ${presentation.day}
           </div>
 
           <div class="erp-month">
-            ${month}
+            ${presentation.month}
           </div>
 
         </div>
@@ -69,37 +79,21 @@ function renderInvoiceListRow(invoice) {
           </div>
 
           <div class="erp-name">
-            ${escapeHtml(customerName)}
+            ${escapeHtml(presentation.customerName)}
           </div>
 
           <div class="erp-items">
-            ${articlesCount}
-            article${articlesCount > 1 ? "s" : ""}
+            ${presentation.articlesCount}
+            article${presentation.articlesCount > 1 ? "s" : ""}
           </div>
 
-          <span class="document-status ${
-            invoice.type === "quote"
-              ? (invoice.status === "accepted" ? "accepted" : invoice.status === "declined" ? "overdue" : "draft")
-              : invoice.type === "order"
-              ? (invoice.convertedToInvoiceId ? "completed" : "pending")
-              : invoice.type === "credit_note"
-              ? "completed"
-              : invoiceStatusClass
-          }">
-            ${
-              invoice.type === "quote"
-                ? (invoice.status === "accepted" ? "Devis accepté" : invoice.status === "declined" ? "Devis refusé" : "Devis en attente")
-                : invoice.type === "order"
-                ? `${orderFulfillmentLabel(invoice)}${invoice.convertedToInvoiceId ? " · Facturée" : ""}`
-                : invoice.type === "credit_note"
-                ? "Avoir émis"
-                : invoiceStatusLabel
-            }
+          <span class="document-status ${presentation.document.className}">
+            ${presentation.document.label}
           </span>
 
-          ${electronicTransmission ? `
-            <span class="electronic-invoice-badge ${electronicTransmission.className}">
-              ${electronicTransmission.label}
+          ${presentation.electronicTransmission ? `
+            <span class="electronic-invoice-badge ${presentation.electronicTransmission.className}">
+              ${presentation.electronicTransmission.label}
             </span>
           ` : ""}
 
@@ -122,9 +116,7 @@ function renderInvoiceListRow(invoice) {
 
           ${
             invoice.type === "invoice"
-              ? `<span class="invoice-status ${
-                  invoiceStatusClass
-                }">${invoiceStatusLabel}</span>`
+              ? `<span class="invoice-status ${presentation.payment.className}">${presentation.payment.label}</span>`
               : ""
           }
 
