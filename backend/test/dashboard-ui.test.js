@@ -100,6 +100,15 @@ test('electronic invoicing alert preserves configuration and ready-document navi
   await b.context.updateElectronicInvoicingAlert([{ electronicTransmission: { status: 'ready' } }]);
   b.node('dashboardElectronicAlertButton').onclick(); assert.deepEqual(b.calls.slice(1), ['invoicesSection', 'ready']);
 });
+test('electronic invoicing presentation centralizes configuration and ready states', () => {
+  const b = browser();
+  const missing = b.context.getElectronicInvoicingAlertPresentation({ enabled: false, missingFields: ['SIRET', 'Adresse', 'Email'] }, 0);
+  assert.deepEqual(JSON.parse(JSON.stringify(missing)), { label: 'Facturation électronique à préparer', detail: 'À compléter : SIRET · Adresse…', buttonLabel: 'Préparer', route: 'company', isReady: false });
+  const ready = b.context.getElectronicInvoicingAlertPresentation({ enabled: true, identityComplete: true, providerName: 'Plateforme A' }, 2);
+  assert.equal(ready.label, '2 factures prêtes à transmettre');
+  assert.equal(ready.route, 'ready-documents');
+  assert.equal(ready.isReady, true);
+});
 test('performance chart groups paid revenue and destroys previous instances', () => {
   const b = browser(); b.context.updateCommercialInsights([], [{ totalTTC: 120, paidAt: '2026-09-10' }, { totalTTC: 60, paidAt: '2026-08-10' }]);
   assert.equal(b.charts.length, 1); assert.deepEqual(Array.from(b.charts[0].options.data.datasets[0].data), [0, 0, 0, 0, 60, 120]);

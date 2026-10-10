@@ -1,5 +1,31 @@
 // Tableau de bord : alerts.
 
+function getElectronicInvoicingAlertPresentation(status, prepared) {
+  if (!status.enabled || !status.identityComplete) {
+    const missingFields = status.missingFields || [];
+    return {
+      label: "Facturation électronique à préparer",
+      detail: missingFields.length
+        ? `À compléter : ${missingFields.slice(0, 2).join(" · ")}${missingFields.length > 2 ? "…" : ""}`
+        : "Activez la préparation depuis le profil de votre entreprise.",
+      buttonLabel: "Préparer",
+      route: "company",
+      isReady: false
+    };
+  }
+  return {
+    label: prepared
+      ? `${prepared} facture${prepared > 1 ? "s" : ""} prête${prepared > 1 ? "s" : ""} à transmettre`
+      : "Facturation électronique préparée",
+    detail: status.providerName
+      ? `Plateforme envisagée : ${status.providerName}. Connecteur en attente d’activation.`
+      : "Choisissez une plateforme agréée lorsque votre connecteur sera disponible.",
+    buttonLabel: prepared ? "Voir" : "Configurer",
+    route: prepared ? "ready-documents" : "company",
+    isReady: true
+  };
+}
+
 async function updateElectronicInvoicingAlert(invoices) {
   const label = document.getElementById("dashboardElectronicAlertLabel");
   const detail = document.getElementById("dashboardElectronicAlertDetail");
@@ -10,33 +36,20 @@ async function updateElectronicInvoicingAlert(invoices) {
   const prepared = invoices.filter(invoice => invoice.electronicTransmission?.status === "ready").length;
   try {
     const status = await apiFetch("/api/electronic-invoicing/status");
-    if (!status.enabled || !status.identityComplete) {
-      label.textContent = "Facturation électronique à préparer";
-      detail.textContent = status.missingFields?.length
-        ? `À compléter : ${status.missingFields.slice(0, 2).join(" · ")}${status.missingFields.length > 2 ? "…" : ""}`
-        : "Activez la préparation depuis le profil de votre entreprise.";
-      button.textContent = "Préparer";
-      button.onclick = () => showSection("company");
-      dot?.classList.remove("is-ready");
-      return;
-    }
-
-    label.textContent = prepared
-      ? `${prepared} facture${prepared > 1 ? "s" : ""} prête${prepared > 1 ? "s" : ""} à transmettre`
-      : "Facturation électronique préparée";
-    detail.textContent = status.providerName
-      ? `Plateforme envisagée : ${status.providerName}. Connecteur en attente d’activation.`
-      : "Choisissez une plateforme agréée lorsque votre connecteur sera disponible.";
-    button.textContent = prepared ? "Voir" : "Configurer";
+    const presentation = getElectronicInvoicingAlertPresentation(status, prepared);
+    label.textContent = presentation.label;
+    detail.textContent = presentation.detail;
+    button.textContent = presentation.buttonLabel;
     button.onclick = () => {
-      if (prepared) {
+      if (presentation.route === "ready-documents") {
         showSection("invoicesSection");
         setElectronicInvoiceQuickFilter("ready");
       } else {
         showSection("company");
       }
     };
-    dot?.classList.add("is-ready");
+    if (presentation.isReady) dot?.classList.add("is-ready");
+    else dot?.classList.remove("is-ready");
   } catch (err) {
     console.warn("Alerte facturation électronique indisponible", err);
   }
