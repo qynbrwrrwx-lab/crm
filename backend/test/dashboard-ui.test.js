@@ -103,6 +103,19 @@ test('revenue chart series keep only values from the selected period buckets', (
   assert.equal(series.labels.length, 7);
   assert.deepEqual(Array.from(series.points), [0, 20, 0, 0, 0, 0, 40]);
 });
+test('commercial insight helpers distinguish a first payment from a revenue decrease', () => {
+  const b = browser();
+  const now = new b.context.Date('2026-09-15T12:00:00Z');
+  const insight = b.context.getMonthlyRevenueInsight([
+    { totalTTC: 70, paidAt: '2026-09-10T09:00:00Z' },
+    { totalTTC: 100, paidAt: '2026-08-10T09:00:00Z' }
+  ], now);
+  assert.equal(insight.monthlyRevenue, 70);
+  assert.equal(insight.invoiceCount, 1);
+  assert.equal(insight.previousRevenue, 100);
+  assert.equal(b.context.getRevenueComparison(insight.monthlyRevenue, insight.previousRevenue).text, '-30 % vs le mois précédent');
+  assert.match(b.context.getRevenueComparison(70, 0).text, /Premier encaissement/);
+});
 test('onboarding hides completed setup and tolerates API failure', async () => {
   const b = browser(); const responses = { '/api/company': { companyName: 'A', siret: 'B', email: 'C', address: 'D', city: 'E' }, '/api/contacts': [{}], '/api/products': [{}], '/api/invoices': [{ type: 'quote' }] };
   b.context.apiFetch = async url => responses[url]; await b.context.loadOnboardingChecklist();

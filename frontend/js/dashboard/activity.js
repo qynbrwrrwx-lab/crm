@@ -1,13 +1,23 @@
 // Tableau de bord : activity.
 
+function getRecentCommercialDocuments(documents) {
+  return [...documents]
+    .sort((left, right) => new Date(right.updatedAt || right.createdAt) - new Date(left.updatedAt || left.createdAt))
+    .slice(0, 6);
+}
+
+function getCommercialDocumentClient(document) {
+  return document.contactId?.companyName
+    || `${document.contactId?.firstname || ""} ${document.contactId?.lastname || ""}`.trim()
+    || "Client non renseigné";
+}
+
 function updateRecentActivity(documents) {
   const list = document.getElementById("dashboardRecentActivityList");
   if (!list) return;
 
   const labels = { quote: "Devis", order: "Commande", invoice: "Facture", credit_note: "Avoir" };
-  const recent = [...documents]
-    .sort((left, right) => new Date(right.updatedAt || right.createdAt) - new Date(left.updatedAt || left.createdAt))
-    .slice(0, 6);
+  const recent = getRecentCommercialDocuments(documents);
 
   if (!recent.length) {
     list.innerHTML = '<p class="empty-state">Aucune activité commerciale pour le moment.</p>';
@@ -15,7 +25,7 @@ function updateRecentActivity(documents) {
   }
 
   list.innerHTML = recent.map(document => {
-    const client = document.contactId?.companyName || `${document.contactId?.firstname || ""} ${document.contactId?.lastname || ""}`.trim() || "Client non renseigné";
+    const client = getCommercialDocumentClient(document);
     const date = new Date(document.updatedAt || document.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
     const detail = document.type === "invoice"
       ? (document.paymentStatus === "paid" ? "Facture réglée" : "Paiement en attente")
@@ -29,45 +39,37 @@ function updateRecentActivity(documents) {
   }).join("");
 }
 
-function updateCommercialInsights(documents, paidInvoices) {
-  const now = new Date();
-  const monthPaidInvoices = paidInvoices.filter(invoice => {
+function getMonthlyRevenueInsight(paidInvoices, now = new Date()) {
+  const getInvoicesForMonth = (year, month) => paidInvoices.filter(invoice => {
     const date = new Date(invoice.paidAt || invoice.updatedAt || invoice.createdAt);
-    return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+    return date.getFullYear() === year && date.getMonth() === month;
   });
+  const monthPaidInvoices = getInvoicesForMonth(now.getFullYear(), now.getMonth());
   const monthlyRevenue = monthPaidInvoices.reduce(
     (total, invoice) => total + Number(invoice.totalTTC || 0),
     0
   );
-  const revenue = document.getElementById("dashboardMonthlyRevenue");
-  const revenueDetail = document.getElementById("dashboardMonthlyRevenueDetail");
-  if (revenue) revenue.textContent = formatCurrency(monthlyRevenue);
-  if (revenueDetail) {
-    revenueDetail.textContent = monthPaidInvoices.length
-      ? `${monthPaidInvoices.length} facture${monthPaidInvoices.length > 1 ? "s" : ""} réglée${monthPaidInvoices.length > 1 ? "s" : ""} ce mois-ci.`
-      : "Aucune facture réglée ce mois-ci.";
-  }
   const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const previousRevenue = paidInvoices
-    .filter(invoice => {
-      const date = new Date(invoice.paidAt || invoice.updatedAt || invoice.createdAt);
-      return date.getFullYear() === previousMonth.getFullYear() && date.getMonth() === previousMonth.getMonth();
-    })
+  const previousRevenue = getInvoicesForMonth(previousMonth.getFullYear(), previousMonth.getMonth())
     .reduce((total, invoice) => total + Number(invoice.totalTTC || 0), 0);
-  const comparison = document.getElementById("dashboardRevenueComparison");
-  if (comparison) {
-    if (!previousRevenue) {
-      comparison.textContent = monthlyRevenue ? "Premier encaissement comparé au mois précédent." : "Pas de comparaison disponible.";
-      comparison.className = "revenue-comparison neutral";
-    } else {
-      const variation = ((monthlyRevenue - previousRevenue) / previousRevenue) * 100;
-      comparison.textContent = `${variation >= 0 ? "+" : ""}${variation.toFixed(0)} % vs le mois précédent`;
-      comparison.className = `revenue-comparison ${variation >= 0 ? "positive" : "negative"}`;
-    }
-  }
-  dashboardPaidInvoices = paidInvoices;
-  refreshDashboardPerformance();
+  return { monthlyRevenue, invoiceCount: monthPaidInvoices.length, previousRevenue };
+}
 
+function getRevenueComparison(monthlyRevenue, previousRevenue) {
+  if (!previousRevenue) {
+    return {
+      text: monthlyRevenue ? "Premier encaissement comparé au mois précédent." : "Pas de comparaison disponible.",
+      className: "revenue-comparison neutral"
+    };
+  }
+  const variation = ((monthlyRevenue - previousRevenue) / previousRevenue) * 100;
+  return {
+    text: `${variation >= 0 ? "+" : ""}${variation.toFixed(0)} % vs le mois précédent`,
+    className: `revenue-comparison ${variation >= 0 ? "positive" : "negative"}`
+  };
+}
+
+function getBestSellers(documents) {
   const sales = new Map();
   documents
     .filter(document => document.type === "order")
@@ -77,10 +79,29 @@ function updateCommercialInsights(documents, paidInvoices) {
         sales.set(name, (sales.get(name) || 0) + Number(line.quantity || 0));
       });
     });
-
-  const bestSellers = [...sales.entries()]
+  return [...sales.entries()]
     .sort(([, left], [, right]) => right - left)
     .slice(0, 3);
+}
+
+function updateCommercialInsights(documents, paidInvoices) {
+  const { monthlyRevenue, invoiceCount, previousRevenue } = getMonthlyRevenueInsight(paidInvoices);
+  const revenue = document.getElementById("dashboardMonthlyRevenue");
+  const revenueDetail = document.getElementById("dashboardMonthlyRevenueDetail");
+  if (revenue) revenue.textContent = formatCurrency(monthlyRevenue);
+  if (revenueDetail) revenueDetail.textContent = invoiceCount
+    ? `${invoiceCount} facture${invoiceCount > 1 ? "s" : ""} réglée${invoiceCount > 1 ? "s" : ""} ce mois-ci.`
+    : "Aucune facture réglée ce mois-ci.";
+  const comparison = document.getElementById("dashboardRevenueComparison");
+  if (comparison) {
+    const revenueComparison = getRevenueComparison(monthlyRevenue, previousRevenue);
+    comparison.textContent = revenueComparison.text;
+    comparison.className = revenueComparison.className;
+  }
+  dashboardPaidInvoices = paidInvoices;
+  refreshDashboardPerformance();
+
+  const bestSellers = getBestSellers(documents);
   const container = document.getElementById("dashboardBestSellers");
   if (!container) return;
   container.innerHTML = bestSellers.length
