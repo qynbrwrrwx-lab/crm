@@ -22,15 +22,21 @@ function setAuthBusy(isBusy) {
   });
 }
 
+function readAuthCredentials(emailId = "email", passwordId = "password") {
+  return {
+    email: document.getElementById(emailId).value,
+    password: document.getElementById(passwordId).value
+  };
+}
+
+function sendAuthCredentials(endpoint, credentials) {
+  return apiFetch(endpoint, { method: "POST", body: JSON.stringify(credentials) });
+}
+
 async function register() {
+  const credentials = readAuthCredentials();
 
-  const email =
-    document.getElementById("email").value;
-
-  const password =
-    document.getElementById("password").value;
-
-  if (password.length < 12) {
+  if (credentials.password.length < 12) {
     showToast("Le mot de passe doit contenir au moins 12 caracteres");
     return;
   }
@@ -39,16 +45,7 @@ async function register() {
   showLoader();
 
   try {
-
-    const data = await apiFetch("/api/auth/register", {
-
-      method: "POST",
-
-      body: JSON.stringify({
-        email,
-        password
-      })
-    });
+    const data = await sendAuthCredentials("/api/auth/register", credentials);
 
     showToast(data.message || "📩 Vérifie ton email !");
 
@@ -62,30 +59,14 @@ async function register() {
 }
 
 async function login() {
-
-  const email =
-    document.getElementById("email").value;
-
-  const password =
-    document.getElementById("password").value;
+  const credentials = readAuthCredentials();
 
   setAuthBusy(true);
   showLoader();
 
   try {
-
-    const data =
-      await apiFetch("/api/auth/login", {
-
-        method: "POST",
-
-        body: JSON.stringify({
-          email,
-          password
-        })
-      });
-
-      setToken(data.token);
+    const data = await sendAuthCredentials("/api/auth/login", credentials);
+    setToken(data.token);
 
     showApp();
 
@@ -117,56 +98,18 @@ if (document.readyState === "loading") {
 }
 
 async function adminLogin() {
-
-  const email =
-    document.getElementById(
-      "adminEmail"
-    ).value;
-
-  const password =
-    document.getElementById(
-      "adminPassword"
-    ).value;
+  const credentials = readAuthCredentials("adminEmail", "adminPassword");
 
   try {
-
-    const data =
-      await apiFetch(
-        "/api/auth/login",
-        {
-          method: "POST",
-
-          body: JSON.stringify({
-            email,
-            password
-          })
-        }
-      );
-
-    // TOKEN
-    localStorage.setItem(
-      "token",
-      data.token
-    );
-
-    // REDIRECTION ADMIN
-    window.location.href =
-      "/admin";
-
+    const data = await sendAuthCredentials("/api/auth/login", credentials);
+    setToken(data.token);
+    window.location.href = "/admin";
   } catch (err) {
-
-    alert(
-      err.message
-    );
+    alert(err.message);
   }
 }
 
 function logoutAdmin() {
-
-  localStorage.removeItem(
-    "token"
-  );
-
-  window.location.href =
-    "/admin-login";
+  removeToken();
+  window.location.href = "/admin-login";
   }

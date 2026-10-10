@@ -70,6 +70,23 @@ test("login stores its session and opens the application", async () => {
   assert.equal(b.elements.get("registerButton").disabled, false);
 });
 
+test("admin login shares the credentials request and session contract", async () => {
+  const b = browser();
+  b.elements.set("adminEmail", { value: "admin@example.com" });
+  b.elements.set("adminPassword", { value: "admin-password" });
+  b.context.apiFetch = async (url, options) => {
+    assert.equal(url, "/api/auth/login");
+    assert.deepEqual(JSON.parse(options.body), { email: "admin@example.com", password: "admin-password" });
+    return { token: "admin-session" };
+  };
+  await b.context.adminLogin();
+  assert.equal(b.storage.get("token"), "admin-session");
+  assert.equal(b.context.location.href, "/admin");
+  b.context.logoutAdmin();
+  assert.equal(b.storage.has("token"), false);
+  assert.equal(b.context.location.href, "/admin-login");
+});
+
 test("failed login leaves the application closed and clears its loader", async () => {
   const b = browser();
   b.context.apiFetch = async () => { throw new Error("Invalid login"); };
