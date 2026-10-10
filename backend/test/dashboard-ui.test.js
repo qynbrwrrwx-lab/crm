@@ -78,6 +78,11 @@ test('recent activity escapes names, sorts and limits to six without modifying i
   assert.match(body, /&lt;client&gt;/); assert.doesNotMatch(body, /<num>/); assert.equal(docs[0]._id, '0');
   b.context.updateRecentActivity([]); assert.match(b.node('dashboardRecentActivityList').innerHTML, /empty-state/);
 });
+test('recent activity presentation centralizes document labels and payment status', () => {
+  const b = browser(); const invoice = { _id: 'i', invoiceNumber: 'F-1', contactId: { companyName: 'Client' }, createdAt: '2026-09-05', totalTTC: 120, type: 'invoice', paymentStatus: 'paid' };
+  const item = b.context.getRecentActivityPresentation(invoice); assert.deepEqual(JSON.parse(JSON.stringify(item)), { id: 'i', typeLabel: 'Facture', number: 'F-1', client: 'Client', dateLabel: new b.context.Date('2026-09-05').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }), statusLabel: 'Facture réglée', amountLabel: b.context.formatCurrency(120) });
+  assert.equal(b.context.getRecentActivityPresentation({ _id: 'o', type: 'order', totalTTC: 0 }).statusLabel, 'Commande');
+});
 test('electronic invoicing alert preserves configuration and ready-document navigation', async () => {
   const b = browser(); b.context.apiFetch = async url => { assert.equal(url, '/api/electronic-invoicing/status'); return { enabled: false }; };
   await b.context.updateElectronicInvoicingAlert([]); b.node('dashboardElectronicAlertButton').onclick(); assert.deepEqual(b.calls, ['company']);

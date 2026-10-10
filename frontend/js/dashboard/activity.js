@@ -1,5 +1,7 @@
 // Tableau de bord : activity.
 
+const commercialDocumentLabels = { quote: "Devis", order: "Commande", invoice: "Facture", credit_note: "Avoir" };
+
 function getRecentCommercialDocuments(documents) {
   return [...documents]
     .sort((left, right) => new Date(right.updatedAt || right.createdAt) - new Date(left.updatedAt || left.createdAt))
@@ -12,11 +14,23 @@ function getCommercialDocumentClient(document) {
     || "Client non renseigné";
 }
 
+function getRecentActivityPresentation(document) {
+  const typeLabel = commercialDocumentLabels[document.type] || "Document";
+  return {
+    id: document._id,
+    typeLabel,
+    number: document.invoiceNumber || "Sans numéro",
+    client: getCommercialDocumentClient(document),
+    dateLabel: new Date(document.updatedAt || document.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }),
+    statusLabel: document.type === "invoice" ? (document.paymentStatus === "paid" ? "Facture réglée" : "Paiement en attente") : typeLabel,
+    amountLabel: formatCurrency(document.totalTTC)
+  };
+}
+
 function updateRecentActivity(documents) {
   const list = document.getElementById("dashboardRecentActivityList");
   if (!list) return;
 
-  const labels = { quote: "Devis", order: "Commande", invoice: "Facture", credit_note: "Avoir" };
   const recent = getRecentCommercialDocuments(documents);
 
   if (!recent.length) {
@@ -25,16 +39,12 @@ function updateRecentActivity(documents) {
   }
 
   list.innerHTML = recent.map(document => {
-    const client = getCommercialDocumentClient(document);
-    const date = new Date(document.updatedAt || document.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
-    const detail = document.type === "invoice"
-      ? (document.paymentStatus === "paid" ? "Facture réglée" : "Paiement en attente")
-      : labels[document.type] || "Document";
-    return `<button type="button" class="dashboard-activity-row" onclick="openInvoice('${document._id}')">
-      <span class="dashboard-activity-type">${labels[document.type] || "Document"}</span>
-      <span class="dashboard-activity-main"><strong>${escapeHtml(document.invoiceNumber || "Sans numéro")}</strong><small>${escapeHtml(client)} · ${date}</small></span>
-      <span class="dashboard-activity-status">${detail}</span>
-      <strong class="dashboard-activity-amount">${formatCurrency(document.totalTTC)}</strong>
+    const item = getRecentActivityPresentation(document);
+    return `<button type="button" class="dashboard-activity-row" onclick="openInvoice('${item.id}')">
+      <span class="dashboard-activity-type">${item.typeLabel}</span>
+      <span class="dashboard-activity-main"><strong>${escapeHtml(item.number)}</strong><small>${escapeHtml(item.client)} · ${item.dateLabel}</small></span>
+      <span class="dashboard-activity-status">${item.statusLabel}</span>
+      <strong class="dashboard-activity-amount">${item.amountLabel}</strong>
     </button>`;
   }).join("");
 }
