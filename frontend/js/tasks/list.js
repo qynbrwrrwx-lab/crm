@@ -28,13 +28,25 @@ function taskListStatusLabel(task) {
   return task.status === "done" ? "Terminée" : "À faire";
 }
 
+function getTaskRowPresentation(task) {
+  const isAppointment = task.type === "appointment";
+  return {
+    id: task._id,
+    className: `task-row ${task.status} ${task.type} priority-${task.priority}`,
+    statusLabel: taskListStatusLabel(task),
+    title: task.title,
+    detail: `${taskContactLabel(task)} · ${isAppointment ? taskDateTime(task.startDate) : taskDate(task.dueDate)}`,
+    completionLabel: task.status === "open" ? (isAppointment ? "Réalisé" : "Terminer") : ""
+  };
+}
+
 function renderTaskRow(task) {
-  const date = task.type === "appointment" ? taskDateTime(task.startDate) : taskDate(task.dueDate);
-  const completion = task.status === "open"
-    ? `<button class="secondary-btn" onclick="completeTask('${task._id}')">${task.type === "appointment" ? "Réalisé" : "Terminer"}</button>`
+  const row = getTaskRowPresentation(task);
+  const completion = row.completionLabel
+    ? `<button class="secondary-btn" onclick="completeTask('${row.id}')">${row.completionLabel}</button>`
     : "";
 
-  return `<article class="task-row ${task.status} ${task.type} priority-${task.priority}"><div><span>${taskListStatusLabel(task)}</span><h3>${escapeHtml(task.title)}</h3><small>${escapeHtml(taskContactLabel(task))} · ${date}</small></div><div class="expense-actions"><button class="secondary-btn" onclick="editTask('${task._id}')">Détails</button>${completion}<button class="expense-text-action danger" onclick="deleteTask('${task._id}')">Supprimer</button></div></article>`;
+  return `<article class="${row.className}"><div><span>${row.statusLabel}</span><h3>${escapeHtml(row.title)}</h3><small>${escapeHtml(row.detail)}</small></div><div class="expense-actions"><button class="secondary-btn" onclick="editTask('${row.id}')">Détails</button>${completion}<button class="expense-text-action danger" onclick="deleteTask('${row.id}')">Supprimer</button></div></article>`;
 }
 
 function renderTasks() {
