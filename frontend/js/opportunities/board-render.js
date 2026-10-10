@@ -55,14 +55,26 @@ function renderOpportunityMoveOptions(stage) {
     .join("");
 }
 
-function renderOpportunityCard(item, stage) {
-  const canCreateQuote = item.contactId && !closedOpportunityStages.includes(stage);
-  const canMove = !closedOpportunityStages.includes(stage);
-  const closeDate = item.expectedCloseDate ? ` · Prévu le ${new Date(item.expectedCloseDate).toLocaleDateString("fr-FR")}` : "";
-  const quoteAction = canCreateQuote ? `<button type="button" class="opportunity-quote-btn" onclick="createQuoteFromOpportunity('${item._id}')">Créer un devis</button>` : "";
-  const moveAction = canMove ? `<select aria-label="Déplacer l’opportunité" onchange="moveOpportunity('${item._id}',this.value)"><option value="">Déplacer…</option>${renderOpportunityMoveOptions(stage)}</select>` : "";
+function getOpportunityCardPresentation(item, stage) {
+  const isClosed = closedOpportunityStages.includes(stage);
+  return {
+    id: item._id,
+    contactName: opportunityContactName(item),
+    title: item.title,
+    amountLabel: opportunityCurrency(item.amount),
+    probabilityLabel: `${Number(item.probability || 0)} % de probabilité`,
+    closeDateLabel: item.expectedCloseDate ? ` · Prévu le ${new Date(item.expectedCloseDate).toLocaleDateString("fr-FR")}` : "",
+    canCreateQuote: Boolean(item.contactId && !isClosed),
+    canMove: !isClosed
+  };
+}
 
-  return `<article class="opportunity-card"><div><span>${escapeHtml(opportunityContactName(item))}</span><h3>${escapeHtml(item.title)}</h3><strong>${opportunityCurrency(item.amount)}</strong><small>${Number(item.probability || 0)} % de probabilité${closeDate}</small></div><div class="opportunity-card-actions">${quoteAction}<button type="button" onclick="editOpportunity('${item._id}')">Modifier</button>${moveAction}<button type="button" class="danger" onclick="deleteOpportunity('${item._id}')">Supprimer</button></div></article>`;
+function renderOpportunityCard(item, stage) {
+  const card = getOpportunityCardPresentation(item, stage);
+  const quoteAction = card.canCreateQuote ? `<button type="button" class="opportunity-quote-btn" onclick="createQuoteFromOpportunity('${card.id}')">Créer un devis</button>` : "";
+  const moveAction = card.canMove ? `<select aria-label="Déplacer l’opportunité" onchange="moveOpportunity('${card.id}',this.value)"><option value="">Déplacer…</option>${renderOpportunityMoveOptions(stage)}</select>` : "";
+
+  return `<article class="opportunity-card"><div><span>${escapeHtml(card.contactName)}</span><h3>${escapeHtml(card.title)}</h3><strong>${card.amountLabel}</strong><small>${card.probabilityLabel}${card.closeDateLabel}</small></div><div class="opportunity-card-actions">${quoteAction}<button type="button" onclick="editOpportunity('${card.id}')">Modifier</button>${moveAction}<button type="button" class="danger" onclick="deleteOpportunity('${card.id}')">Supprimer</button></div></article>`;
 }
 
 function renderOpportunityColumn(stage, label, opportunities) {

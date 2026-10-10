@@ -5,7 +5,9 @@
 | Module | Responsabilité |
 | --- | --- |
 | `shared.js` | Étapes, probabilités, motifs de perte et formatage. |
-| `board.js` | Chargement, colonnes, indicateurs des cartes et glisser-déposer. |
+| `board.js` | Chargement et glisser-déposer du pipeline. |
+| `board-render.js` | Métriques, préparation des cartes et rendu des colonnes. |
+| `board-enhancements.js` | Relances et indicateurs de perte ou d’inactivité des cartes. |
 | `insights.js` | Conversion, origines, pertes et détails du tableau de bord. |
 | `form.js` | Champs, édition, sauvegarde et suggestion de probabilité. |
 | `actions.js` | Relances, changements d’étape, création de devis et suppression. |
