@@ -92,6 +92,17 @@ test('performance chart groups paid revenue and destroys previous instances', ()
   b.node('dashboardPeriod').value = 'year'; b.context.refreshDashboardPerformance();
   assert.equal(b.charts[0].destroyed, true); assert.equal(b.charts[1].options.data.labels.length, 12);
 });
+test('revenue chart series keep only values from the selected period buckets', () => {
+  const b = browser();
+  const today = new b.context.Date('2026-09-15T12:00:00Z');
+  const series = b.context.getRevenueChartSeries([
+    { totalTTC: 40, paidAt: '2026-09-15T09:00:00Z' },
+    { totalTTC: 20, paidAt: '2026-09-10T09:00:00Z' },
+    { totalTTC: 999, paidAt: '2026-08-01T09:00:00Z' }
+  ], 'week', today);
+  assert.equal(series.labels.length, 7);
+  assert.deepEqual(Array.from(series.points), [0, 20, 0, 0, 0, 0, 40]);
+});
 test('onboarding hides completed setup and tolerates API failure', async () => {
   const b = browser(); const responses = { '/api/company': { companyName: 'A', siret: 'B', email: 'C', address: 'D', city: 'E' }, '/api/contacts': [{}], '/api/products': [{}], '/api/invoices': [{ type: 'quote' }] };
   b.context.apiFetch = async url => responses[url]; await b.context.loadOnboardingChecklist();
