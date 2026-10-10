@@ -7,8 +7,21 @@ function agendaEventTime(item) {
   return item.type === "task" ? "Tâche" : "RDV";
 }
 
+function getAgendaEventPresentation(item) {
+  return {
+    id: item._id,
+    type: item.type,
+    status: item.status,
+    timeLabel: agendaEventTime(item),
+    title: item.title,
+    contactLabel: taskContactLabel(item),
+    canDuplicate: item.type === "appointment"
+  };
+}
+
 function eventChip(item) {
-  return `<button type="button" class="agenda-event ${item.type} ${item.status}" onclick="editTask('${item._id}')"><time>${agendaEventTime(item)}</time><span>${escapeHtml(item.title)}</span></button>`;
+  const event = getAgendaEventPresentation(item);
+  return `<button type="button" class="agenda-event ${event.type} ${event.status}" onclick="editTask('${event.id}')"><time>${event.timeLabel}</time><span>${escapeHtml(event.title)}</span></button>`;
 }
 
 function renderMonthAgenda(cursor) {
@@ -67,10 +80,11 @@ function renderYearAgenda(cursor) {
 }
 
 function renderDayEvent(item) {
-  const duplicate = item.type === "appointment"
-    ? `<button type="button" class="secondary-btn agenda-duplicate-btn" onclick="duplicateAppointment('${item._id}')">Dupliquer</button>`
+  const event = getAgendaEventPresentation(item);
+  const duplicate = event.canDuplicate
+    ? `<button type="button" class="secondary-btn agenda-duplicate-btn" onclick="duplicateAppointment('${event.id}')">Dupliquer</button>`
     : "";
-  return `<article class="agenda-day-event ${item.type}"><time>${agendaEventTime(item)}</time><div><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(taskContactLabel(item))}</span></div><button type="button" class="secondary-btn" onclick="editTask('${item._id}')">Voir</button>${duplicate}</article>`;
+  return `<article class="agenda-day-event ${event.type}"><time>${event.timeLabel}</time><div><strong>${escapeHtml(event.title)}</strong><span>${escapeHtml(event.contactLabel)}</span></div><button type="button" class="secondary-btn" onclick="editTask('${event.id}')">Voir</button>${duplicate}</article>`;
 }
 
 function renderDayAgenda(day) {
