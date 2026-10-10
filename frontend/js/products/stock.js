@@ -1,37 +1,32 @@
 // Produits : stock. Voir README.md.
 
+function renderStockHistory(movements) {
+  if (!movements.length) return '<p class="empty-state">Aucun mouvement de stock pour le moment.</p>';
+  return movements.map(movement => {
+    const quantity = Number(movement.quantity);
+    const sign = quantity > 0 ? "+" : "";
+    const label = movement.type === "restock" ? "Réassort" : "Vente";
+    const documentNumber = movement.documentId?.invoiceNumber
+      ? ` · ${movement.documentId.invoiceNumber}`
+      : "";
+    return `<div class="stock-history-row ${quantity > 0 ? "in" : "out"}">
+      <span>${escapeHtml(label)}${escapeHtml(documentNumber)}</span>
+      <strong>${sign}${quantity}</strong>
+      <small>${new Date(movement.createdAt).toLocaleDateString("fr-FR")}</small>
+    </div>`;
+  }).join("");
+}
+
 async function getStockHistoryMarkup(id) {
   try {
-    const movements = await apiFetch(`/api/products/${id}/movements`);
-
-    return movements.length
-      ? movements.map(movement => {
-          const quantity = Number(movement.quantity);
-          const sign = quantity > 0 ? "+" : "";
-          const label = movement.type === "restock" ? "Réassort" : "Vente";
-          const documentNumber = movement.documentId?.invoiceNumber
-            ? ` · ${movement.documentId.invoiceNumber}`
-            : "";
-
-          return `<div class="stock-history-row ${quantity > 0 ? "in" : "out"}">
-            <span>${escapeHtml(label)}${escapeHtml(documentNumber)}</span>
-            <strong>${sign}${quantity}</strong>
-            <small>${new Date(movement.createdAt).toLocaleDateString("fr-FR")}</small>
-          </div>`;
-        }).join("")
-      : '<p class="empty-state">Aucun mouvement de stock pour le moment.</p>';
+    return renderStockHistory(await apiFetch(`/api/products/${id}/movements`));
   } catch (err) {
     console.error(err);
     return `<p class="empty-state">${escapeHtml(err.message || "Historique indisponible")}</p>`;
   }
 }
 
-async function openRestockModal(id) {
-  const product = allProducts.find(item => item._id === id);
-  const modal = document.getElementById("restockModal");
-  if (!product || !modal) return;
-
-  restockingProductId = id;
+function initializeRestockModal(product) {
   document.getElementById("restockProductReference").textContent = product.reference || "Sans référence";
   document.getElementById("restockProductName").textContent = product.name;
   document.getElementById("restockCurrentStock").textContent = Number(product.stock || 0);
@@ -44,6 +39,15 @@ async function openRestockModal(id) {
   document.getElementById("productLastDocumentDate").textContent = "Analyse de l’activité commerciale";
   document.getElementById("productDocumentCount").textContent = "…";
   document.getElementById("productDocumentHistory").innerHTML = '<p class="empty-state">Chargement des documents…</p>';
+}
+
+async function openRestockModal(id) {
+  const product = allProducts.find(item => item._id === id);
+  const modal = document.getElementById("restockModal");
+  if (!product || !modal) return;
+
+  restockingProductId = id;
+  initializeRestockModal(product);
   modal.style.display = "flex";
 
   const [historyMarkup, commercialSummary] = await Promise.all([
@@ -51,6 +55,7 @@ async function openRestockModal(id) {
     getProductCommercialSummary(id)
   ]);
 
+  if (restockingProductId !== id) return;
   document.getElementById("restockHistory").innerHTML = historyMarkup;
   renderProductCommercialSummary(commercialSummary);
   document.getElementById("restockQuantity").focus();

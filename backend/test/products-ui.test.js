@@ -177,6 +177,7 @@ test("failed restock preserves the open product and entered quantity", async () 
 
 test("stock history escapes document references and error messages", async () => {
   const b = browser();
+  assert.match(b.context.renderStockHistory([]), /Aucun mouvement/);
   b.context.apiFetch = async () => [{ quantity: -2, type: "sale", createdAt: "2026-01-01", documentId: { invoiceNumber: "<img src=x>" } }];
   assert.match(await b.context.getStockHistoryMarkup("product"), /&lt;img src=x&gt;/);
   b.context.apiFetch = async () => { throw new Error("<script>failure</script>"); };
