@@ -250,6 +250,17 @@ test("payment dialog computes the unpaid balance and rejects an excessive amount
   assert.equal(b.elements.get("paymentModal").style.display, "none");
 });
 
+test("payment helpers prepare the remaining balance and distinguish partial confirmation", () => {
+  const b = browser();
+  const invoice = documentFixture({ payments: [{ amount: 20 }] });
+  const payment = b.context.getPaymentModalData(invoice);
+  assert.deepEqual(plain(payment), { invoiceId: "document", invoiceNumber: "FAC-001", remainingAmount: 100, amountLabel: "100.00 € TTC" });
+  assert.equal(b.context.isValidPaymentAmount(100.001, 100), true);
+  assert.equal(b.context.isValidPaymentAmount(100.01, 100), false);
+  assert.match(b.context.getPaymentConfirmationMessage({ ...invoice, paymentStatus: "partial", payments: [{ amount: 20 }, { amount: 30 }] }, "Virement"), /reste 70.00 €/);
+  assert.throws(() => b.context.getPaymentModalData({ type: "quote" }), /Facture introuvable/);
+});
+
 test("partial payment sends the amount and displays the remaining balance", async () => {
   const b = browser();
   const invoice = documentFixture({ payments: [{ amount: 20 }] });
