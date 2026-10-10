@@ -22,6 +22,26 @@ function selectSuppliers(suppliers, query = "") {
     .includes(normalizedQuery));
 }
 
+function getSupplierCardPresentation(supplier, products = [], expenses = []) {
+  const usage = getSupplierUsage(supplier, products, expenses);
+  const urgentProductCount = usage.urgentProducts.length;
+  return {
+    id: supplier._id,
+    initial: supplier.name.slice(0, 1).toUpperCase(),
+    name: supplier.name,
+    contactName: supplier.contactName || "Interlocuteur non renseigné",
+    productLabel: `${usage.products.length} produit${usage.products.length > 1 ? "s" : ""}`,
+    expenseLabel: `${usage.expenses.length} dépense${usage.expenses.length > 1 ? "s" : ""}`,
+    restockLabel: urgentProductCount ? `${urgentProductCount} produit${urgentProductCount > 1 ? "s" : ""} à réassortir` : "",
+    lastRestockLabel: supplier.lastRestockRequestAt ? `Dernière demande de réassort : ${new Date(supplier.lastRestockRequestAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}` : "",
+    notes: supplier.notes || "",
+    email: supplier.email || "",
+    phone: supplier.phone || "",
+    canCreatePurchaseOrder: Boolean(urgentProductCount),
+    canRequestRestock: Boolean(supplier.email && urgentProductCount)
+  };
+}
+
 function renderSuppliers() {
   const list = document.getElementById("suppliersList");
   const count = document.getElementById("suppliersCount");
@@ -35,12 +55,12 @@ function renderSuppliers() {
     return;
   }
   list.innerHTML = suppliers.map(supplier => {
-    const usage = getSupplierUsage(supplier, products, expenses);
+    const item = getSupplierCardPresentation(supplier, products, expenses);
     return `<article class="supplier-card">
-    <div class="supplier-avatar">${escapeHtml(supplier.name.slice(0, 1).toUpperCase())}</div>
-    <div class="supplier-main"><h3>${escapeHtml(supplier.name)}</h3><p>${escapeHtml(supplier.contactName || "Interlocuteur non renseigné")}</p><span class="supplier-usage">${usage.products.length} produit${usage.products.length > 1 ? "s" : ""} · ${usage.expenses.length} dépense${usage.expenses.length > 1 ? "s" : ""}</span>${usage.urgentProducts.length ? `<small class="client-follow-up is-overdue">${usage.urgentProducts.length} produit${usage.urgentProducts.length > 1 ? "s" : ""} à réassortir</small>` : ""}${supplier.lastRestockRequestAt ? `<small>Dernière demande de réassort : ${new Date(supplier.lastRestockRequestAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}</small>` : ""}${supplier.notes ? `<small>${escapeHtml(supplier.notes)}</small>` : ""}</div>
-    <div class="supplier-contact">${supplier.email ? `<a href="mailto:${escapeHtml(supplier.email)}">${escapeHtml(supplier.email)}</a>` : ""}${supplier.phone ? `<a href="tel:${escapeHtml(supplier.phone)}">${escapeHtml(supplier.phone)}</a>` : ""}</div>
-    <div class="expense-actions">${usage.urgentProducts.length ? `<button type="button" class="expense-text-action supplier-add-expense" onclick="createPurchaseOrderForSupplier('${supplier._id}')">Créer un bon de commande</button>` : ""}${supplier.email && usage.urgentProducts.length ? `<button type="button" class="expense-text-action supplier-add-expense" onclick="sendRestockRequest('${supplier._id}')">Demander le réassort</button>` : ""}<button type="button" class="expense-text-action supplier-add-expense" onclick="startExpenseForSupplier('${supplier._id}')">Ajouter une dépense</button><button type="button" class="expense-text-action" onclick="editSupplier('${supplier._id}')">Modifier</button><button type="button" class="expense-text-action danger" onclick="deleteSupplier('${supplier._id}')">Supprimer</button></div>
+    <div class="supplier-avatar">${escapeHtml(item.initial)}</div>
+    <div class="supplier-main"><h3>${escapeHtml(item.name)}</h3><p>${escapeHtml(item.contactName)}</p><span class="supplier-usage">${item.productLabel} · ${item.expenseLabel}</span>${item.restockLabel ? `<small class="client-follow-up is-overdue">${item.restockLabel}</small>` : ""}${item.lastRestockLabel ? `<small>${item.lastRestockLabel}</small>` : ""}${item.notes ? `<small>${escapeHtml(item.notes)}</small>` : ""}</div>
+    <div class="supplier-contact">${item.email ? `<a href="mailto:${escapeHtml(item.email)}">${escapeHtml(item.email)}</a>` : ""}${item.phone ? `<a href="tel:${escapeHtml(item.phone)}">${escapeHtml(item.phone)}</a>` : ""}</div>
+    <div class="expense-actions">${item.canCreatePurchaseOrder ? `<button type="button" class="expense-text-action supplier-add-expense" onclick="createPurchaseOrderForSupplier('${item.id}')">Créer un bon de commande</button>` : ""}${item.canRequestRestock ? `<button type="button" class="expense-text-action supplier-add-expense" onclick="sendRestockRequest('${item.id}')">Demander le réassort</button>` : ""}<button type="button" class="expense-text-action supplier-add-expense" onclick="startExpenseForSupplier('${item.id}')">Ajouter une dépense</button><button type="button" class="expense-text-action" onclick="editSupplier('${item.id}')">Modifier</button><button type="button" class="expense-text-action danger" onclick="deleteSupplier('${item.id}')">Supprimer</button></div>
   </article>`;
   }).join("");
 }

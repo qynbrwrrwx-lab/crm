@@ -74,6 +74,9 @@ test('supplier helpers select matching suppliers and summarize related purchases
  assert.deepEqual(JSON.parse(JSON.stringify(b.context.selectSuppliers(suppliers,'matériel').map(item=>item._id))),['other']);
  const usage=b.context.getSupplierUsage(suppliers[0],products,expenses);assert.equal(usage.products.length,2);assert.equal(usage.urgentProducts.length,1);assert.equal(usage.expenses.length,1);assert.equal(products[0].supplierName,'ACME');
 });
+test('supplier card presentation centralizes usage labels and available actions',()=>{
+ const b=browser(),products=[{supplierName:'ACME',stock:0,lowStockThreshold:0},{supplierName:'acme',stock:8,lowStockThreshold:5}],expenses=[expense({supplier:'Acme'})];assert.equal(JSON.stringify(b.context.getSupplierCardPresentation(supplier,products,expenses)),JSON.stringify({id:'s',initial:'A',name:'Acme',contactName:'Interlocuteur non renseigné',productLabel:'2 produits',expenseLabel:'1 dépense',restockLabel:'1 produit à réassortir',lastRestockLabel:'',notes:'',email:'contact@example.test',phone:'',canCreatePurchaseOrder:true,canRequestRestock:true}));assert.equal(b.context.getSupplierCardPresentation({...supplier,email:''},products,expenses).canRequestRestock,false);
+});
 test('supplier editing saves trimmed contact fields through PUT',async()=>{
  const b=browser();b.set('allSuppliers',[supplier]);b.context.editSupplier('s');b.node('supplierName').value=' Acme ';b.context.loadSuppliers=async()=>{};await b.context.saveSupplier({preventDefault(){}});
  assert.equal(b.calls[0][0],'/api/suppliers/s');assert.equal(b.calls[0][1].method,'PUT');assert.equal(JSON.parse(b.calls[0][1].body).name,'Acme');assert.equal(b.read('editingSupplierId'),null);
