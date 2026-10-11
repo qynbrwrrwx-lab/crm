@@ -67,6 +67,11 @@ test('budget summary separates spending, progress and status from its rendered r
  assert.deepEqual(JSON.parse(JSON.stringify(summary)),{category:'Autres',monthlyAmount:100,spent:85,amount:100,percent:85,progress:85,status:'warning'});
  assert.match(b.context.renderExpenseBudgetRow({category:'Autres',monthlyAmount:100}),/expense-budget-row warning/);
 });
+test('budget row presentation centralizes formatted amounts and deletion identifier',()=>{
+ const b=browser();b.set('allExpenses',[expense({status:'paid',amountTTC:85,paidAt:'2026-09-05'})]);
+ assert.deepEqual(JSON.parse(JSON.stringify(b.context.getExpenseBudgetRowPresentation({category:'Frais / divers',monthlyAmount:100}))),{category:'Frais / divers',status:'healthy',progress:0,spentLabel:b.context.formatExpenseCurrency(0),amountLabel:b.context.formatExpenseCurrency(100),usageLabel:'0 % utilisé',encodedCategory:'Frais%20%2F%20divers'});
+ assert.deepEqual(JSON.parse(JSON.stringify(b.context.getExpenseBudgetRowPresentation({category:'Autres',monthlyAmount:100}))),{category:'Autres',status:'warning',progress:85,spentLabel:b.context.formatExpenseCurrency(85),amountLabel:b.context.formatExpenseCurrency(100),usageLabel:'85 % utilisé',encodedCategory:'Autres'});
+});
 test('expense category presentation ranks paid amounts and computes percentages',()=>{
  const b=browser(),paid=[expense({category:'Marketing',amountTTC:60}),expense({category:'Autres',amountTTC:40}),expense({category:'Marketing',amountTTC:20})];assert.equal(JSON.stringify(b.context.getExpenseCategoryBreakdownPresentation(paid)),JSON.stringify([{category:'Marketing',amountLabel:b.context.formatExpenseCurrency(80),percentage:67},{category:'Autres',amountLabel:b.context.formatExpenseCurrency(40),percentage:33}]));
 });

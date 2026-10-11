@@ -25,9 +25,22 @@ function getExpenseBudgetSummary(budget) {
   };
 }
 
-function renderExpenseBudgetRow(budget) {
+function getExpenseBudgetRowPresentation(budget) {
   const { category, spent, amount, percent, progress, status } = getExpenseBudgetSummary(budget);
-  return `<article class="expense-budget-row ${status}"><div><strong>${escapeHtml(category)}</strong><span><i style="width:${progress}%"></i></span></div><div><b>${formatExpenseCurrency(spent)} <small>/ ${formatExpenseCurrency(amount)}</small></b><em>${percent} % utilisé</em></div><button type="button" class="expense-text-action danger" onclick="deleteExpenseBudget('${encodeURIComponent(category)}')">Retirer</button></article>`;
+  return {
+    category,
+    status,
+    progress,
+    spentLabel: formatExpenseCurrency(spent),
+    amountLabel: formatExpenseCurrency(amount),
+    usageLabel: `${percent} % utilisé`,
+    encodedCategory: encodeURIComponent(category)
+  };
+}
+
+function renderExpenseBudgetRow(budget) {
+  const item = getExpenseBudgetRowPresentation(budget);
+  return `<article class="expense-budget-row ${item.status}"><div><strong>${escapeHtml(item.category)}</strong><span><i style="width:${item.progress}%"></i></span></div><div><b>${item.spentLabel} <small>/ ${item.amountLabel}</small></b><em>${item.usageLabel}</em></div><button type="button" class="expense-text-action danger" onclick="deleteExpenseBudget('${item.encodedCategory}')">Retirer</button></article>`;
 }
 
 function renderExpenseBudgets() {
