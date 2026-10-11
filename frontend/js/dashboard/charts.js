@@ -109,37 +109,23 @@ function refreshDashboardPerformance() {
 }
 
 async function loadAnalytics() {
-
- const contacts =
-  await apiFetch("/api/contacts");
-
-  const ctx =
-    document.getElementById("analyticsChart");
-
-  const favorites =
-    contacts.filter(c => c.favorite).length;
-
+  const contacts = await apiFetch("/api/contacts");
+  const ctx = document.getElementById("analyticsChart");
   if (analyticsChart) {
     analyticsChart.destroy();
   }
+  analyticsChart = new Chart(ctx, getAnalyticsChartOptions(contacts));
+}
 
-  analyticsChart = new Chart(ctx, {
-
+function getAnalyticsChartOptions(contacts) {
+  const favorites = contacts.filter(contact => contact.favorite).length;
+  return {
     type: "doughnut",
-
     data: {
-
-      labels: [
-        "Favoris",
-        "Autres"
-      ],
-
+      labels: ["Favoris", "Autres"],
       datasets: [{
-        data: [
-          favorites,
-          contacts.length - favorites
-        ]
+        data: [favorites, contacts.length - favorites]
       }]
     }
-  });
+  };
 }

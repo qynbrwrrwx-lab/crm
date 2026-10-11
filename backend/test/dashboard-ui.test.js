@@ -188,6 +188,13 @@ test('revenue chart series keep only values from the selected period buckets', (
   assert.equal(series.labels.length, 7);
   assert.deepEqual(Array.from(series.points), [0, 20, 0, 0, 0, 0, 40]);
 });
+test('analytics chart options centralize favorite contact data', () => {
+  const b = browser();
+  const options = b.context.getAnalyticsChartOptions([{ favorite: true }, { favorite: false }, { favorite: true }]);
+  assert.deepEqual(JSON.parse(JSON.stringify(options)), {
+    type: 'doughnut', data: { labels: ['Favoris', 'Autres'], datasets: [{ data: [2, 1] }] }
+  });
+});
 test('commercial insight helpers distinguish a first payment from a revenue decrease', () => {
   const b = browser();
   const now = new b.context.Date('2026-09-15T12:00:00Z');
