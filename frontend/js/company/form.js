@@ -1,5 +1,19 @@
 // Entreprise : form.
 
+function setCompanyEditMode(editing) {
+  document.querySelectorAll(".company-field").forEach(field => {
+    if (editing) field.removeAttribute("readonly");
+    else field.setAttribute("readonly", true);
+    if (field.tagName === "SELECT") field.disabled = !editing;
+  });
+  document.querySelectorAll(".company-editable-control").forEach(field => {
+    field.disabled = !editing;
+  });
+  document.getElementById("companyLogoSection").style.display = editing ? "block" : "none";
+  document.getElementById("editCompanyBtn").style.display = editing ? "none" : "inline-flex";
+  document.getElementById("saveCompanyBtn").style.display = editing ? "inline-flex" : "none";
+}
+
 async function saveCompany() {
 
   try {
@@ -17,38 +31,7 @@ async function saveCompany() {
     loadOnboardingChecklist?.().catch(console.error);
     showToast("Profil de l’entreprise enregistré");
 
-    document
-  .querySelectorAll(".company-field")
-  .forEach(field => {
-
-    field.setAttribute(
-      "readonly",
-      true
-    );
-
-    if (
-      field.tagName === "SELECT"
-    ) {
-      field.disabled = true;
-    }
-
-  });
-
-    document.querySelectorAll(".company-editable-control").forEach(field => {
-      field.disabled = true;
-    });
-
-    document.getElementById(
-  "companyLogoSection"
-  ).style.display = "none";
-
-    document.getElementById(
-  "editCompanyBtn"
-  ).style.display = "inline-flex";
-
-    document.getElementById(
-  "saveCompanyBtn"
-  ).style.display = "none";
+    setCompanyEditMode(false);
 
   } catch (err) {
 
@@ -59,34 +42,5 @@ async function saveCompany() {
 }
 
 function enableCompanyEdit() {
-
-  document
-    .querySelectorAll(".company-field")
-    .forEach(field => {
-
-      field.removeAttribute("readonly");
-
-      if (
-        field.tagName === "SELECT"
-      ) {
-        field.disabled = false;
-      }
-
-    });
-
-  document.querySelectorAll(".company-editable-control").forEach(field => {
-    field.disabled = false;
-  });
-
-  document.getElementById(
-    "companyLogoSection"
-  ).style.display = "block";
-
-  document.getElementById(
-    "editCompanyBtn"
-  ).style.display = "none";
-
-  document.getElementById(
-  "saveCompanyBtn"
-  ).style.display = "inline-flex";
+  setCompanyEditMode(true);
 }

@@ -67,6 +67,10 @@ test('failed save keeps edited values and controls open',async()=>{
  const b=browser();b.context.enableCompanyEdit();b.node('companyName').value='Conserver';await b.context.saveCompany();
  assert.equal(b.node('companyName').value,'Conserver');assert.equal(b.node('saveCompanyBtn').style.display,'inline-flex');assert.equal(b.controls[0].disabled,false);assert.equal(b.toasts[0],'offline');
 });
+test('company edit mode updates fields, controls and actions together',()=>{
+ const b=browser();b.context.setCompanyEditMode(true);assert.equal(b.fields[2].disabled,false);assert.equal(b.node('saveCompanyBtn').style.display,'inline-flex');
+ b.context.setCompanyEditMode(false);assert.equal(b.fields[2].disabled,true);assert.equal(b.node('saveCompanyBtn').style.display,'none');assert.equal(b.controls[0].disabled,true);
+});
 test('logo change retains state for saving and refreshes header; empty selection is ignored',()=>{
  const b=browser(),change=b.listeners.find(l=>l.id==='companyLogo').callback;change({target:{files:[]}});assert.equal(b.read('companyLogoBase64'),'');
  change({target:{files:[{data:'data:image/png;base64,AA'}]}});assert.equal(b.read('companyLogoBase64'),'data:image/png;base64,AA');assert.equal(b.node('headerLogo').src,'data:image/png;base64,AA');
