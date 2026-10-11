@@ -81,27 +81,52 @@ function getOpportunityCardPresentation(item, stage) {
   };
 }
 
-function renderOpportunityCard(item, stage) {
-  const card = getOpportunityCardPresentation(item, stage);
+function getOpportunityColumnPresentation(stage, label, opportunities) {
+  return {
+    stage,
+    label,
+    totalLabel: opportunityCurrency(opportunityStageTotal(opportunities)),
+    count: opportunities.length,
+    cards: opportunities.map(item => getOpportunityCardPresentation(item, stage)),
+    emptyMessage: "Aucune opportunité"
+  };
+}
+
+function getOpportunityBoardPresentation(opportunities, now = new Date()) {
+  return {
+    metrics: getOpportunityBoardMetrics(opportunities, now),
+    columns: Object.entries(opportunityStages)
+      .map(([stage, label]) => getOpportunityColumnPresentation(stage, label, opportunities.filter(item => item.stage === stage)))
+  };
+}
+
+function renderOpportunityCardPresentation(card) {
   const quoteAction = card.canCreateQuote ? `<button type="button" class="opportunity-quote-btn" onclick="createQuoteFromOpportunity('${card.id}')">Créer un devis</button>` : "";
-  const moveAction = card.canMove ? `<select aria-label="Déplacer l’opportunité" onchange="moveOpportunity('${card.id}',this.value)"><option value="">Déplacer…</option>${renderOpportunityMoveOptions(stage)}</select>` : "";
+  const moveAction = card.canMove ? `<select aria-label="Déplacer l’opportunité" onchange="moveOpportunity('${card.id}',this.value)"><option value="">Déplacer…</option>${renderOpportunityMoveOptions(card.stage)}</select>` : "";
 
   return `<article class="opportunity-card"><div><span>${escapeHtml(card.contactName)}</span><h3>${escapeHtml(card.title)}</h3><strong>${card.amountLabel}</strong><small>${card.probabilityLabel}${card.closeDateLabel}</small></div><div class="opportunity-card-actions">${quoteAction}<button type="button" onclick="editOpportunity('${card.id}')">Modifier</button>${moveAction}<button type="button" class="danger" onclick="deleteOpportunity('${card.id}')">Supprimer</button></div></article>`;
 }
 
+function renderOpportunityCard(item, stage) {
+  return renderOpportunityCardPresentation({ ...getOpportunityCardPresentation(item, stage), stage });
+}
+
+function renderOpportunityColumnPresentation(column) {
+  const content = column.cards.length
+    ? column.cards.map(card => renderOpportunityCardPresentation({ ...card, stage: column.stage })).join("")
+    : `<p class="opportunity-empty">${column.emptyMessage}</p>`;
+  return `<section class="opportunity-column stage-${column.stage}"><header><div><span>${column.label}</span><strong>${column.totalLabel}</strong></div><b>${column.count}</b></header><div>${content}</div></section>`;
+}
+
 function renderOpportunityColumn(stage, label, opportunities) {
-  const content = opportunities.length
-    ? opportunities.map(item => renderOpportunityCard(item, stage)).join("")
-    : '<p class="opportunity-empty">Aucune opportunité</p>';
-  return `<section class="opportunity-column stage-${stage}"><header><div><span>${label}</span><strong>${opportunityCurrency(opportunityStageTotal(opportunities))}</strong></div><b>${opportunities.length}</b></header><div>${content}</div></section>`;
+  return renderOpportunityColumnPresentation(getOpportunityColumnPresentation(stage, label, opportunities));
 }
 
 function renderOpportunityBoard(opportunities) {
   const board = document.getElementById("opportunityBoard");
   if (!board) return;
 
-  renderOpportunityMetrics(getOpportunityBoardMetrics(opportunities));
-  board.innerHTML = Object.entries(opportunityStages)
-    .map(([stage, label]) => renderOpportunityColumn(stage, label, opportunities.filter(item => item.stage === stage)))
-    .join("");
+  const presentation = getOpportunityBoardPresentation(opportunities);
+  renderOpportunityMetrics(presentation.metrics);
+  board.innerHTML = presentation.columns.map(renderOpportunityColumnPresentation).join("");
 }
