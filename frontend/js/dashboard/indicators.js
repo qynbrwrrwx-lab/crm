@@ -20,14 +20,26 @@ function getPaymentAlertPresentation({ pending, overdue, overdueTotal }) {
   };
 }
 
-function updateBusinessKPI(invoices) {
-  const { quotes, orders, pending, paid, overdue, pendingTotal, paidTotal, overdueTotal } = getBusinessMetrics(invoices);
+function getBusinessKpiPresentation(metrics) {
+  return {
+    quoteCount: metrics.quotes.length,
+    orderCount: metrics.orders.length,
+    pendingCount: metrics.pending.length,
+    pendingTotalLabel: formatCurrency(metrics.pendingTotal),
+    paidTotalLabel: formatCurrency(metrics.paidTotal)
+  };
+}
 
-  document.getElementById("dashboardQuotes").innerText = quotes.length;
-  document.getElementById("dashboardOrders").innerText = orders.length;
-  document.getElementById("dashboardPendingInvoices").innerText = pending.length;
+function updateBusinessKPI(invoices) {
+  const metrics = getBusinessMetrics(invoices);
+  const { pending, paid, overdue, overdueTotal } = metrics;
+  const presentation = getBusinessKpiPresentation(metrics);
+
+  document.getElementById("dashboardQuotes").innerText = presentation.quoteCount;
+  document.getElementById("dashboardOrders").innerText = presentation.orderCount;
+  document.getElementById("dashboardPendingInvoices").innerText = presentation.pendingCount;
   const pendingAlert = document.getElementById("dashboardPendingInvoicesAlert");
-  if (pendingAlert) pendingAlert.innerText = pending.length;
+  if (pendingAlert) pendingAlert.innerText = presentation.pendingCount;
   const paymentAlertLabel = document.getElementById("dashboardPaymentAlertLabel");
   const paymentAlertDetail = document.getElementById("dashboardPaymentAlertDetail");
   const paymentAlertDot = document.getElementById("dashboardPaymentAlertDot");
@@ -48,8 +60,8 @@ function updateBusinessKPI(invoices) {
     if (paymentAlertDetail) paymentAlertDetail.textContent = paymentAlert.detail;
     paymentAlertDot?.classList.remove("overdue");
   }
-  document.getElementById("dashboardPendingTotal").innerText = formatCurrency(pendingTotal);
-  document.getElementById("dashboardPaidTotal").innerText = formatCurrency(paidTotal);
+  document.getElementById("dashboardPendingTotal").innerText = presentation.pendingTotalLabel;
+  document.getElementById("dashboardPaidTotal").innerText = presentation.paidTotalLabel;
   updateElectronicInvoicingAlert(invoices);
   updateCommercialInsights(invoices, paid);
   updateRecentActivity(invoices);

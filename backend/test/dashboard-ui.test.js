@@ -62,6 +62,17 @@ test('payment alert presentation centralizes overdue and pending states', () => 
   assert.equal(pending.label, '<span id="dashboardPendingInvoicesAlert">1</span> facture(s) à encaisser');
   assert.equal(pending.filter, 'pending');
 });
+test('business KPI presentation centralizes counts and totals', () => {
+  const b = browser();
+  const metrics = b.context.getBusinessMetrics([
+    { type: 'quote', totalTTC: 10 }, { type: 'order', totalTTC: 20 },
+    { type: 'invoice', paymentStatus: 'pending', totalTTC: 30 }, { type: 'invoice', paymentStatus: 'paid', totalTTC: 40 }
+  ]);
+  assert.deepEqual(JSON.parse(JSON.stringify(b.context.getBusinessKpiPresentation(metrics))), {
+    quoteCount: 1, orderCount: 1, pendingCount: 1,
+    pendingTotalLabel: b.context.formatCurrency(30), paidTotalLabel: b.context.formatCurrency(40)
+  });
+});
 test('cash forecast deducts partial payments and excludes settled and distant documents', () => {
   const b = browser(); b.context.allInvoices = [
     { type: 'invoice', totalTTC: 100, payments: [{ amount: 40 }], paymentDueDate: '2026-09-20' },
