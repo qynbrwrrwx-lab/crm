@@ -32,6 +32,18 @@ function renderExpenseListRow(expense) {
   </article>`;
 }
 
+function getExpenseListPresentation(selection, expenses) {
+  const hasExpenses = expenses.length > 0;
+  return {
+    pendingTotalLabel: formatExpenseCurrency(selection.pendingTotal),
+    paidTotalLabel: formatExpenseCurrency(selection.paidTotal),
+    countLabel: `${expenses.length} dépense${expenses.length > 1 ? "s" : ""}`,
+    emptyMessage: hasExpenses
+      ? "Aucune dépense ne correspond aux filtres choisis."
+      : "Aucune dépense enregistrée. Ajoutez vos premiers achats, abonnements ou frais fournisseurs."
+  };
+}
+
 function renderExpenses() {
   const list = document.getElementById("expensesList");
   const pendingTotal = document.getElementById("expensesPendingTotal");
@@ -40,16 +52,17 @@ function renderExpenses() {
   if (!list) return;
 
   const selection = selectExpenses(allExpenses, readExpenseListFilters());
-  if (pendingTotal) pendingTotal.textContent = formatExpenseCurrency(selection.pendingTotal);
-  if (paidTotal) paidTotal.textContent = formatExpenseCurrency(selection.paidTotal);
-  if (count) count.textContent = `${allExpenses.length} dépense${allExpenses.length > 1 ? "s" : ""}`;
+  const presentation = getExpenseListPresentation(selection, allExpenses);
+  if (pendingTotal) pendingTotal.textContent = presentation.pendingTotalLabel;
+  if (paidTotal) paidTotal.textContent = presentation.paidTotalLabel;
+  if (count) count.textContent = presentation.countLabel;
   updateExpenseDashboard?.();
   renderSuppliers?.();
   renderExpenseCategoryBreakdown(selection.paidExpenses);
   renderExpenseBudgets();
 
   if (!selection.visibleExpenses.length) {
-    list.innerHTML = `<p class="empty-state">${allExpenses.length ? "Aucune dépense ne correspond aux filtres choisis." : "Aucune dépense enregistrée. Ajoutez vos premiers achats, abonnements ou frais fournisseurs."}</p>`;
+    list.innerHTML = `<p class="empty-state">${presentation.emptyMessage}</p>`;
     return;
   }
   list.innerHTML = selection.visibleExpenses.map(renderExpenseListRow).join("");

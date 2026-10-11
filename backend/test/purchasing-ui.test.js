@@ -37,6 +37,11 @@ test('expense selection keeps totals global while returning only matching rows',
  const selected=b.context.selectExpenses(expenses,{query:'hébergement',status:'overdue',category:'Autres'});
  assert.deepEqual(JSON.parse(JSON.stringify(selected.visibleExpenses.map(item=>item._id))),['late']);assert.equal(selected.pendingTotal,120);assert.equal(selected.paidTotal,60);assert.deepEqual(expenses.map(item=>item._id),['late','paid','future']);
 });
+test('expense list presentation centralizes counters, totals and empty states',()=>{
+ const b=browser(),selection={pendingTotal:80,paidTotal:60};
+ assert.deepEqual(JSON.parse(JSON.stringify(b.context.getExpenseListPresentation(selection,[expense(),expense({_id:'paid'})]))),{pendingTotalLabel:b.context.formatExpenseCurrency(80),paidTotalLabel:b.context.formatExpenseCurrency(60),countLabel:'2 dépenses',emptyMessage:'Aucune dépense ne correspond aux filtres choisis.'});
+ assert.equal(b.context.getExpenseListPresentation(selection,[]).emptyMessage,'Aucune dépense enregistrée. Ajoutez vos premiers achats, abonnements ou frais fournisseurs.');
+});
 test('monthly expense requires a due date and invalid amounts make no request',async()=>{
  const b=browser();b.node('expenseSupplier').value='Acme';b.node('expenseLabel').value='Abonnement';b.node('expenseAmount').value='10';b.node('expenseRecurrence').value='monthly';await b.context.saveExpense();
  assert.equal(b.calls.length,0);assert.match(b.toasts[0],/échéance/);
