@@ -450,6 +450,15 @@ test("product picker delegates search field styling to the commerce stylesheet",
   assert.match(commerceStyles, /\.product-picker-search \{ width:100%/);
 });
 
+test("product picker presentation centralizes labels and formatted prices", () => {
+  const b = browser();
+  assert.deepEqual(plain(b.context.getInvoiceProductPickerPresentation([{ _id: "product", name: "Produit", priceHT: "12.5" }])), {
+    searchPlaceholder: "Rechercher un produit...",
+    rows: [{ id: "product", name: "Produit", priceLabel: "12.50 € HT" }]
+  });
+  assert.deepEqual(plain(b.context.getInvoiceProductPickerPresentation([])), { searchPlaceholder: "Rechercher un produit...", rows: [] });
+});
+
 for (const [type, expected] of [["quote", "Devis"], ["order", "Commande"], ["invoice", "Facture"], ["credit_note", "Avoir"]]) {
   test(`the ${type} detail view remains available after splitting scripts`, async () => {
     const b = browser();

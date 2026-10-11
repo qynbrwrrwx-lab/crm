@@ -1,13 +1,25 @@
 // Documents commerciaux : rendu et sélection des produits dans l’éditeur.
+function getInvoiceProductPickerPresentation(products) {
+  return {
+    searchPlaceholder: "Rechercher un produit...",
+    rows: products.map(product => ({
+      id: product._id,
+      name: product.name,
+      priceLabel: `${Number(product.priceHT).toFixed(2)} € HT`
+    }))
+  };
+}
+
 function renderInvoiceProductPicker(products) {
+  const presentation = getInvoiceProductPickerPresentation(products);
   document.getElementById("addProductBody").innerHTML = `
-    <input id="productSearch" class="product-picker-search" type="text" placeholder="Rechercher un produit...">
+    <input id="productSearch" class="product-picker-search" type="text" placeholder="${presentation.searchPlaceholder}">
     <div id="productList">
-      ${products.map(product => `
-        <div class="product-picker-row" onclick="addProductToInvoice('${product._id}')">
+      ${presentation.rows.map(product => `
+        <div class="product-picker-row" onclick="addProductToInvoice('${product.id}')">
           <div>
             <strong>${escapeHtml(product.name)}</strong>
-            <div class="erp-items">${Number(product.priceHT).toFixed(2)} € HT</div>
+            <div class="erp-items">${product.priceLabel}</div>
           </div>
           <button class="primary-btn" type="button">Ajouter</button>
         </div>
