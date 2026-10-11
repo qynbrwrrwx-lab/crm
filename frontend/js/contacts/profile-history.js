@@ -34,10 +34,19 @@ function renderClientOpportunityItem(item) {
   return `<button type="button" class="client-profile-document" onclick="openOpportunityFromProfile('${item._id}')"><span class="client-profile-document-type">${escapeHtml(stage)}</span><span class="client-profile-document-main"><strong>${escapeHtml(item.title)}</strong><small>${date}</small></span><strong class="client-profile-document-total">${formatCurrency(item.amount)}</strong></button>`;
 }
 
+function getClientDocumentItemPresentation(document) {
+  return {
+    id: document._id,
+    typeLabel: clientProfileDocumentTypes[document.type] || "Document",
+    number: document.invoiceNumber || "Sans numéro",
+    dateLabel: new Date(document.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }),
+    totalLabel: formatCurrency(document.totalTTC)
+  };
+}
+
 function renderClientDocumentItem(document) {
-  const type = clientProfileDocumentTypes[document.type] || "Document";
-  const date = new Date(document.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
-  return `<button type="button" class="client-profile-document" onclick="openInvoice('${document._id}')"><span class="client-profile-document-type">${escapeHtml(type)}</span><span class="client-profile-document-main"><strong>${escapeHtml(document.invoiceNumber || "Sans numéro")}</strong><small>${date}</small></span><strong class="client-profile-document-total">${formatCurrency(document.totalTTC)}</strong></button>`;
+  const presentation = getClientDocumentItemPresentation(document);
+  return `<button type="button" class="client-profile-document" onclick="openInvoice('${presentation.id}')"><span class="client-profile-document-type">${escapeHtml(presentation.typeLabel)}</span><span class="client-profile-document-main"><strong>${escapeHtml(presentation.number)}</strong><small>${presentation.dateLabel}</small></span><strong class="client-profile-document-total">${presentation.totalLabel}</strong></button>`;
 }
 
 function renderClientProfileHistorySection({ className = "", eyebrow, title, countLabel, items, renderItem, limit, emptyMessage }) {

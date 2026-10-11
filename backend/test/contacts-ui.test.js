@@ -259,6 +259,12 @@ test("client agenda presentation centralizes type, date and priority", () => {
   assert.deepEqual(plain(item), { id: "task", typeLabel: "Rendez-vous", title: "Relance", dateLabel: b.read("new Date('2026-10-05').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })"), priorityLabel: "Prioritaire" });
 });
 
+test("client document presentation centralizes type, date and amount", () => {
+  const b = browser();
+  const item = b.context.getClientDocumentItemPresentation({ _id: "invoice", type: "invoice", invoiceNumber: "FAC-1", createdAt: "2026-10-05", totalTTC: 120 });
+  assert.deepEqual(plain(item), { id: "invoice", typeLabel: "Facture", number: "FAC-1", dateLabel: b.read("new Date('2026-10-05').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })"), totalLabel: b.context.formatCurrency(120) });
+});
+
 test("map popups escape contact names when loading shared contacts", async () => {
   const b = browser();
   b.context.map = { removeLayer() {} };
