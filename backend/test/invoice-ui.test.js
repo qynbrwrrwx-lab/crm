@@ -721,6 +721,21 @@ test("quote draft summary keeps quantities, totals and stock warnings consistent
   assert.equal(b.elements.get("quoteDraftAvailability").classList.contains("is-success"), true);
 });
 
+test("quote context and draft presentation centralize client and availability labels", () => {
+  const b = browser();
+  assert.deepEqual(plain(b.context.getQuoteClientContextPresentation(null)), {
+    label: "Client destinataire", name: "Sélectionnez un client pour afficher ses coordonnées.", details: ""
+  });
+  assert.deepEqual(plain(b.context.getQuoteClientContextPresentation({ companyName: "Acme", email: "contact@example.test", phone: "0102" })), {
+    label: "Client destinataire", name: "Acme", details: "contact@example.test · 0102"
+  });
+  assert.deepEqual(plain(b.context.getQuoteDraftSummaryPresentation({ count: 2, total: 24, selectedLines: [{}], shortages: [] })), {
+    countLabel: "2 articles", totalLabel: b.context.formatDocumentCurrency(24), availabilityLabel: "Stock disponible", isWarning: false, isSuccess: true
+  });
+  assert.equal(b.context.getQuoteDraftSummaryPresentation({ count: 0, total: 0, selectedLines: [], shortages: [] }).availabilityLabel, "Disponibilité à vérifier");
+  assert.equal(b.context.getQuoteDraftSummaryPresentation({ count: 1, total: 12, selectedLines: [{}], shortages: [{}] }).isWarning, true);
+});
+
 test("document activity presentation centralizes labels and dates", () => {
   const b = browser();
   const item = b.context.getDocumentActivityPresentation({ action: "invoice.paid", createdAt: "2026-10-05T10:00:00Z" });

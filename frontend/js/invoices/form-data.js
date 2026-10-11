@@ -48,34 +48,54 @@ async function loadInvoiceData() {
   productSelect.innerHTML = renderInvoiceProductOptions(products);
 }
 
+function getQuoteClientContextPresentation(contact) {
+  if (!contact) {
+    return {
+      label: "Client destinataire",
+      name: "Sélectionnez un client pour afficher ses coordonnées.",
+      details: ""
+    };
+  }
+  return {
+    label: "Client destinataire",
+    name: contact.companyName || `${contact.firstname || ""} ${contact.lastname || ""}`.trim() || "Client",
+    details: [contact.email, contact.phone, contact.billingAddress].filter(Boolean).join(" · ") || "Coordonnées à compléter dans la fiche client"
+  };
+}
+
 function updateQuoteClientContext() {
   const container = document.getElementById("quoteClientContext");
   const contactId = document.getElementById("quoteContact")?.value;
   if (!container) return;
 
-  const contact = quoteContactsById.get(contactId);
-  if (!contact) {
-    container.innerHTML = "<span>Client destinataire</span><strong>Sélectionnez un client pour afficher ses coordonnées.</strong>";
-    return;
-  }
+  const presentation = getQuoteClientContextPresentation(quoteContactsById.get(contactId));
+  container.innerHTML = `<span>${presentation.label}</span><strong>${escapeHtml(presentation.name)}</strong>${presentation.details ? `<small>${escapeHtml(presentation.details)}</small>` : ""}`;
+}
 
-  const name = contact.companyName || `${contact.firstname || ""} ${contact.lastname || ""}`.trim() || "Client";
-  const details = [contact.email, contact.phone, contact.billingAddress].filter(Boolean).join(" · ");
-  container.innerHTML = `<span>Client destinataire</span><strong>${escapeHtml(name)}</strong><small>${escapeHtml(details || "Coordonnées à compléter dans la fiche client")}</small>`;
+function getQuoteDraftSummaryPresentation(summary) {
+  const hasShortages = summary.shortages.length > 0;
+  const hasSelectedLines = summary.selectedLines.length > 0;
+  return {
+    countLabel: `${summary.count} article${summary.count > 1 ? "s" : ""}`,
+    totalLabel: formatDocumentCurrency(summary.total),
+    availabilityLabel: hasShortages ? "Stock insuffisant sur un ou plusieurs articles" : (hasSelectedLines ? "Stock disponible" : "Disponibilité à vérifier"),
+    isWarning: hasShortages,
+    isSuccess: hasSelectedLines && !hasShortages
+  };
 }
 
 function updateQuoteDraftSummary() {
   const lines = [...document.querySelectorAll(".quote-line")];
-  const { selectedLines, count, total, shortages } = getQuoteDraftSummary(lines, quoteProductsById);
+  const presentation = getQuoteDraftSummaryPresentation(getQuoteDraftSummary(lines, quoteProductsById));
   const countEl = document.getElementById("quoteDraftCount");
   const totalEl = document.getElementById("quoteDraftTotal");
   const availabilityEl = document.getElementById("quoteDraftAvailability");
-  if (countEl) countEl.textContent = `${count} article${count > 1 ? "s" : ""}`;
-  if (totalEl) totalEl.textContent = formatDocumentCurrency(total);
+  if (countEl) countEl.textContent = presentation.countLabel;
+  if (totalEl) totalEl.textContent = presentation.totalLabel;
   if (availabilityEl) {
-    availabilityEl.textContent = shortages.length ? "Stock insuffisant sur un ou plusieurs articles" : (selectedLines.length ? "Stock disponible" : "Disponibilité à vérifier");
-    availabilityEl.classList.toggle("is-warning", shortages.length > 0);
-    availabilityEl.classList.toggle("is-success", selectedLines.length > 0 && shortages.length === 0);
+    availabilityEl.textContent = presentation.availabilityLabel;
+    availabilityEl.classList.toggle("is-warning", presentation.isWarning);
+    availabilityEl.classList.toggle("is-success", presentation.isSuccess);
   }
 }
 
