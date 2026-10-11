@@ -92,6 +92,12 @@ test("favorites escape contact values before rendering and settings update the c
   b.context.apiFetch = async () => [{}, {}]; await b.context.loadUserInfo(); assert.equal(b.nodes.get("userStats").innerText, 2);
 });
 
+test("favorite contact presentation centralizes name and optional contact fields", () => {
+  const b = browser();
+  assert.deepEqual(JSON.parse(JSON.stringify(b.context.getFavoriteContactPresentation({ firstname: "Alice", lastname: "Martin", phone: "01 02", companyName: "Acme" }))), { fullName: "Alice Martin", phone: "01 02", companyName: "Acme" });
+  assert.deepEqual(JSON.parse(JSON.stringify(b.context.getFavoriteContactPresentation({ lastname: "Martin" }))), { fullName: "Martin", phone: "", companyName: "" });
+});
+
 test("Escape closes the first visible modal only", () => {
   const b = browser(), closed = [];
   b.nodes.get("paymentModal").style.display = "flex"; b.nodes.get("restockModal").style.display = "flex";
