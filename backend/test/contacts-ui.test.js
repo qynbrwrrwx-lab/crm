@@ -216,6 +216,17 @@ test("client profile data keeps only active related opportunities and suggests t
   assert.equal(data.nextAction.target, "invoices");
 });
 
+test("client profile overview presentation centralizes contact and commercial labels", () => {
+  const b = browser();
+  const presentation = b.context.getClientProfileOverviewPresentation(contact({ email: "a@example.test" }), {
+    firstPaidInvoice: { createdAt: "2026-01-01" }, latest: { invoiceNumber: "FAC-1" }, paidInvoices: [{}, {}], pending: 50, related: [{}, {}], total: 120
+  });
+  assert.equal(presentation.totalLabel, b.context.formatCurrency(120));
+  assert.equal(presentation.relatedLabel, "2 documents associés");
+  assert.equal(presentation.latestLabel, "Dernier document : FAC-1");
+  assert.equal(presentation.averageLabel, b.context.formatCurrency(60));
+});
+
 test("client profile history escapes titles and retains its empty sections", () => {
   const b = browser();
   const history = b.context.renderClientProfileHistory({
