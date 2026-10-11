@@ -198,6 +198,13 @@ test("client profile renders outstanding invoices and excludes other clients", a
   assert.match(b.elements.get("invoiceDetailsBody").innerHTML, /Suivre le règlement/);
 });
 
+test("client profile presentation centralizes title, tags, notes and next action", () => {
+  const b = browser();
+  const nextAction = { title: "Relancer", detail: "Une facture", action: "Voir", target: "invoices" };
+  const presentation = b.context.getClientProfilePresentation(contact({ companyName: "", firstname: "Alice", lastname: "Martin", tags: ["VIP"], notes: "Note" }), "client", nextAction);
+  assert.deepEqual(plain(presentation), { title: "Alice Martin", id: "client", tags: ["VIP"], notes: "Note", nextAction });
+});
+
 test("client profile data keeps only active related opportunities and suggests the right action", () => {
   const b = browser();
   const data = b.context.getClientProfileDataFromResources(contact(), {
