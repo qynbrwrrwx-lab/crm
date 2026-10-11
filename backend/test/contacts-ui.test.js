@@ -240,3 +240,11 @@ test("map popups escape contact names when loading shared contacts", async () =>
   assert.doesNotMatch(popup, /<img src=x>/);
   assert.equal(b.read("allContacts.length"), 1);
 });
+
+test("contact filter status presentation centralizes count and reset visibility", () => {
+  const b = browser();
+  const inactive = b.context.getContactFilterStatusPresentation([contact()], { query: "", sort: "recent", followUpFilter: "all", tagFilter: "all" });
+  assert.deepEqual(plain(inactive), { countLabel: "1 client affiché", resetHidden: true });
+  const active = b.context.getContactFilterStatusPresentation([contact(), contact({ _id: "other" })], { query: "acme", sort: "recent", followUpFilter: "all", tagFilter: "all" });
+  assert.deepEqual(plain(active), { countLabel: "2 clients affichés", resetHidden: false });
+});

@@ -108,11 +108,20 @@ function getContactFilterState() {
   };
 }
 
+function getContactFilterStatusPresentation(contacts, filters) {
+  const hasActiveFilter = filters.query.trim() || filters.sort !== "recent" || filters.followUpFilter !== "all" || filters.tagFilter !== "all";
+  return {
+    countLabel: `${contacts.length} client${contacts.length > 1 ? "s" : ""} affiché${contacts.length > 1 ? "s" : ""}`,
+    resetHidden: !hasActiveFilter
+  };
+}
+
 function updateContactFilterStatus(contacts, filters) {
   const count = document.getElementById("contactFilteredCount");
   const reset = document.getElementById("resetContactFilters");
-  if (count) count.textContent = `${contacts.length} client${contacts.length > 1 ? "s" : ""} affiché${contacts.length > 1 ? "s" : ""}`;
-  if (reset) reset.hidden = !(filters.query.trim() || filters.sort !== "recent" || filters.followUpFilter !== "all" || filters.tagFilter !== "all");
+  const presentation = getContactFilterStatusPresentation(contacts, filters);
+  if (count) count.textContent = presentation.countLabel;
+  if (reset) reset.hidden = presentation.resetHidden;
 }
 
 function filterContacts() {
