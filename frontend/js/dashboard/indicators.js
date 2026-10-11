@@ -57,17 +57,28 @@ function updateBusinessKPI(invoices) {
   updateCashForecast();
 }
 
-function updateStockKPI(products) {
+function getStockKpiPresentation(products) {
   const { lowStock, outOfStock, stockValue, stockCost } = getStockMetrics(products);
+  return {
+    lowStock,
+    outOfStock,
+    count: products.length,
+    valueLabel: formatCurrency(stockValue),
+    valueDetail: `Valeur d’achat : ${formatCurrency(stockCost)} · Marge potentielle : ${formatCurrency(stockValue - stockCost)}`
+  };
+}
+
+function updateStockKPI(products) {
+  const presentation = getStockKpiPresentation(products);
   const element = document.getElementById("dashboardLowStock");
-  if (element) element.innerText = lowStock;
+  if (element) element.innerText = presentation.lowStock;
   const lowStockAlert = document.getElementById("dashboardLowStockAlert");
-  if (lowStockAlert) lowStockAlert.innerText = lowStock;
+  if (lowStockAlert) lowStockAlert.innerText = presentation.lowStock;
   const outOfStockElement = document.getElementById("dashboardOutOfStock");
-  if (outOfStockElement) outOfStockElement.innerText = outOfStock;
+  if (outOfStockElement) outOfStockElement.innerText = presentation.outOfStock;
   const valueElement = document.getElementById("dashboardStockValue");
-  if (valueElement) valueElement.innerText = formatCurrency(stockValue);
-  if (valueElement) valueElement.title = `Valeur d’achat : ${formatCurrency(stockCost)} · Marge potentielle : ${formatCurrency(stockValue - stockCost)}`;
+  if (valueElement) valueElement.innerText = presentation.valueLabel;
+  if (valueElement) valueElement.title = presentation.valueDetail;
   const countElement = document.getElementById("dashboardProductCount");
-  if (countElement) countElement.innerText = products.length;
+  if (countElement) countElement.innerText = presentation.count;
 }

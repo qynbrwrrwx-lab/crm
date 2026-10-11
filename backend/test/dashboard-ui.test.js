@@ -46,6 +46,14 @@ test('stock indicators preserve zero thresholds and purchase value', () => {
   assert.equal(b.node('dashboardStockValue').innerText, b.context.formatCurrency(40));
   assert.ok(b.node('dashboardStockValue').title.includes(b.context.formatCurrency(24)));
 });
+test('stock indicator presentation centralizes counts, value and potential margin', () => {
+  const b = browser();
+  const presentation = b.context.getStockKpiPresentation([{ stock: 2, lowStockThreshold: 3, priceHT: 20, purchasePriceHT: 12 }]);
+  assert.deepEqual(JSON.parse(JSON.stringify(presentation)), {
+    lowStock: 1, outOfStock: 0, count: 1, valueLabel: b.context.formatCurrency(40),
+    valueDetail: `Valeur d’achat : ${b.context.formatCurrency(24)} · Marge potentielle : ${b.context.formatCurrency(16)}`
+  });
+});
 test('payment alert presentation centralizes overdue and pending states', () => {
   const b = browser();
   const overdue = b.context.getPaymentAlertPresentation({ pending: [{}, {}], overdue: [{}, {}], overdueTotal: 120 });
