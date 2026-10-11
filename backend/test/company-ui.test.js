@@ -63,6 +63,10 @@ test('saving preserves mail settings, numeric terms, electronic settings and log
  assert.deepEqual(payload.electronicInvoicing,{enabled:true,providerName:'Provider',preferredFormat:'factur-x'});
  assert.equal(b.fields[2].disabled,true);assert.equal(b.controls[0].disabled,true);assert.equal(b.node('saveCompanyBtn').style.display,'none');
 });
+test('electronic invoicing form data normalizes provider and enabled state',()=>{
+ const b=browser();assert.deepEqual(JSON.parse(JSON.stringify(b.context.getElectronicInvoicingFormData({enabled:'true',providerName:' Provider ',preferredFormat:'factur-x'}))),{enabled:true,providerName:'Provider',preferredFormat:'factur-x'});
+ assert.equal(b.context.getElectronicInvoicingFormData({enabled:'false',providerName:'',preferredFormat:'ubl'}).enabled,false);
+});
 test('failed save keeps edited values and controls open',async()=>{
  const b=browser();b.context.enableCompanyEdit();b.node('companyName').value='Conserver';await b.context.saveCompany();
  assert.equal(b.node('companyName').value,'Conserver');assert.equal(b.node('saveCompanyBtn').style.display,'inline-flex');assert.equal(b.controls[0].disabled,false);assert.equal(b.toasts[0],'offline');
