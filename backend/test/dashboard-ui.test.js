@@ -58,6 +58,18 @@ test('cash forecast deducts partial payments and excludes settled and distant do
   assert.equal(b.node('dashboardCashForecast').textContent, b.context.formatCurrency(-20));
   assert.equal(b.node('dashboardCashForecast').className, 'is-negative');
 });
+test('cash forecast presentation centralizes display labels and balance state', () => {
+  const b = browser();
+  const presentation = b.context.getCashForecastPresentation(
+    [{ type: 'invoice', totalTTC: 100, payments: [{ amount: 25 }], paymentDueDate: '2026-09-20' }],
+    [{ amountTTC: 20, dueDate: '2026-09-20' }],
+    new b.context.Date('2026-09-15T12:00:00Z')
+  );
+  assert.deepEqual(JSON.parse(JSON.stringify(presentation)), {
+    valueLabel: b.context.formatCurrency(55), className: 'is-positive',
+    detailLabel: `${b.context.formatCurrency(75)} à encaisser · ${b.context.formatCurrency(20)} à décaisser d’ici 30 jours.`
+  });
+});
 test('expense alerts select overdue expenses and reset navigation when cleared', () => {
   const b = browser(); b.context.updateExpenseAlert([{ amountTTC: 50, dueDate: '2026-09-01' }, { status: 'paid', dueDate: '2026-09-01' }]);
   assert.match(b.node('dashboardExpenseAlertLabel').textContent, /^1 échéance/);

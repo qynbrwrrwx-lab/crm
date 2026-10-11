@@ -22,29 +22,38 @@ function updateExpenseDashboard() {
   updateCashForecast();
 }
 
-function updateCashForecast() {
-  const element = document.getElementById("dashboardCashForecast");
-  const detail = document.getElementById("dashboardCashForecastDetail");
-  if (!element || !detail) return;
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const deadline = new Date(now);
+function getCashForecastPresentation(invoices, expenses, now = new Date()) {
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const deadline = new Date(today);
   deadline.setDate(deadline.getDate() + 30);
-  const invoices = typeof allInvoices === "undefined" ? [] : allInvoices;
-  const expenses = typeof allExpenses === "undefined" ? [] : allExpenses;
   const expectedIncome = invoices
-    .filter(invoice => invoice.type === "invoice" && invoice.paymentStatus !== "paid" && invoice.paymentDueDate && new Date(invoice.paymentDueDate) >= now && new Date(invoice.paymentDueDate) <= deadline)
+    .filter(invoice => invoice.type === "invoice" && invoice.paymentStatus !== "paid" && invoice.paymentDueDate && new Date(invoice.paymentDueDate) >= today && new Date(invoice.paymentDueDate) <= deadline)
     .reduce((total, invoice) => {
       const paid = (invoice.payments || []).reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
       return total + Math.max(0, Number(invoice.totalTTC || 0) - paid);
     }, 0);
   const expectedExpenses = expenses
-    .filter(expense => expense.status !== "paid" && expense.dueDate && new Date(expense.dueDate) >= now && new Date(expense.dueDate) <= deadline)
+    .filter(expense => expense.status !== "paid" && expense.dueDate && new Date(expense.dueDate) >= today && new Date(expense.dueDate) <= deadline)
     .reduce((total, expense) => total + Number(expense.amountTTC || 0), 0);
   const forecast = expectedIncome - expectedExpenses;
-  element.textContent = formatCurrency(forecast);
-  element.className = forecast >= 0 ? "is-positive" : "is-negative";
-  detail.textContent = `${formatCurrency(expectedIncome)} à encaisser · ${formatCurrency(expectedExpenses)} à décaisser d’ici 30 jours.`;
+  return {
+    valueLabel: formatCurrency(forecast),
+    className: forecast >= 0 ? "is-positive" : "is-negative",
+    detailLabel: `${formatCurrency(expectedIncome)} à encaisser · ${formatCurrency(expectedExpenses)} à décaisser d’ici 30 jours.`
+  };
+}
+
+function updateCashForecast() {
+  const element = document.getElementById("dashboardCashForecast");
+  const detail = document.getElementById("dashboardCashForecastDetail");
+  if (!element || !detail) return;
+  const invoices = typeof allInvoices === "undefined" ? [] : allInvoices;
+  const expenses = typeof allExpenses === "undefined" ? [] : allExpenses;
+  const presentation = getCashForecastPresentation(invoices, expenses);
+  element.textContent = presentation.valueLabel;
+  element.className = presentation.className;
+  detail.textContent = presentation.detailLabel;
 }
 
 function getExpenseAlertPresentation(expenses, now = new Date()) {
