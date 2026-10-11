@@ -253,6 +253,12 @@ test("client profile history escapes titles and retains its empty sections", () 
   assert.match(history, /Aucun événement commercial/);
 });
 
+test("client agenda presentation centralizes type, date and priority", () => {
+  const b = browser();
+  const item = b.context.getClientAgendaItemPresentation({ _id: "task", type: "appointment", title: "Relance", dueDate: "2026-10-05", priority: "high" });
+  assert.deepEqual(plain(item), { id: "task", typeLabel: "Rendez-vous", title: "Relance", dateLabel: b.read("new Date('2026-10-05').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })"), priorityLabel: "Prioritaire" });
+});
+
 test("map popups escape contact names when loading shared contacts", async () => {
   const b = browser();
   b.context.map = { removeLayer() {} };

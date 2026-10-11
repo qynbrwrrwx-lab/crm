@@ -13,8 +13,19 @@ function renderClientAgendaDate(item) {
   return "Sans date";
 }
 
+function getClientAgendaItemPresentation(item) {
+  return {
+    id: item._id,
+    typeLabel: item.type === "appointment" ? "Rendez-vous" : "Tâche",
+    title: item.title,
+    dateLabel: renderClientAgendaDate(item),
+    priorityLabel: item.priority === "high" ? "Prioritaire" : "À suivre"
+  };
+}
+
 function renderClientAgendaItem(item) {
-  return `<button type="button" class="client-profile-document" onclick="openAgendaItem('${item._id}')"><span class="client-profile-document-type">${item.type === "appointment" ? "Rendez-vous" : "Tâche"}</span><span class="client-profile-document-main"><strong>${escapeHtml(item.title)}</strong><small>${renderClientAgendaDate(item)}</small></span><strong class="client-profile-document-total">${item.priority === "high" ? "Prioritaire" : "À suivre"}</strong></button>`;
+  const presentation = getClientAgendaItemPresentation(item);
+  return `<button type="button" class="client-profile-document" onclick="openAgendaItem('${presentation.id}')"><span class="client-profile-document-type">${presentation.typeLabel}</span><span class="client-profile-document-main"><strong>${escapeHtml(presentation.title)}</strong><small>${presentation.dateLabel}</small></span><strong class="client-profile-document-total">${presentation.priorityLabel}</strong></button>`;
 }
 
 function renderClientOpportunityItem(item) {
