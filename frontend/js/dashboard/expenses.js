@@ -1,23 +1,33 @@
 // Tableau de bord : expenses.
 
-function updateExpenseDashboard() {
-  const expenses = typeof allExpenses === "undefined" ? [] : allExpenses;
+function getExpenseDashboardPresentation(invoices, expenses) {
   const paidExpenses = expenses
     .filter(expense => expense.status === "paid")
     .reduce((total, expense) => total + Number(expense.amountTTC || 0), 0);
   const pendingExpenses = expenses
     .filter(expense => expense.status !== "paid")
     .reduce((total, expense) => total + Number(expense.amountTTC || 0), 0);
-  const paidRevenue = (typeof allInvoices === "undefined" ? [] : allInvoices)
+  const paidRevenue = invoices
     .filter(invoice => invoice.type === "invoice" && invoice.paymentStatus === "paid")
     .reduce((total, invoice) => total + Number(invoice.totalTTC || 0), 0);
+  return {
+    paidExpensesLabel: formatCurrency(paidExpenses),
+    pendingExpensesLabel: formatCurrency(pendingExpenses),
+    estimatedMarginLabel: formatCurrency(paidRevenue - paidExpenses)
+  };
+}
+
+function updateExpenseDashboard() {
+  const expenses = typeof allExpenses === "undefined" ? [] : allExpenses;
+  const invoices = typeof allInvoices === "undefined" ? [] : allInvoices;
+  const presentation = getExpenseDashboardPresentation(invoices, expenses);
   const setValue = (id, value) => {
     const element = document.getElementById(id);
-    if (element) element.textContent = formatCurrency(value);
+    if (element) element.textContent = value;
   };
-  setValue("dashboardExpensesPaid", paidExpenses);
-  setValue("dashboardExpensesPending", pendingExpenses);
-  setValue("dashboardEstimatedMargin", paidRevenue - paidExpenses);
+  setValue("dashboardExpensesPaid", presentation.paidExpensesLabel);
+  setValue("dashboardExpensesPending", presentation.pendingExpensesLabel);
+  setValue("dashboardEstimatedMargin", presentation.estimatedMarginLabel);
   updateExpenseAlert(expenses);
   updateCashForecast();
 }

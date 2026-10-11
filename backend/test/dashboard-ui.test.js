@@ -70,6 +70,18 @@ test('cash forecast presentation centralizes display labels and balance state', 
     detailLabel: `${b.context.formatCurrency(75)} à encaisser · ${b.context.formatCurrency(20)} à décaisser d’ici 30 jours.`
   });
 });
+test('expense dashboard presentation centralizes paid, pending and margin amounts', () => {
+  const b = browser();
+  const presentation = b.context.getExpenseDashboardPresentation(
+    [{ type: 'invoice', paymentStatus: 'paid', totalTTC: 200 }, { type: 'quote', paymentStatus: 'paid', totalTTC: 1000 }],
+    [{ status: 'paid', amountTTC: 75 }, { amountTTC: 20 }]
+  );
+  assert.deepEqual(JSON.parse(JSON.stringify(presentation)), {
+    paidExpensesLabel: b.context.formatCurrency(75),
+    pendingExpensesLabel: b.context.formatCurrency(20),
+    estimatedMarginLabel: b.context.formatCurrency(125)
+  });
+});
 test('expense alerts select overdue expenses and reset navigation when cleared', () => {
   const b = browser(); b.context.updateExpenseAlert([{ amountTTC: 50, dueDate: '2026-09-01' }, { status: 'paid', dueDate: '2026-09-01' }]);
   assert.match(b.node('dashboardExpenseAlertLabel').textContent, /^1 échéance/);
