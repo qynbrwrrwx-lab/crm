@@ -205,6 +205,12 @@ test("client profile presentation centralizes title, tags, notes and next action
   assert.deepEqual(plain(presentation), { title: "Alice Martin", id: "client", tags: ["VIP"], notes: "Note", nextAction });
 });
 
+test("client profile actions presentation centralizes identifier and email link", () => {
+  const b = browser();
+  assert.deepEqual(plain(b.context.getClientProfileActionsPresentation(contact({ email: "a+b@example.test" }), "client")), { id: "client", emailHref: "mailto:a%2Bb%40example.test" });
+  assert.equal(b.context.getClientProfileActionsPresentation(contact({ email: "" }), "client").emailHref, null);
+});
+
 test("client profile data keeps only active related opportunities and suggests the right action", () => {
   const b = browser();
   const data = b.context.getClientProfileDataFromResources(contact(), {
