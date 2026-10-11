@@ -64,3 +64,8 @@ test('CSV import understands debit and credit columns and preserves confirmation
 test('chart separates monthly income and expense and destroys the previous instance',()=>{
  const b=browser();b.set('treasuryEntries',[{type:'income',amount:70,date:'2026-10-01'},{type:'expense',amount:20,date:'2026-09-01'}]);b.ctx.renderTreasuryChart();assert.deepEqual(Array.from(b.charts[0].options.data.datasets[0].data),[0,0,0,0,0,70]);assert.deepEqual(Array.from(b.charts[0].options.data.datasets[1].data),[0,0,0,0,20,0]);b.ctx.renderTreasuryChart();assert.equal(b.charts[0].destroyed,true);
 });
+
+test('chart configuration centralizes datasets, colors and formatted tooltips',()=>{
+ const b=browser(),config=b.ctx.getTreasuryChartConfig({labels:['Sept.'],income:[70],expense:[20]});
+ assert.equal(config.type,'bar');assert.deepEqual(JSON.parse(JSON.stringify(config.data)),{labels:['Sept.'],datasets:[{label:'Entrées',data:[70],backgroundColor:'rgba(52, 211, 153, .68)',borderRadius:7},{label:'Sorties',data:[20],backgroundColor:'rgba(251, 113, 133, .65)',borderRadius:7}]});assert.equal(config.options.scales.y.beginAtZero,true);assert.equal(config.options.plugins.tooltip.callbacks.label({dataset:{label:'Entrées'},raw:70}),`Entrées : ${b.ctx.treasuryMoney(70)}`);assert.equal(config.options.scales.y.ticks.callback(12),'12 €');
+});
