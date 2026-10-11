@@ -1,14 +1,23 @@
 // Entreprise : email.
 
-function updateEmailSendingPreview() {
-  const companyName = document.getElementById("companyName")?.value.trim() || "votre entreprise";
-  const replyTo = document.getElementById("companyReplyToEmail")?.value.trim()
-    || document.getElementById("companyEmail")?.value.trim()
+function getEmailSendingPresentation({ companyName, replyToEmail, companyEmail }) {
+  const senderName = String(companyName || "").trim() || "votre entreprise";
+  const replyTo = String(replyToEmail || "").trim()
+    || String(companyEmail || "").trim()
     || "adresse de votre compte";
+  return { senderLabel: `My Prospect — ${senderName}`, replyTo };
+}
+
+function updateEmailSendingPreview() {
+  const presentation = getEmailSendingPresentation({
+    companyName: document.getElementById("companyName")?.value,
+    replyToEmail: document.getElementById("companyReplyToEmail")?.value,
+    companyEmail: document.getElementById("companyEmail")?.value
+  });
   const sender = document.getElementById("emailSenderPreview");
   const reply = document.getElementById("emailReplyPreview");
-  if (sender) sender.textContent = `My Prospect — ${companyName}`;
-  if (reply) reply.textContent = replyTo;
+  if (sender) sender.textContent = presentation.senderLabel;
+  if (reply) reply.textContent = presentation.replyTo;
 }
 
 document.getElementById("companyReplyToEmail")?.addEventListener("input", updateEmailSendingPreview);

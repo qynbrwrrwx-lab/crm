@@ -32,6 +32,11 @@ test('email preview uses reply address, company email and default in that order 
  b.node('companyReplyToEmail').value='';b.context.updateEmailSendingPreview();assert.equal(b.node('emailReplyPreview').textContent,'main@example.test');
  b.node('companyEmail').value='';b.context.updateEmailSendingPreview();assert.equal(b.node('emailReplyPreview').textContent,'adresse de votre compte');
 });
+test('email preview presentation centralizes sender and reply address fallbacks',()=>{
+ const b=browser();const presentation=b.context.getEmailSendingPresentation({companyName:' Entreprise ',replyToEmail:'',companyEmail:' contact@example.test '});
+ assert.deepEqual(JSON.parse(JSON.stringify(presentation)),{senderLabel:'My Prospect — Entreprise',replyTo:'contact@example.test'});
+ assert.equal(b.context.getEmailSendingPresentation({companyName:'',replyToEmail:'',companyEmail:''}).senderLabel,'My Prospect — votre entreprise');
+});
 test('profile load computes electronic readiness after filling all identity fields',async()=>{
  const b=browser();b.context.apiFetch=async url=>url==='/api/company'?company:{preparedDocuments:2};
  await b.context.loadCompany();assert.equal(b.node('companyAddress').value,'Rue');assert.equal(b.node('companyPaymentDueDays').value,0);
