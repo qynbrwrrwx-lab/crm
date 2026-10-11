@@ -41,16 +41,22 @@ function exportAdminUsersCsv() {
   link.click(); URL.revokeObjectURL(url);
 }
 
-function renderAdminStats(stats) {
+function getAdminStatsPresentation(stats) {
   return [
-    ["Utilisateurs", stats.totalUsers],
-    ["Comptes vérifiés", stats.verifiedUsers],
-    ["À vérifier", stats.pendingVerification],
-    ["Essais en cours", stats.trials],
-    ["Essais expirent bientôt", stats.trialsEndingSoon],
-    ["Abonnements actifs", stats.activeSubscriptions],
-    ["CA encaissé", `${Number(stats.revenue || 0).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €`]
-  ].map(([label, value], index) => `<div class="admin-stat-card"><div class="admin-stat-label admin-stat-label--compact">${label}</div><strong${index === 0 ? ' id="totalUsers"' : ""} class="admin-stat-live-value">${value}</strong></div>`).join("");
+    { label: "Utilisateurs", value: stats.totalUsers, isTotal: true },
+    { label: "Comptes vérifiés", value: stats.verifiedUsers },
+    { label: "À vérifier", value: stats.pendingVerification },
+    { label: "Essais en cours", value: stats.trials },
+    { label: "Essais expirent bientôt", value: stats.trialsEndingSoon },
+    { label: "Abonnements actifs", value: stats.activeSubscriptions },
+    { label: "CA encaissé", value: `${Number(stats.revenue || 0).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €` }
+  ];
+}
+
+function renderAdminStats(stats) {
+  return getAdminStatsPresentation(stats)
+    .map(item => `<div class="admin-stat-card"><div class="admin-stat-label admin-stat-label--compact">${item.label}</div><strong${item.isTotal ? ' id="totalUsers"' : ""} class="admin-stat-live-value">${item.value}</strong></div>`)
+    .join("");
 }
 
 function renderAdminAudit(audit) {

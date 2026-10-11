@@ -49,6 +49,10 @@ test('admin user presentation centralizes status and suspension availability',()
 test('admin statistics keep the total counter after rendering their cards',()=>{
  const b=browser(true);const markup=b.ctx.renderAdminStats({totalUsers:2,verifiedUsers:1,pendingVerification:1,trials:1,trialsEndingSoon:0,activeSubscriptions:0,revenue:0});assert.match(markup,/id="totalUsers"/);assert.match(markup,/admin-stat-live-value/);
 });
+test('admin statistics presentation centralizes labels and revenue formatting',()=>{
+ const b=browser(true);const presentation=b.ctx.getAdminStatsPresentation({totalUsers:2,verifiedUsers:1,pendingVerification:1,trials:1,trialsEndingSoon:0,activeSubscriptions:0,revenue:12.5});
+ assert.deepEqual(JSON.parse(JSON.stringify(presentation)),[{label:'Utilisateurs',value:2,isTotal:true},{label:'Comptes vérifiés',value:1},{label:'À vérifier',value:1},{label:'Essais en cours',value:1},{label:'Essais expirent bientôt',value:0},{label:'Abonnements actifs',value:0},{label:'CA encaissé',value:'12,50 €'}]);
+});
 test('admin modal templates use classes instead of embedded presentation',()=>{
  const b=browser(true);const summary=b.ctx.renderAdminUserSummary({user:{email:'admin@example.test',isVerified:true},documents:1,invoices:1},'Aujourd’hui','Demain');const billing=b.ctx.renderSubscriptionBillingModal('admin@example.test');const rows=b.ctx.renderSubscriptionInvoiceRows([{_id:'i',invoiceNumber:'F1',planName:'Pro',totalTTC:12,status:'draft'}]);for(const markup of [summary,billing,rows])assert.doesNotMatch(markup,/style=/);assert.match(summary,/admin-summary-card/);assert.match(billing,/admin-billing-card/);assert.match(rows,/admin-invoice-row/);
 });
