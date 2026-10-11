@@ -41,6 +41,11 @@ test('keyboard shortcut opens search and Escape closes it',()=>{
 test('admin user filters combine verification and subscription and escape email',()=>{
  const b=browser(true);b.set('adminUsers',[{_id:'a',email:'<acme>@example.test',role:'user',isVerified:true,subscriptionStatus:'active'},{_id:'b',email:'other@example.test',role:'user',isVerified:true,subscriptionStatus:'trial'}]);b.node('adminVerificationFilter').value='verified';b.node('adminSubscriptionFilter').value='active';b.ctx.filterAdminUsers();assert.match(b.node('adminUsers').innerHTML,/&lt;acme&gt;/);assert.match(b.node('adminUsers').innerHTML,/admin-user-status--verified/);assert.doesNotMatch(b.node('adminUsers').innerHTML,/other@example/);
 });
+test('admin user presentation centralizes status and suspension availability',()=>{
+ const b=browser(true);
+ assert.deepEqual(JSON.parse(JSON.stringify(b.ctx.getAdminUserPresentation({_id:'u',email:'user@example.test',role:'user',isVerified:true,isSuspended:false}))),{id:'u',email:'user@example.test',role:'user',status:'verified',statusLabel:'Compte vérifié',canToggleSuspension:true,suspensionAction:'Suspendre',suspensionClass:'admin-user-action--suspend',nextSuspended:true});
+ assert.deepEqual(JSON.parse(JSON.stringify(b.ctx.getAdminUserPresentation({_id:'a',email:'admin@example.test',role:'admin',isVerified:true,isSuspended:true}))),{id:'a',email:'admin@example.test',role:'admin',status:'suspended',statusLabel:'Compte suspendu',canToggleSuspension:false,suspensionAction:'Réactiver',suspensionClass:'admin-user-action--restore',nextSuspended:false});
+});
 test('admin statistics keep the total counter after rendering their cards',()=>{
  const b=browser(true);const markup=b.ctx.renderAdminStats({totalUsers:2,verifiedUsers:1,pendingVerification:1,trials:1,trialsEndingSoon:0,activeSubscriptions:0,revenue:0});assert.match(markup,/id="totalUsers"/);assert.match(markup,/admin-stat-live-value/);
 });

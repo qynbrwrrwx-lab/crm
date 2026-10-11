@@ -1,13 +1,24 @@
 // admin : utilisateurs, statistiques et journal.
 
-function renderAdminUser(user) {
+function getAdminUserPresentation(user) {
   const status = user.isSuspended ? "suspended" : user.isVerified ? "verified" : "pending";
-  const statusLabel = user.isSuspended ? "Compte suspendu" : user.isVerified ? "Compte vérifié" : "En attente de vérification";
-  const suspensionAction = user.isSuspended ? "Réactiver" : "Suspendre";
-  const suspensionClass = user.isSuspended ? "admin-user-action--restore" : "admin-user-action--suspend";
-  const suspensionButton = user.role === "admin" ? "" : `<button class="admin-user-action ${suspensionClass}" onclick="toggleAdminSuspension('${user._id}',${!user.isSuspended})">${suspensionAction}</button>`;
+  return {
+    id: user._id,
+    email: user.email,
+    role: user.role,
+    status,
+    statusLabel: user.isSuspended ? "Compte suspendu" : user.isVerified ? "Compte vérifié" : "En attente de vérification",
+    canToggleSuspension: user.role !== "admin",
+    suspensionAction: user.isSuspended ? "Réactiver" : "Suspendre",
+    suspensionClass: user.isSuspended ? "admin-user-action--restore" : "admin-user-action--suspend",
+    nextSuspended: !user.isSuspended
+  };
+}
 
-  return `<article class="admin-user-card"><div class="admin-user-email">${escapeAdminHtml(user.email)}</div><div class="admin-user-role">Rôle : ${escapeAdminHtml(user.role)}</div><div class="admin-user-status admin-user-status--${status}">${statusLabel}</div><button class="admin-user-action admin-user-action--summary" onclick="showAdminUserSummary('${user._id}')">Voir la synthèse</button>${suspensionButton}</article>`;
+function renderAdminUser(user) {
+  const item = getAdminUserPresentation(user);
+  const suspensionButton = item.canToggleSuspension ? `<button class="admin-user-action ${item.suspensionClass}" onclick="toggleAdminSuspension('${item.id}',${item.nextSuspended})">${item.suspensionAction}</button>` : "";
+  return `<article class="admin-user-card"><div class="admin-user-email">${escapeAdminHtml(item.email)}</div><div class="admin-user-role">Rôle : ${escapeAdminHtml(item.role)}</div><div class="admin-user-status admin-user-status--${item.status}">${item.statusLabel}</div><button class="admin-user-action admin-user-action--summary" onclick="showAdminUserSummary('${item.id}')">Voir la synthèse</button>${suspensionButton}</article>`;
 }
 
 function filterAdminUsers() {
