@@ -59,9 +59,21 @@ function renderAdminStats(stats) {
     .join("");
 }
 
+function getAdminAuditPresentation(audit) {
+  return {
+    emptyMessage: "Aucune action administrateur enregistrée.",
+    entries: audit.map(event => ({
+      actionLabel: event.action === "admin.user_suspended" ? "Compte suspendu" : "Compte réactivé",
+      targetEmail: event.metadata?.targetEmail || "",
+      dateLabel: new Date(event.createdAt).toLocaleString("fr-FR")
+    }))
+  };
+}
+
 function renderAdminAudit(audit) {
-  if (!audit.length) return "Aucune action administrateur enregistrée.";
-  return audit.map(event => `<div class="admin-audit-entry"><strong class="admin-audit-action">${event.action === "admin.user_suspended" ? "Compte suspendu" : "Compte réactivé"}</strong><span class="admin-audit-target">${escapeAdminHtml(event.metadata?.targetEmail || "")}</span><small class="admin-audit-time">${new Date(event.createdAt).toLocaleString("fr-FR")}</small></div>`).join("");
+  const presentation = getAdminAuditPresentation(audit);
+  if (!presentation.entries.length) return presentation.emptyMessage;
+  return presentation.entries.map(item => `<div class="admin-audit-entry"><strong class="admin-audit-action">${item.actionLabel}</strong><span class="admin-audit-target">${escapeAdminHtml(item.targetEmail)}</span><small class="admin-audit-time">${item.dateLabel}</small></div>`).join("");
 }
 
 async function loadAdminUsers() {

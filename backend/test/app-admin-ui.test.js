@@ -58,6 +58,11 @@ test('admin user summary presentation centralizes account labels and subscriptio
  assert.deepEqual(JSON.parse(JSON.stringify(b.ctx.getAdminUserSummaryPresentation(summary))),{email:'admin@example.test',verificationLabel:'Vérifié',trialEndLabel:b.read("new Date('2026-10-10').toLocaleDateString('fr-FR')"),documents:2,invoices:1,activityLabel:b.read("new Date('2026-10-03').toLocaleDateString('fr-FR')"),subscriptionStatus:'active'});
  assert.equal(b.ctx.getAdminUserSummaryPresentation({user:{email:'a@example.test'},documents:0,invoices:0}).activityLabel,'Aucune activité');
 });
+test('admin audit presentation centralizes labels, recipients and timestamps',()=>{
+ const b=browser(true),audit=[{action:'admin.user_suspended',metadata:{targetEmail:'user@example.test'},createdAt:'2026-10-03T12:00:00Z'},{action:'admin.user_restored',createdAt:'2026-10-04T12:00:00Z'}];
+ assert.deepEqual(JSON.parse(JSON.stringify(b.ctx.getAdminAuditPresentation(audit))),{emptyMessage:'Aucune action administrateur enregistrée.',entries:[{actionLabel:'Compte suspendu',targetEmail:'user@example.test',dateLabel:b.read("new Date('2026-10-03T12:00:00Z').toLocaleString('fr-FR')")},{actionLabel:'Compte réactivé',targetEmail:'',dateLabel:b.read("new Date('2026-10-04T12:00:00Z').toLocaleString('fr-FR')")}]});
+ assert.equal(b.ctx.getAdminAuditPresentation([]).entries.length,0);
+});
 test('admin modal templates use classes instead of embedded presentation',()=>{
  const b=browser(true);const summary=b.ctx.renderAdminUserSummary({user:{email:'admin@example.test',isVerified:true},documents:1,invoices:1});const billing=b.ctx.renderSubscriptionBillingModal('admin@example.test');const rows=b.ctx.renderSubscriptionInvoiceRows([{_id:'i',invoiceNumber:'F1',planName:'Pro',totalTTC:12,status:'draft'}]);for(const markup of [summary,billing,rows])assert.doesNotMatch(markup,/style=/);assert.match(summary,/admin-summary-card/);assert.match(billing,/admin-billing-card/);assert.match(rows,/admin-invoice-row/);
 });
