@@ -11,10 +11,13 @@ function getPurchaseOrderDatesMarkup(order) {
   return `${sentAt}${receivedAt}`;
 }
 
-function renderPurchaseOrderStatusOptions(order) {
+function getPurchaseOrderStatusOptionsPresentation(order) {
   return Object.entries(purchaseOrderStatusLabels)
-    .map(([status, label]) => `<option value="${status}" ${order.status === status ? "selected" : ""}>${label}</option>`)
-    .join("");
+    .map(([value, label]) => ({ value, label, selected: order.status === value }));
+}
+
+function renderPurchaseOrderStatusOptions(options) {
+  return options.map(option => `<option value="${option.value}" ${option.selected ? "selected" : ""}>${option.label}</option>`).join("");
 }
 
 function getPurchaseOrderPresentation(order) {
@@ -28,12 +31,25 @@ function getPurchaseOrderPresentation(order) {
   };
 }
 
+function getPurchaseOrderListPresentation(orders) {
+  const pendingCount = getPendingPurchaseOrderCount(orders);
+  return {
+    heading: `Bons de commande fournisseurs · ${pendingCount} en attente de réception`,
+    emptyTitle: "Aucun bon de commande",
+    emptyDetail: "Créez-en depuis un fournisseur avec des produits à réassortir.",
+    items: orders.map(order => ({
+      ...getPurchaseOrderPresentation(order),
+      statusOptions: getPurchaseOrderStatusOptionsPresentation(order)
+    }))
+  };
+}
+
 function renderPurchaseOrderList(orders) {
-  if (!orders.length) return '<article><strong>Aucun bon de commande</strong><small>Créez-en depuis un fournisseur avec des produits à réassortir.</small></article>';
-  return orders.map(order => {
-    const item = getPurchaseOrderPresentation(order);
+  const presentation = getPurchaseOrderListPresentation(orders);
+  if (!presentation.items.length) return `<article><strong>${presentation.emptyTitle}</strong><small>${presentation.emptyDetail}</small></article>`;
+  return presentation.items.map(item => {
     const sendAction = item.canSend ? `<button type="button" class="secondary-btn" onclick="sendPurchaseOrder('${item.id}')">Envoyer</button>` : "";
-    return `<article><strong>${escapeHtml(item.number)}</strong><small>${escapeHtml(item.supplierName)} · ${item.lineCount} ligne(s)${item.dateLabel}</small><button type="button" class="secondary-btn" onclick="printPurchaseOrder('${item.id}')">PDF</button>${sendAction}<select onchange="updatePurchaseOrderStatus('${item.id}',this.value)">${renderPurchaseOrderStatusOptions(order)}</select></article>`;
+    return `<article><strong>${escapeHtml(item.number)}</strong><small>${escapeHtml(item.supplierName)} · ${item.lineCount} ligne(s)${item.dateLabel}</small><button type="button" class="secondary-btn" onclick="printPurchaseOrder('${item.id}')">PDF</button>${sendAction}<select onchange="updatePurchaseOrderStatus('${item.id}',this.value)">${renderPurchaseOrderStatusOptions(item.statusOptions)}</select></article>`;
   }).join("");
 }
 
@@ -47,8 +63,7 @@ async function renderPurchaseOrders() {
   list.before(panel);
   try {
     const orders = await apiFetch("/api/purchase-orders");
-    const pending = getPendingPurchaseOrderCount(orders);
-    panel.querySelector("span").textContent = `Bons de commande fournisseurs · ${pending} en attente de réception`;
+    panel.querySelector("span").textContent = getPurchaseOrderListPresentation(orders).heading;
     window.purchaseOrders = orders;
     document.getElementById("purchaseOrdersList").innerHTML = renderPurchaseOrderList(orders);
   } catch (error) {

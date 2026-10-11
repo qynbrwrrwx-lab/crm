@@ -108,6 +108,12 @@ test('purchase order helpers retain status labels, pending count and draft actio
 test('purchase order presentation centralizes supplier, line count and send action',()=>{
  const b=browser(),draft={_id:'draft',number:'BC-1',supplierId:{name:'Acme'},lines:[{}],status:'draft'};assert.equal(JSON.stringify(b.context.getPurchaseOrderPresentation(draft)),JSON.stringify({id:'draft',number:'BC-1',supplierName:'Acme',lineCount:1,dateLabel:'',canSend:true}));const sent=b.context.getPurchaseOrderPresentation({_id:'sent',number:'BC-2',lines:[],status:'sent'});assert.equal(sent.supplierName,'Fournisseur');assert.equal(sent.canSend,false);
 });
+
+test('purchase order list presentation centralizes heading, options and empty state',()=>{
+ const b=browser(),orders=[{_id:'draft',number:'BC-1',supplierId:{name:'Acme'},lines:[{}],status:'draft'},{_id:'sent',number:'BC-2',supplierId:{name:'Beta'},lines:[],status:'sent'}],presentation=b.context.getPurchaseOrderListPresentation(orders);
+ assert.equal(presentation.heading,'Bons de commande fournisseurs · 1 en attente de réception');assert.deepEqual(JSON.parse(JSON.stringify(presentation.items[0])),{id:'draft',number:'BC-1',supplierName:'Acme',lineCount:1,dateLabel:'',canSend:true,statusOptions:[{value:'draft',label:'Brouillon',selected:true},{value:'sent',label:'Envoyé',selected:false},{value:'received',label:'Reçu',selected:false},{value:'cancelled',label:'Annulé',selected:false}]});assert.equal(presentation.items[1].statusOptions.find(option=>option.value==='sent').selected,true);
+ assert.deepEqual(JSON.parse(JSON.stringify(b.context.getPurchaseOrderListPresentation([]))),{heading:'Bons de commande fournisseurs · 0 en attente de réception',emptyTitle:'Aucun bon de commande',emptyDetail:'Créez-en depuis un fournisseur avec des produits à réassortir.',items:[]});
+});
 test('receiving a purchase order requires confirmation and refreshes stock only after successful update',async()=>{
  const b=browser();let stocks=0;b.context.loadSuppliers=async()=>{};b.context.loadProducts=async()=>stocks++;b.context.confirmAppAction=async()=>false;await b.context.updatePurchaseOrderStatus('o','received');assert.equal(b.calls.length,0);assert.equal(stocks,0);
  b.context.confirmAppAction=async()=>true;await b.context.updatePurchaseOrderStatus('o','received');assert.equal(b.calls[0][0],'/api/purchase-orders/o/status');assert.deepEqual(JSON.parse(b.calls[0][1].body),{status:'received'});assert.equal(stocks,1);
