@@ -1,5 +1,23 @@
 // Documents commerciaux : details. Voir README.md pour les responsabilités.
 
+const documentActivityLabels = {
+  "document.created": "Document créé",
+  "quote.accepted": "Devis accepté",
+  "document.converted_to_order": "Commande créée depuis le devis",
+  "document.converted_to_invoice": "Facture créée depuis la commande",
+  "document.email_sent": "Document envoyé par e-mail",
+  "document.email_failed": "Échec de l’envoi par e-mail",
+  "invoice.paid": "Paiement enregistré",
+  "invoice.credit_note_created": "Avoir créé"
+};
+
+function getDocumentActivityPresentation(event) {
+  return {
+    label: documentActivityLabels[event.action] || event.action,
+    dateLabel: new Date(event.createdAt).toLocaleString("fr-FR")
+  };
+}
+
 async function copyDocumentNumber(value) {
   const number = String(value || "").trim();
   if (!number) return;
@@ -25,27 +43,19 @@ async function loadDocumentActivity(documentId) {
   const container = document.getElementById("documentActivity");
   if (!container) return;
 
-  const labels = {
-    "document.created": "Document créé",
-    "quote.accepted": "Devis accepté",
-    "document.converted_to_order": "Commande créée depuis le devis",
-    "document.converted_to_invoice": "Facture créée depuis la commande",
-    "document.email_sent": "Document envoyé par e-mail",
-    "document.email_failed": "Échec de l’envoi par e-mail",
-    "invoice.paid": "Paiement enregistré",
-    "invoice.credit_note_created": "Avoir créé"
-  };
-
   try {
     const events = await apiFetch(`/api/invoices/${documentId}/activity`);
 
     container.innerHTML = events.length
-      ? events.map(event => `
+      ? events.map(event => {
+        const presentation = getDocumentActivityPresentation(event);
+        return `
           <div class="document-activity-row">
             <span class="document-activity-dot"></span>
-            <div><strong>${escapeHtml(labels[event.action] || event.action)}</strong><small>${new Date(event.createdAt).toLocaleString("fr-FR")}</small></div>
+            <div><strong>${escapeHtml(presentation.label)}</strong><small>${presentation.dateLabel}</small></div>
           </div>
-        `).join("")
+        `;
+      }).join("")
       : '<p class="document-activity-empty">Aucun événement supplémentaire pour ce document.</p>';
   } catch (err) {
     container.innerHTML = '<p class="document-activity-empty">Historique indisponible pour le moment.</p>';

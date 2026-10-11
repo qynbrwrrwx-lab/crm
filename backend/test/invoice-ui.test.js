@@ -711,3 +711,10 @@ test("quote draft summary keeps quantities, totals and stock warnings consistent
   assert.equal(b.elements.get("quoteDraftAvailability").classList.contains("is-warning"), false);
   assert.equal(b.elements.get("quoteDraftAvailability").classList.contains("is-success"), true);
 });
+
+test("document activity presentation centralizes labels and dates", () => {
+  const b = browser();
+  const item = b.context.getDocumentActivityPresentation({ action: "invoice.paid", createdAt: "2026-10-05T10:00:00Z" });
+  assert.deepEqual(plain(item), { label: "Paiement enregistré", dateLabel: b.read("new Date('2026-10-05T10:00:00Z').toLocaleString('fr-FR')") });
+  assert.equal(b.context.getDocumentActivityPresentation({ action: "custom.action", createdAt: "2026-10-05" }).label, "custom.action");
+});
