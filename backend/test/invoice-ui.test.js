@@ -718,3 +718,13 @@ test("document activity presentation centralizes labels and dates", () => {
   assert.deepEqual(plain(item), { label: "Paiement enregistré", dateLabel: b.read("new Date('2026-10-05T10:00:00Z').toLocaleString('fr-FR')") });
   assert.equal(b.context.getDocumentActivityPresentation({ action: "custom.action", createdAt: "2026-10-05" }).label, "custom.action");
 });
+
+test("invoice list metrics presentation centralizes counters and filter states", () => {
+  const b = browser();
+  const presentation = b.context.getInvoiceListMetricsPresentation({ quotes: [{}], acceptedQuotes: [], orders: [{}, {}], visibleInvoiceIds: new Set(["a", "b"]), paidTotal: 120, pendingTotal: 30, electronicReadyCount: 2 }, { search: "", status: "paid", electronicStatus: "ready", sort: "recent" });
+  assert.equal(presentation.invoiceSummaryLabel, "2 factures");
+  assert.equal(presentation.paidLabel, `${b.context.formatDocumentCurrency(120)} encaissé`);
+  assert.equal(presentation.electronicActive, true);
+  assert.equal(presentation.resetHidden, false);
+  assert.equal(presentation.ordersLabel, "2 commandes");
+});
