@@ -93,6 +93,15 @@ function renderDayAgenda(day) {
   return `<div class="agenda-day-view"><button type="button" class="agenda-day-create" onclick="prepareAppointment('${agendaKey(day)}')">+ Planifier un rendez-vous</button>${content}</div>`;
 }
 
+function getAgendaDayDetailsPresentation(day, events) {
+  const count = events.length;
+  return {
+    dateLabel: day.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }),
+    actionLabel: count ? `${count} action${count > 1 ? "s" : ""} planifiée${count > 1 ? "s" : ""}` : "Journée disponible",
+    dateKey: agendaKey(day)
+  };
+}
+
 function renderAgendaDayDetails(detail) {
   if (agendaView === "list" || agendaView === "year") {
     detail.innerHTML = "";
@@ -100,9 +109,8 @@ function renderAgendaDayDetails(detail) {
   }
 
   const selected = eventsForDate(agendaSelectedDate);
-  const count = selected.length;
-  const text = count ? `${count} action${count > 1 ? "s" : ""} planifiée${count > 1 ? "s" : ""}` : "Journée disponible";
-  detail.innerHTML = `<div><strong>${agendaSelectedDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</strong><span>${text}</span></div><button type="button" class="secondary-btn" onclick="prepareAppointment('${agendaKey(agendaSelectedDate)}')">Planifier</button>`;
+  const presentation = getAgendaDayDetailsPresentation(agendaSelectedDate, selected);
+  detail.innerHTML = `<div><strong>${presentation.dateLabel}</strong><span>${presentation.actionLabel}</span></div><button type="button" class="secondary-btn" onclick="prepareAppointment('${presentation.dateKey}')">Planifier</button>`;
 }
 
 function renderAgenda() {

@@ -26,6 +26,11 @@ test('agenda day view retains appointment actions and list view clears the day d
 test('agenda event presentation centralizes labels and duplication availability',()=>{
  const b=browser(),appointment={_id:'a',type:'appointment',status:'open',title:'RDV',startDate:'2026-10-03T12:30:00Z',contactId:{companyName:'Client'}};assert.equal(JSON.stringify(b.ctx.getAgendaEventPresentation(appointment)),JSON.stringify({id:'a',type:'appointment',status:'open',timeLabel:b.read("agendaEventTime({type:'appointment',startDate:'2026-10-03T12:30:00Z'})"),title:'RDV',contactLabel:'Client',canDuplicate:true}));assert.equal(JSON.stringify(b.ctx.getAgendaEventPresentation({_id:'t',type:'task',status:'done',title:'Relance'})),JSON.stringify({id:'t',type:'task',status:'done',timeLabel:'Tâche',title:'Relance',contactLabel:'Sans client',canDuplicate:false}));
 });
+test('agenda day detail presentation centralizes date, count and planning key',()=>{
+ const b=browser(),day=new b.ctx.Date('2026-10-03T12:00:00Z');
+ assert.deepEqual(JSON.parse(JSON.stringify(b.ctx.getAgendaDayDetailsPresentation(day,[{},{}]))),{dateLabel:b.read("new Date('2026-10-03T12:00:00Z').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})"),actionLabel:'2 actions planifiées',dateKey:'2026-10-03'});
+ assert.equal(b.ctx.getAgendaDayDetailsPresentation(day,[]).actionLabel,'Journée disponible');
+});
 test('task list escapes text and distinguishes overdue tasks from appointments',()=>{
  const b=browser();b.set('allTasks',[{_id:'t',type:'task',title:'<Relance>',status:'open',priority:'high',dueDate:'2026-10-01'},{_id:'a',type:'appointment',title:'RDV',status:'open',priority:'normal',startDate:'2026-10-04T12:00:00Z'}]);b.ctx.renderTasks();assert.equal(b.node('tasksOverdueCount').textContent,1);assert.equal(b.node('appointmentsUpcomingCount').textContent,1);assert.match(b.node('tasksList').innerHTML,/&lt;Relance&gt;/);
  b.node('tasksFilter').value='rdv';b.ctx.renderTasks();assert.equal((b.node('tasksList').innerHTML.match(/<article/g)||[]).length,1);
