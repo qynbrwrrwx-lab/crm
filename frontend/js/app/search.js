@@ -2,6 +2,24 @@
 
 let globalSearchOpener = null;
 
+function getGlobalSearchPresentation(query, results) {
+  if (query.length < 2) {
+    return {
+      shouldSearch: false,
+      countLabel: "Saisissez au moins 2 caractères",
+      emptyMessage: "Retrouvez vos clients, produits, devis, commandes et factures sans quitter votre page.",
+      items: []
+    };
+  }
+  const labels = { contact: "Client", product: "Produit", document: "Document", opportunity: "Opportunité", task: "Agenda" };
+  return {
+    shouldSearch: true,
+    countLabel: `${results.length} résultat${results.length > 1 ? "s" : ""}`,
+    emptyMessage: "Aucun résultat. Essayez avec un nom, une référence ou un numéro de document.",
+    items: results.map((result, index) => ({ ...result, index, kindLabel: labels[result.kind] }))
+  };
+}
+
 function openGlobalSearch() {
   const modal = document.getElementById("globalSearchModal");
   const input = document.getElementById("globalSearchInput");
@@ -28,11 +46,12 @@ function renderGlobalSearchResults() {
   if (!input || !list || !count) return;
 
   const query = input.value.trim().toLocaleLowerCase("fr-FR");
-  if (query.length < 2) {
+  let presentation = getGlobalSearchPresentation(query, []);
+  if (!presentation.shouldSearch) {
     globalSearchResults = [];
     globalSearchSelectedIndex = -1;
-    count.textContent = "Saisissez au moins 2 caractères";
-    list.innerHTML = '<p class="global-search-empty">Retrouvez vos clients, produits, devis, commandes et factures sans quitter votre page.</p>';
+    count.textContent = presentation.countLabel;
+    list.innerHTML = `<p class="global-search-empty">${presentation.emptyMessage}</p>`;
     return;
   }
 
@@ -43,15 +62,15 @@ function renderGlobalSearchResults() {
     opportunities: typeof allOpportunities === "undefined" ? [] : allOpportunities,
     tasks: typeof allTasks === "undefined" ? [] : allTasks
   });
+  presentation = getGlobalSearchPresentation(query, globalSearchResults);
   globalSearchSelectedIndex = -1;
-  count.textContent = `${globalSearchResults.length} résultat${globalSearchResults.length > 1 ? "s" : ""}`;
-  if (!globalSearchResults.length) {
-    list.innerHTML = '<p class="global-search-empty">Aucun résultat. Essayez avec un nom, une référence ou un numéro de document.</p>';
+  count.textContent = presentation.countLabel;
+  if (!presentation.items.length) {
+    list.innerHTML = `<p class="global-search-empty">${presentation.emptyMessage}</p>`;
     return;
   }
 
-  const labels = { contact: "Client", product: "Produit", document: "Document", opportunity: "Opportunité", task: "Agenda" };
-  list.innerHTML = globalSearchResults.map((result, index) => `<button type="button" class="global-search-result" data-global-search-result="${index}"><span class="global-search-result-type">${labels[result.kind]}</span><span class="global-search-result-main"><strong>${escapeHtml(result.title)}</strong><small>${escapeHtml(result.detail)}</small></span><span class="global-search-result-arrow">↗</span></button>`).join("");
+  list.innerHTML = presentation.items.map(item => `<button type="button" class="global-search-result" data-global-search-result="${item.index}"><span class="global-search-result-type">${item.kindLabel}</span><span class="global-search-result-main"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.detail)}</small></span><span class="global-search-result-arrow">↗</span></button>`).join("");
   document.querySelectorAll("[data-global-search-result]").forEach(button => {
     button.addEventListener("click", () => openGlobalSearchResult(Number(button.dataset.globalSearchResult)));
   });

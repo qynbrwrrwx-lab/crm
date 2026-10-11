@@ -35,6 +35,11 @@ test('confirmation requires a password before resolving and cancellation returns
 test('global search includes domains, escapes text and opens the selected task',()=>{
  const b=browser();b.ctx.allContacts=[{_id:'c',companyName:'<Acme>'}];b.ctx.allTasks=[{_id:'t',title:'Acme relance',type:'task'}];b.node('globalSearchInput').value='acme';b.ctx.renderGlobalSearchResults();assert.equal(b.read('globalSearchResults.length'),2);assert.match(b.node('globalSearchResults').innerHTML,/&lt;Acme&gt;/);assert.match(b.node('globalSearchResults').innerHTML,/data-global-search-result/);assert.doesNotMatch(b.node('globalSearchResults').innerHTML,/onclick=/);b.ctx.editTask=id=>b.navigation.push(id);b.ctx.openGlobalSearchResult(1);assert.deepEqual(b.navigation,['tasksSection','t']);b.node('globalSearchInput').value='a';b.ctx.renderGlobalSearchResults();assert.equal(b.read('globalSearchResults.length'),0);
 });
+test('global search presentation centralizes thresholds, labels and empty states',()=>{
+ const b=browser();
+ assert.deepEqual(JSON.parse(JSON.stringify(b.ctx.getGlobalSearchPresentation('a',[]))),{shouldSearch:false,countLabel:'Saisissez au moins 2 caractères',emptyMessage:'Retrouvez vos clients, produits, devis, commandes et factures sans quitter votre page.',items:[]});
+ assert.deepEqual(JSON.parse(JSON.stringify(b.ctx.getGlobalSearchPresentation('acme',[{kind:'contact',id:'c',title:'Acme',detail:'Client'},{kind:'task',id:'t',title:'Relance',detail:'Agenda'}]))),{shouldSearch:true,countLabel:'2 résultats',emptyMessage:'Aucun résultat. Essayez avec un nom, une référence ou un numéro de document.',items:[{kind:'contact',id:'c',title:'Acme',detail:'Client',index:0,kindLabel:'Client'},{kind:'task',id:'t',title:'Relance',detail:'Agenda',index:1,kindLabel:'Agenda'}]});
+});
 test('keyboard shortcut opens search and Escape closes it',()=>{
  const b=browser();const key=b.events[0].fn;key({ctrlKey:true,key:'k',preventDefault(){}});assert.equal(b.node('globalSearchModal').style.display,'flex');key({key:'Escape'});assert.equal(b.node('globalSearchModal').style.display,'none');
 });
