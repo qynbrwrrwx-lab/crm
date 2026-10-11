@@ -81,3 +81,8 @@ test('electronic preview presentation centralizes identity, provider and readine
  assert.deepEqual(JSON.parse(JSON.stringify(ready)),{identityLabel:'Identité entreprise prête',providerLabel:'Plateforme envisagée : Plateforme',readinessLabel:'Préparation en cours',isReady:true});
  assert.equal(b.context.getElectronicInvoicingPreviewPresentation({enabled:true,providerName:'',identityFields:['A','','C','D','E']}).readinessLabel,'À configurer');
 });
+test('electronic document status label handles empty, singular and plural counts',()=>{
+ const b=browser();assert.equal(b.context.getElectronicDocumentStatusLabel(0),'Aucun document préparé');
+ assert.equal(b.context.getElectronicDocumentStatusLabel(1),'1 document prêt à transmettre');
+ assert.equal(b.context.getElectronicDocumentStatusLabel(2),'2 documents prêts à transmettre');
+});

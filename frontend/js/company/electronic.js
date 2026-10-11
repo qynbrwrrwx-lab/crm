@@ -38,13 +38,18 @@ async function loadElectronicInvoicingStatus() {
     const status = await apiFetch("/api/electronic-invoicing/status");
     const documents = document.getElementById("eInvoiceDocumentsStatus");
     if (documents) {
-      documents.textContent = status.preparedDocuments
-        ? `${status.preparedDocuments} document${status.preparedDocuments > 1 ? "s" : ""} prêt${status.preparedDocuments > 1 ? "s" : ""} à transmettre`
-        : "Aucun document préparé";
+      documents.textContent = getElectronicDocumentStatusLabel(status.preparedDocuments);
     }
   } catch (err) {
     console.warn("Statut de facturation électronique indisponible", err);
   }
+}
+
+function getElectronicDocumentStatusLabel(preparedDocuments) {
+  const count = Number(preparedDocuments || 0);
+  return count
+    ? `${count} document${count > 1 ? "s" : ""} prêt${count > 1 ? "s" : ""} à transmettre`
+    : "Aucun document préparé";
 }
 
 document.getElementById("eInvoiceEnabled")?.addEventListener("input", () => updateElectronicInvoicingPreview());
