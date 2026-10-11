@@ -202,3 +202,15 @@ test('onboarding hides completed setup and tolerates API failure', async () => {
   b.context.apiFetch = async () => { throw new Error('offline'); }; await b.context.loadOnboardingChecklist();
   assert.equal(b.node('onboardingChecklist').hidden, true);
 });
+test('onboarding presentation centralizes completion and step numbering', () => {
+  const b = browser();
+  const presentation = b.context.getOnboardingPresentation(
+    { companyName: 'A', siret: 'B', email: 'C', address: 'D', city: 'E' }, [{}], [], [{ type: 'quote' }]
+  );
+  assert.equal(presentation.completed, 3);
+  assert.equal(presentation.progressLabel, '3/4');
+  assert.deepEqual(JSON.parse(JSON.stringify(presentation.steps.map(step => ({ section: step.section, done: step.done, stepNumber: step.stepNumber })))), [
+    { section: 'company', done: true, stepNumber: 1 }, { section: 'contacts', done: true, stepNumber: 2 },
+    { section: 'products', done: false, stepNumber: 3 }, { section: 'quotesSection', done: true, stepNumber: 4 }
+  ]);
+});
