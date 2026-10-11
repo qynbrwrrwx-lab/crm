@@ -1,12 +1,16 @@
 // Chargement et affichage du profil entreprise.
+function isCompanySetupComplete(company) {
+  return [company.companyName, company.siret, company.email, company.address, company.city]
+    .every(value => String(value || "").trim());
+}
+
 async function loadCompanySetupStatus() {
   const notice = document.getElementById("companySetupNotice");
   if (!notice) return;
 
   try {
     const company = await apiFetch("/api/company");
-    const requiredFields = [company.companyName, company.siret, company.email, company.address, company.city];
-    notice.hidden = requiredFields.every(value => String(value || "").trim());
+    notice.hidden = isCompanySetupComplete(company);
   } catch (err) {
     notice.hidden = false;
   }

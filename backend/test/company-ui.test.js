@@ -49,6 +49,10 @@ test('company setup notice detects missing data and API failure',async()=>{
  b.context.apiFetch=async()=>({...company,city:' '});await b.context.loadCompanySetupStatus();assert.equal(b.node('companySetupNotice').hidden,false);
  b.context.apiFetch=async()=>{throw new Error('offline');};await b.context.loadCompanySetupStatus();assert.equal(b.node('companySetupNotice').hidden,false);
 });
+test('company setup helper requires every identity field',()=>{
+ const b=browser();assert.equal(b.context.isCompanySetupComplete(company),true);
+ assert.equal(b.context.isCompanySetupComplete({...company,address:' '}),false);
+});
 test('saving preserves mail settings, numeric terms, electronic settings and logo in PUT payload',async()=>{
  const b=browser();b.node('companyName').value='A';b.node('companyReplyToEmail').value='reply@example.test';b.node('documentEmailIntro').value='Bonjour';b.node('documentEmailClosing').value='Merci';
  b.node('companyPaymentDueDays').value='0';b.node('quoteValidity').value='15';b.node('eInvoiceEnabled').value='true';b.node('eInvoiceProviderName').value=' Provider ';b.node('eInvoiceFormat').value='factur-x';b.read('companyLogoBase64="data:image/png;base64,AA"');
