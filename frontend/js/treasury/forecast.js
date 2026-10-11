@@ -1,17 +1,35 @@
 // Trésorerie : forecast.
 
+function getTreasuryForecastPresentation({ items, income, expense, projected }) {
+  return {
+    incomeLabel: treasuryMoney(income),
+    expenseLabel: treasuryMoney(expense),
+    balanceLabel: treasuryMoney(projected),
+    balanceClass: projected >= 0 ? "positive" : "negative",
+    items: items.slice(0, 8).map(item => ({
+      type: item.type,
+      dateLabel: treasuryDate(item.date),
+      label: item.label,
+      detail: item.detail || (item.type === "income" ? "Encaissement attendu" : "Décaissement prévu"),
+      amountLabel: `${item.type === "income" ? "+" : "−"}${treasuryMoney(item.amount)}`
+    })),
+    emptyMessage: "Aucune échéance prévue dans les 30 jours."
+  };
+}
+
 function renderTreasuryForecast(currentBalance) {
   const invoices = typeof allInvoices === "undefined" ? [] : allInvoices;
   const expenses = typeof allExpenses === "undefined" ? [] : allExpenses;
-  const { items, income, expense, projected } = getTreasuryForecastData(currentBalance, invoices, expenses);
-  const set = (id, value) => { const node = document.getElementById(id); if (node) node.textContent = treasuryMoney(value); };
-  set("treasuryForecastIncome", income); set("treasuryForecastExpense", expense); set("treasuryForecastBalance", projected);
+  const forecast = getTreasuryForecastData(currentBalance, invoices, expenses);
+  const presentation = getTreasuryForecastPresentation(forecast);
+  const set = (id, value) => { const node = document.getElementById(id); if (node) node.textContent = value; };
+  set("treasuryForecastIncome", presentation.incomeLabel); set("treasuryForecastExpense", presentation.expenseLabel); set("treasuryForecastBalance", presentation.balanceLabel);
   const balanceNode = document.getElementById("treasuryForecastBalance");
-  if (balanceNode) balanceNode.className = projected >= 0 ? "positive" : "negative";
-  updateTreasuryForecastAlert(projected, income, expense);
+  if (balanceNode) balanceNode.className = presentation.balanceClass;
+  updateTreasuryForecastAlert(forecast.projected, forecast.income, forecast.expense);
   const list = document.getElementById("treasuryForecastList");
   if (!list) return;
-  list.innerHTML = items.length ? items.slice(0, 8).map(item => `<div class="treasury-forecast-row ${item.type}"><span>${treasuryDate(item.date)}</span><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.detail || (item.type === "income" ? "Encaissement attendu" : "Décaissement prévu"))}</small><b>${item.type === "income" ? "+" : "−"}${treasuryMoney(item.amount)}</b></div>`).join("") : '<p class="empty-state">Aucune échéance prévue dans les 30 jours.</p>';
+  list.innerHTML = presentation.items.length ? presentation.items.map(item => `<div class="treasury-forecast-row ${item.type}"><span>${item.dateLabel}</span><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.detail)}</small><b>${item.amountLabel}</b></div>`).join("") : `<p class="empty-state">${presentation.emptyMessage}</p>`;
 }
 
 function updateTreasuryForecastAlert(projected, income, expense) {
