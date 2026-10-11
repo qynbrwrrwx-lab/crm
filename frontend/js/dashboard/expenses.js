@@ -47,13 +47,8 @@ function updateCashForecast() {
   detail.textContent = `${formatCurrency(expectedIncome)} à encaisser · ${formatCurrency(expectedExpenses)} à décaisser d’ici 30 jours.`;
 }
 
-function updateExpenseAlert(expenses) {
-  const label = document.getElementById("dashboardExpenseAlertLabel");
-  const detail = document.getElementById("dashboardExpenseAlertDetail");
-  const button = document.getElementById("dashboardExpenseAlertButton");
-  const dot = document.getElementById("dashboardExpenseAlertDot");
-  if (!label || !detail || !button) return;
-  const today = new Date();
+function getExpenseAlertPresentation(expenses, now = new Date()) {
+  const today = new Date(now);
   today.setHours(0, 0, 0, 0);
   const overdue = expenses.filter(expense => {
     if (expense.status === "paid" || !expense.dueDate) return false;
@@ -62,20 +57,40 @@ function updateExpenseAlert(expenses) {
     return dueDate < today;
   });
   if (!overdue.length) {
-    label.textContent = "Aucune échéance fournisseur en retard";
-    detail.textContent = "Les dépenses à payer seront suivies ici.";
-    button.textContent = "Voir";
+    return {
+      label: "Aucune échéance fournisseur en retard",
+      detail: "Les dépenses à payer seront suivies ici.",
+      buttonLabel: "Voir",
+      filter: null
+    };
+  }
+  const total = overdue.reduce((sum, expense) => sum + Number(expense.amountTTC || 0), 0);
+  return {
+    label: `${overdue.length} échéance${overdue.length > 1 ? "s" : ""} fournisseur en retard`,
+    detail: `${formatCurrency(total)} à régulariser.`,
+    buttonLabel: "Gérer",
+    filter: "overdue"
+  };
+}
+
+function updateExpenseAlert(expenses) {
+  const label = document.getElementById("dashboardExpenseAlertLabel");
+  const detail = document.getElementById("dashboardExpenseAlertDetail");
+  const button = document.getElementById("dashboardExpenseAlertButton");
+  const dot = document.getElementById("dashboardExpenseAlertDot");
+  if (!label || !detail || !button) return;
+  const presentation = getExpenseAlertPresentation(expenses);
+  label.textContent = presentation.label;
+  detail.textContent = presentation.detail;
+  button.textContent = presentation.buttonLabel;
+  if (!presentation.filter) {
     button.onclick = () => showSection("expensesSection");
     dot?.classList.remove("overdue");
     return;
   }
-  const total = overdue.reduce((sum, expense) => sum + Number(expense.amountTTC || 0), 0);
-  label.textContent = `${overdue.length} échéance${overdue.length > 1 ? "s" : ""} fournisseur en retard`;
-  detail.textContent = `${formatCurrency(total)} à régulariser.`;
-  button.textContent = "Gérer";
   button.onclick = () => {
     showSection("expensesSection");
-    setExpenseQuickFilter("overdue");
+    setExpenseQuickFilter(presentation.filter);
   };
   dot?.classList.add("overdue");
 }

@@ -64,6 +64,16 @@ test('expense alerts select overdue expenses and reset navigation when cleared',
   b.node('dashboardExpenseAlertButton').onclick(); assert.deepEqual(b.calls, ['expensesSection', 'overdue']);
   b.context.updateExpenseAlert([]); assert.equal(b.node('dashboardExpenseAlertDot').classList.contains('overdue'), false);
 });
+test('expense alert presentation centralizes overdue totals and empty state', () => {
+  const b = browser();
+  const now = new b.context.Date('2026-09-15T12:00:00Z');
+  const overdue = b.context.getExpenseAlertPresentation([
+    { amountTTC: 50, dueDate: '2026-09-01' }, { amountTTC: 20, dueDate: '2026-09-02' },
+    { status: 'paid', amountTTC: 99, dueDate: '2026-09-01' }
+  ], now);
+  assert.deepEqual(JSON.parse(JSON.stringify(overdue)), { label: '2 échéances fournisseur en retard', detail: `${b.context.formatCurrency(70)} à régulariser.`, buttonLabel: 'Gérer', filter: 'overdue' });
+  assert.equal(b.context.getExpenseAlertPresentation([], now).buttonLabel, 'Voir');
+});
 test('client follow-up prioritizes the oldest date without mutating contacts', () => {
   const b = browser(); const contacts = [{ _id: 'new', nextFollowUpAt: '2026-09-10' }, { _id: 'old', companyName: '<Client>', nextFollowUpAt: '2026-09-01' }];
   b.context.updateClientFollowUpAlert(contacts); b.node('dashboardFollowUpAlertButton').onclick();
