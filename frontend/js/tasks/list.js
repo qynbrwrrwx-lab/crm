@@ -17,14 +17,13 @@ function getTaskCountersPresentation(tasks, { open, overdue, high, upcoming }) {
   };
 }
 
-function updateTaskCounters(data) {
-  const presentation = getTaskCountersPresentation(allTasks, data);
+function updateTaskCounters(presentation) {
   const counters = [
-    ["tasksCount", presentation.totalLabel],
-    ["tasksOpenCount", presentation.openTaskCount],
-    ["appointmentsUpcomingCount", presentation.upcomingAppointmentCount],
-    ["tasksHighCount", presentation.highPriorityCount],
-    ["tasksOverdueCount", presentation.overdueCount]
+    ["tasksCount", presentation.counters.totalLabel],
+    ["tasksOpenCount", presentation.counters.openTaskCount],
+    ["appointmentsUpcomingCount", presentation.counters.upcomingAppointmentCount],
+    ["tasksHighCount", presentation.counters.highPriorityCount],
+    ["tasksOverdueCount", presentation.counters.overdueCount]
   ];
 
   counters.forEach(([id, value]) => {
@@ -51,13 +50,24 @@ function getTaskRowPresentation(task) {
   };
 }
 
-function renderTaskRow(task) {
-  const row = getTaskRowPresentation(task);
+function getTaskListPresentation(tasks, data) {
+  return {
+    counters: getTaskCountersPresentation(tasks, data),
+    rows: data.shown.map(getTaskRowPresentation),
+    emptyMessage: "Aucune action à afficher."
+  };
+}
+
+function renderTaskRowPresentation(row) {
   const completion = row.completionLabel
     ? `<button class="secondary-btn" onclick="completeTask('${row.id}')">${row.completionLabel}</button>`
     : "";
 
   return `<article class="${row.className}"><div><span>${row.statusLabel}</span><h3>${escapeHtml(row.title)}</h3><small>${escapeHtml(row.detail)}</small></div><div class="expense-actions"><button class="secondary-btn" onclick="editTask('${row.id}')">Détails</button>${completion}<button class="expense-text-action danger" onclick="deleteTask('${row.id}')">Supprimer</button></div></article>`;
+}
+
+function renderTaskRow(task) {
+  return renderTaskRowPresentation(getTaskRowPresentation(task));
 }
 
 function renderTasks() {
@@ -72,11 +82,12 @@ function renderTasks() {
     now: new Date()
   });
 
-  updateTaskCounters(data);
+  const presentation = getTaskListPresentation(allTasks, data);
+  updateTaskCounters(presentation);
   updateTaskDashboardAlert(data.overdue, data.high);
-  list.innerHTML = data.shown.length
-    ? data.shown.map(renderTaskRow).join("")
-    : '<p class="empty-state">Aucune action à afficher.</p>';
+  list.innerHTML = presentation.rows.length
+    ? presentation.rows.map(renderTaskRowPresentation).join("")
+    : `<p class="empty-state">${presentation.emptyMessage}</p>`;
   renderAgenda();
 }
 

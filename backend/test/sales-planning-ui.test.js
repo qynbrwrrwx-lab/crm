@@ -43,6 +43,12 @@ test('task counters presentation centralizes task and appointment totals',()=>{
  assert.deepEqual(JSON.parse(JSON.stringify(b.ctx.getTaskCountersPresentation(tasks,data))),{totalLabel:'3 éléments',openTaskCount:1,upcomingAppointmentCount:2,highPriorityCount:2,overdueCount:1});
  assert.equal(b.ctx.getTaskCountersPresentation([{type:'task'}],{open:[],overdue:[],high:[],upcoming:[]}).totalLabel,'1 élément');
 });
+
+test('task list presentation centralizes counters, rendered rows and the empty state',()=>{
+ const b=browser(),task={_id:'t',type:'task',title:'Relance',status:'open',priority:'normal',dueDate:'2026-10-03'},data={shown:[task],open:[task],overdue:[],high:[],upcoming:[]},presentation=b.ctx.getTaskListPresentation([task],data);
+ assert.deepEqual(JSON.parse(JSON.stringify(presentation)),{counters:{totalLabel:'1 élément',openTaskCount:1,upcomingAppointmentCount:0,highPriorityCount:0,overdueCount:0},rows:[{id:'t',className:'task-row open task priority-normal',statusLabel:'À faire',title:'Relance',detail:`Sans client · ${b.read("taskDate('2026-10-03')")}`,completionLabel:'Terminer'}],emptyMessage:'Aucune action à afficher.'});
+ assert.match(b.ctx.renderTaskRowPresentation(presentation.rows[0]),/completeTask\('t'\)/);
+});
 test('task loading refreshes agenda data and starts only one reminder timer',async()=>{
  const b=browser(),steps=[];b.ctx.apiFetch=async(...args)=>{b.calls.push(args);return [];};b.ctx.taskContacts=()=>steps.push('contacts');b.ctx.renderTasks=()=>steps.push('render');b.ctx.showAppointmentConfirmationStatus=()=>steps.push('confirmation');b.ctx.updateUpcomingAppointmentAlert=()=>steps.push('alert');b.ctx.checkAgendaReminders=()=>steps.push('reminder');
  await b.ctx.loadTasks();await b.ctx.loadTasks();assert.deepEqual(b.calls.map(([url])=>url),['/api/tasks','/api/tasks']);assert.deepEqual(steps,['contacts','render','confirmation','alert','reminder','contacts','render','confirmation','alert','reminder']);assert.equal(b.timers(),1);assert.equal(b.read('allTasks.length'),0);
