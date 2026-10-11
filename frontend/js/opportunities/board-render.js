@@ -31,15 +31,27 @@ function getOpportunityBoardMetrics(opportunities, now = new Date()) {
   };
 }
 
+function getOpportunityMetricsPresentation(metrics) {
+  return {
+    countLabel: `${metrics.count} opportunité${metrics.count > 1 ? "s" : ""}`,
+    pipelineLabel: opportunityCurrency(metrics.pipeline),
+    forecastLabel: opportunityCurrency(metrics.forecast),
+    proposalLabel: opportunityCurrency(metrics.proposal),
+    wonLabel: opportunityCurrency(metrics.won),
+    closingSoonCount: metrics.closingSoon
+  };
+}
+
 function renderOpportunityMetrics(metrics) {
+  const presentation = getOpportunityMetricsPresentation(metrics);
   const counters = [
-    ["opportunitiesCount", `${metrics.count} opportunité${metrics.count > 1 ? "s" : ""}`],
-    ["opportunitiesPipelineTotal", opportunityCurrency(metrics.pipeline)],
-    ["opportunitiesForecastTotal", opportunityCurrency(metrics.forecast)],
-    ["opportunitiesProposalTotal", opportunityCurrency(metrics.proposal)],
-    ["opportunitiesWonTotal", opportunityCurrency(metrics.won)],
-    ["dashboardPipelineTotal", opportunityCurrency(metrics.pipeline)],
-    ["dashboardClosingOpportunities", metrics.closingSoon]
+    ["opportunitiesCount", presentation.countLabel],
+    ["opportunitiesPipelineTotal", presentation.pipelineLabel],
+    ["opportunitiesForecastTotal", presentation.forecastLabel],
+    ["opportunitiesProposalTotal", presentation.proposalLabel],
+    ["opportunitiesWonTotal", presentation.wonLabel],
+    ["dashboardPipelineTotal", presentation.pipelineLabel],
+    ["dashboardClosingOpportunities", presentation.closingSoonCount]
   ];
 
   counters.forEach(([id, value]) => {
