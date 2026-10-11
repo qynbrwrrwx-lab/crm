@@ -1,23 +1,35 @@
 // Entreprise : electronic.
 
-function updateElectronicInvoicingPreview(company = null) {
-  const enabled = document.getElementById("eInvoiceEnabled")?.value === "true";
-  const providerName = document.getElementById("eInvoiceProviderName")?.value.trim();
-  const identityComplete = [
-    document.getElementById("companyName")?.value,
-    document.getElementById("companySiret")?.value,
-    document.getElementById("companyAddress")?.value,
-    document.getElementById("companyPostalCode")?.value,
-    document.getElementById("companyCity")?.value
-  ].every(value => String(value || "").trim());
+function getElectronicInvoicingPreviewPresentation({ enabled, providerName, identityFields }) {
+  const identityComplete = identityFields.every(value => String(value || "").trim());
+  return {
+    identityLabel: identityComplete ? "Identité entreprise prête" : "Identité entreprise à compléter",
+    providerLabel: providerName ? `Plateforme envisagée : ${providerName}` : "Plateforme non sélectionnée",
+    readinessLabel: enabled && identityComplete ? "Préparation en cours" : "À configurer",
+    isReady: enabled && identityComplete
+  };
+}
+
+function updateElectronicInvoicingPreview() {
+  const presentation = getElectronicInvoicingPreviewPresentation({
+    enabled: document.getElementById("eInvoiceEnabled")?.value === "true",
+    providerName: document.getElementById("eInvoiceProviderName")?.value.trim(),
+    identityFields: [
+      document.getElementById("companyName")?.value,
+      document.getElementById("companySiret")?.value,
+      document.getElementById("companyAddress")?.value,
+      document.getElementById("companyPostalCode")?.value,
+      document.getElementById("companyCity")?.value
+    ]
+  });
   const readiness = document.getElementById("eInvoiceReadiness");
   const identity = document.getElementById("eInvoiceIdentityStatus");
   const provider = document.getElementById("eInvoiceProviderStatus");
-  if (identity) identity.textContent = identityComplete ? "Identité entreprise prête" : "Identité entreprise à compléter";
-  if (provider) provider.textContent = providerName ? `Plateforme envisagée : ${providerName}` : "Plateforme non sélectionnée";
+  if (identity) identity.textContent = presentation.identityLabel;
+  if (provider) provider.textContent = presentation.providerLabel;
   if (readiness) {
-    readiness.textContent = enabled && identityComplete ? "Préparation en cours" : "À configurer";
-    readiness.classList.toggle("is-ready", enabled && identityComplete);
+    readiness.textContent = presentation.readinessLabel;
+    readiness.classList.toggle("is-ready", presentation.isReady);
   }
 }
 

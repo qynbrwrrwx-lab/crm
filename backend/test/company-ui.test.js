@@ -67,3 +67,8 @@ test('electronic preview clears ready state when identity becomes incomplete',()
  b.context.updateElectronicInvoicingPreview();assert.equal(b.node('eInvoiceReadiness').classList.contains('is-ready'),true);
  b.node('companyCity').value='';b.context.updateElectronicInvoicingPreview();assert.equal(b.node('eInvoiceReadiness').classList.contains('is-ready'),false);
 });
+test('electronic preview presentation centralizes identity, provider and readiness states',()=>{
+ const b=browser();const ready=b.context.getElectronicInvoicingPreviewPresentation({enabled:true,providerName:'Plateforme',identityFields:['A','B','C','D','E']});
+ assert.deepEqual(JSON.parse(JSON.stringify(ready)),{identityLabel:'Identité entreprise prête',providerLabel:'Plateforme envisagée : Plateforme',readinessLabel:'Préparation en cours',isReady:true});
+ assert.equal(b.context.getElectronicInvoicingPreviewPresentation({enabled:true,providerName:'',identityFields:['A','','C','D','E']}).readinessLabel,'À configurer');
+});
