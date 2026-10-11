@@ -7,13 +7,24 @@ function getTaskFilters() {
   };
 }
 
-function updateTaskCounters({ open, overdue, high, upcoming }) {
+function getTaskCountersPresentation(tasks, { open, overdue, high, upcoming }) {
+  return {
+    totalLabel: `${tasks.length} élément${tasks.length > 1 ? "s" : ""}`,
+    openTaskCount: open.filter(task => task.type === "task").length,
+    upcomingAppointmentCount: upcoming.length,
+    highPriorityCount: high.length,
+    overdueCount: overdue.length
+  };
+}
+
+function updateTaskCounters(data) {
+  const presentation = getTaskCountersPresentation(allTasks, data);
   const counters = [
-    ["tasksCount", `${allTasks.length} élément${allTasks.length > 1 ? "s" : ""}`],
-    ["tasksOpenCount", open.filter(task => task.type === "task").length],
-    ["appointmentsUpcomingCount", upcoming.length],
-    ["tasksHighCount", high.length],
-    ["tasksOverdueCount", overdue.length]
+    ["tasksCount", presentation.totalLabel],
+    ["tasksOpenCount", presentation.openTaskCount],
+    ["appointmentsUpcomingCount", presentation.upcomingAppointmentCount],
+    ["tasksHighCount", presentation.highPriorityCount],
+    ["tasksOverdueCount", presentation.overdueCount]
   ];
 
   counters.forEach(([id, value]) => {

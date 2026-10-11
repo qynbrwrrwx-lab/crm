@@ -33,6 +33,11 @@ test('task list escapes text and distinguishes overdue tasks from appointments',
 test('task row presentation centralizes labels, dates and completion actions',()=>{
  const b=browser(),task={_id:'t',type:'task',title:'Relance',status:'open',priority:'high',dueDate:'2026-10-03',contactId:{companyName:'Client'}};assert.equal(JSON.stringify(b.ctx.getTaskRowPresentation(task)),JSON.stringify({id:'t',className:'task-row open task priority-high',statusLabel:'Priorité haute',title:'Relance',detail:`Client · ${b.read("taskDate('2026-10-03')")}`,completionLabel:'Terminer'}));const appointment=b.ctx.getTaskRowPresentation({_id:'a',type:'appointment',title:'RDV',status:'done',priority:'normal',startDate:'2026-10-03T12:00:00Z',contactId:{companyName:'Client'}});assert.equal(appointment.statusLabel,'Rendez-vous');assert.equal(appointment.completionLabel,'');assert.equal(appointment.detail,`Client · ${b.read("taskDateTime('2026-10-03T12:00:00Z')")}`);
 });
+test('task counters presentation centralizes task and appointment totals',()=>{
+ const b=browser(),tasks=[{type:'task'},{type:'task'},{type:'appointment'}],data={open:[{type:'task'},{type:'appointment'}],overdue:[{}],high:[{},{}],upcoming:[{},{}]};
+ assert.deepEqual(JSON.parse(JSON.stringify(b.ctx.getTaskCountersPresentation(tasks,data))),{totalLabel:'3 éléments',openTaskCount:1,upcomingAppointmentCount:2,highPriorityCount:2,overdueCount:1});
+ assert.equal(b.ctx.getTaskCountersPresentation([{type:'task'}],{open:[],overdue:[],high:[],upcoming:[]}).totalLabel,'1 élément');
+});
 test('task loading refreshes agenda data and starts only one reminder timer',async()=>{
  const b=browser(),steps=[];b.ctx.apiFetch=async(...args)=>{b.calls.push(args);return [];};b.ctx.taskContacts=()=>steps.push('contacts');b.ctx.renderTasks=()=>steps.push('render');b.ctx.showAppointmentConfirmationStatus=()=>steps.push('confirmation');b.ctx.updateUpcomingAppointmentAlert=()=>steps.push('alert');b.ctx.checkAgendaReminders=()=>steps.push('reminder');
  await b.ctx.loadTasks();await b.ctx.loadTasks();assert.deepEqual(b.calls.map(([url])=>url),['/api/tasks','/api/tasks']);assert.deepEqual(steps,['contacts','render','confirmation','alert','reminder','contacts','render','confirmation','alert','reminder']);assert.equal(b.timers(),1);assert.equal(b.read('allTasks.length'),0);
