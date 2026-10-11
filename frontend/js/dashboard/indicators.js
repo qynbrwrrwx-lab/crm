@@ -3,6 +3,23 @@ function updateKPI(contacts) {
   document.getElementById("total").innerText = contacts.length;
 }
 
+function getPaymentAlertPresentation({ pending, overdue, overdueTotal }) {
+  if (overdue.length) {
+    return {
+      label: `${overdue.length} facture${overdue.length > 1 ? "s" : ""} en retard`,
+      detail: `${formatCurrency(overdueTotal)} à relancer en priorité.`,
+      filter: "overdue",
+      isOverdue: true
+    };
+  }
+  return {
+    label: `<span id="dashboardPendingInvoicesAlert">${pending.length}</span> facture(s) à encaisser`,
+    detail: "Suivez vos règlements en attente.",
+    filter: "pending",
+    isOverdue: false
+  };
+}
+
 function updateBusinessKPI(invoices) {
   const { quotes, orders, pending, paid, overdue, pendingTotal, paidTotal, overdueTotal } = getBusinessMetrics(invoices);
 
@@ -15,19 +32,20 @@ function updateBusinessKPI(invoices) {
   const paymentAlertDetail = document.getElementById("dashboardPaymentAlertDetail");
   const paymentAlertDot = document.getElementById("dashboardPaymentAlertDot");
   const paymentAlertButton = document.getElementById("dashboardPaymentAlertButton");
+  const paymentAlert = getPaymentAlertPresentation({ pending, overdue, overdueTotal });
   if (paymentAlertButton) {
     paymentAlertButton.onclick = () => {
       showSection("invoicesSection");
-      setInvoiceQuickFilter(overdue.length ? "overdue" : "pending");
+      setInvoiceQuickFilter(paymentAlert.filter);
     };
   }
-  if (overdue.length) {
-    if (paymentAlertLabel) paymentAlertLabel.textContent = `${overdue.length} facture${overdue.length > 1 ? "s" : ""} en retard`;
-    if (paymentAlertDetail) paymentAlertDetail.textContent = `${formatCurrency(overdueTotal)} à relancer en priorité.`;
+  if (paymentAlert.isOverdue) {
+    if (paymentAlertLabel) paymentAlertLabel.textContent = paymentAlert.label;
+    if (paymentAlertDetail) paymentAlertDetail.textContent = paymentAlert.detail;
     paymentAlertDot?.classList.add("overdue");
   } else {
-    if (paymentAlertLabel) paymentAlertLabel.innerHTML = `<span id="dashboardPendingInvoicesAlert">${pending.length}</span> facture(s) à encaisser`;
-    if (paymentAlertDetail) paymentAlertDetail.textContent = "Suivez vos règlements en attente.";
+    if (paymentAlertLabel) paymentAlertLabel.innerHTML = paymentAlert.label;
+    if (paymentAlertDetail) paymentAlertDetail.textContent = paymentAlert.detail;
     paymentAlertDot?.classList.remove("overdue");
   }
   document.getElementById("dashboardPendingTotal").innerText = formatCurrency(pendingTotal);

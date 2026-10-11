@@ -46,6 +46,14 @@ test('stock indicators preserve zero thresholds and purchase value', () => {
   assert.equal(b.node('dashboardStockValue').innerText, b.context.formatCurrency(40));
   assert.ok(b.node('dashboardStockValue').title.includes(b.context.formatCurrency(24)));
 });
+test('payment alert presentation centralizes overdue and pending states', () => {
+  const b = browser();
+  const overdue = b.context.getPaymentAlertPresentation({ pending: [{}, {}], overdue: [{}, {}], overdueTotal: 120 });
+  assert.deepEqual(JSON.parse(JSON.stringify(overdue)), { label: '2 factures en retard', detail: `${b.context.formatCurrency(120)} à relancer en priorité.`, filter: 'overdue', isOverdue: true });
+  const pending = b.context.getPaymentAlertPresentation({ pending: [{}], overdue: [], overdueTotal: 0 });
+  assert.equal(pending.label, '<span id="dashboardPendingInvoicesAlert">1</span> facture(s) à encaisser');
+  assert.equal(pending.filter, 'pending');
+});
 test('cash forecast deducts partial payments and excludes settled and distant documents', () => {
   const b = browser(); b.context.allInvoices = [
     { type: 'invoice', totalTTC: 100, payments: [{ amount: 40 }], paymentDueDate: '2026-09-20' },
