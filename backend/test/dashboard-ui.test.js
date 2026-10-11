@@ -195,6 +195,14 @@ test('analytics chart options centralize favorite contact data', () => {
     type: 'doughnut', data: { labels: ['Favoris', 'Autres'], datasets: [{ data: [2, 1] }] }
   });
 });
+test('contact creation chart options centralize date labels and counts', () => {
+  const b = browser();
+  const dateLabel = new b.context.Date('2026-09-10').toLocaleDateString();
+  const options = b.context.getContactCreationChartOptions([{ createdAt: '2026-09-10' }, { createdAt: '2026-09-10' }, {}]);
+  assert.deepEqual(JSON.parse(JSON.stringify(options)), {
+    type: 'line', data: { labels: [dateLabel, 'Unknown'], datasets: [{ label: 'Nouveaux contacts', data: [2, 1], fill: true }] }
+  });
+});
 test('commercial insight helpers distinguish a first payment from a revenue decrease', () => {
   const b = browser();
   const now = new b.context.Date('2026-09-15T12:00:00Z');

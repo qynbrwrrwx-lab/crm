@@ -13,29 +13,26 @@ function getContactCreationCounts(contacts) {
 function updateChart(contacts) {
   const ctx = document.getElementById("chart");
   if (!ctx) return;
-  const counts = getContactCreationCounts(contacts);
 
   if (chart) {
     chart.destroy();
   }
+  chart = new Chart(ctx, getContactCreationChartOptions(contacts));
+}
 
-  chart = new Chart(ctx, {
-
+function getContactCreationChartOptions(contacts) {
+  const counts = getContactCreationCounts(contacts);
+  return {
     type: "line",
-
     data: {
-
       labels: Object.keys(counts),
-
       datasets: [{
         label: "Nouveaux contacts",
-
         data: Object.values(counts),
-
         fill: true
       }]
     }
-  });
+  };
 }
 
 function getRevenuePeriodBuckets(period, today = new Date()) {
