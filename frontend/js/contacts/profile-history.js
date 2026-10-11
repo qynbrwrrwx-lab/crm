@@ -28,10 +28,19 @@ function renderClientAgendaItem(item) {
   return `<button type="button" class="client-profile-document" onclick="openAgendaItem('${presentation.id}')"><span class="client-profile-document-type">${presentation.typeLabel}</span><span class="client-profile-document-main"><strong>${escapeHtml(presentation.title)}</strong><small>${presentation.dateLabel}</small></span><strong class="client-profile-document-total">${presentation.priorityLabel}</strong></button>`;
 }
 
+function getClientOpportunityItemPresentation(item) {
+  return {
+    id: item._id,
+    stageLabel: clientProfileOpportunityStages[item.stage] || "Opportunité",
+    title: item.title,
+    dateLabel: item.expectedCloseDate ? `Prévu le ${new Date(item.expectedCloseDate).toLocaleDateString("fr-FR")}` : "Date à préciser",
+    amountLabel: formatCurrency(item.amount)
+  };
+}
+
 function renderClientOpportunityItem(item) {
-  const stage = clientProfileOpportunityStages[item.stage] || "Opportunité";
-  const date = item.expectedCloseDate ? `Prévu le ${new Date(item.expectedCloseDate).toLocaleDateString("fr-FR")}` : "Date à préciser";
-  return `<button type="button" class="client-profile-document" onclick="openOpportunityFromProfile('${item._id}')"><span class="client-profile-document-type">${escapeHtml(stage)}</span><span class="client-profile-document-main"><strong>${escapeHtml(item.title)}</strong><small>${date}</small></span><strong class="client-profile-document-total">${formatCurrency(item.amount)}</strong></button>`;
+  const presentation = getClientOpportunityItemPresentation(item);
+  return `<button type="button" class="client-profile-document" onclick="openOpportunityFromProfile('${presentation.id}')"><span class="client-profile-document-type">${escapeHtml(presentation.stageLabel)}</span><span class="client-profile-document-main"><strong>${escapeHtml(presentation.title)}</strong><small>${presentation.dateLabel}</small></span><strong class="client-profile-document-total">${presentation.amountLabel}</strong></button>`;
 }
 
 function getClientDocumentItemPresentation(document) {

@@ -265,6 +265,12 @@ test("client document presentation centralizes type, date and amount", () => {
   assert.deepEqual(plain(item), { id: "invoice", typeLabel: "Facture", number: "FAC-1", dateLabel: b.read("new Date('2026-10-05').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })"), totalLabel: b.context.formatCurrency(120) });
 });
 
+test("client opportunity presentation centralizes stage, date and amount", () => {
+  const b = browser();
+  const item = b.context.getClientOpportunityItemPresentation({ _id: "opportunity", stage: "proposal", title: "Projet", expectedCloseDate: "2026-10-05", amount: 120 });
+  assert.deepEqual(plain(item), { id: "opportunity", stageLabel: "Proposition", title: "Projet", dateLabel: `Prévu le ${b.read("new Date('2026-10-05').toLocaleDateString('fr-FR')")}`, amountLabel: b.context.formatCurrency(120) });
+});
+
 test("map popups escape contact names when loading shared contacts", async () => {
   const b = browser();
   b.context.map = { removeLayer() {} };
