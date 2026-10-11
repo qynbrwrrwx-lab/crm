@@ -28,6 +28,12 @@ test('forecast presentation centralizes amounts, balance state and item labels',
  assert.deepEqual(JSON.parse(JSON.stringify(presentation)),{incomeLabel:b.ctx.treasuryMoney(120),expenseLabel:b.ctx.treasuryMoney(40),balanceLabel:b.ctx.treasuryMoney(80),balanceClass:'positive',items:[{type:'income',dateLabel:b.read("treasuryDate('2026-10-10')"),label:'Facture F-1',detail:'Encaissement attendu',amountLabel:`+${b.ctx.treasuryMoney(120)}`},{type:'expense',dateLabel:b.read("treasuryDate('2026-10-11')"),label:'Achat',detail:'Acme',amountLabel:`−${b.ctx.treasuryMoney(40)}`}],emptyMessage:'Aucune échéance prévue dans les 30 jours.'});
  assert.equal(b.ctx.getTreasuryForecastPresentation({income:0,expense:0,projected:-1,items:[]}).balanceClass,'negative');
 });
+test('forecast alert presentation centralizes setup, reserve and positive states',()=>{
+ const b=browser();
+ assert.deepEqual(JSON.parse(JSON.stringify(b.ctx.getTreasuryForecastAlertPresentation(10,20,30,null))),{label:'Trésorerie prévisionnelle à calculer',detail:'Renseignez un solde de référence pour activer cette alerte.',isOverdue:false});
+ assert.deepEqual(JSON.parse(JSON.stringify(b.ctx.getTreasuryForecastAlertPresentation(10,20,30,{_id:'s',minimumBalance:50}))),{label:'Réserve de trésorerie insuffisante',detail:`${b.ctx.treasuryMoney(40)} manque pour atteindre votre réserve minimale.`,isOverdue:true});
+ assert.deepEqual(JSON.parse(JSON.stringify(b.ctx.getTreasuryForecastAlertPresentation(80,20,30,{_id:'s',minimumBalance:50}))),{label:'Trésorerie prévisionnelle positive',detail:`Solde estimé : ${b.ctx.treasuryMoney(80)} dans 30 jours.`,isOverdue:false});
+});
 test('minimum balance alert distinguishes missing setup and insufficient reserves',()=>{
  const b=browser();b.ctx.updateTreasuryForecastAlert(10,20,30);assert.match(b.node('dashboardTreasuryAlertLabel').textContent,/à calculer/);b.set('treasurySettings',{_id:'s',minimumBalance:50});b.ctx.updateTreasuryForecastAlert(10,20,30);assert.match(b.node('dashboardTreasuryAlertLabel').textContent,/insuffisante/);assert.equal(b.node('dashboardTreasuryAlertDot').classList.contains('overdue'),true);b.ctx.updateTreasuryForecastAlert(80,20,30);assert.equal(b.node('dashboardTreasuryAlertDot').classList.contains('overdue'),false);
 });

@@ -17,6 +17,38 @@ function getTreasuryForecastPresentation({ items, income, expense, projected }) 
   };
 }
 
+function getTreasuryForecastAlertPresentation(projected, income, expense, settings) {
+  const hasReference = Boolean(settings?._id);
+  const hasForecast = income > 0 || expense > 0;
+  if (!hasReference) {
+    return {
+      label: "Trésorerie prévisionnelle à calculer",
+      detail: "Renseignez un solde de référence pour activer cette alerte.",
+      isOverdue: false
+    };
+  }
+  if (!hasForecast) {
+    return {
+      label: "Aucune échéance de trésorerie à 30 jours",
+      detail: "Les prochaines factures et dépenses apparaîtront ici.",
+      isOverdue: false
+    };
+  }
+  const reserve = Number(settings.minimumBalance || 0);
+  if (projected < reserve) {
+    return {
+      label: projected < 0 ? "Solde prévisionnel négatif" : "Réserve de trésorerie insuffisante",
+      detail: `${treasuryMoney(Math.max(0, reserve - projected))} manque${reserve ? " pour atteindre votre réserve minimale" : " à couvrir"}.`,
+      isOverdue: true
+    };
+  }
+  return {
+    label: "Trésorerie prévisionnelle positive",
+    detail: `Solde estimé : ${treasuryMoney(projected)} dans 30 jours.`,
+    isOverdue: false
+  };
+}
+
 function renderTreasuryForecast(currentBalance) {
   const invoices = typeof allInvoices === "undefined" ? [] : allInvoices;
   const expenses = typeof allExpenses === "undefined" ? [] : allExpenses;
@@ -38,26 +70,11 @@ function updateTreasuryForecastAlert(projected, income, expense) {
   const button = document.getElementById("dashboardTreasuryAlertButton");
   const dot = document.getElementById("dashboardTreasuryAlertDot");
   if (!label || !detail || !button) return;
-  const hasReference = Boolean(treasurySettings?._id);
-  const hasForecast = income > 0 || expense > 0;
-  if (!hasReference) {
-    label.textContent = "Trésorerie prévisionnelle à calculer";
-    detail.textContent = "Renseignez un solde de référence pour activer cette alerte.";
-    dot?.classList.remove("overdue");
-  } else if (!hasForecast) {
-    label.textContent = "Aucune échéance de trésorerie à 30 jours";
-    detail.textContent = "Les prochaines factures et dépenses apparaîtront ici.";
-    dot?.classList.remove("overdue");
-  } else if (projected < Number(treasurySettings.minimumBalance || 0)) {
-    const reserve = Number(treasurySettings.minimumBalance || 0);
-    label.textContent = projected < 0 ? "Solde prévisionnel négatif" : "Réserve de trésorerie insuffisante";
-    detail.textContent = `${treasuryMoney(Math.max(0, reserve - projected))} manque${reserve ? " pour atteindre votre réserve minimale" : " à couvrir"}.`;
-    dot?.classList.add("overdue");
-  } else {
-    label.textContent = "Trésorerie prévisionnelle positive";
-    detail.textContent = `Solde estimé : ${treasuryMoney(projected)} dans 30 jours.`;
-    dot?.classList.remove("overdue");
-  }
+  const presentation = getTreasuryForecastAlertPresentation(projected, income, expense, treasurySettings);
+  label.textContent = presentation.label;
+  detail.textContent = presentation.detail;
+  if (presentation.isOverdue) dot?.classList.add("overdue");
+  else dot?.classList.remove("overdue");
   button.textContent = "Voir";
   button.onclick = () => showSection("treasurySection");
 }
