@@ -1,5 +1,28 @@
 // Tâches : actions et préremplissage des rendez-vous.
 
+function getAppointmentConfirmationPresentation(item) {
+  return {
+    confirmation: {
+      title: "Envoyer la confirmation",
+      message: `Envoyer la confirmation du rendez-vous à ${taskContactLabel(item)} ?`,
+      actionLabel: "Envoyer"
+    },
+    successMessage: "Confirmation de rendez-vous envoyée."
+  };
+}
+
+function getFutureAppointmentDeletionPresentation(deletedCount = 0) {
+  return {
+    confirmation: {
+      title: "Supprimer les rendez-vous à venir",
+      message: "Cette occurrence et toutes les suivantes seront supprimées. Les rendez-vous déjà réalisés resteront dans l’historique.",
+      actionLabel: "Supprimer la série",
+      danger: true
+    },
+    successMessage: `${deletedCount} rendez-vous à venir supprimé(s).`
+  };
+}
+
 function showAppointmentConfirmationStatus() {
   if (agendaView !== "day") return;
 
@@ -21,16 +44,13 @@ function showAppointmentConfirmationStatus() {
 }
 
 async function sendAppointmentConfirmation(item) {
-  const confirmed = await confirmAppAction({
-    title: "Envoyer la confirmation",
-    message: `Envoyer la confirmation du rendez-vous à ${taskContactLabel(item)} ?`,
-    actionLabel: "Envoyer"
-  });
+  const presentation = getAppointmentConfirmationPresentation(item);
+  const confirmed = await confirmAppAction(presentation.confirmation);
   if (!confirmed) return;
 
   try {
     await apiFetch(`/api/tasks/${item._id}/send-confirmation`, { method: "POST" });
-    showToast("Confirmation de rendez-vous envoyée.");
+    showToast(presentation.successMessage);
     await loadTasks();
   } catch (error) {
     showToast(error.message);
@@ -38,17 +58,13 @@ async function sendAppointmentConfirmation(item) {
 }
 
 async function deleteFutureRecurringAppointments(item) {
-  const confirmed = await confirmAppAction({
-    title: "Supprimer les rendez-vous à venir",
-    message: "Cette occurrence et toutes les suivantes seront supprimées. Les rendez-vous déjà réalisés resteront dans l’historique.",
-    actionLabel: "Supprimer la série",
-    danger: true
-  });
+  const presentation = getFutureAppointmentDeletionPresentation();
+  const confirmed = await confirmAppAction(presentation.confirmation);
   if (!confirmed) return;
 
   try {
     const result = await apiFetch(`/api/tasks/${item._id}/future-recurrences`, { method: "DELETE" });
-    showToast(`${result.deletedCount || 0} rendez-vous à venir supprimé(s).`);
+    showToast(getFutureAppointmentDeletionPresentation(result.deletedCount || 0).successMessage);
     await loadTasks();
   } catch (error) {
     showToast(error.message);
