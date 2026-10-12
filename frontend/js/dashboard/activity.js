@@ -27,19 +27,25 @@ function getRecentActivityPresentation(document) {
   };
 }
 
+function getRecentActivityListPresentation(documents) {
+  return {
+    emptyMessage: "Aucune activité commerciale pour le moment.",
+    items: getRecentCommercialDocuments(documents).map(getRecentActivityPresentation)
+  };
+}
+
 function updateRecentActivity(documents) {
   const list = document.getElementById("dashboardRecentActivityList");
   if (!list) return;
 
-  const recent = getRecentCommercialDocuments(documents);
+  const presentation = getRecentActivityListPresentation(documents);
 
-  if (!recent.length) {
-    list.innerHTML = '<p class="empty-state">Aucune activité commerciale pour le moment.</p>';
+  if (!presentation.items.length) {
+    list.innerHTML = `<p class="empty-state">${presentation.emptyMessage}</p>`;
     return;
   }
 
-  list.innerHTML = recent.map(document => {
-    const item = getRecentActivityPresentation(document);
+  list.innerHTML = presentation.items.map(item => {
     return `<button type="button" class="dashboard-activity-row" onclick="openInvoice('${item.id}')">
       <span class="dashboard-activity-type">${item.typeLabel}</span>
       <span class="dashboard-activity-main"><strong>${escapeHtml(item.number)}</strong><small>${escapeHtml(item.client)} · ${item.dateLabel}</small></span>

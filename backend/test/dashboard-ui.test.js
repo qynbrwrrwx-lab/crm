@@ -154,6 +154,16 @@ test('recent activity presentation centralizes document labels and payment statu
   const item = b.context.getRecentActivityPresentation(invoice); assert.deepEqual(JSON.parse(JSON.stringify(item)), { id: 'i', typeLabel: 'Facture', number: 'F-1', client: 'Client', dateLabel: new b.context.Date('2026-09-05').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }), statusLabel: 'Facture réglée', amountLabel: b.context.formatCurrency(120) });
   assert.equal(b.context.getRecentActivityPresentation({ _id: 'o', type: 'order', totalTTC: 0 }).statusLabel, 'Commande');
 });
+test('recent activity list presentation centralizes sorting, limits and empty state', () => {
+  const b = browser();
+  const documents = Array.from({ length: 7 }, (_, index) => ({ _id: String(index), type: 'invoice', invoiceNumber: `FAC-${index}`, paymentStatus: index === 0 ? 'paid' : 'pending', totalTTC: index, createdAt: `2026-10-${String(index + 1).padStart(2, '0')}` }));
+  const presentation = b.context.getRecentActivityListPresentation(documents);
+  assert.equal(presentation.items.length, 6);
+  assert.equal(presentation.items[0].id, '6');
+  assert.equal(presentation.items.at(-1).id, '1');
+  assert.equal(presentation.emptyMessage, 'Aucune activité commerciale pour le moment.');
+  assert.deepEqual(JSON.parse(JSON.stringify(b.context.getRecentActivityListPresentation([]))), { emptyMessage: 'Aucune activité commerciale pour le moment.', items: [] });
+});
 test('electronic invoicing alert preserves configuration and ready-document navigation', async () => {
   const b = browser(); b.context.apiFetch = async url => { assert.equal(url, '/api/electronic-invoicing/status'); return { enabled: false }; };
   await b.context.updateElectronicInvoicingAlert([]); b.node('dashboardElectronicAlertButton').onclick(); assert.deepEqual(b.calls, ['company']);
