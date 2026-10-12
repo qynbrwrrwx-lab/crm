@@ -22,6 +22,31 @@ function getPaymentConfirmationMessage(invoice, paymentMethod) {
     : `Règlement partiel enregistré · reste ${remainingAmount.toFixed(2)} €`;
 }
 
+function getCreditNoteCreationPresentation(invoiceNumber = "") {
+  return {
+    confirmation: {
+      title: "Créer un avoir ?",
+      message: "Un avoir correspondant à cette facture sera créé. Cette opération est définitive.",
+      actionLabel: "Créer l’avoir",
+      danger: true
+    },
+    pendingLabel: "Création…",
+    successMessage: `Avoir ${invoiceNumber} créé ✅`
+  };
+}
+
+function getDepositInvoiceCreationPresentation(rate, invoiceNumber = "") {
+  return {
+    invalidRateMessage: "Saisissez un pourcentage entre 1 et 100",
+    confirmation: {
+      title: "Créer une facture d’acompte",
+      message: `Une facture d’acompte de ${rate}% sera créée et numérotée.`,
+      actionLabel: "Créer la facture"
+    },
+    successMessage: `Facture d’acompte ${invoiceNumber} créée ✅`
+  };
+}
+
 function openPaymentModal(invoice) {
   const payment = getPaymentModalData(invoice);
   paymentInvoiceId = payment.invoiceId;
@@ -120,15 +145,16 @@ async function confirmInvoicePayment() {
 }
 
 async function createCreditNote(id) {
-  if (!await confirmAppAction({ title: "Créer un avoir ?", message: "Un avoir correspondant à cette facture sera créé. Cette opération est définitive.", actionLabel: "Créer l’avoir", danger: true })) return;
+  const presentation = getCreditNoteCreationPresentation();
+  if (!await confirmAppAction(presentation.confirmation)) return;
   const lockKey = `credit-note:${id}`;
   if (documentActionLocks.has(lockKey)) return;
   documentActionLocks.add(lockKey);
-  setDocumentActionPending(id, "credit-note", true, "Création…");
+  setDocumentActionPending(id, "credit-note", true, presentation.pendingLabel);
   try {
     const creditNote = await apiFetch(`/api/invoices/credit-note/${id}`, { method: "POST" });
     await loadInvoices();
-    showToast(`Avoir ${creditNote.invoiceNumber} créé ✅`);
+    showToast(getCreditNoteCreationPresentation(creditNote.invoiceNumber).successMessage);
     await openInvoice(creditNote._id);
   } catch (err) {
     showToast(err.message || "Impossible de créer l'avoir");
@@ -141,11 +167,12 @@ async function createCreditNote(id) {
 async function createDepositInvoice(id) {
   const rate = Number(prompt("Pourcentage d’acompte à facturer (ex. 30) :", "30"));
   if (!Number.isFinite(rate)) return;
-  if (rate <= 0 || rate > 100) { showToast("Saisissez un pourcentage entre 1 et 100"); return; }
-  if (!await confirmAppAction({ title: "Créer une facture d’acompte", message: `Une facture d’acompte de ${rate}% sera créée et numérotée.`, actionLabel: "Créer la facture" })) return;
+  const presentation = getDepositInvoiceCreationPresentation(rate);
+  if (rate <= 0 || rate > 100) { showToast(presentation.invalidRateMessage); return; }
+  if (!await confirmAppAction(presentation.confirmation)) return;
   try {
     const invoice = await apiFetch(`/api/invoices/quote/${id}/create-deposit-invoice`, { method: "POST", body: JSON.stringify({ rate }) });
     await loadInvoiceData();
-    showToast(`Facture d’acompte ${invoice.invoiceNumber} créée ✅`);
+    showToast(getDepositInvoiceCreationPresentation(rate, invoice.invoiceNumber).successMessage);
   } catch (err) { showToast(err.message || "Impossible de créer la facture d’acompte"); }
 }

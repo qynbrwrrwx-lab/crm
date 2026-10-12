@@ -607,6 +607,12 @@ test("document conversion presentation centralizes confirmation, pending state a
   assert.deepEqual(plain(b.context.getDocumentConversionPresentation("order-to-invoice", "FAC-1")), { confirmation: { title: "Émettre la facture ?", message: "Une facture sera créée depuis cette commande. Elle sera verrouillée après son émission.", actionLabel: "Émettre la facture" }, pendingLabel: "Émission…", successMessage: "Facture FAC-1 créée ✅" });
 });
 
+test("credit note and deposit presentations centralize confirmations and feedback", () => {
+  const b = browser();
+  assert.deepEqual(plain(b.context.getCreditNoteCreationPresentation("AV-1")), { confirmation: { title: "Créer un avoir ?", message: "Un avoir correspondant à cette facture sera créé. Cette opération est définitive.", actionLabel: "Créer l’avoir", danger: true }, pendingLabel: "Création…", successMessage: "Avoir AV-1 créé ✅" });
+  assert.deepEqual(plain(b.context.getDepositInvoiceCreationPresentation(30, "AC-1")), { invalidRateMessage: "Saisissez un pourcentage entre 1 et 100", confirmation: { title: "Créer une facture d’acompte", message: "Une facture d’acompte de 30% sera créée et numérotée.", actionLabel: "Créer la facture" }, successMessage: "Facture d’acompte AC-1 créée ✅" });
+});
+
 test("invoice payment presentation centralizes payment, credit note and reminder availability", () => {
   const b = browser();
   const overdue = documentFixture({ paymentDueDate: "2000-01-01", contactId: { email: "client@example.test" } });
