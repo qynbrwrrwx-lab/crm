@@ -94,12 +94,23 @@ async function createPurchaseOrderForSupplier(id) {
   }
 }
 
+function getPurchaseOrderStatusPresentation(status) {
+  if (status === "received") {
+    return {
+      confirmation: {
+        title: "Confirmer la réception",
+        message: "Les quantités du bon seront ajoutées au stock une seule fois. Confirmer la réception ?",
+        actionLabel: "Réceptionner"
+      },
+      successMessage: "Réception enregistrée et stock mis à jour."
+    };
+  }
+  return { confirmation: null, successMessage: "Statut mis à jour." };
+}
+
 async function updatePurchaseOrderStatus(id, status) {
-  if (status === "received" && !await confirmAppAction({
-    title: "Confirmer la réception",
-    message: "Les quantités du bon seront ajoutées au stock une seule fois. Confirmer la réception ?",
-    actionLabel: "Réceptionner"
-  })) {
+  const presentation = getPurchaseOrderStatusPresentation(status);
+  if (presentation.confirmation && !await confirmAppAction(presentation.confirmation)) {
     document.getElementById("purchaseOrdersPanel")?.remove();
     return loadSuppliers();
   }
@@ -108,7 +119,7 @@ async function updatePurchaseOrderStatus(id, status) {
     document.getElementById("purchaseOrdersPanel")?.remove();
     await loadSuppliers();
     if (status === "received") await loadProducts?.();
-    showToast(status === "received" ? "Réception enregistrée et stock mis à jour." : "Statut mis à jour.");
+    showToast(presentation.successMessage);
   } catch (error) {
     showToast(error.message || "Mise à jour impossible");
   }

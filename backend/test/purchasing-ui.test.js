@@ -125,6 +125,9 @@ test('receiving a purchase order requires confirmation and refreshes stock only 
  b.context.confirmAppAction=async()=>true;await b.context.updatePurchaseOrderStatus('o','received');assert.equal(b.calls[0][0],'/api/purchase-orders/o/status');assert.deepEqual(JSON.parse(b.calls[0][1].body),{status:'received'});assert.equal(stocks,1);
  b.context.apiFetch=async()=>{throw new Error('offline');};await b.context.updatePurchaseOrderStatus('o','received');assert.equal(stocks,1);assert.equal(b.toasts.at(-1),'offline');
 });
+test('purchase order status presentation centralizes receipt confirmation and status feedback',()=>{
+ const b=browser();assert.deepEqual(JSON.parse(JSON.stringify(b.context.getPurchaseOrderStatusPresentation('received'))),{confirmation:{title:'Confirmer la réception',message:'Les quantités du bon seront ajoutées au stock une seule fois. Confirmer la réception ?',actionLabel:'Réceptionner'},successMessage:'Réception enregistrée et stock mis à jour.'});assert.deepEqual(JSON.parse(JSON.stringify(b.context.getPurchaseOrderStatusPresentation('sent'))),{confirmation:null,successMessage:'Statut mis à jour.'});
+});
 test('cancelled restock email makes no request',async()=>{
  const b=browser();b.set('allSuppliers',[supplier]);b.context.confirmAppAction=async()=>false;await b.context.sendRestockRequest('s');assert.equal(b.calls.length,0);
 });
