@@ -113,29 +113,33 @@ function renderAgendaDayDetails(detail) {
   detail.innerHTML = `<div><strong>${presentation.dateLabel}</strong><span>${presentation.actionLabel}</span></div><button type="button" class="secondary-btn" onclick="prepareAppointment('${presentation.dateKey}')">Planifier</button>`;
 }
 
+function getAgendaViewPresentation(view, cursor, selectedDate) {
+  if (view === "month") {
+    return {
+      label: cursor.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }),
+      content: renderMonthAgenda(cursor)
+    };
+  }
+  if (view === "week") return renderWeekAgenda(cursor);
+  if (view === "year") return { label: String(cursor.getFullYear()), content: renderYearAgenda(cursor) };
+  if (view === "day") {
+    return {
+      label: selectedDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }),
+      content: renderDayAgenda(selectedDate)
+    };
+  }
+  return { label: "Toutes les actions", content: "" };
+}
+
 function renderAgenda() {
   const calendar = document.getElementById("agendaCalendar");
   const detail = document.getElementById("agendaDayDetails");
   const label = document.getElementById("agendaPeriodLabel");
   if (!calendar || !detail) return;
 
-  if (agendaView === "month") {
-    label.textContent = agendaCursor.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
-    calendar.innerHTML = renderMonthAgenda(agendaCursor);
-  } else if (agendaView === "week") {
-    const week = renderWeekAgenda(agendaCursor);
-    label.textContent = week.label;
-    calendar.innerHTML = week.content;
-  } else if (agendaView === "year") {
-    label.textContent = String(agendaCursor.getFullYear());
-    calendar.innerHTML = renderYearAgenda(agendaCursor);
-  } else if (agendaView === "day") {
-    label.textContent = agendaSelectedDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-    calendar.innerHTML = renderDayAgenda(agendaSelectedDate);
-  } else {
-    label.textContent = "Toutes les actions";
-    calendar.innerHTML = "";
-  }
+  const presentation = getAgendaViewPresentation(agendaView, agendaCursor, agendaSelectedDate);
+  label.textContent = presentation.label;
+  calendar.innerHTML = presentation.content;
 
   renderAgendaDayDetails(detail);
 }
