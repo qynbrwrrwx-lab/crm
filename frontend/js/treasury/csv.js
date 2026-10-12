@@ -1,5 +1,21 @@
 // Trésorerie : csv.
 
+function getTreasuryCsvImportPresentation(entryCount, result = {}) {
+  const entryLabel = `${entryCount} mouvement${entryCount > 1 ? "s" : ""}`;
+  const importVerb = entryCount > 1 ? "seront importés" : "sera importé";
+  const imported = Number(result.imported || 0);
+  const ignored = Number(result.ignored || 0);
+  return {
+    emptyMessage: "Aucun mouvement exploitable n'a été trouvé",
+    confirmation: {
+      title: "Importer le relevé",
+      message: `${entryLabel} ${importVerb}. Les doublons déjà importés seront ignorés.`,
+      actionLabel: "Importer"
+    },
+    successMessage: `${imported} mouvement${imported > 1 ? "s" : ""} importé${imported > 1 ? "s" : ""}${ignored ? ` · ${ignored} doublon${ignored > 1 ? "s" : ""} ignoré${ignored > 1 ? "s" : ""}` : ""}`
+  };
+}
+
 function exportTreasuryCsv() {
   if (!treasuryEntries.length) return showToast("Aucun mouvement à exporter");
   const quote = escapeCsvValue;
@@ -29,11 +45,12 @@ async function importTreasuryCsv(event) {
     const parsed = parseTreasuryCsv(text);
     if (parsed.error) return showToast(parsed.error);
     const { entries } = parsed;
-    if (!entries.length) return showToast("Aucun mouvement exploitable n'a été trouvé");
-    const confirmed = await confirmAppAction({ title: "Importer le relevé", message: `${entries.length} mouvement${entries.length > 1 ? "s" : ""} sera/seront importé(s). Les doublons déjà importés seront ignorés.`, actionLabel: "Importer" });
+    const presentation = getTreasuryCsvImportPresentation(entries.length);
+    if (!entries.length) return showToast(presentation.emptyMessage);
+    const confirmed = await confirmAppAction(presentation.confirmation);
     if (!confirmed) return;
     const result = await apiFetch("/api/treasury/entries/import", { method: "POST", body: JSON.stringify({ entries }) });
-    showToast(`${result.imported} mouvement${result.imported > 1 ? "s" : ""} importé${result.imported > 1 ? "s" : ""}${result.ignored ? ` · ${result.ignored} doublon${result.ignored > 1 ? "s" : ""} ignoré${result.ignored > 1 ? "s" : ""}` : ""}`);
+    showToast(getTreasuryCsvImportPresentation(entries.length, result).successMessage);
     await loadTreasury();
   } catch (error) { showToast(error.message || "Impossible d'importer ce fichier CSV"); }
 }

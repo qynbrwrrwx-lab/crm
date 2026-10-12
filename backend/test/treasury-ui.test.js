@@ -67,6 +67,9 @@ test('settings allow negative opening balance but reject negative reserves',asyn
 test('CSV import understands debit and credit columns and preserves confirmation',async()=>{
  const b=browser();b.ctx.loadTreasury=async()=>{};const event=()=>({target:{value:'file',files:[{text:async()=> 'Date;Libellé;Débit;Crédit\n03/10/2026;"Achat; matériel";12,50;\n04/10/2026;Virement;;100,00'}]}});b.ctx.confirmAppAction=async()=>false;await b.ctx.importTreasuryCsv(event());assert.equal(b.calls.length,0);b.ctx.confirmAppAction=async()=>true;await b.ctx.importTreasuryCsv(event());assert.equal(b.calls[0][0],'/api/treasury/entries/import');assert.deepEqual(JSON.parse(b.calls[0][1].body),{entries:[{date:'2026-10-03',label:'Achat; matériel',type:'expense',amount:12.5},{date:'2026-10-04',label:'Virement',type:'income',amount:100}]});
 });
+test('treasury CSV import presentation centralizes empty, confirmation and duplicate feedback',()=>{
+ const b=browser(),presentation=b.ctx.getTreasuryCsvImportPresentation(2,{imported:1,ignored:2});assert.equal(presentation.emptyMessage,"Aucun mouvement exploitable n'a été trouvé");assert.deepEqual(JSON.parse(JSON.stringify(presentation.confirmation)),{title:'Importer le relevé',message:'2 mouvements seront importés. Les doublons déjà importés seront ignorés.',actionLabel:'Importer'});assert.equal(presentation.successMessage,'1 mouvement importé · 2 doublons ignorés');
+});
 test('chart separates monthly income and expense and destroys the previous instance',()=>{
  const b=browser();b.set('treasuryEntries',[{type:'income',amount:70,date:'2026-10-01'},{type:'expense',amount:20,date:'2026-09-01'}]);b.ctx.renderTreasuryChart();assert.deepEqual(Array.from(b.charts[0].options.data.datasets[0].data),[0,0,0,0,0,70]);assert.deepEqual(Array.from(b.charts[0].options.data.datasets[1].data),[0,0,0,0,20,0]);b.ctx.renderTreasuryChart();assert.equal(b.charts[0].destroyed,true);
 });
