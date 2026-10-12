@@ -593,6 +593,14 @@ test("order fulfillment presentation centralizes the next operational action", (
   assert.equal(b.context.getOrderFulfillmentNextStepPresentation("delivered"), null);
 });
 
+test("document workflow presentations centralize confirmations and action feedback", () => {
+  const b = browser();
+  assert.deepEqual(plain(b.context.getQuoteDuplicationPresentation("DEV-1")), { confirmation: { title: "Dupliquer ce devis ?", message: "Un nouveau devis brouillon sera créé avec les mêmes lignes. Vous pourrez ensuite le modifier avant envoi.", actionLabel: "Dupliquer le devis" }, successMessage: "Devis DEV-1 créé à partir du modèle ✅" });
+  assert.equal(b.context.getDocumentDeletionPresentation().confirmation.danger, true);
+  assert.equal(b.context.getQuoteAcceptancePresentation().successMessage, "Devis accepté et verrouillé ✅");
+  assert.deepEqual(plain(b.context.getOrderFulfillmentPresentation("shipped")), { confirmation: { title: "Mettre à jour la commande", message: "Voulez-vous marquer comme expédiée ?", actionLabel: "Confirmer" }, successMessage: "Suivi de commande mis à jour ✅" });
+});
+
 test("invoice payment presentation centralizes payment, credit note and reminder availability", () => {
   const b = browser();
   const overdue = documentFixture({ paymentDueDate: "2000-01-01", contactId: { email: "client@example.test" } });
