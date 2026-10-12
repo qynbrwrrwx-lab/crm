@@ -613,6 +613,13 @@ test("credit note and deposit presentations centralize confirmations and feedbac
   assert.deepEqual(plain(b.context.getDepositInvoiceCreationPresentation(30, "AC-1")), { invalidRateMessage: "Saisissez un pourcentage entre 1 et 100", confirmation: { title: "Créer une facture d’acompte", message: "Une facture d’acompte de 30% sera créée et numérotée.", actionLabel: "Créer la facture" }, successMessage: "Facture d’acompte AC-1 créée ✅" });
 });
 
+test("document delivery presentation centralizes emails, reminders and delivery notes", () => {
+  const b = browser();
+  assert.deepEqual(plain(b.context.getDocumentDeliveryActionPresentation("email")), { confirmation: { title: "Envoyer ce document ?", message: "Le document et son PDF seront envoyés à l’adresse e-mail du client.", actionLabel: "Envoyer l’e-mail" }, pendingLabel: "Envoi en cours…", successMessage: "E-mail remis au serveur d’envoi ✅" });
+  assert.deepEqual(plain(b.context.getDocumentDeliveryActionPresentation("reminder", "client@example.test")), { missingEmailMessage: "L’adresse e-mail du client est manquante", confirmation: { title: "Envoyer la relance ?", message: "Une relance sera envoyée directement à client@example.test.", actionLabel: "Envoyer la relance" }, successMessage: "Relance envoyée ✅" });
+  assert.equal(b.context.getDocumentDeliveryActionPresentation("delivery-note").successMessage, "Bon de livraison envoyé ✅");
+});
+
 test("invoice payment presentation centralizes payment, credit note and reminder availability", () => {
   const b = browser();
   const overdue = documentFixture({ paymentDueDate: "2000-01-01", contactId: { email: "client@example.test" } });
