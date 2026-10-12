@@ -593,6 +593,17 @@ test("order fulfillment presentation centralizes the next operational action", (
   assert.equal(b.context.getOrderFulfillmentNextStepPresentation("delivered"), null);
 });
 
+test("invoice payment presentation centralizes payment, credit note and reminder availability", () => {
+  const b = browser();
+  const overdue = documentFixture({ paymentDueDate: "2000-01-01", contactId: { email: "client@example.test" } });
+  assert.deepEqual(plain(b.context.getInvoicePaymentActionsPresentation(overdue)), { isPaid: false, paymentMethod: "", canCreateCreditNote: true, reminderLabel: "Envoyer une relance" });
+  const paid = b.context.getInvoicePaymentActionsPresentation(documentFixture({ paymentStatus: "paid", paymentMethod: "Virement", creditNoteId: "credit" }));
+  assert.equal(paid.isPaid, true);
+  assert.equal(paid.paymentMethod, "Virement");
+  assert.equal(paid.canCreateCreditNote, false);
+  assert.equal(b.context.getInvoicePaymentActionsPresentation(documentFixture({ type: "quote" })), null);
+});
+
 test("detail action markup delegates layout styles to the commerce stylesheet", () => {
   const b = browser();
   const paidInvoice = documentFixture({ paymentStatus: "paid", paymentMethod: "Virement" });

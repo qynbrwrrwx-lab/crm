@@ -55,16 +55,32 @@ function getOrderFulfillmentNextStepPresentation(status) {
   return { status: "delivered", label: "Marquer livrée" };
 }
 
+function getInvoicePaymentActionsPresentation(invoice) {
+  if (invoice.type !== "invoice") return null;
+  const canSendReminder = getInvoiceDueState(invoice)?.kind === "overdue" && invoice.contactId?.email;
+  return {
+    isPaid: invoice.paymentStatus === "paid",
+    paymentMethod: invoice.paymentMethod || "",
+    canCreateCreditNote: !invoice.creditNoteId,
+    reminderLabel: canSendReminder
+      ? invoice.paymentReminderSentAt
+        ? `Renvoyer la relance · ${formatDocumentEmailDate(invoice.paymentReminderSentAt)}`
+        : "Envoyer une relance"
+      : ""
+  };
+}
+
 function renderInvoicePaymentActions(invoice) {
-  if (invoice.type !== "invoice") return "";
-  const payment = invoice.paymentStatus !== "paid"
+  const presentation = getInvoicePaymentActionsPresentation(invoice);
+  if (!presentation) return "";
+  const payment = !presentation.isPaid
     ? `<button class="primary-btn" onclick="markInvoicePaid('${invoice._id}')">Marquer comme payée</button>`
-    : `<span class="invoice-paid-badge">Payée${invoice.paymentMethod ? ` · ${escapeHtml(invoice.paymentMethod)}` : ""}</span>`;
-  const creditNote = !invoice.creditNoteId
+    : `<span class="invoice-paid-badge">Payée${presentation.paymentMethod ? ` · ${escapeHtml(presentation.paymentMethod)}` : ""}</span>`;
+  const creditNote = presentation.canCreateCreditNote
     ? `<button class="secondary-btn" data-document-action="credit-note" data-document-id="${invoice._id}" onclick="createCreditNote('${invoice._id}')">Créer un avoir</button>`
     : "";
-  const reminder = getInvoiceDueState(invoice)?.kind === "overdue" && invoice.contactId?.email
-    ? `<button class="secondary-btn document-contact-fix-action" onclick="openPaymentReminder('${invoice._id}')">${invoice.paymentReminderSentAt ? `Renvoyer la relance · ${formatDocumentEmailDate(invoice.paymentReminderSentAt)}` : "Envoyer une relance"}</button>`
+  const reminder = presentation.reminderLabel
+    ? `<button class="secondary-btn document-contact-fix-action" onclick="openPaymentReminder('${invoice._id}')">${presentation.reminderLabel}</button>`
     : "";
   return [payment, creditNote, reminder].join("");
 }
