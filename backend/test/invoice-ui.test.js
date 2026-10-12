@@ -601,6 +601,12 @@ test("document workflow presentations centralize confirmations and action feedba
   assert.deepEqual(plain(b.context.getOrderFulfillmentPresentation("shipped")), { confirmation: { title: "Mettre à jour la commande", message: "Voulez-vous marquer comme expédiée ?", actionLabel: "Confirmer" }, successMessage: "Suivi de commande mis à jour ✅" });
 });
 
+test("document conversion presentation centralizes confirmation, pending state and success feedback", () => {
+  const b = browser();
+  assert.deepEqual(plain(b.context.getDocumentConversionPresentation("quote-to-order", "CMD-1")), { confirmation: { title: "Créer la commande ?", message: "Une commande sera créée à partir de ce devis accepté. Cette conversion ne peut être effectuée qu’une seule fois.", actionLabel: "Créer la commande" }, pendingLabel: "Création…", successMessage: "Commande CMD-1 créée ✅" });
+  assert.deepEqual(plain(b.context.getDocumentConversionPresentation("order-to-invoice", "FAC-1")), { confirmation: { title: "Émettre la facture ?", message: "Une facture sera créée depuis cette commande. Elle sera verrouillée après son émission.", actionLabel: "Émettre la facture" }, pendingLabel: "Émission…", successMessage: "Facture FAC-1 créée ✅" });
+});
+
 test("invoice payment presentation centralizes payment, credit note and reminder availability", () => {
   const b = browser();
   const overdue = documentFixture({ paymentDueDate: "2000-01-01", contactId: { email: "client@example.test" } });
