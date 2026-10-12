@@ -1,5 +1,27 @@
 // Opportunités : formulaire, préremplissage et enregistrement.
 
+const opportunitySourceOptions = [
+  ["manual", "Saisie manuelle"],
+  ["website", "Site internet"],
+  ["referral", "Recommandation"],
+  ["network", "Réseau / salon"],
+  ["advertising", "Publicité"],
+  ["other", "Autre"]
+];
+
+function getOpportunityFormModePresentation(isEditing) {
+  return isEditing
+    ? { title: "Modifier l’opportunité", submitLabel: "Enregistrer les modifications", cancelHidden: false }
+    : { title: "Ajouter une opportunité", submitLabel: "Ajouter au pipeline", cancelHidden: true };
+}
+
+function getOpportunityFormOptionsPresentation() {
+  return {
+    sourceOptions: opportunitySourceOptions.map(([value, label]) => ({ value, label })),
+    lostReasonOptions: Object.entries(opportunityLostReasons).map(([value, label]) => ({ value, label }))
+  };
+}
+
 function opportunityContacts() {
   const select = document.getElementById("opportunityContact");
   if (!select || typeof allContacts === "undefined") return;
@@ -17,7 +39,10 @@ function ensureOpportunitySourceField() {
   const stage = document.getElementById("opportunityStage")?.closest("label");
   if (!stage) return;
 
-  stage.insertAdjacentHTML("beforebegin", '<label class="form-field"><span>Origine</span><select id="opportunitySource"><option value="manual">Saisie manuelle</option><option value="website">Site internet</option><option value="referral">Recommandation</option><option value="network">Réseau / salon</option><option value="advertising">Publicité</option><option value="other">Autre</option></select></label>');
+  const options = getOpportunityFormOptionsPresentation().sourceOptions
+    .map(option => `<option value="${option.value}">${option.label}</option>`)
+    .join("");
+  stage.insertAdjacentHTML("beforebegin", `<label class="form-field"><span>Origine</span><select id="opportunitySource">${options}</select></label>`);
 }
 
 function ensureOpportunityLostReasonField() {
@@ -25,8 +50,8 @@ function ensureOpportunityLostReasonField() {
   const stage = document.getElementById("opportunityStage")?.closest("label");
   if (!stage) return;
 
-  const options = Object.entries(opportunityLostReasons)
-    .map(([value, label]) => `<option value="${value}">${label}</option>`)
+  const options = getOpportunityFormOptionsPresentation().lostReasonOptions
+    .map(option => `<option value="${option.value}">${option.label}</option>`)
     .join("");
   stage.insertAdjacentHTML("afterend", `<label class="form-field" id="opportunityLostReasonField" hidden><span>Motif de perte</span><select id="opportunityLostReason"><option value="">Non renseigné</option>${options}</select></label>`);
 }
@@ -44,9 +69,10 @@ function suggestOpportunityProbability() {
 }
 
 function setOpportunityFormMode(isEditing) {
-  document.getElementById("opportunityFormTitle").textContent = isEditing ? "Modifier l’opportunité" : "Ajouter une opportunité";
-  document.getElementById("opportunitySubmitButton").textContent = isEditing ? "Enregistrer les modifications" : "Ajouter au pipeline";
-  document.getElementById("opportunityCancelEdit").hidden = !isEditing;
+  const presentation = getOpportunityFormModePresentation(isEditing);
+  document.getElementById("opportunityFormTitle").textContent = presentation.title;
+  document.getElementById("opportunitySubmitButton").textContent = presentation.submitLabel;
+  document.getElementById("opportunityCancelEdit").hidden = presentation.cancelHidden;
 }
 
 function resetOpportunityForm() {
