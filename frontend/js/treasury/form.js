@@ -1,17 +1,48 @@
 // Trésorerie : form.
 
+function getTreasuryFormActionPresentation(isEditing = false) {
+  return {
+    settings: {
+      invalidMessage: "Renseignez un solde, une réserve et une date valides",
+      successMessage: "Paramètres de trésorerie mis à jour"
+    },
+    entry: {
+      invalidMessage: "Vérifiez le libellé, le montant et la date",
+      successMessage: isEditing ? "Mouvement mis à jour" : "Mouvement ajouté"
+    },
+    deletion: {
+      confirmation: {
+        title: "Supprimer le mouvement",
+        message: "Cette suppression est définitive.",
+        actionLabel: "Supprimer",
+        danger: true
+      },
+      successMessage: "Mouvement supprimé"
+    }
+  };
+}
+
 async function saveTreasurySettings(event) {
   event.preventDefault();
+  const presentation = getTreasuryFormActionPresentation();
   const { openingBalance, minimumBalance, openingBalanceDate } = readTreasurySettingsForm();
-  if (!Number.isFinite(openingBalance) || !Number.isFinite(minimumBalance) || minimumBalance < 0 || !openingBalanceDate) return showToast("Renseignez un solde, une réserve et une date valides");
-  try { await apiFetch("/api/treasury/settings", { method: "PUT", body: JSON.stringify({ openingBalance, minimumBalance, openingBalanceDate }) }); showToast("Paramètres de trésorerie mis à jour"); await loadTreasury(); } catch (error) { showToast(error.message || "Impossible de mettre à jour le solde"); }
+  if (!Number.isFinite(openingBalance) || !Number.isFinite(minimumBalance) || minimumBalance < 0 || !openingBalanceDate) return showToast(presentation.settings.invalidMessage);
+  try { await apiFetch("/api/treasury/settings", { method: "PUT", body: JSON.stringify({ openingBalance, minimumBalance, openingBalanceDate }) }); showToast(presentation.settings.successMessage); await loadTreasury(); } catch (error) { showToast(error.message || "Impossible de mettre à jour le solde"); }
 }
 
 async function saveTreasuryEntry(event) {
   event.preventDefault();
+  const isEditing = Boolean(editingTreasuryEntryId);
+  const presentation = getTreasuryFormActionPresentation(isEditing);
   const { label, amount, type, date } = readTreasuryEntryForm();
-  if (!label || !Number.isFinite(amount) || amount <= 0 || !date) return showToast("Vérifiez le libellé, le montant et la date");
-  try { const endpoint = editingTreasuryEntryId ? `/api/treasury/entries/${editingTreasuryEntryId}` : "/api/treasury/entries"; await apiFetch(endpoint, { method: editingTreasuryEntryId ? "PUT" : "POST", body: JSON.stringify({ label, amount, type, date }) }); const wasEditing = Boolean(editingTreasuryEntryId); cancelTreasuryEntryEdit(); showToast(wasEditing ? "Mouvement mis à jour" : "Mouvement ajouté"); await loadTreasury(); } catch (error) { showToast(error.message || "Impossible d'enregistrer le mouvement"); }
+  if (!label || !Number.isFinite(amount) || amount <= 0 || !date) return showToast(presentation.entry.invalidMessage);
+  try {
+    const endpoint = isEditing ? `/api/treasury/entries/${editingTreasuryEntryId}` : "/api/treasury/entries";
+    await apiFetch(endpoint, { method: isEditing ? "PUT" : "POST", body: JSON.stringify({ label, amount, type, date }) });
+    cancelTreasuryEntryEdit();
+    showToast(presentation.entry.successMessage);
+    await loadTreasury();
+  } catch (error) { showToast(error.message || "Impossible d'enregistrer le mouvement"); }
 }
 
 function editTreasuryEntry(id) {
@@ -34,9 +65,10 @@ function cancelTreasuryEntryEdit() {
 }
 
 async function deleteTreasuryEntry(id) {
-  const confirmed = await confirmAppAction({ title: "Supprimer le mouvement", message: "Cette suppression est définitive.", actionLabel: "Supprimer", danger: true });
+  const presentation = getTreasuryFormActionPresentation().deletion;
+  const confirmed = await confirmAppAction(presentation.confirmation);
   if (!confirmed) return;
-  try { await apiFetch(`/api/treasury/entries/${id}`, { method: "DELETE" }); showToast("Mouvement supprimé"); await loadTreasury(); } catch (error) { showToast(error.message || "Impossible de supprimer le mouvement"); }
+  try { await apiFetch(`/api/treasury/entries/${id}`, { method: "DELETE" }); showToast(presentation.successMessage); await loadTreasury(); } catch (error) { showToast(error.message || "Impossible de supprimer le mouvement"); }
 }
 
 document.addEventListener("DOMContentLoaded", () => { const field = document.getElementById("treasuryEntryDate"); if (field && !field.value) field.value = new Date().toISOString().slice(0, 10); });
