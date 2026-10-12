@@ -23,6 +23,17 @@ function createAgendaActionButton({ className, label, onClick }) {
   return button;
 }
 
+function getAgendaAppointmentActionsPresentation(item) {
+  const actions = [{ key: "export", className: "secondary-btn agenda-export-btn", label: "Ajouter au calendrier" }];
+  if (item.contactId?.email || item.freeContactEmail) {
+    actions.push({ key: "confirmation", className: "secondary-btn agenda-confirmation-btn", label: "Envoyer la confirmation" });
+  }
+  if (item.recurrenceGroup) {
+    actions.push({ key: "deleteSeries", className: "expense-text-action danger agenda-series-delete-btn", label: "Supprimer cette série" });
+  }
+  return actions;
+}
+
 function addAgendaExportButtons() {
   if (agendaView !== "day") return;
 
@@ -33,26 +44,13 @@ function addAgendaExportButtons() {
     const item = appointments[index];
     if (!item) return;
 
-    card.appendChild(createAgendaActionButton({
-      className: "secondary-btn agenda-export-btn",
-      label: "Ajouter au calendrier",
-      onClick: () => exportAppointmentToCalendar(item)
-    }));
-
-    if (item.contactId?.email || item.freeContactEmail) {
-      card.appendChild(createAgendaActionButton({
-        className: "secondary-btn agenda-confirmation-btn",
-        label: "Envoyer la confirmation",
-        onClick: () => sendAppointmentConfirmation(item)
-      }));
-    }
-
-    if (item.recurrenceGroup) {
-      card.appendChild(createAgendaActionButton({
-        className: "expense-text-action danger agenda-series-delete-btn",
-        label: "Supprimer cette série",
-        onClick: () => deleteFutureRecurringAppointments(item)
-      }));
-    }
+    const handlers = {
+      export: () => exportAppointmentToCalendar(item),
+      confirmation: () => sendAppointmentConfirmation(item),
+      deleteSeries: () => deleteFutureRecurringAppointments(item)
+    };
+    getAgendaAppointmentActionsPresentation(item).forEach(action => {
+      card.appendChild(createAgendaActionButton({ ...action, onClick: handlers[action.key] }));
+    });
   });
 }
