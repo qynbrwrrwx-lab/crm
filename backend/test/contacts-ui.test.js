@@ -192,6 +192,12 @@ test("contact CSV helpers preserve exports and accept unaccented import aliases"
   assert.equal(b.context.getContactImportMessage(3, [2]), "2 clients importés, 1 ligne(s) ignorée(s)");
 });
 
+test("contact action presentations centralize deletion and CSV import confirmations", () => {
+  const b = browser();
+  assert.deepEqual(JSON.parse(JSON.stringify(b.context.getContactDeletionPresentation())), { confirmation: { title: "Supprimer ce client ?", message: "Cette suppression est définitive. Les documents existants resteront protégés.", actionLabel: "Supprimer le client", danger: true }, successMessage: "Contact supprimé 🗑️" });
+  assert.deepEqual(JSON.parse(JSON.stringify(b.context.getContactCsvImportPresentation(2))), { confirmation: { title: "Importer des clients ?", message: "2 client(s) valide(s) vont être ajouté(s) à votre répertoire.", actionLabel: "Importer les clients" } });
+});
+
 test("client profile renders outstanding invoices and excludes other clients", async () => {
   const b = browser();
   b.context.fixtures = [contact()];

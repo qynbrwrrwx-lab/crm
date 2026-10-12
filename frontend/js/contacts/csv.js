@@ -45,13 +45,24 @@ function getContactImportMessage(total, failures) {
   return `${total - failures.length} clients importés, ${failures.length} ligne(s) ignorée(s)`;
 }
 
+function getContactCsvImportPresentation(validRowCount) {
+  return {
+    confirmation: {
+      title: "Importer des clients ?",
+      message: `${validRowCount} client(s) valide(s) vont être ajouté(s) à votre répertoire.`,
+      actionLabel: "Importer les clients"
+    }
+  };
+}
+
 async function handleContactsCsvImport(event) {
   try {
     const rows = await readCsvImport(event);
     if (!rows) return;
     const validRows = rows.filter(isValidContactCsvRow);
     if (!validRows.length) throw new Error("Aucune ligne valide : nom ou entreprise et adresse de facturation sont obligatoires");
-    if (!await confirmAppAction({ title: "Importer des clients ?", message: `${validRows.length} client(s) valide(s) vont être ajouté(s) à votre répertoire.`, actionLabel: "Importer les clients" })) return;
+    const presentation = getContactCsvImportPresentation(validRows.length);
+    if (!await confirmAppAction(presentation.confirmation)) return;
 
     showLoader();
     const failures = [];
