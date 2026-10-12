@@ -171,6 +171,17 @@ test("product document presentation centralizes document details and payment sta
   assert.equal(b.context.getProductDocumentPresentation({ type: "order", createdAt: "2026-01-01" }).paymentLabel, "Voir le détail");
 });
 
+test("product commercial summary presentation centralizes labels, activity and empty history", () => {
+  const b = browser();
+  const presentation = b.context.getProductCommercialSummaryPresentation({ quantitySold: 2, revenue: 240, relatedDocuments: [{ _id: "invoice", type: "invoice", invoiceNumber: "FAC-1", paymentStatus: "paid", createdAt: "2026-01-01", totalTTC: 120 }], lastDocument: { type: "invoice", invoiceNumber: "FAC-1", createdAt: "2026-01-01" } });
+  assert.deepEqual(plain(presentation), {
+    quantityLabel: "2 unités", revenueLabel: b.context.formatProductCurrency(240), lastDocumentLabel: "Facture · FAC-1",
+    lastDocumentDateLabel: b.read("new Date('2026-01-01').toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })"),
+    history: { countLabel: "1 document", emptyMessage: "Aucun document commercial ne contient encore ce produit.", items: [plain(b.context.getProductDocumentPresentation({ _id: "invoice", type: "invoice", invoiceNumber: "FAC-1", paymentStatus: "paid", createdAt: "2026-01-01", totalTTC: 120 }))] }
+  });
+  assert.deepEqual(plain(b.context.getProductCommercialSummaryPresentation({ unavailable: true })), { quantityLabel: "Indisponible", revenueLabel: "Indisponible", lastDocumentLabel: "Activité indisponible", lastDocumentDateLabel: "Réessayez dans quelques instants", history: { countLabel: "0 document", emptyMessage: "Aucun document commercial ne contient encore ce produit.", items: [] } });
+});
+
 test("restock rejects non-positive and fractional quantities", async () => {
   const b = browser();
   b.read('restockingProductId = "product"');

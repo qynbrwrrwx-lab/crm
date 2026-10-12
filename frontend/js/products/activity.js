@@ -31,6 +31,43 @@ async function getProductCommercialSummary(productId) {
   }
 }
 
+function getProductDocumentHistoryPresentation(documents) {
+  return {
+    countLabel: `${documents.length} document${documents.length > 1 ? "s" : ""}`,
+    emptyMessage: "Aucun document commercial ne contient encore ce produit.",
+    items: documents.slice(0, 5).map(getProductDocumentPresentation)
+  };
+}
+
+function getProductCommercialSummaryPresentation(summary) {
+  if (summary.unavailable) {
+    return {
+      quantityLabel: "Indisponible",
+      revenueLabel: "Indisponible",
+      lastDocumentLabel: "Activité indisponible",
+      lastDocumentDateLabel: "Réessayez dans quelques instants",
+      history: getProductDocumentHistoryPresentation([])
+    };
+  }
+  const latestDocument = summary.lastDocument;
+  if (!latestDocument) {
+    return {
+      quantityLabel: `${summary.quantitySold} unité${summary.quantitySold > 1 ? "s" : ""}`,
+      revenueLabel: formatProductCurrency(summary.revenue),
+      lastDocumentLabel: "Aucun document",
+      lastDocumentDateLabel: "Ce produit n’a pas encore été utilisé",
+      history: getProductDocumentHistoryPresentation(summary.relatedDocuments)
+    };
+  }
+  return {
+    quantityLabel: `${summary.quantitySold} unité${summary.quantitySold > 1 ? "s" : ""}`,
+    revenueLabel: formatProductCurrency(summary.revenue),
+    lastDocumentLabel: `${productDocumentLabels[latestDocument.type] || "Document"} · ${latestDocument.invoiceNumber || "Sans numéro"}`,
+    lastDocumentDateLabel: new Date(latestDocument.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }),
+    history: getProductDocumentHistoryPresentation(summary.relatedDocuments)
+  };
+}
+
 function renderProductCommercialSummary(summary) {
   const quantity = document.getElementById("productSoldQuantity");
   const revenue = document.getElementById("productRevenue");
@@ -38,45 +75,30 @@ function renderProductCommercialSummary(summary) {
   const lastDocumentDate = document.getElementById("productLastDocumentDate");
   if (!quantity || !revenue || !lastDocument || !lastDocumentDate) return;
 
-  if (summary.unavailable) {
-    quantity.textContent = "Indisponible";
-    revenue.textContent = "Indisponible";
-    lastDocument.textContent = "Activité indisponible";
-    lastDocumentDate.textContent = "Réessayez dans quelques instants";
-    renderProductDocumentHistory([]);
-    return;
-  }
-
-  quantity.textContent = `${summary.quantitySold} unité${summary.quantitySold > 1 ? "s" : ""}`;
-  revenue.textContent = formatProductCurrency(summary.revenue);
-  renderProductDocumentHistory(summary.relatedDocuments);
-
-  const latestDocument = summary.lastDocument;
-  if (!latestDocument) {
-    lastDocument.textContent = "Aucun document";
-    lastDocumentDate.textContent = "Ce produit n’a pas encore été utilisé";
-    return;
-  }
-
-  lastDocument.textContent = `${productDocumentLabels[latestDocument.type] || "Document"} · ${latestDocument.invoiceNumber || "Sans numéro"}`;
-  lastDocumentDate.textContent = new Date(latestDocument.createdAt).toLocaleDateString("fr-FR", {
-    day: "2-digit", month: "long", year: "numeric"
-  });
+  const presentation = getProductCommercialSummaryPresentation(summary);
+  quantity.textContent = presentation.quantityLabel;
+  revenue.textContent = presentation.revenueLabel;
+  lastDocument.textContent = presentation.lastDocumentLabel;
+  lastDocumentDate.textContent = presentation.lastDocumentDateLabel;
+  renderProductDocumentHistoryPresentation(presentation.history);
 }
 
 function renderProductDocumentHistory(documents) {
+  renderProductDocumentHistoryPresentation(getProductDocumentHistoryPresentation(documents));
+}
+
+function renderProductDocumentHistoryPresentation(presentation) {
   const count = document.getElementById("productDocumentCount");
   const list = document.getElementById("productDocumentHistory");
   if (!count || !list) return;
 
-  count.textContent = `${documents.length} document${documents.length > 1 ? "s" : ""}`;
-  if (!documents.length) {
-    list.innerHTML = '<p class="empty-state">Aucun document commercial ne contient encore ce produit.</p>';
+  count.textContent = presentation.countLabel;
+  if (!presentation.items.length) {
+    list.innerHTML = `<p class="empty-state">${presentation.emptyMessage}</p>`;
     return;
   }
 
-  list.innerHTML = documents.slice(0, 5).map(document => {
-    const item = getProductDocumentPresentation(document);
+  list.innerHTML = presentation.items.map(item => {
     return `<button type="button" class="product-document-row" onclick="closeRestockModal(); openInvoice('${item.id}')">
       <span class="product-document-type">${item.typeLabel}</span>
       <span class="product-document-main"><strong>${escapeHtml(item.number)}</strong><small>${item.dateLabel} · ${item.paymentLabel}</small></span>
