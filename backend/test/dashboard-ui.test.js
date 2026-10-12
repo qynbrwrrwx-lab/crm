@@ -164,6 +164,18 @@ test('recent activity list presentation centralizes sorting, limits and empty st
   assert.equal(presentation.emptyMessage, 'Aucune activité commerciale pour le moment.');
   assert.deepEqual(JSON.parse(JSON.stringify(b.context.getRecentActivityListPresentation([]))), { emptyMessage: 'Aucune activité commerciale pour le moment.', items: [] });
 });
+test('commercial insights presentation centralizes revenue detail, comparison and best sellers', () => {
+  const b = browser();
+  const now = new b.context.Date('2026-09-15T12:00:00Z');
+  const documents = [{ type: 'order', products: [{ productName: 'Service', quantity: 2 }] }];
+  const paidInvoices = [{ totalTTC: 120, paidAt: '2026-09-10' }, { totalTTC: 60, paidAt: '2026-08-10' }];
+  const presentation = b.context.getCommercialInsightsPresentation(documents, paidInvoices, now);
+  assert.equal(presentation.monthlyRevenueLabel, b.context.formatCurrency(120));
+  assert.equal(presentation.revenueDetail, '1 facture réglée ce mois-ci.');
+  assert.deepEqual(JSON.parse(JSON.stringify(presentation.revenueComparison)), { text: '+100 % vs le mois précédent', className: 'revenue-comparison positive' });
+  assert.deepEqual(JSON.parse(JSON.stringify(presentation.bestSellers)), [{ rank: 1, name: 'Service', quantityLabel: '2 unités' }]);
+  assert.equal(b.context.getCommercialInsightsPresentation([], [], now).bestSellersEmptyMessage, 'Pas encore de vente enregistrée.');
+});
 test('electronic invoicing alert preserves configuration and ready-document navigation', async () => {
   const b = browser(); b.context.apiFetch = async url => { assert.equal(url, '/api/electronic-invoicing/status'); return { enabled: false }; };
   await b.context.updateElectronicInvoicingAlert([]); b.node('dashboardElectronicAlertButton').onclick(); assert.deepEqual(b.calls, ['company']);

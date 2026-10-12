@@ -108,33 +108,42 @@ function getBestSellerPresentations(documents) {
   }));
 }
 
+function getCommercialInsightsPresentation(documents, paidInvoices, now = new Date()) {
+  const { monthlyRevenue, invoiceCount, previousRevenue } = getMonthlyRevenueInsight(paidInvoices, now);
+  return {
+    monthlyRevenueLabel: formatCurrency(monthlyRevenue),
+    revenueDetail: invoiceCount
+      ? `${invoiceCount} facture${invoiceCount > 1 ? "s" : ""} réglée${invoiceCount > 1 ? "s" : ""} ce mois-ci.`
+      : "Aucune facture réglée ce mois-ci.",
+    revenueComparison: getRevenueComparison(monthlyRevenue, previousRevenue),
+    bestSellers: getBestSellerPresentations(documents),
+    bestSellersEmptyMessage: "Pas encore de vente enregistrée."
+  };
+}
+
 function updateCommercialInsights(documents, paidInvoices) {
-  const { monthlyRevenue, invoiceCount, previousRevenue } = getMonthlyRevenueInsight(paidInvoices);
+  const presentation = getCommercialInsightsPresentation(documents, paidInvoices);
   const revenue = document.getElementById("dashboardMonthlyRevenue");
   const revenueDetail = document.getElementById("dashboardMonthlyRevenueDetail");
-  if (revenue) revenue.textContent = formatCurrency(monthlyRevenue);
-  if (revenueDetail) revenueDetail.textContent = invoiceCount
-    ? `${invoiceCount} facture${invoiceCount > 1 ? "s" : ""} réglée${invoiceCount > 1 ? "s" : ""} ce mois-ci.`
-    : "Aucune facture réglée ce mois-ci.";
+  if (revenue) revenue.textContent = presentation.monthlyRevenueLabel;
+  if (revenueDetail) revenueDetail.textContent = presentation.revenueDetail;
   const comparison = document.getElementById("dashboardRevenueComparison");
   if (comparison) {
-    const revenueComparison = getRevenueComparison(monthlyRevenue, previousRevenue);
-    comparison.textContent = revenueComparison.text;
-    comparison.className = revenueComparison.className;
+    comparison.textContent = presentation.revenueComparison.text;
+    comparison.className = presentation.revenueComparison.className;
   }
   dashboardPaidInvoices = paidInvoices;
   refreshDashboardPerformance();
 
-  const bestSellers = getBestSellerPresentations(documents);
   const container = document.getElementById("dashboardBestSellers");
   if (!container) return;
-  container.innerHTML = bestSellers.length
-    ? bestSellers.map(item => `
+  container.innerHTML = presentation.bestSellers.length
+    ? presentation.bestSellers.map(item => `
         <div class="best-seller-row">
           <span class="best-seller-rank">${item.rank}</span>
           <strong>${escapeHtml(item.name)}</strong>
           <span>${item.quantityLabel}</span>
         </div>
       `).join("")
-    : '<p class="empty-state">Pas encore de vente enregistrée.</p>';
+    : `<p class="empty-state">${presentation.bestSellersEmptyMessage}</p>`;
 }
