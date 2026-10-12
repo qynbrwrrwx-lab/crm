@@ -1,5 +1,19 @@
 // Interactions et appels API du formulaire de tâches.
 
+function getTaskActionPresentation() {
+  return {
+    completionSuccessMessage: "Action marquée comme réalisée",
+    deletion: {
+      confirmation: {
+        title: "Supprimer l’action",
+        message: "Cette suppression est définitive.",
+        actionLabel: "Supprimer",
+        danger: true
+      }
+    }
+  };
+}
+
 function taskContacts() {
   const select = document.getElementById("taskContact");
   if (!select || typeof allContacts === "undefined") return;
@@ -78,9 +92,10 @@ async function saveTask(event) {
 }
 
 async function completeTask(id) {
+  const presentation = getTaskActionPresentation();
   try {
     await apiFetch(`/api/tasks/${id}/done`, { method: "PUT" });
-    showToast("Action marquée comme réalisée");
+    showToast(presentation.completionSuccessMessage);
     await loadTasks();
   } catch (error) {
     showToast(error.message);
@@ -88,12 +103,8 @@ async function completeTask(id) {
 }
 
 async function deleteTask(id) {
-  const confirmed = await confirmAppAction({
-    title: "Supprimer l’action",
-    message: "Cette suppression est définitive.",
-    actionLabel: "Supprimer",
-    danger: true
-  });
+  const presentation = getTaskActionPresentation();
+  const confirmed = await confirmAppAction(presentation.deletion.confirmation);
   if (!confirmed) return;
 
   try {
