@@ -1,5 +1,21 @@
 // expenses : budgets.
 
+function getExpenseBudgetActionPresentation() {
+  return {
+    invalidMessage: "Saisissez un budget mensuel valide",
+    savedMessage: "Budget mensuel enregistré",
+    deletion: {
+      confirmation: {
+        title: "Retirer le budget",
+        message: "Le suivi de cette catégorie sera retiré.",
+        actionLabel: "Retirer",
+        danger: true
+      },
+      successMessage: "Budget retiré"
+    }
+  };
+}
+
 function currentMonthPaidByCategory(category) {
   const now = new Date();
   return allExpenses
@@ -64,21 +80,23 @@ async function loadExpenseBudgets() {
 
 async function saveExpenseBudget(event) {
   event.preventDefault();
+  const presentation = getExpenseBudgetActionPresentation();
   const category = document.getElementById("expenseBudgetCategory")?.value;
   const monthlyAmount = Number(document.getElementById("expenseBudgetAmount")?.value);
-  if (!category || !Number.isFinite(monthlyAmount) || monthlyAmount < 0) return showToast("Saisissez un budget mensuel valide");
+  if (!category || !Number.isFinite(monthlyAmount) || monthlyAmount < 0) return showToast(presentation.invalidMessage);
   try {
     await apiFetch(`/api/expense-budgets/${encodeURIComponent(category)}`, { method: "PUT", body: JSON.stringify({ monthlyAmount }) });
     document.getElementById("expenseBudgetAmount").value = "";
-    showToast("Budget mensuel enregistré");
+    showToast(presentation.savedMessage);
     await loadExpenseBudgets();
   } catch (error) { showToast(error.message || "Impossible d'enregistrer le budget"); }
 }
 
 async function deleteExpenseBudget(category) {
-  const confirmed = await confirmAppAction({ title: "Retirer le budget", message: "Le suivi de cette catégorie sera retiré.", actionLabel: "Retirer", danger: true });
+  const presentation = getExpenseBudgetActionPresentation().deletion;
+  const confirmed = await confirmAppAction(presentation.confirmation);
   if (!confirmed) return;
-  try { await apiFetch(`/api/expense-budgets/${category}`, { method: "DELETE" }); showToast("Budget retiré"); await loadExpenseBudgets(); } catch (error) { showToast(error.message || "Impossible de retirer le budget"); }
+  try { await apiFetch(`/api/expense-budgets/${category}`, { method: "DELETE" }); showToast(presentation.successMessage); await loadExpenseBudgets(); } catch (error) { showToast(error.message || "Impossible de retirer le budget"); }
 }
 
 function getExpenseCategoryBreakdownPresentation(paidExpenses) {

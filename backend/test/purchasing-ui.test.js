@@ -60,6 +60,9 @@ test('payment reports recurring follow-up and cancelled payment or deletion make
 test('expense action presentations centralize confirmations and success feedback',()=>{
  const b=browser();assert.deepEqual(JSON.parse(JSON.stringify(b.context.getExpensePaymentPresentation())),{confirmation:{title:'Confirmer le règlement',message:'Cette dépense sera marquée comme réglée.',actionLabel:'Marquer réglée'},successMessage:'Dépense marquée comme réglée'});assert.equal(b.context.getExpensePaymentPresentation(true).successMessage,'Dépense réglée · prochaine échéance créée');assert.deepEqual(JSON.parse(JSON.stringify(b.context.getExpenseDeletionPresentation())),{confirmation:{title:'Supprimer la dépense',message:'Cette suppression est définitive.',actionLabel:'Supprimer',danger:true},successMessage:'Dépense supprimée'});
 });
+test('expense budget action presentation centralizes validation and deletion feedback',()=>{
+ const b=browser();assert.deepEqual(JSON.parse(JSON.stringify(b.context.getExpenseBudgetActionPresentation())),{invalidMessage:'Saisissez un budget mensuel valide',savedMessage:'Budget mensuel enregistré',deletion:{confirmation:{title:'Retirer le budget',message:'Le suivi de cette catégorie sera retiré.',actionLabel:'Retirer',danger:true},successMessage:'Budget retiré'}});
+});
 test('monthly budget counts only settled current-month expenses and marks overspending',()=>{
  const b=browser();b.set('allExpenses',[expense({status:'paid',amountTTC:120,paidAt:'2026-09-05'}),expense({status:'paid',amountTTC:500,paidAt:'2026-08-05'}),expense({amountTTC:999})]);b.set('allExpenseBudgets',[{category:'Autres',monthlyAmount:100}]);
  assert.equal(b.context.currentMonthPaidByCategory('Autres'),120);b.context.renderExpenseBudgets();assert.match(b.node('expenseBudgetsList').innerHTML,/expense-budget-row over/);assert.match(b.node('expenseBudgetsList').innerHTML,/width:100%/);assert.match(b.node('expenseBudgetsList').innerHTML,/120 %/);
