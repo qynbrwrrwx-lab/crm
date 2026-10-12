@@ -122,6 +122,10 @@ test('receiving a purchase order requires confirmation and refreshes stock only 
 test('cancelled restock email makes no request',async()=>{
  const b=browser();b.set('allSuppliers',[supplier]);b.context.confirmAppAction=async()=>false;await b.context.sendRestockRequest('s');assert.equal(b.calls.length,0);
 });
+test('restock request presentation centralizes confirmation and product label',()=>{
+ const b=browser();assert.deepEqual(JSON.parse(JSON.stringify(b.context.getRestockRequestPresentation(supplier,1))),{confirmation:{title:'Envoyer la demande de réassort',message:'Envoyer par e-mail la liste des produits à réassortir à Acme ?',actionLabel:'Envoyer'},successMessage:'Demande de réassort envoyée pour 1 produit.'});assert.equal(b.context.getRestockRequestPresentation(supplier,2).successMessage,'Demande de réassort envoyée pour 2 produits.');
+});
+
 test('purchase order print escapes supplier and document names as well as lines',()=>{
  const b=browser();b.context.purchaseOrders=[{_id:'o',number:'<numero>',supplierId:{name:'<fournisseur>'},lines:[{name:'<article>',reference:'<ref>',quantity:2}]}];b.context.printPurchaseOrder('o');
  const output=b.printed();for(const name of ['numero','fournisseur','article','ref']){assert.ok(output.includes(`&lt;${name}&gt;`));assert.ok(!output.includes(`<${name}>`));}
