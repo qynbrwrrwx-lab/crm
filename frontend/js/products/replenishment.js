@@ -41,6 +41,25 @@ function escapeRestockText(value) {
   return String(value || "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
 }
 
+function getRestockOrderPresentation(products, dateLabel) {
+  return groupRestockProductsBySupplier(products).map(([supplier, supplierProducts], index) => ({
+    number: `BC-R${String(index + 1).padStart(3, "0")}`,
+    supplier: escapeRestockText(supplier),
+    dateLabel,
+    products: supplierProducts.map(product => ({
+      name: escapeRestockText(product.name),
+      reference: escapeRestockText(product.reference || "—"),
+      supplierReference: escapeRestockText(product.supplierReference || "—"),
+      stock: Number(product.stock || 0),
+      suggestedQuantity: getSuggestedRestockQuantity(product)
+    }))
+  }));
+}
+
+function renderRestockOrderSections(orders) {
+  return orders.map(order => `<section class="order"><header><div><small>MY PROSPECT · RÉASSORT</small><h1>Bon de commande fournisseur</h1><p>Document préparatoire · ${order.dateLabel}</p></div><strong>${order.number}</strong></header><h2>${order.supplier}</h2><table><thead><tr><th>Produit</th><th>Référence</th><th>Réf. fournisseur</th><th>Stock</th><th>À commander</th></tr></thead><tbody>${order.products.map(product => `<tr><td>${product.name}</td><td>${product.reference}</td><td>${product.supplierReference}</td><td>${product.stock}</td><td><b>${product.suggestedQuantity}</b></td></tr>`).join("")}</tbody></table><footer>Quantités suggérées pour revenir à deux fois le seuil d’alerte. Les tarifs ne sont volontairement pas affichés.</footer></section>`).join("");
+}
+
 function ensureRestockExportAction() {
   const heading = document.getElementById("productsFilter")?.closest(".list-toolbar-card")?.querySelector(".list-toolbar-heading");
   if (!heading || document.getElementById("exportRestockSuggestionsButton")) return;
@@ -71,7 +90,8 @@ function exportRestockSuggestionsCsv() {
 function prepareRestockOrders() {
   const urgent = getUrgentRestockProducts(allProducts);
   if (!urgent.length) return showToast("Aucun réassort n’est nécessaire selon les seuils définis.");
-  const sections = groupRestockProductsBySupplier(allProducts).map(([supplier, products], index) => `<section class="order"><header><div><small>MY PROSPECT · RÉASSORT</small><h1>Bon de commande fournisseur</h1><p>Document préparatoire · ${new Date().toLocaleDateString("fr-FR")}</p></div><strong>BC-R${String(index + 1).padStart(3, "0")}</strong></header><h2>${escapeRestockText(supplier)}</h2><table><thead><tr><th>Produit</th><th>Référence</th><th>Réf. fournisseur</th><th>Stock</th><th>À commander</th></tr></thead><tbody>${products.map(product => `<tr><td>${escapeRestockText(product.name)}</td><td>${escapeRestockText(product.reference || "—")}</td><td>${escapeRestockText(product.supplierReference || "—")}</td><td>${Number(product.stock || 0)}</td><td><b>${getSuggestedRestockQuantity(product)}</b></td></tr>`).join("")}</tbody></table><footer>Quantités suggérées pour revenir à deux fois le seuil d’alerte. Les tarifs ne sont volontairement pas affichés.</footer></section>`).join("");
+  const orders = getRestockOrderPresentation(allProducts, new Date().toLocaleDateString("fr-FR"));
+  const sections = renderRestockOrderSections(orders);
   const page = window.open("", "_blank", "noopener,noreferrer");
   if (!page) return showToast("Autorisez les fenêtres contextuelles pour préparer les commandes.");
   page.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Bons de commande · My Prospect</title><style>body{font-family:Arial,sans-serif;color:#172033;margin:32px}.order{page-break-after:always;margin-bottom:48px}header{display:flex;justify-content:space-between;border-bottom:2px solid #2563eb;padding-bottom:18px}small{color:#2563eb;font-weight:bold;letter-spacing:.08em}h1{margin:8px 0;font-size:24px}h2{margin:26px 0 14px}p,footer{color:#64748b;font-size:13px}header strong{color:#2563eb}table{width:100%;border-collapse:collapse}th,td{padding:11px;border-bottom:1px solid #dbe3ef;text-align:left}th{background:#eff6ff;color:#1e3a8a;font-size:12px;text-transform:uppercase}td:last-child,th:last-child{text-align:right}@media print{body{margin:16px}.order{break-after:page}}</style></head><body>${sections}<script>window.onload=()=>window.print();<\/script></body></html>`);

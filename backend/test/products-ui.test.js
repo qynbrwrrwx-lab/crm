@@ -261,6 +261,13 @@ test("restock helpers centralize urgent selection and supplier grouping without 
   assert.equal(products[0]._id, "low");
 });
 
+test("restock order presentation centralizes supplier documents and escaped product details", () => {
+  const b = browser();
+  const orders = b.context.getRestockOrderPresentation([product({ stock: 2, name: "<Article>", supplierName: "Alpha", reference: "A-1", supplierReference: "F-1" })], "15/09/2026");
+  assert.deepEqual(plain(orders), [{ number: "BC-R001", supplier: "Alpha", dateLabel: "15/09/2026", products: [{ name: "&lt;Article&gt;", reference: "A-1", supplierReference: "F-1", stock: 2, suggestedQuantity: 8 }] }]);
+  assert.match(b.context.renderRestockOrderSections(orders), /BC-R001/);
+});
+
 test("cancelled product deletion and CSV import make no request", async () => {
   const b = browser();
   b.context.confirmAppAction = async () => false;
