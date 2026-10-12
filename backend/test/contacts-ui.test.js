@@ -283,6 +283,14 @@ test("map popups escape contact names when loading shared contacts", async () =>
   assert.equal(b.read("allContacts.length"), 1);
 });
 
+test("map marker presentation centralizes coordinates and the contact label", () => {
+  const b = browser();
+  assert.deepEqual(plain(b.context.getContactMapMarkerPresentation(contact({ firstname: "Marie", lastname: "Curie", lat: 48, lng: 2 }))), {
+    coordinates: [48, 2], name: "Marie Curie"
+  });
+  assert.equal(b.context.getContactMapMarkerPresentation(contact({ lat: null, lng: 2 })), null);
+});
+
 test("contact filter status presentation centralizes count and reset visibility", () => {
   const b = browser();
   const inactive = b.context.getContactFilterStatusPresentation([contact()], { query: "", sort: "recent", followUpFilter: "all", tagFilter: "all" });

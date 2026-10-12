@@ -54,10 +54,18 @@ function renderContactMap(contacts) {
   markers.forEach(marker => map.removeLayer(marker));
   markers = [];
   contacts.forEach(contact => {
-    if (!contact.lat || !contact.lng) return;
-    const name = `${escapeHtml(contact.firstname || "")} ${escapeHtml(contact.lastname || "")}`;
-    markers.push(L.marker([contact.lat, contact.lng]).addTo(map).bindPopup(`<b>${name}</b>`));
+    const marker = getContactMapMarkerPresentation(contact);
+    if (!marker) return;
+    markers.push(L.marker(marker.coordinates).addTo(map).bindPopup(`<b>${escapeHtml(marker.name)}</b>`));
   });
+}
+
+function getContactMapMarkerPresentation(contact) {
+  if (!contact.lat || !contact.lng) return null;
+  return {
+    coordinates: [contact.lat, contact.lng],
+    name: `${contact.firstname || ""} ${contact.lastname || ""}`
+  };
 }
 
 async function loadContacts() {
