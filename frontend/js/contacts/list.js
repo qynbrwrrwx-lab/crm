@@ -21,6 +21,7 @@ function renderContactFollowUp(followUp) {
 
 function getContactCardPresentation(contact) {
   return {
+    id: contact._id,
     fullName: `${contact.firstname || ""} ${contact.lastname || ""}`.trim(),
     companyName: contact.companyName || "Client particulier",
     email: contact.email || "E-mail non renseigne",
@@ -32,20 +33,31 @@ function getContactCardPresentation(contact) {
   };
 }
 
-function renderContactCard(contact) {
-  const presentation = getContactCardPresentation(contact);
+function getContactListPresentation(contacts) {
+  return {
+    emptyMessage: "Aucun contact ne correspond à votre recherche.",
+    cards: contacts.map(getContactCardPresentation)
+  };
+}
+
+function renderContactCardPresentation(presentation) {
   const favorite = presentation.favorite ? '<span class="client-favorite">Favori</span>' : "";
   const tags = renderContactTags(presentation.tags);
-  return `<article class="client client-card"><div class="client-info"><div class="client-name-row"><strong>${escapeHtml(presentation.fullName)}</strong>${favorite}</div><div class="client-meta"><span>${escapeHtml(presentation.companyName)}</span><span>${escapeHtml(presentation.email)}</span><span>${escapeHtml(presentation.phone)}</span><span>${escapeHtml(presentation.billingAddress)}</span></div>${tags}${renderContactFollowUp(presentation.followUp)}</div><div class="client-actions"><button class="client-action-btn client-view-btn" onclick="openClientProfile('${contact._id}')">Voir la fiche</button><button class="client-action-btn client-favorite-btn ${presentation.favorite ? "is-favorite" : ""}" onclick="toggleFavorite('${contact._id}')">Favori</button><button class="client-action-btn" onclick="editContact('${contact._id}')">Modifier</button><button class="client-action-btn client-delete-btn" onclick="deleteContact('${contact._id}')">Supprimer</button></div></article>`;
+  return `<article class="client client-card"><div class="client-info"><div class="client-name-row"><strong>${escapeHtml(presentation.fullName)}</strong>${favorite}</div><div class="client-meta"><span>${escapeHtml(presentation.companyName)}</span><span>${escapeHtml(presentation.email)}</span><span>${escapeHtml(presentation.phone)}</span><span>${escapeHtml(presentation.billingAddress)}</span></div>${tags}${renderContactFollowUp(presentation.followUp)}</div><div class="client-actions"><button class="client-action-btn client-view-btn" onclick="openClientProfile('${presentation.id}')">Voir la fiche</button><button class="client-action-btn client-favorite-btn ${presentation.favorite ? "is-favorite" : ""}" onclick="toggleFavorite('${presentation.id}')">Favori</button><button class="client-action-btn" onclick="editContact('${presentation.id}')">Modifier</button><button class="client-action-btn client-delete-btn" onclick="deleteContact('${presentation.id}')">Supprimer</button></div></article>`;
+}
+
+function renderContactCard(contact) {
+  return renderContactCardPresentation(getContactCardPresentation(contact));
 }
 
 function renderContacts(contacts) {
   const list = document.getElementById("list");
   if (!list) return;
 
-  list.innerHTML = contacts.length
-    ? contacts.map(renderContactCard).join("")
-    : '<p class="empty-state">Aucun contact ne correspond à votre recherche.</p>';
+  const presentation = getContactListPresentation(contacts);
+  list.innerHTML = presentation.cards.length
+    ? presentation.cards.map(renderContactCardPresentation).join("")
+    : `<p class="empty-state">${presentation.emptyMessage}</p>`;
 }
 
 function renderContactMap(contacts) {

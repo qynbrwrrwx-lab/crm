@@ -73,6 +73,15 @@ test("contact card presentation centralizes defaults and follow-up data", () => 
   assert.equal(presentation.followUp.overdue, true);
 });
 
+test("contact list presentation centralizes cards and the empty state", () => {
+  const b = browser();
+  const presentation = b.context.getContactListPresentation([contact({ _id: "client", firstname: "Marie", lastname: "Curie" })]);
+  assert.equal(presentation.cards[0].id, "client");
+  assert.equal(presentation.cards[0].fullName, "Marie Curie");
+  assert.equal(presentation.emptyMessage, "Aucun contact ne correspond à votre recherche.");
+  assert.deepEqual(plain(b.context.getContactListPresentation([])), { emptyMessage: "Aucun contact ne correspond à votre recherche.", cards: [] });
+});
+
 test("contact search combines text and due follow-ups without changing the shared list", () => {
   const b = browser();
   b.context.fixtures = [contact({ _id: "due", tags: ["VIP"], nextFollowUpAt: "2000-01-01" }), contact({ _id: "future", tags: ["VIP"], nextFollowUpAt: "2099-01-01" }), contact({ _id: "other", lastname: "Durand" })];
