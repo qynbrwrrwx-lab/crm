@@ -49,6 +49,9 @@ test('reconciliation matches remaining invoice amounts and unpaid expenses and e
 test('reconciliation presentation centralizes imported entry and target labels',()=>{
  const b=browser(),suggestion={kind:'invoice',id:'i',entry:{type:'income',label:'Virement',amount:'60',date:'2026-10-01'},target:'Facture F-1',detail:'Client'};assert.equal(JSON.stringify(b.ctx.getTreasuryReconciliationPresentation(suggestion)),JSON.stringify({kind:'invoice',id:'i',entryTypeLabel:'Encaissement importé',entryLabel:'Virement',entryAmountLabel:b.ctx.treasuryMoney(60),entryDateLabel:b.read("treasuryDate('2026-10-01')"),amount:60,target:'Facture F-1',detail:'Client'}));assert.equal(b.ctx.getTreasuryReconciliationPresentation({...suggestion,kind:'expense',entry:{...suggestion.entry,type:'expense'}}).entryTypeLabel,'Débit importé');
 });
+test('reconciliation action presentation centralizes confirmation and result feedback',()=>{
+ const b=browser();assert.deepEqual(JSON.parse(JSON.stringify(b.ctx.getTreasuryReconciliationActionPresentation('invoice'))),{confirmation:{title:'Valider le rapprochement',message:'Cette action enregistrera ce montant comme un virement reçu. Vérifiez le document avant de confirmer.',actionLabel:'Valider'},successMessage:'Paiement de facture enregistré'});assert.equal(b.ctx.getTreasuryReconciliationActionPresentation('expense').successMessage,'Dépense marquée comme réglée');
+});
 test('reconciliation cancellation sends nothing and confirmed invoice uses the payment contract',async()=>{
  const b=browser();b.ctx.loadTreasury=async()=>{};b.ctx.confirmAppAction=async()=>false;await b.ctx.confirmTreasurySuggestion('invoice','i',60);assert.equal(b.calls.length,0);b.ctx.confirmAppAction=async()=>true;await b.ctx.confirmTreasurySuggestion('invoice','i',60);assert.equal(b.calls[0][0],'/api/invoices/pay/i');assert.equal(b.calls[0][1].method,'PUT');assert.deepEqual(JSON.parse(b.calls[0][1].body),{paymentMethod:'Virement bancaire',amount:60});
 });

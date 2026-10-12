@@ -38,14 +38,26 @@ function openTreasurySuggestion(kind, id) {
   if (search && expense) { search.value = expense.label; renderExpenses(); }
 }
 
+function getTreasuryReconciliationActionPresentation(kind) {
+  const isInvoice = kind === "invoice";
+  return {
+    confirmation: {
+      title: "Valider le rapprochement",
+      message: `Cette action ${isInvoice ? "enregistrera ce montant comme un virement reçu" : "marquera cette dépense comme réglée"}. Vérifiez le document avant de confirmer.`,
+      actionLabel: "Valider"
+    },
+    successMessage: isInvoice ? "Paiement de facture enregistré" : "Dépense marquée comme réglée"
+  };
+}
+
 async function confirmTreasurySuggestion(kind, id, amount) {
-  const action = kind === "invoice" ? "enregistrera ce montant comme un virement reçu" : "marquera cette dépense comme réglée";
-  const confirmed = await confirmAppAction({ title: "Valider le rapprochement", message: `Cette action ${action}. Vérifiez le document avant de confirmer.`, actionLabel: "Valider" });
+  const presentation = getTreasuryReconciliationActionPresentation(kind);
+  const confirmed = await confirmAppAction(presentation.confirmation);
   if (!confirmed) return;
   try {
     if (kind === "invoice") await apiFetch(`/api/invoices/pay/${id}`, { method: "PUT", body: JSON.stringify({ paymentMethod: "Virement bancaire", amount }) });
     else await apiFetch(`/api/expenses/${id}/pay`, { method: "PUT" });
-    showToast(kind === "invoice" ? "Paiement de facture enregistré" : "Dépense marquée comme réglée");
+    showToast(presentation.successMessage);
     await Promise.all([loadInvoices(), loadExpenses(), loadTreasury()]);
   } catch (error) { showToast(error.message || "Impossible de valider ce rapprochement"); }
 }
