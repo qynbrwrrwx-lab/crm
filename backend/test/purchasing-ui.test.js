@@ -126,6 +126,10 @@ test('restock request presentation centralizes confirmation and product label',(
  const b=browser();assert.deepEqual(JSON.parse(JSON.stringify(b.context.getRestockRequestPresentation(supplier,1))),{confirmation:{title:'Envoyer la demande de réassort',message:'Envoyer par e-mail la liste des produits à réassortir à Acme ?',actionLabel:'Envoyer'},successMessage:'Demande de réassort envoyée pour 1 produit.'});assert.equal(b.context.getRestockRequestPresentation(supplier,2).successMessage,'Demande de réassort envoyée pour 2 produits.');
 });
 
+test('supplier deletion presentation centralizes confirmation and success feedback',()=>{
+ const b=browser();assert.deepEqual(JSON.parse(JSON.stringify(b.context.getSupplierDeletionPresentation())),{confirmation:{title:'Supprimer le fournisseur',message:'Cette suppression est définitive.',actionLabel:'Supprimer',danger:true},successMessage:'Fournisseur supprimé'});
+});
+
 test('purchase order print escapes supplier and document names as well as lines',()=>{
  const b=browser();b.context.purchaseOrders=[{_id:'o',number:'<numero>',supplierId:{name:'<fournisseur>'},lines:[{name:'<article>',reference:'<ref>',quantity:2}]}];b.context.printPurchaseOrder('o');
  const output=b.printed();for(const name of ['numero','fournisseur','article','ref']){assert.ok(output.includes(`&lt;${name}&gt;`));assert.ok(!output.includes(`<${name}>`));}

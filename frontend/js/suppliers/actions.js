@@ -12,6 +12,18 @@ function getRestockRequestPresentation(supplier, productCount) {
   };
 }
 
+function getSupplierDeletionPresentation() {
+  return {
+    confirmation: {
+      title: "Supprimer le fournisseur",
+      message: "Cette suppression est définitive.",
+      actionLabel: "Supprimer",
+      danger: true
+    },
+    successMessage: "Fournisseur supprimé"
+  };
+}
+
 async function sendRestockRequest(id) {
   const supplier = allSuppliers.find(item => item._id === id);
   if (!supplier) return;
@@ -26,7 +38,8 @@ async function sendRestockRequest(id) {
 }
 
 async function deleteSupplier(id) {
-  const confirmed = await confirmAppAction({ title: "Supprimer le fournisseur", message: "Cette suppression est définitive.", actionLabel: "Supprimer", danger: true });
+  const presentation = getSupplierDeletionPresentation();
+  const confirmed = await confirmAppAction(presentation.confirmation);
   if (!confirmed) return;
-  try { await apiFetch(`/api/suppliers/${id}`, { method: "DELETE" }); showToast("Fournisseur supprimé"); await loadSuppliers(); } catch (error) { showToast(error.message || "Impossible de supprimer le fournisseur"); }
+  try { await apiFetch(`/api/suppliers/${id}`, { method: "DELETE" }); showToast(presentation.successMessage); await loadSuppliers(); } catch (error) { showToast(error.message || "Impossible de supprimer le fournisseur"); }
 }
