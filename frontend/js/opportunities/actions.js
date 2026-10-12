@@ -1,5 +1,20 @@
 // Opportunités : actions entre le pipeline, l'agenda et les devis.
 
+function getOpportunityMovePresentation() {
+  return { successMessage: "Étape mise à jour" };
+}
+
+function getOpportunityDeletionPresentation() {
+  return {
+    confirmation: {
+      title: "Supprimer l’opportunité",
+      message: "Cette action est définitive.",
+      actionLabel: "Supprimer",
+      danger: true
+    }
+  };
+}
+
 function createOpportunityFollowUp(opportunity) {
   showSection("tasksSection");
   resetTaskForm();
@@ -17,12 +32,13 @@ function createOpportunityFollowUp(opportunity) {
 async function moveOpportunity(id, stage) {
   if (!stage) return;
 
+  const presentation = getOpportunityMovePresentation();
   try {
     await apiFetch(`/api/opportunities/${id}/stage`, {
       method: "PUT",
       body: JSON.stringify({ stage })
     });
-    showToast("Étape mise à jour");
+    showToast(presentation.successMessage);
     await loadOpportunities();
   } catch (error) {
     showToast(error.message);
@@ -49,12 +65,8 @@ async function createQuoteFromOpportunity(id) {
 }
 
 async function deleteOpportunity(id) {
-  const confirmed = await confirmAppAction({
-    title: "Supprimer l’opportunité",
-    message: "Cette action est définitive.",
-    actionLabel: "Supprimer",
-    danger: true
-  });
+  const presentation = getOpportunityDeletionPresentation();
+  const confirmed = await confirmAppAction(presentation.confirmation);
   if (!confirmed) return;
 
   try {
