@@ -38,13 +38,7 @@ function renderQuoteDetailActions(invoice, isEditingQuote) {
 function renderOrderDetailActions(invoice) {
   if (invoice.type !== "order") return "";
   const delivery = `<button class="secondary-btn" onclick="openDeliveryNote('${invoice._id}')">Bon de livraison</button><button class="secondary-btn" onclick="sendDeliveryNote('${invoice._id}')">Envoyer le bon</button>`;
-  const nextStep = invoice.fulfillmentStatus === "to_prepare"
-    ? { status: "prepared", label: "Marquer préparée" }
-    : invoice.fulfillmentStatus === "prepared"
-      ? { status: "shipped", label: "Marquer expédiée" }
-      : invoice.fulfillmentStatus === "delivered"
-        ? null
-        : { status: "delivered", label: "Marquer livrée" };
+  const nextStep = getOrderFulfillmentNextStepPresentation(invoice.fulfillmentStatus);
   const fulfillment = nextStep
     ? `<button class="secondary-btn" onclick="updateOrderFulfillment('${invoice._id}','${nextStep.status}')">${nextStep.label}</button>`
     : "";
@@ -52,6 +46,13 @@ function renderOrderDetailActions(invoice) {
     ? `<button class="primary-btn" data-document-action="order-to-invoice" data-document-id="${invoice._id}" onclick="convertOrderToInvoice('${invoice._id}')">Transformer en facture</button>`
     : "";
   return [delivery, fulfillment, conversion].join("");
+}
+
+function getOrderFulfillmentNextStepPresentation(status) {
+  if (status === "to_prepare") return { status: "prepared", label: "Marquer préparée" };
+  if (status === "prepared") return { status: "shipped", label: "Marquer expédiée" };
+  if (status === "delivered") return null;
+  return { status: "delivered", label: "Marquer livrée" };
 }
 
 function renderInvoicePaymentActions(invoice) {

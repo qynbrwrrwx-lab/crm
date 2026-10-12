@@ -585,6 +585,14 @@ test("detail actions keep each document workflow in its own action group", () =>
   assert.match(overdueInvoice, /openPaymentReminder\('document'\)/);
 });
 
+test("order fulfillment presentation centralizes the next operational action", () => {
+  const b = browser();
+  assert.deepEqual(plain(b.context.getOrderFulfillmentNextStepPresentation("to_prepare")), { status: "prepared", label: "Marquer préparée" });
+  assert.deepEqual(plain(b.context.getOrderFulfillmentNextStepPresentation("prepared")), { status: "shipped", label: "Marquer expédiée" });
+  assert.deepEqual(plain(b.context.getOrderFulfillmentNextStepPresentation("shipped")), { status: "delivered", label: "Marquer livrée" });
+  assert.equal(b.context.getOrderFulfillmentNextStepPresentation("delivered"), null);
+});
+
 test("detail action markup delegates layout styles to the commerce stylesheet", () => {
   const b = browser();
   const paidInvoice = documentFixture({ paymentStatus: "paid", paymentMethod: "Virement" });
