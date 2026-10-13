@@ -49,14 +49,22 @@ async function loadAccountActivity() {
   }
 }
 
+function getAccountDeletionPresentation() {
+  return {
+    confirmation: {
+      title: "Supprimer votre compte ?",
+      message: "Cette action supprimera définitivement votre compte et toutes vos données.",
+      actionLabel: "Supprimer mon compte",
+      danger: true,
+      passwordRequired: true
+    },
+    successMessage: "Compte supprimé"
+  };
+}
+
 async function deleteAccount() {
-  const password = await confirmAppAction({
-    title: "Supprimer votre compte ?",
-    message: "Cette action supprimera définitivement votre compte et toutes vos données.",
-    actionLabel: "Supprimer mon compte",
-    danger: true,
-    passwordRequired: true
-  });
+  const presentation = getAccountDeletionPresentation();
+  const password = await confirmAppAction(presentation.confirmation);
   if (!password) return;
 
   try {
@@ -65,7 +73,7 @@ async function deleteAccount() {
       body: JSON.stringify({ password })
     });
     localStorage.removeItem("token");
-    showToast("Compte supprimé");
+    showToast(presentation.successMessage);
     setTimeout(() => window.location.reload(), 800);
   } catch (err) {
     showToast(err.message || "Impossible de supprimer le compte");

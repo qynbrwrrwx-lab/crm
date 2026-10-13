@@ -171,6 +171,20 @@ test("cancelled account deletion makes no request and retains the session", asyn
   assert.equal(b.storage.get("token"), "session");
 });
 
+test("account deletion presentation centralizes confirmation and success feedback", () => {
+  const b = browser();
+  assert.deepEqual(JSON.parse(JSON.stringify(b.context.getAccountDeletionPresentation())), {
+    confirmation: {
+      title: "Supprimer votre compte ?",
+      message: "Cette action supprimera définitivement votre compte et toutes vos données.",
+      actionLabel: "Supprimer mon compte",
+      danger: true,
+      passwordRequired: true
+    },
+    successMessage: "Compte supprimé"
+  });
+});
+
 test("shared CSV parser preserves escaped quotes, semicolons and multiline cells", () => {
   const b = browser();
   const csv = '\uFEFFNom;Notes\r\n"Martin";"Ligne 1; \"\"texte\"\"\nLigne 2"\r\n';
