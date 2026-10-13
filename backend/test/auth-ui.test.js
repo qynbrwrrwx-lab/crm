@@ -16,7 +16,7 @@ function browser(pathname = "/") {
   for (const id of ["newPassword", "confirmNewPassword"]) elements.set(id, { value: "", type: "password", focus() {} });
   let shown = 0, loading = false;
   const context = vm.createContext({
-    document: { body: { innerHTML: "original-page" }, documentElement: { classList: { remove() {} } }, getElementById: id => elements.get(id) || null, querySelectorAll: () => [], querySelector: () => null },
+    document: { body: { innerHTML: "original-page" }, documentElement: { classList: { remove() {} } }, getElementById: id => elements.get(id) || null, querySelectorAll: () => [], querySelector: selector => selector === ".auth-password-toggle" ? elements.get("authPasswordToggle") : null },
     localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, String(value)), removeItem: key => storage.delete(key) },
     location: { pathname, href: "", reload() {} }, console: { error() {} },
     apiFetch: async (...args) => { calls.push(args); throw new Error("Unexpected API call"); },
@@ -161,6 +161,20 @@ test("password reset validates confirmation then posts to the token route", asyn
   await b.context.resetPassword();
   assert.deepEqual(sent, { url: "https://test.invalid/api/auth/reset-password/private-token", method: "POST", body: { password: "new-password-123" } });
   assert.equal(b.context.location.href, "/");
+});
+
+test("password toggle keeps its fixed icon control while updating the accessible state", () => {
+  const b = browser();
+  const password = b.elements.get("password");
+  const button = b.elements.get("authPasswordToggle");
+  button.setAttribute = (name, value) => { button[name] = value; };
+  b.context.toggleAuthPassword();
+  assert.equal(password.type, "text");
+  assert.equal(button["aria-label"], "Masquer le mot de passe");
+  assert.match(button.innerHTML, /<svg/);
+  b.context.toggleAuthPassword();
+  assert.equal(password.type, "password");
+  assert.equal(button["aria-label"], "Afficher le mot de passe");
 });
 
 test("cancelled account deletion makes no request and retains the session", async () => {
