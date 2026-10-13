@@ -70,14 +70,27 @@ function populateProductCategories(products) {
   }
 }
 
+function getProductDeletionPresentation() {
+  return {
+    confirmation: {
+      title: "Supprimer ce produit ?",
+      message: "Cette suppression est définitive. Les produits présents dans des documents restent protégés.",
+      actionLabel: "Supprimer le produit",
+      danger: true
+    },
+    successMessage: "Produit supprimé 🗑️"
+  };
+}
+
 async function deleteProduct(id) {
-  if (!await confirmAppAction({ title: "Supprimer ce produit ?", message: "Cette suppression est définitive. Les produits présents dans des documents restent protégés.", actionLabel: "Supprimer le produit", danger: true })) return;
+  const presentation = getProductDeletionPresentation();
+  if (!await confirmAppAction(presentation.confirmation)) return;
 
   try {
     await apiFetch(`/api/products/${id}`, { method: "DELETE" });
     await loadProducts();
     await loadInvoiceData();
-    showToast("Produit supprimé 🗑️");
+    showToast(presentation.successMessage);
   } catch (err) {
     showToast(err.message || "Impossible de supprimer ce produit");
   }

@@ -277,6 +277,26 @@ test("cancelled product deletion and CSV import make no request", async () => {
   assert.equal(b.calls.length, 0);
 });
 
+test("product action presentations centralize deletion and CSV import confirmations", () => {
+  const b = browser();
+  assert.deepEqual(plain(b.context.getProductDeletionPresentation()), {
+    confirmation: {
+      title: "Supprimer ce produit ?",
+      message: "Cette suppression est définitive. Les produits présents dans des documents restent protégés.",
+      actionLabel: "Supprimer le produit",
+      danger: true
+    },
+    successMessage: "Produit supprimé 🗑️"
+  });
+  assert.deepEqual(plain(b.context.getProductCsvImportPresentation(2)), {
+    confirmation: {
+      title: "Importer des produits ?",
+      message: "2 produit(s) valide(s) vont être ajouté(s) à votre catalogue.",
+      actionLabel: "Importer les produits"
+    }
+  });
+});
+
 test("product CSV import normalizes decimal commas and preserves zero VAT", async () => {
   const b = browser();
   b.context.readCsvImport = async () => [{ nom: "Article", "prix ht": "12,50", tva: "0", stock: "2", "seuil stock faible": "0" }];

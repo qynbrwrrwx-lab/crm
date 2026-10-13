@@ -20,13 +20,24 @@ function exportProductsCsv() {
   downloadCsvFile(lines, "produits");
 }
 
+function getProductCsvImportPresentation(validRowCount) {
+  return {
+    confirmation: {
+      title: "Importer des produits ?",
+      message: `${validRowCount} produit(s) valide(s) vont être ajouté(s) à votre catalogue.`,
+      actionLabel: "Importer les produits"
+    }
+  };
+}
+
 async function handleProductsCsvImport(event) {
   try {
     const rows = await readCsvImport(event);
     if (!rows) return;
     const validRows = rows.filter(row => row.nom && row["prix ht"] !== "");
     if (!validRows.length) throw new Error("Aucune ligne valide : nom et prix HT sont obligatoires");
-    if (!await confirmAppAction({ title: "Importer des produits ?", message: `${validRows.length} produit(s) valide(s) vont être ajouté(s) à votre catalogue.`, actionLabel: "Importer les produits" })) return;
+    const presentation = getProductCsvImportPresentation(validRows.length);
+    if (!await confirmAppAction(presentation.confirmation)) return;
 
     showLoader();
     const failures = [];
